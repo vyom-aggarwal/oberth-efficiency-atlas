@@ -160,3 +160,50 @@ asserted in `tests/test_coast.py` for spans of 5τ and 50τ.)
   - Since δv∞/v∞ = δε/v∞², the test asserts |v∞_out/v∞_in − 1| < max(1e-10, 1e-11·(μ/r_p)/v∞²).
   - A flat 1e-10 is physically unreachable at v∞ = 0.02 v_esc: the measured error there is 1.1e-9.
   - The turn-angle tolerance stays at 1e-9 rad (worst measured: 4.4e-11).
+
+## 2026-10-03: Burn-arc validation and error-estimate check (checkpoint 4)
+
+- **Test 3 (gravity-free burn)** checks the full closed-form constant-direction rocket solution,
+  not just |Δv|:
+  - final mass
+  - Δv vector (magnitude and direction)
+  - displacement r(t_b) − r_i − v_i t_b = û c [t_b + (m_f/ṁ) ln(m_f/m0)]
+  - the work integral W = Δ(v²/2)
+
+  It covers prograde, inertial (default and oblique) steering, Isp from 300 to 3000 s and a0 from
+  1e-3 to 30 m/s². Everything passes at 1e-10 relative.
+- **Test 5 (mass invariance)** scales (T, m0) by k ∈ {1e-3, 1, 37.5, 1e3, 1e6} through the public
+  API. All outputs agree to 1e-12, and m0 and m_final scale by exactly k. As planned, this is
+  largely structural, because mass is normalized by m0.
+- **Body independence** is now a test: Earth, Jupiter, Sun and Mars with matched
+  (ṽ∞, Δṽ, c̃, ã0) give the same η and η_E to 1e-10.
+- **Frame-rotation invariance** is a test: two random 3D rotations, all three steering laws.
+- **Was the η error estimate honest?** Each case was rerun at rtol = atol = 1e-13, and the change
+  in η was compared with the energy-balance estimate δη:
+
+| case | Π | η | δη (estimate) | \|Δη\| on rerun | estimate/actual |
+|---|---|---|---|---|---|
+| Earth hydrolox, v∞ = 0.3 v_esc | 0.77 | 0.99124 | 1.1e-11 | 1.2e-11 | 1.0 |
+| Earth, v∞ = 0.02 v_esc, inertial | 0.17 | 0.99946 | 2.0e-12 | 2.0e-12 | 1.0 |
+| Earth, a0 = 1e3 m/s² | 1.5e-3 | 0.99999996 | 1.0e-11 | 9.9e-12 | 1.0 |
+| Jupiter NTR | 1.6 | 0.97785 | 1.7e-11 | 1.3e-11 | 1.3 |
+| Jupiter Hall, a0 = 3e-4 | 2.4e3 | 0.0863 | 3.4e-11 | 9.3e-12 | 3.6 |
+| Earth Hall, a0 = 2.5e-4 (outside SOI) | 6.6e3 | 0.0150 | 1.3e-11 | 2.0e-13 | 63 |
+| Mars ion, a0 = 1e-3 | 7.2e2 | 0.0431 | 1.5e-11 | 2.8e-12 | 5.3 |
+| Sun, pitch law | 0.54 | 0.98890 | 8.2e-11 | 5.8e-11 | 1.4 |
+| Saturn, Δv = 1 m/s | 4.9e-4 | 0.99999996 | 3.5e-8 | 3.2e-8 | 1.1 |
+| Venus, v∞ = 5 v_esc | 7.7 | 0.5384 | 2.6e-10 | 2.2e-10 | 1.2 |
+
+  - The estimate was never optimistic, and it is tight (within ~1.3×) for Π ≲ 10.
+  - For long burns it is conservative, by up to 63×.
+  - `test_eta_error_estimate_is_not_optimistic` asserts |Δη| ≤ 2 δη. The factor 2 allows for
+    the rerun's own error.
+  - Small Δv (1 m/s) inflates δη, because B_imp is small in absolute terms. At Δv = 1 mm/s it
+    exceeds 1e-6, and `eta_unreliable` fires (tested).
+- **First physics glimpse** (prograde, centered burns):
+  - η stays above 0.97 for Π ≲ 2.
+  - η falls to 0.04–0.09 for electric propulsion with Π ~ 10³.
+  - At Π = 7.7 with v∞ = 5 v_esc (Venus), η = 0.54. This hints that the secondary parameter
+    v∞/v_esc matters at fixed Π, which is what Phase 2 is meant to investigate.
+- **Flag semantics fix:** an impact now always sets `unsafe_periapsis`. Previously, a zero safety
+  margin left it unset, because the check was a strict r_min < R.

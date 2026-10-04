@@ -357,7 +357,7 @@ def simulate_flyby(
     eta_unreliable = bool(math.isfinite(eta) and eta_err > num.eta_err_max)
 
     flags = {
-        "unsafe_periapsis": bool(r_min * s.length < body.radius_eq + safety_margin),
+        "unsafe_periapsis": bool(impacted or r_min * s.length < body.radius_eq + safety_margin),
         "impact": bool(impacted),
         "captured": bool(captured),
         "outside_soi": bool(burn is not None and max(soi_start, soi_end) > 1.0),
