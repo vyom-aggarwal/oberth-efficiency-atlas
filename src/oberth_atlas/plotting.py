@@ -223,3 +223,27 @@ def _coast_extension(y_start: np.ndarray, sign: float, r_stop: float):
     tt = np.linspace(0.0, sol.t[-1], 1500)
     y = sol.sol(tt)
     return tt, y[0:3], y[3:6]
+
+
+# ---------------------------------------------------------------- Phase 2 helpers
+
+RED = "#e34948"
+NEUTRAL = "#f0efec"
+BLUE_RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
+
+
+def eta_colormap():
+    """Diverging map for η: red for negative (worse than deep space), neutral gray at 0, blue ramp to 1."""
+    from matplotlib.colors import LinearSegmentedColormap
+    return LinearSegmentedColormap.from_list("eta", [RED, "#f2b8b5", NEUTRAL] + BLUE_RAMP[1:], N=256)
+
+
+def eta_norm(vmin: float = -0.5):
+    """Asymmetric norm with 0 at the neutral midpoint and 1 at the top."""
+    from matplotlib.colors import TwoSlopeNorm
+    return TwoSlopeNorm(vmin=vmin, vcenter=0.0, vmax=1.0)
+
+
+def sequential_colormap():
+    from matplotlib.colors import LinearSegmentedColormap
+    return LinearSegmentedColormap.from_list("seq_blue", BLUE_RAMP, N=256)

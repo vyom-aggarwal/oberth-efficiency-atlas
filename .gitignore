@@ -14,3 +14,6 @@ dist/
 
 # CLI run outputs (regenerable; curated figures live in figures/)
 runs/
+
+# Long-run logs
+*.log
