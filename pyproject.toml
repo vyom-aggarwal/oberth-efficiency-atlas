@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oberth-atlas"
+version = "0.1.0"
+description = "Finite-burn Oberth efficiency: how much of the impulsive Oberth bonus real engines keep during planetary flybys."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "plotly>=5.18",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+oberth = "oberth_atlas.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "slow: long-running validation cases (deselect with -m 'not slow')",
+]

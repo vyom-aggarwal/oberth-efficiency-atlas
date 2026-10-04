@@ -1,0 +1,15 @@
+# Earth powered flyby with a hydrolox upper stage. Burn centered on periapsis.
+# Π ≈ 0.76: the burn lasts about one periapsis timescale.
+body: earth
+flyby:
+  v_inf_in_km_s: 3.0
+  periapsis_altitude_km: 300.0
+engine:
+  isp_s: 465.0        # representative hydrolox vacuum Isp (assumption)
+  a0_m_s2: 2.0        # initial thrust acceleration T/m0
+burn:
+  delta_v_km_s: 1.0
+  midpoint_offset_s: 0.0
+steering:
+  law: prograde
+safety_margin_km: 100.0

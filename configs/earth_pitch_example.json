@@ -1,0 +1,9 @@
+{
+  "name": "earth_pitch_example",
+  "body": "earth",
+  "flyby": {"v_inf_in_km_s": 3.0, "periapsis_altitude_km": 600.0},
+  "engine": {"isp_s": 380.0, "a0_m_s2": 1.0},
+  "burn": {"delta_v_km_s": 1.5, "midpoint_offset_tb": -0.1},
+  "steering": {"law": "pitch_linear", "alpha0_deg": 5.0, "alpha1_deg": -20.0},
+  "safety_margin_km": 100.0
+}

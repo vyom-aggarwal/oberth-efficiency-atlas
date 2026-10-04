@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Environments
+.venv/
+
+# Tools
+.pytest_cache/
+.ipynb_checkpoints/
+
+# CLI run outputs (regenerable; curated figures live in figures/)
+runs/
