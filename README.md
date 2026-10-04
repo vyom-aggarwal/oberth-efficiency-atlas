@@ -19,4 +19,11 @@ python -m venv .venv
 
 ## Status
 - **Phase 1 (simulator core and validation):** complete. There is a three-segment finite-burn
-  flyby simulator, a 296-test validation suite, a single-flyby CLI, and figures in `figures/`.
+  flyby simulator, a validation suite, a single-flyby CLI, and figures in `figures/`.
+- **Phase 2 (sweep and atlas):** complete.
+  - A 135,720-run dimensionless sweep and 15,360 mission samples (`results/*.parquet`).
+  - Analytic theory (`docs/theory.md`).
+  - Collapse analysis and the atlas figures.
+
+  Headline: the half-efficiency point is Π ≈ 10–40 at every body, and Π·√C collapses the
+  small-Π data exactly.

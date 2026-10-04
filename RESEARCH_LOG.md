@@ -676,3 +676,60 @@ Prograde, real bodies; values are the median η with the 10th–90th percentile 
   - median η = −0.13 to −0.29 at the giant planets;
   - 4–27% of planetary samples impact.
   - At the Sun the median stays positive (0.16 Hall, 0.06 ion), with 1–5% impacting.
+
+## 2026-10-04: Phase 2 complete: summary and open questions
+
+**Delivered:**
+- **Body-free simulator core** (`simulate_nd`). Energy drift is now normalized by v_p²/2.
+- **Analytic theory** (`theory.py`, derived in `docs/theory.md`):
+  - the exact small-Π prefactor, prograde to all orders in Δv, inertial exactly quadratic;
+  - the linear-response curve η_lin(Π; v∞/v_esc);
+  - the parabolic-core and hyperbolic-tail asymptotes;
+  - the exact η ↔ η_W map.
+- **Sweep data:** a dimensionless grid of 135,720 runs (`results/sweep_nd.parquet`) and 15,360
+  real-body mission samples (`results/missions.parquet`).
+- **Analysis:** reliability masks, per-body impact and SOI handling, and model-free collapse
+  metrics.
+- **Figures:** eight new ones, plus `phase2_numbers.json`.
+- **Two Kepler-solver bug fixes**, found by the sweep.
+- **Tests:** 401, all passing.
+
+**Main findings:**
+1. **The hand prefactor needed first-order Δv/v_p corrections.** The corrected C matches every
+   small-Π sweep point to ≤ 1e-3, and is limited by noise. The hand formula is off by up to 4.4×.
+2. **Π√C collapses the small-Π data ~200× better than Π alone** (0.001 dex against 0.2–0.3 dex).
+3. **The dominant secondary parameter is v∞/v_esc.** It explains 73–92% of the scatter left after
+   collapsing on Π (prograde). The mass ratio is irrelevant.
+4. **There are three regimes, not two:** C·Π², then (9/2Π)^(1/3), then ln Π/Π.
+   - Regime II exists when v∞ ≪ v_esc and ends at Π_T = v_p V³/v∞³.
+   - The half-efficiency point is Π½ = 8–40 for every body: the practical rule of thumb.
+5. **The prograde Δv→0 theory (η_lin mapped through ξ) collapses the full-range data to 0.009 RMS
+   in η.** The residual is set by Δv/v_p.
+6. **Inertial steering:**
+   - an impact band at 10 ≲ Π ≲ 10⁵ (33–39% of cases at h = 0.1 R);
+   - mostly negative η beyond Π ~ 10³;
+   - no one-parameter collapse at large Π.
+7. **Real missions:**
+   - Chemical: η ≈ 1 everywhere.
+   - Nuclear thermal: η ≈ 0.96 at the terrestrial planets, ≈ 1 at the giant planets.
+   - Electric propulsion: η ≈ 0.01 at the terrestrial planets (where 95–100% of burns start
+     outside the SOI), ≈ 0.05–0.12 at Jupiter and Saturn, and 0.3–0.4 at the Sun.
+
+**Open questions for the user:**
+1. **Adopt η_W** = (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep) as the baseline-subtracted η_E?
+   - It is the quantity that is linear in thrust, and η follows from it exactly through ξ.
+   - Caveat: it still uses W_deep = v∞Δv + Δv²/2, which is undefined for bound solar arrivals. The
+     Sun would need a different baseline, for example burning at the aphelion of the incoming
+     orbit.
+2. **Electric propulsion at terrestrial planets.** These burns almost always start outside the SOI.
+   - Should the atlas grey these out, rather than show them hollow as now?
+   - Or should the question be deferred to the Phase 4 heliocentric treatment?
+3. **Phase 3 scope.**
+   - **Steering:** inertial steering is a poor baseline beyond Π ~ 10. Optimize pitch_linear and
+     compare against prograde only?
+   - **Burn timing:** at leading order the theory predicts the optimal timing puts the
+     Δv-centroid at periapsis, i.e. starting earlier than centered by (x̄ − ½)·t_b. The gain is
+     only O(μ_r²·Π²) for chemical engines. Is the larger-Π question the more interesting one?
+4. **The exhaust-velocity axis** barely matters, explaining < 5% of the scatter. Should future
+   sweeps fix it, to spend the budget on Δv and v∞ resolution?
+5. **A leftover local `phase-1` branch** exists from Phase 1. Delete it?
