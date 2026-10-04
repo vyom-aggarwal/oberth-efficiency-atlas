@@ -148,7 +148,7 @@ def main(path: str) -> None:
     ax.set_title("Confraria's escape case (LEO 200 km, Isp 300 s)")
     ax.text(0.98, 0.97, "dashed: leading-order theory (Π → 0)\nConfraria fig. 4.34 shows ~40–150%\nover T/W₀ = 0.5–0.1 (read by eye)",
             transform=ax.transAxes, ha="right", va="top", fontsize=7, color=INK_2)
-    ax.legend(loc="lower left", fontsize=7)
+    ax.legend(loc="center right", fontsize=7)
     fig.suptitle("Robbins (1966) finite-burn loss expression vs measured losses (expression as quoted by Confraria 2020)",
                  fontsize=9.5, x=0.01, ha="left")
     save_figure(fig, ROOT / "figures" / "robbins_comparison.png", "scripts/robbins_comparison.py")
