@@ -6,8 +6,9 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
 ## Working rules
 - **Phases are gated.** At the end of each phase, report a summary, test results, figures and
   open questions. Then stop until the user says "proceed".
-- **Commit regularly** at logical checkpoints (a module plus its passing tests). Work happens on
-  a `phase-N` branch, which is merged to `main` with a descriptive commit at phase end.
+- **Commit early and often:** after every meaningful step (a module plus its tests, a fix, a
+  log/doc update, regenerated figures), not only at checkpoints. Work happens on a `phase-N`
+  branch, which is merged to `main` with a descriptive commit at phase end.
 - **Never fabricate or hand-tune results.** Every number and figure must come from code in this
   repo. If a test tolerance changes, log the measured floor that justifies it in RESEARCH_LOG.md.
 - **RESEARCH_LOG.md** gets a dated entry for every design decision, assumption, sourced parameter
@@ -33,6 +34,23 @@ On macOS/Linux, use `.venv/bin/python`.
 `oberth run` prints the metrics and writes `runs/<name>/result.json` (SI units) and
 `runs/<name>/trajectory.png`. The config schema is documented in `src/oberth_atlas/config.py`;
 unknown keys are rejected.
+
+### Phase 2 (sweep and atlas)
+```bash
+.venv/Scripts/oberth sweep --out results/sweep_nd.parquet       # ~136k body-free runs, ~25 min on 8 cores
+.venv/Scripts/oberth missions --n 256 --out results/missions.parquet
+.venv/Scripts/python scripts/fig_regimes.py         # writes figures/regimes_half_point.csv (used below)
+.venv/Scripts/python scripts/fig_missions.py        # writes figures/mission_table.csv (used below)
+.venv/Scripts/python scripts/fig_prefactor_check.py
+.venv/Scripts/python scripts/fig_eta_vs_pi.py
+.venv/Scripts/python scripts/fig_collapse.py
+.venv/Scripts/python scripts/fig_atlas.py
+.venv/Scripts/python scripts/phase2_numbers.py      # every quoted Phase 2 number -> figures/phase2_numbers.json
+```
+- The grid bounds and the mission envelopes come from `configs/atlas/presets.yaml` (representative
+  assumptions).
+- Parquet files carry provenance metadata (`sweep.read_metadata`).
+- The theory behind `theory.py` is derived in `docs/theory.md`.
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.
