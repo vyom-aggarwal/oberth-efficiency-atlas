@@ -72,7 +72,7 @@ def main(path: str) -> None:
         ax.text(0.02 if upper_left else 0.98, 0.98 if upper_left else 0.02,
                 "body      median η (p10–p90)  outside SOI\n" + "\n".join(lines),
                 transform=ax.transAxes, ha="left" if upper_left else "right", va="top" if upper_left else "bottom",
-                fontsize=7, family="monospace", color=INK,
+                fontsize=7, family="monospace", color=INK, multialignment="left",
                 bbox=dict(boxstyle="round,pad=0.3", facecolor="#fcfcfbe6", edgecolor="#e1e0d9"))
         ax.set_xscale("log")
         ax.set_yscale("log")
