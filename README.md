@@ -14,4 +14,9 @@ sources and results.
 python -m venv .venv
 .venv/Scripts/python -m pip install -e ".[dev]"   # .venv/bin/python on macOS/Linux
 .venv/Scripts/python -m pytest
+.venv/Scripts/oberth run configs/earth_hydrolox.yaml
 ```
+
+## Status
+- **Phase 1 (simulator core and validation):** complete. There is a three-segment finite-burn
+  flyby simulator, a 296-test validation suite, a single-flyby CLI, and figures in `figures/`.

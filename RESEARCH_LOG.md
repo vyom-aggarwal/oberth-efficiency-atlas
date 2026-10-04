@@ -245,3 +245,32 @@ component *toward the planet* on the incoming leg. On the incoming asymptote, ŷ
 - Consequence for Phase 2: inertial-law atlas cells at large Π will be masked by impact, which
   is a real limitation of that law. Phase 3's altitude constraint will matter for any law that
   pitches inward.
+
+## 2026-10-03: CLI, configs and example runs (checkpoint 6)
+
+`oberth run <config>` (YAML or JSON) prints the metrics and writes `runs/<name>/result.json` and
+`trajectory.png`. Engine parameters in the example configs are representative assumptions, not
+sourced hardware values. Results from `scripts/fig_example_trajectories.py`:
+
+| config | Π | η | η_E | Δv loss (m/s) | flags |
+|---|---|---|---|---|---|
+| earth_hydrolox (v∞ 3 km/s, h 300 km, Δv 1 km/s, 465 s, a0 2 m/s²) | 0.762 | 0.99170 | 0.99313 | 14.2 | none |
+| earth_pitch_example (pitch α = 5° − 20°·s, burn midpoint −0.1 t_b) | 1.96 | 0.94277 | 0.95370 | 124.5 | none |
+| jupiter_nuclear_thermal (v∞ 6 km/s, r_p 1.5 R_J, Δv 2 km/s, 850 s, 0.5 m/s²) | 1.62 | 0.97668 | 0.97378 | 171.6 | none |
+| jupiter_hall (v∞ 5.5 km/s, h 0.1 R_J, Δv 1 km/s, 1800 s, 3e-4 m/s²) | 2350 | 0.08900 | 0.16227 | 5059.9 | none |
+
+- **Jupiter Hall case.**
+  - A 1 km/s electric-propulsion burn spread over ~37 days keeps only 9% of the impulsive Oberth
+    bonus. The impulsive burn would give v∞_out = 12.05 km/s; the finite burn gives 6.99 km/s.
+  - The burn starts at 0.29 r_SOI, so it stays inside Jupiter's sphere of influence.
+  - The long prograde thrust before periapsis **raises** the achieved periapsis, from 7,149 km to
+    16,263 km altitude. This further reduces the Oberth benefit. It is the mirror image of the
+    inertial-steering impact result above.
+- **η and η_E differ, and not in a consistent direction.** η_E > η for the Earth cases, η_E < η
+  for Jupiter NTR, and η_E is nearly 2× η for the Hall case. η measures the excess-*speed* bonus,
+  while η_E measures the *energy* gain. Because v∞_out = sqrt(v∞_in² + 2Δε), the two weight
+  losses differently. Which one the Phase 2 collapse should use (or both) is an open question;
+  the data are stored for both.
+- **Plotting** samples each adaptive integrator step through the dense output. Uniform time
+  sampling under-resolved the periapsis passage for months-long burns. Coast arcs beyond the
+  simulated span are display-only extensions, which enter no reported number.

@@ -24,6 +24,17 @@ python -m venv .venv
 ```
 On macOS/Linux, use `.venv/bin/python`.
 
+## Running
+```bash
+.venv/Scripts/oberth run configs/earth_hydrolox.yaml          # or: python -m oberth_atlas run ...
+.venv/Scripts/oberth run configs/jupiter_hall.yaml --no-plot
+.venv/Scripts/python scripts/fig_eta_vs_a0.py                 # -> figures/eta_vs_a0.{png,csv}
+.venv/Scripts/python scripts/fig_example_trajectories.py      # -> figures/trajectory_<config>.png
+```
+`oberth run` prints the metrics and writes `runs/<name>/result.json` (SI units) and
+`runs/<name>/trajectory.png`. The config schema is documented in `src/oberth_atlas/config.py`;
+unknown keys are rejected.
+
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.
 - **Config files** use unit-suffixed keys (`v_inf_in_km_s`, `periapsis_altitude_km`, `a0_m_s2`,
@@ -59,3 +70,6 @@ On macOS/Linux, use `.venv/bin/python`.
 ## Figures
 Every figure in `figures/` is a 300-dpi PNG made by a script in `scripts/`. It is saved with
 `plotting.save_figure`, which embeds the script path and git commit in the PNG metadata.
+Commit the code first, then regenerate the figures, so the stamped commit is clean
+(not `-dirty`). Plot colors come from the validated palette in `plotting.py`. Text uses ink
+tokens, never series colors.

@@ -1,0 +1,14 @@
+# Jupiter flyby with a Hall-thruster spacecraft: a months-long burn (Π ~ 10³).
+# Shows how little of the impulsive Oberth bonus a low-thrust burn keeps.
+body: jupiter
+flyby:
+  v_inf_in_km_s: 5.5
+  periapsis_altitude_km: 7149.0      # 0.1 × equatorial radius
+engine:
+  isp_s: 1800.0         # representative Hall-thruster Isp (assumption)
+  a0_m_s2: 3.0e-4
+burn:
+  delta_v_km_s: 1.0
+steering:
+  law: prograde
+safety_margin_km: 5000.0

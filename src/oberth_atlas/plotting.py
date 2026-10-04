@@ -101,16 +101,35 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
     gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 1.25])
     ax_zoom, ax_wide, ax_e = fig.add_subplot(gs[0]), fig.add_subplot(gs[1]), fig.add_subplot(gs[2])
 
-    # Dense, smooth samples of each segment (SI), falling back to integrator steps.
+    # Smooth samples of each segment (SI): every adaptive integrator step is subdivided via the
+    # dense output, so fast periapsis passages stay resolved even within months-long burns.
     curves = []
     for seg in traj.segments:
         if seg.sol is not None:
-            n = 1500 if seg.thrusting else 2500
-            tt = np.linspace(seg.t[0], seg.t[-1], n) * s.time
+            k = 12
+            frac = np.linspace(0.0, 1.0, k, endpoint=False)
+            tt = (seg.t[:-1, None] + np.diff(seg.t)[:, None] * frac[None, :]).ravel()
+            tt = np.append(tt, seg.t[-1]) * s.time
             t, r, v, m = traj.si(seg, tt)
         else:
             t, r, v, m = traj.si(seg)
         curves.append((seg, t, r, v))
+
+    # Wide-view extent: the whole burn arc, or ±25 r_p for short burns.
+    rp = result.r_p / R
+    burn = [c for c in curves if c[0].thrusting]
+    extent = 25.0 * rp
+    if burn:
+        extent = max(extent, 1.15 * float(np.max(np.abs(burn[0][2][:2] / R))))
+    # Display-only coast extensions out to the panel edge (two-body, so exact in form).
+    # They do not enter any reported number.
+    extensions = []
+    if not result.flags["impact"] and s.mu > 0:
+        r_stop = 1.6 * extent * R / s.length
+        for y_start, sign in ((traj.segments[0].y[:, 0], -1.0), (traj.segments[-1].y[:, -1], 1.0)):
+            ext = _coast_extension(y_start, sign, r_stop)
+            if ext is not None:
+                extensions.append(ext[1] * s.length)
 
     burn_label_done = False
     for ax in (ax_zoom, ax_wide):
@@ -118,6 +137,8 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
         if result.safety_margin > 0:
             ax.add_patch(Circle((0, 0), 1.0 + result.safety_margin / R, fill=False, edgecolor=MUTED,
                                 linewidth=0.6, linestyle=(0, (2, 2)), zorder=1))
+        for r in extensions:
+            ax.plot(r[0] / R, r[1] / R, color=MUTED, linewidth=1.2, zorder=3)
         for seg, t, r, v in curves:
             x, y = r[0] / R, r[1] / R
             if seg.thrusting:
@@ -131,7 +152,7 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
         ax.set_xlabel("x / R")
         ax.set_ylabel("y / R")
 
-    # Periapsis actually reached (minimum radius point), from step points and events.
+    # Minimum radius actually reached, from the simulated samples.
     all_r = np.concatenate([c[2] for c in curves], axis=1)
     i_min = int(np.argmin(np.linalg.norm(all_r, axis=0)))
     for ax in (ax_zoom, ax_wide):
@@ -139,18 +160,11 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
                 markeredgecolor=SURFACE, markeredgewidth=1.2, zorder=5,
                 label="min radius" if ax is ax_zoom else None)
 
-    rp = result.r_p / R
     lim = 4.0 * rp
     ax_zoom.set_xlim(-lim, lim)
     ax_zoom.set_ylim(-lim, lim)
     ax_zoom.set_title("Periapsis close-up")
     ax_zoom.legend(loc="lower left", fontsize=7.5, handlelength=1.6)
-
-    # Wide view: frame the whole burn arc (or ±25 r_p for short burns).
-    burn = [c for c in curves if c[0].thrusting]
-    extent = 25.0 * rp
-    if burn:
-        extent = max(extent, 1.15 * float(np.max(np.abs(burn[0][2][:2] / R))))
     ax_wide.set_xlim(-extent, extent)
     ax_wide.set_ylim(-extent, extent)
     ax_wide.set_title("Burn-scale view")
@@ -165,13 +179,11 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
                   linewidth=2.0 if seg.thrusting else 1.2)
     if math.isfinite(result.t_burn_start):
         ax_e.axvspan(result.t_burn_start / tau, result.t_burn_end / tau, color=SERIES[1], alpha=0.10, linewidth=0)
+        pad = 0.1 * max(result.t_burn_end - result.t_burn_start, 20.0 * tau) / tau
+        ax_e.set_xlim(min(result.t_burn_start, 0.0) / tau - pad, max(result.t_burn_end, 0.0) / tau + pad)
     ax_e.set_xlabel("t / τ   (t = 0: unperturbed periapsis)")
     ax_e.set_ylabel("specific energy ε  [MJ/kg]")
     ax_e.set_title("Orbital energy")
-    if math.isfinite(result.t_burn_start):
-        lo = min(result.t_burn_start, 0.0) / tau - 2.0
-        hi = max(result.t_burn_end, 0.0) / tau + 2.0
-        ax_e.set_xlim(lo, hi)
 
     lines = [
         f"{result.body.capitalize()}   v∞,in = {result.v_inf_in / 1e3:.3g} km/s   h_p = {result.periapsis_altitude / 1e3:.4g} km",
@@ -183,3 +195,30 @@ def plot_trajectory(result, title: str | None = None) -> plt.Figure:
         )
     fig.suptitle(title or "\n".join(lines), fontsize=9.5, color=INK, x=0.01, ha="left")
     return fig
+
+
+def _coast_extension(y_start: np.ndarray, sign: float, r_stop: float):
+    """Propagate a coast (nondimensional, μ = 1) from y_start forward (sign > 0) or backward until r = r_stop.
+
+    For display only. Returns (t, r, v) arrays, or None if y_start is already beyond r_stop.
+    """
+    from scipy.integrate import solve_ivp
+
+    from .dynamics import coast_rhs
+
+    r0 = float(np.linalg.norm(y_start[0:3]))
+    if r0 >= r_stop:
+        return None
+    eps = 0.5 * float(y_start[3:6] @ y_start[3:6]) - 1.0 / r0
+    speed_far = math.sqrt(max(2.0 * eps, 1.0 / r_stop))
+    t_max = 3.0 * r_stop / speed_far + 10.0
+
+    def leave(t, y):
+        return math.sqrt(y[0] ** 2 + y[1] ** 2 + y[2] ** 2) - r_stop
+
+    leave.terminal = True
+    sol = solve_ivp(coast_rhs(1.0), (0.0, sign * t_max), y_start, method="DOP853", rtol=1e-10, atol=1e-12,
+                    events=leave, dense_output=True)
+    tt = np.linspace(0.0, sol.t[-1], 1500)
+    y = sol.sol(tt)
+    return tt, y[0:3], y[3:6]
