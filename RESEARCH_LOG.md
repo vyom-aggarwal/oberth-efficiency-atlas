@@ -354,3 +354,78 @@ sourced hardware values. Results from `scripts/fig_example_trajectories.py`:
   real-body run that stops at the surface.
 - `simulate_flyby` is now a thin SI wrapper. All Phase 1 tests pass unchanged, except for the
   intended normalization update.
+
+## 2026-10-04: Small-Π prefactor: the user's derivation checked independently and corrected
+
+The full derivation is in `docs/theory.md`; the code is in `theory.py`; tests are in `tests/test_theory.py`.
+
+- **The user's (a) and (b) are both confirmed:** v̈ = −k(1−k)v_p/τ², and the inertial velocity
+  direction rotates at k/τ.
+- **The resulting C misses the terms that are first order in Δv/v_p,** because it evaluates
+  the losses on the unperturbed trajectory:
+  - during a prograde burn the speed rises by Δv_acc, which raises the flight-path turn rate by
+    (1+k)Δv_acc;
+  - the inertial cosine loss feeds back into the later speed, so it is weighted by (v_p + Δv);
+  - the inertial sideways thrust reduces the gravity loss.
+- **Corrected result for constant acceleration, centered burn:**
+  - prograde: C = k Δv [(1−k) v_p + (1+k) Δv] / (24 v∞,imp B_imp)
+  - inertial: C = k Δv (v_p + Δv) / (24 v∞,imp B_imp)
+- **General form:** the code handles a general thrust profile through exact profile moments. That
+  covers the mass ratio and any burn timing (timing enters only via the second moment of the Δv
+  distribution about periapsis). For prograde, the speed dependence of the turn rate is kept to
+  all orders in Δv. For inertial, the first-order expression is already exact: the equations of
+  motion are linear in a fixed thrust vector to O(t_b²).
+
+**Step 1: comparison with the measured Phase 1 prefactors.** C is extracted from simulations at
+Π = 0.02 and 0.01 and Richardson-extrapolated.
+
+| case | measured C | user's formula | corrected, constant a | corrected, rocket profile (exact) |
+|---|---|---|---|---|
+| Earth prograde (Δv/v_p = 0.088, Δv/c = 0.22) | 0.014885 | 0.011983 (−19.5%) | 0.014879 (−0.04%) | ≤ 1e-4 |
+| Jupiter prograde (Δv/v_p = 0.041, Δv/c = 0.24) | 0.010137 | 0.009025 (−11.0%) | 0.010109 (−0.28%) | ≤ 1e-4 |
+| Earth inertial | 0.024443 | 0.022396 (−8.4%) | 0.024373 (−0.29%) | −5e-6 |
+
+**Step 2: where each version holds and where it breaks.** The scan covered v∞ ∈ {0.05, 0.5, 2}
+(in units of V), Δv/v_p from 0.003 to 2, and Δv/c from 0 to 3.
+- **User's formula:** the error is first order in Δv/v_p and is never small.
+  - Prograde: −2.5% at Δv/v_p = 0.01, −20% at 0.1, −43% at 0.3, −70% at 1.
+  - Inertial: −1%, −9%, −23%, −50% at the same points.
+- **First-order corrected formula:**
+  - Prograde: the residual is +(0.06–0.33)(Δv/v_p)², i.e. +1.5% at 0.3 and +6.5% at 1.
+  - Inertial: exact (< 1e-6).
+- **All-orders prograde, exact profile:** the residual is < 3e-5 everywhere tested, up to
+  Δv/v_p = 2 and Δv/c = 3. That is the noise of extracting C from simulations, which scales as 1/Δv.
+- **Mass-ratio effects:** a constant-acceleration theory is off by −0.07% at Δv/c = 0.1, −6% at 1
+  and −30% at 3. The exact profile moments remove all of it.
+- **Validity in Π:** the theory is leading order in Π and needs Π ≲ 0.5 (1 − η within 2% of
+  CΠ²). At Π = 1.5 the true 1 − η is already 13% below CΠ² (Phase 1 Earth data). Beyond that is
+  the large-Π theory.
+
+## 2026-10-04: Linear response, the η ↔ η_W map, and three regimes (not two)
+
+- **Energy is the linear quantity.**
+  - The exact bookkeeping is ε_out = ε_in + W.
+  - What is linear in the thrust is the **baseline-subtracted energy efficiency**
+    η_W = (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep), not η itself.
+  - η is an exact algebraic function of η_W:
+    η = (√(1 + ξη_W) − 1)/(√(1 + ξ) − 1), with ξ = 2Δv(v_p − v∞)/(v∞ + Δv)².
+  - At low v∞ with v_pΔv ≳ v∞², ξ ≫ 1 and η ≈ √η_W. This is why η behaves non-monotonically in
+    Δv at fixed Π (seen in the prefactor scan at v∞ = 0.05).
+  - **Proposal for the user:** η_W is the natural "baseline-subtracted η_E" the user wants before
+    the Sun. It is now stored on every run as `eta_W`, labeled as proposed. η stays the primary
+    metric.
+- **Linear-response curve.**
+  - η_lin(Π; v∞/v_esc) = ⟨û·v_u − v∞⟩/(v_p − v∞) is one universal curve per v∞/v_esc.
+  - Prograde: η_W(sim) − η_lin = O(Δv/v_p) with coefficient ≤ 0.25, for Π from 0.1 to 1e5.
+    This is tested at two Δv values, which confirms first-order scaling.
+- **Three prograde regimes, not two:**
+  1. **Π ≪ 1:** 1 − η = CΠ².
+  2. **1 ≪ Π ≪ Π_T = v_p/ṽ∞³:** the parabolic core, η ≈ (9/(2Π))^(1/3) ≈ 1.65 Π^(−1/3). This
+     exists only when v∞ ≪ v_esc. Π_T is the ratio of the hyperbola's crossing time μ/v∞³ to τ.
+  3. **Π ≫ Π_T:** the hyperbolic 1/r tail, η ≈ 2v_p[ln(ṽ∞³ t_b/e) − Σ(e)]/(ṽ∞²(v_p − ṽ∞)Π) ~ ln Π/Π.
+     It matches η_lin to 0.3% at Π = 1e4 for v∞ = 0.5 V.
+- **Inertial at large Π.** η_lin tends to the far-field misalignment limit
+  v∞(cos(δ/2) − 1)/(v_p − v∞) < 0 (−0.20 at v∞ = 0.5 V). Beyond linear response the inertial
+  law's large-Π behavior is not first order in Δv: errors grow as 0.08–0.33 at Π ≥ 1e4 even for
+  Δv/v_p = 1e-3. This is because sideways thrust displaces the whole flyby once Δv·t_b ≳ r_p. It is
+  characterized empirically in the sweep, not by theory.

@@ -113,6 +113,8 @@ class NDResult:
     eta_err: float
     eta_E: float
     eta_E_err: float
+    eta_W: float                     # baseline-subtracted energy efficiency (proposed; see theory.py)
+    eta_W_err: float
     delta_eps_finite: float
     delta_eps_imp: float
     dv_integrated: float
@@ -167,6 +169,8 @@ class FlybyResult:
     eta_err: float                   # numerical error estimate of eta
     eta_E: float                     # Δε_finite / Δε_imp
     eta_E_err: float
+    eta_W: float                     # (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep), proposed baseline-subtracted η_E
+    eta_W_err: float
     delta_v_loss: float              # v_inf_imp − v_inf_out
     delta_eps_finite: float          # ε_out − ε_in
     delta_eps_imp: float
@@ -391,19 +395,22 @@ def simulate_nd(
         deps_imp = metrics.energy_gain_impulsive(1.0, 1.0, v_inf, dv)
         deps_fin = eps_out - 0.5 * v_inf**2
         eta_E = deps_fin / deps_imp
+        x_w = dv * 2.0 / (vp + v_inf)                  # Δε_imp − Δε_deep = Δv (v_p − v∞)
+        eta_W = (deps_fin - dv * (v_inf + 0.5 * dv)) / x_w
         # Error model: the energy-balance residual bounds the error in ε at burnout. Then
         # δv_inf = δε / v_inf_out, plus rounding in the B subtraction.
         d_eps = balance
         d_b = d_eps / v_inf_out + 4.0 * _EPS * (v_inf_out + v_inf + dv)
         eta_err = d_b / b_imp
         eta_E_err = d_eps / deps_imp
+        eta_W_err = d_eps / x_w
         m_final = float(segments[1].y[6, -1])
         dv_int = c * -math.log(m_final)
         Pi = t_b / tau
         r_bs = float(_radius(segments[1].y[:, 0]))
         r_be = float(_radius(segments[1].y[:, -1]))
     else:
-        v_inf_imp = b_imp = b_fin = eta = eta_err = eta_E = eta_E_err = math.nan
+        v_inf_imp = b_imp = b_fin = eta = eta_err = eta_E = eta_E_err = eta_W = eta_W_err = math.nan
         deps_imp = deps_fin = math.nan
         b_imp_small = False
         m_final, dv_int, Pi = 1.0, 0.0, 0.0
@@ -414,7 +421,7 @@ def simulate_nd(
         steering=steering.to_dict() if burn else {}, midpoint_offset=midpoint_offset if burn else math.nan,
         v_p=vp, k=1.0 / vp**2, tau=tau, t_b=t_b, t_start=ts, t_end=te, Pi=Pi, mass_ratio=m_final,
         eps_out=eps_out, v_inf_out=v_inf_out, v_inf_imp=v_inf_imp, b_imp=b_imp, b_finite=b_fin,
-        eta=eta, eta_err=eta_err, eta_E=eta_E, eta_E_err=eta_E_err,
+        eta=eta, eta_err=eta_err, eta_E=eta_E, eta_E_err=eta_E_err, eta_W=eta_W, eta_W_err=eta_W_err,
         delta_eps_finite=deps_fin, delta_eps_imp=deps_imp, dv_integrated=dv_int,
         turn_angle=turn, turn_angle_unperturbed=kepler.turn_angle(1.0 + em1),
         r_min=r_min, r_min_burn=r_min_burn, r_min_numerical=r_min_numerical, r_burn_start=r_bs, r_burn_end=r_be,
@@ -502,6 +509,8 @@ def simulate_flyby(
         eta_err=nd.eta_err,
         eta_E=nd.eta_E,
         eta_E_err=nd.eta_E_err,
+        eta_W=nd.eta_W,
+        eta_W_err=nd.eta_W_err,
         delta_v_loss=(nd.v_inf_imp - nd.v_inf_out) * V,
         delta_eps_finite=nd.delta_eps_finite * E,
         delta_eps_imp=nd.delta_eps_imp * E,
