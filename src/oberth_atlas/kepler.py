@@ -33,11 +33,21 @@ def turn_angle(e: float) -> float:
 
 
 def _sinh_minus_x(x: float) -> float:
-    """sinh(x) - x without cancellation for small |x|."""
-    if abs(x) < 0.5:
+    """sinh(x) - x without cancellation for |x| < 1 (direct evaluation beyond).
+
+    Taylor series through x^21. Its first omitted term, x^23/23!, is < 3e-21 relative at |x| = 1.
+    Direct evaluation at |x| = 1 loses a factor sinh(1)/(sinh(1) - 1) ≈ 6.7 to cancellation, and
+    less beyond. (An earlier version stopped at x^11 and switched at |x| = 0.5, where the omitted
+    term was ~1e-12 relative. That bug was caught by test_kepler_converges_everywhere.)
+    """
+    if abs(x) < 1.0:
         x2 = x * x
-        # Taylor series. At |x| = 0.5 the first omitted term is relative 3e-17.
-        return x * x2 * (1 / 6 + x2 * (1 / 120 + x2 * (1 / 5040 + x2 * (1 / 362880 + x2 / 39916800))))
+        c = (1 / 6, 1 / 120, 1 / 5040, 1 / 362880, 1 / 39916800, 1 / 6227020800, 1 / 1307674368000,
+             1 / 355687428096000, 1 / 121645100408832000, 1 / 51090942171709440000)
+        acc = c[-1]
+        for coef in c[-2::-1]:
+            acc = coef + x2 * acc
+        return x * x2 * acc
     return math.sinh(x) - x
 
 
@@ -45,9 +55,15 @@ def solve_kepler_hyperbolic(M: float, em1: float, maxiter: int = 100) -> float:
     """Solve M = e sinh H - H for the hyperbolic anomaly H, given e - 1 = em1 > 0.
 
     Uses Newton's method on f(H) = (e-1) sinh H + (sinh H - H) - M for M >= 0, and the odd
-    symmetry H(-M) = -H(M). For H >= 0, f is increasing and convex. Newton started from
-    H0 = asinh(M/e) (where f(H0) = -H0 <= 0) therefore overshoots once, then converges
-    monotonically. Convergence is guaranteed for every M, including |M| >> 1.
+    symmetry H(-M) = -H(M). For H >= 0, f is increasing and convex, so Newton started to the
+    RIGHT of the root converges monotonically, with no overshoot. The start is the tightest of
+    three rigorous upper bounds on the root:
+        M/(e-1)        (f >= (e-1)H - M),
+        (6M)^(1/3)     (f >= H^3/6 - M),
+        asinh(M/(e-1)) (f >= (e-1) sinh H - M).
+    This stays fast from near-parabolic (e - 1 -> 0, cubic regime) to |M| >> 1. Starting to the
+    left instead (e.g. at asinh(M/e)) can overshoot to H ~ 100 when e - 1 is tiny, and then needs
+    ~100 iterations to come back.
     """
     if em1 <= 0:
         raise ValueError(f"hyperbolic Kepler equation requires e > 1, got e - 1 = {em1}")
@@ -56,7 +72,7 @@ def solve_kepler_hyperbolic(M: float, em1: float, maxiter: int = 100) -> float:
     sign = 1.0 if M > 0 else -1.0
     M = abs(M)
     e = 1.0 + em1
-    H = math.asinh(M / e)
+    H = min(M / em1, (6.0 * M) ** (1.0 / 3.0), math.asinh(M / em1))
     dH_prev = math.inf
     for _ in range(maxiter):
         f = em1 * math.sinh(H) + _sinh_minus_x(H) - M

@@ -429,3 +429,26 @@ The full derivation is in `docs/theory.md`; the code is in `theory.py`; tests ar
   law's large-Π behavior is not first order in Δv: errors grow as 0.08–0.33 at Π ≥ 1e4 even for
   Δv/v_p = 1e-3. This is because sideways thrust displaces the whole flyby once Δv·t_b ≳ r_p. It is
   characterized empirically in the sweep, not by theory.
+
+## 2026-10-04: Bug fixes in the hyperbolic Kepler solver (found by the Phase 2 sweep)
+
+1. **Slow convergence near-parabolic.**
+   - Newton started at asinh(M/e), which lies left of the root. When e − 1 ≪ 1 (e.g.
+     e − 1 = 3e-5, M = 4.5e-3, which occurs in the sweep at v∞ ≈ 0.005 V), the first step
+     overshot to H ≈ 112. Newton then needed ~100 one-unit steps to come back, so the solver hit
+     its iteration limit and raised an error.
+   - Fix: start at the tightest of three rigorous upper bounds on the root
+     (M/(e−1), (6M)^(1/3), asinh(M/(e−1))). Newton on the increasing convex f then converges
+     monotonically.
+   - New test: 14 eccentricities × 89 values of M (22 decades), all converging within 60
+     iterations.
+2. **Truncated series in sinh(x) − x.**
+   - It stopped at x¹¹ and switched to direct evaluation at |x| = 0.5. The first omitted term
+     there is ~1e-12 relative; the docstring wrongly claimed 3e-17.
+   - Fix: the series now runs through x²¹, with the switch at |x| < 1. Error is ≤ 4.4e-16 relative
+     against an exact rational series.
+   - The new convergence test caught it: residuals at H ≈ 0.47 were 5× the rounding floor.
+3. **Effect on Phase 1 results: none at reportable precision.**
+   - The series error entered only the analytic initial state on near-parabolic arcs, at
+     ≲ 1e-14 relative.
+   - Every Phase 1 test passes unchanged.

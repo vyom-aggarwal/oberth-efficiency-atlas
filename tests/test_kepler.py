@@ -21,6 +21,24 @@ def test_kepler_residual(M, em1):
     assert math.copysign(1.0, H) == math.copysign(1.0, M) or M == 0.0
 
 
+@pytest.mark.parametrize("em1", np.logspace(-9, 4, 14))
+def test_kepler_converges_everywhere(em1):
+    """Dense sweep of M over 22 decades. Near-parabolic orbits (e - 1 ~ 1e-5, M ~ 5e-3) once
+    exhausted the iteration limit (found by the Phase 2 sweep)."""
+    e = 1.0 + em1
+    for M in np.logspace(-12, 10, 89):
+        H = K.solve_kepler_hyperbolic(M, em1, maxiter=60)
+        # The naive residual cancels terms of size e·sinh(H) + H, which sets its rounding floor.
+        assert abs(e * math.sinh(H) - H - M) <= 8 * np.finfo(float).eps * (e * math.sinh(H) + H + M)
+
+
+def test_kepler_near_parabolic_regression():
+    M, em1 = 0.004531289610895653, 3.0393637158516596e-05
+    H = K.solve_kepler_hyperbolic(M, em1, maxiter=60)
+    e = 1 + em1
+    assert H > 0 and abs(e * math.sinh(H) - H - M) <= 8 * np.finfo(float).eps * (e * math.sinh(H) + H + M)
+
+
 def test_kepler_rejects_non_hyperbolic():
     with pytest.raises(ValueError):
         K.solve_kepler_hyperbolic(1.0, 0.0)
