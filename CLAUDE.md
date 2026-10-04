@@ -7,8 +7,9 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
 - **Phases are gated.** At the end of each phase, report a summary, test results, figures and
   open questions. Then stop until the user says "proceed".
 - **Commit early and often:** after every meaningful step (a module plus its tests, a fix, a
-  log/doc update, regenerated figures), not only at checkpoints. Work happens on a `phase-N`
-  branch, which is merged to `main` with a descriptive commit at phase end.
+  log/doc update, regenerated figures), not only at checkpoints. Commit directly on `main`
+  (no phase branches; the user asked on 2026-10-04). Close each phase with a descriptive
+  phase-end commit.
 - **Never fabricate or hand-tune results.** Every number and figure must come from code in this
   repo. If a test tolerance changes, log the measured floor that justifies it in RESEARCH_LOG.md.
 - **RESEARCH_LOG.md** gets a dated entry for every design decision, assumption, sourced parameter
