@@ -19,8 +19,7 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
 ```bash
 python -m venv .venv
 .venv/Scripts/python -m pip install -e ".[dev]"
-.venv/Scripts/python -m pytest              # full suite
-.venv/Scripts/python -m pytest -m "not slow" # quick suite
+.venv/Scripts/python -m pytest              # full suite (~3 s)
 ```
 On macOS/Linux, use `.venv/bin/python`.
 
