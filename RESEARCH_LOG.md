@@ -105,3 +105,58 @@ integrator quality.
 - **Sun (Q2):** realistic solar Oberth dives arrive on bound orbits (C3 < 0), where
   B = v∞_out − (v∞_in + Δv) is undefined. η_E is stored on every run so the choice of metric
   can be made with data before Phase 2.
+
+## 2026-10-03: Simulator design decisions (checkpoint 3)
+
+- **Energy-balance state.** The integrated state is [r, v, m, W], with dW/dt = (T/m) u·v. In
+  exact arithmetic, ε(r, v) − ε0 − W = 0 on *every* segment, including the burn arc, which has
+  no other conserved quantity. The residual's maximum up to burnout is the per-run error estimate:
+  - δε = max |ε − ε0 − W|
+  - δv∞ = δε / v∞_out
+  - δη = (δv∞ + rounding) / B_imp
+  - δη_E = δε / Δε_imp
+
+  Runs with δη > 1e-6 get the `eta_unreliable` flag.
+- **Known blind spot of this estimate:** a pure along-track phase error conserves energy, so the
+  residual cannot see it. Its effect on η is ~rtol relative to Δε, so it is negligible here. A
+  rerun at tighter tolerance will cross-check the estimate (checkpoint 4).
+- **Minimum radius.**
+  - Coast arcs use the exact osculating-conic minimum: periapsis radius if a periapsis is passed,
+    otherwise the smaller endpoint.
+  - The burn arc uses endpoints plus located r·v = 0 events.
+  - `r_min_numerical`, the minimum over step points and events, is kept as a cross-check.
+- **Final coast** is extended past the post-burn periapsis whenever one is still ahead at burnout.
+- **Impact** (r = R_eq) is a terminal event. All outcome metrics are then NaN.
+- **Speed:** a full three-segment flyby takes ~4 ms (~600 RHS evaluations) on this machine.
+  Numba is not needed for Phase 1. Revisit with profiling in Phase 2.
+
+## 2026-10-03: Measured coast error floor (rtol = atol = 1e-12, DOP853)
+
+Coast-only flybys of all six bodies, at v∞/v_esc(r_p) ∈ {0.02, 0.3, 2}, with coast spans of
+±5τ, ±50τ and ±500τ around periapsis:
+
+| v∞/v_esc | span | drift/(μ/r_p) | drift/\|ε\| | v∞_out/v∞_in − 1 | turn-angle error (rad) |
+|---|---|---|---|---|---|
+| 0.02 | 5τ | 1.6e-12 | 4.1e-9 | −1.1e-9 | 4.4e-11 |
+| 0.3 | 5τ | 1.7e-12 | 1.8e-11 | −5.2e-12 | 2.9e-12 |
+| 2 | 5τ | 1.8e-12 | 4.4e-13 | −5.0e-14 | −4.3e-13 |
+| 2 | 50τ | 5.7e-12 | 1.4e-12 | 4.2e-13 | −2.2e-13 |
+| 2 | 500τ | 1.4e-11 | 3.5e-12 | 1.3e-12 | −5.4e-13 |
+
+(The other rows are below these values. Source: a scratch measurement script. The same cases are
+asserted in `tests/test_coast.py` for spans of 5τ and 50τ.)
+
+- **Results are bit-for-bit identical across all six bodies** at equal dimensionless inputs.
+  This is direct numerical confirmation that the body enters only through the four
+  dimensionless groups.
+- **The energy threshold of 1e-11·μ/r_p holds for spans ≤ 50τ** (worst case 5.7e-12), so it is
+  kept as approved.
+- **Observation for the user:** at v∞ ≫ v_esc on very long arcs (500τ), the μ/r_p-normalized
+  drift reaches 1.4e-11, while the |ε|-normalized drift is 3.5e-12. When v∞ ≫ v_esc the natural
+  energy scale is ε, not μ/r_p. A normalization by v_p²/2 = |ε| + μ/r_p would cover both limits.
+  Coast arcs of 500τ do not occur with the default settings, so nothing was changed. This is
+  raised as an open question.
+- **Test 1's v∞ tolerance is derived from the energy threshold, not set separately.**
+  - Since δv∞/v∞ = δε/v∞², the test asserts |v∞_out/v∞_in − 1| < max(1e-10, 1e-11·(μ/r_p)/v∞²).
+  - A flat 1e-10 is physically unreachable at v∞ = 0.02 v_esc: the measured error there is 1.1e-9.
+  - The turn-angle tolerance stays at 1e-9 rad (worst measured: 4.4e-11).
