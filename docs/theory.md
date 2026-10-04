@@ -1,6 +1,18 @@
 # Analytic theory of the finite-burn Oberth efficiency
 
 Implemented in `src/oberth_atlas/theory.py`, tested in `tests/test_theory.py`.
+
+**Prior work** (details in RELATED_WORK.md):
+- **Robbins (1966).** The leading-order loss scaling (ω t_b)²Δv/24 with ω² = μ/r³, which is
+  kΠ²Δv/24 in our variables, is due to Robbins (AIAA J. 4(8):1417–1423), as quoted by Confraria
+  (2020). We could not access the original. In section 4 below:
+  - for fixed-direction thrust at an apse, the equivalent-Δv loss D/(v + Δv) *equals* Robbins'
+    expression at leading order;
+  - prograde thrust comes in below it;
+  - the derivation holds at an apse of any conic (`small_pi_deficit_apse`).
+- **Willis (1966).** The nondimensionalization (radius, circular speed, local gravity at the
+  reference apse) follows the same scheme Willis used for finite-thrust escape/capture charts
+  (NASA TN D-3606).
 Units are nondimensional throughout: μ = r_p = 1, so V = 1, g_p = μ/r_p² = 1, τ = 1/v_p.
 
 ## 1. Notation

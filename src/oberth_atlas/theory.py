@@ -1,5 +1,10 @@
 """Analytic approximations for the Oberth efficiency η (nondimensional units: μ = r_p = 1).
 
+Prior work: the small-Π loss scaling (ω t_b)²Δv/24 with ω² = μ/r³ (= kΠ²Δv/24 here) is due to
+Robbins (1966, AIAA J. 4(8):1417), as quoted by Confraria (2020). This module extends it to
+prograde steering, finite Δv/v_p, the rocket thrust profile, any apse, and hyperbolic flybys
+(RELATED_WORK.md).
+
 Notation: v = ṽ∞, v_p = sqrt(v² + 2), k = 1/v_p² (= μ/(r_p v_p²)), τ = 1/v_p, Π = t_b/τ.
 The burn runs over t ∈ [t_s, t_s + t_b] with t_s = −x_c·t_b (x_c = 1/2 is centered on periapsis).
 The thrust profile of a constant-thrust rocket, in normalized time x = (t − t_s)/t_b ∈ [0, 1], is

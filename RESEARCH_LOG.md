@@ -357,6 +357,8 @@ sourced hardware values. Results from `scripts/fig_example_trajectories.py`:
 
 ## 2026-10-04: Small-Π prefactor: the user's derivation checked independently and corrected
 
+> **Attribution (added 2026-10-04, literature review):** the (ω t_b)²Δv/24 loss scaling, kΠ²Δv/24 here, is Robbins (1966, AIAA J. 4(8):1417). See RELATED_WORK.md and the literature-review entries below.
+
 The full derivation is in `docs/theory.md`; the code is in `theory.py`; tests are in `tests/test_theory.py`.
 
 - **The user's (a) and (b) are both confirmed:** v̈ = −k(1−k)v_p/τ², and the inertial velocity
@@ -519,6 +521,8 @@ the named figure script.
   prograde impact risk comes from the chosen r_p itself.
 
 ## 2026-10-04: Small-Π prefactor validated across the whole sweep (fig_prefactor_check.py)
+
+> **Attribution (added 2026-10-04, literature review):** the (ω t_b)²Δv/24 loss scaling, kΠ²Δv/24 here, is Robbins (1966, AIAA J. 4(8):1417). See RELATED_WORK.md and the literature-review entries below.
 
 **Corrected theory.** For every reliable row with Π < 0.01 and 1 − η > 10³·δη:
 - Prograde (n = 3,360): |(1−η)/(CΠ²) − 1| has median 1.2e-4 and max 1.1e-3.
@@ -733,3 +737,98 @@ Prograde, real bodies; values are the median η with the 10th–90th percentile 
 4. **The exhaust-velocity axis** barely matters, explaining < 5% of the scatter. Should future
    sweeps fix it, to spend the budget on Δv and v∞ resolution?
 5. **A leftover local `phase-1` branch** exists from Phase 1. Delete it?
+
+---
+
+# Literature review (before Phase 3)
+
+## 2026-10-04: Prior work checked; small-Π prefactor attributed to Robbins (1966)
+
+Full summaries, access status and citations are in `RELATED_WORK.md`.
+- **Robbins (1966)** could not be accessed (AIAA paywall). Its loss expression is taken from
+  Confraria's (2020) quotation.
+- **Willis (1966)**, NASA TN D-3606, is the correct form of the "Villis 1967" citation. Full
+  text was read.
+- **Confraria (2020):** full thesis read.
+- **Ferreira et al. (2022):** read in HTML.
+- **Hibberd et al. (2026):** full text read.
+
+**Attribution.** The small-Π loss scaling (ω t_b)²Δv/24 with ω² = μ/r³, which is kΠ²Δv/24 in our
+variables, is **Robbins (1966)**. The user's hand prefactor is Robbins' expression converted to an
+energy deficit with v_p. The Phase 2 entries on the prefactor ("checked independently and
+corrected", "validated across the whole sweep") have been annotated accordingly, and so have
+`docs/theory.md`, `theory.py`, and the prefactor, collapse and regimes figures.
+
+**What this project adds to Robbins' result** (labels in RELATED_WORK.md):
+- **Fixed-direction thrust:** the leading-order loss at an apse *equals* kΠ²Δv/24. It is exact,
+  not just a bound, provided the energy deficit is converted with the post-burn speed v_p + Δv.
+  - Converting with v_p instead, as the hand formula did, is exactly the factor v_p/(v_p + Δv).
+    For the Earth case that is −8.1%, which accounts for most of the measured −8.4% error.
+- **Prograde thrust** comes in below it, by L/L_R = [(1−k)v + (1+k)Δv]/(v + Δv) at first order
+  (all orders in code).
+- **Mass ratio:** a burn centered in time can exceed it with a large mass ratio.
+- **Generalization:** the theory now holds at an apse of *any* conic
+  (`theory.small_pi_deficit_apse`). It is tested against direct integration at apoapsis
+  (k > 1), on a circular orbit (k = 1), at an elliptic periapsis and at a hyperbolic periapsis,
+  to 2e-4.
+
+## 2026-10-04: Robbins' expression compared with measured losses (`scripts/robbins_comparison.py`)
+
+**Measure.** The energy-equivalent extra Δv, L = (Δε_imp − Δε_fin)/(v_p + Δv), compared with
+L_R = kΠ²Δv/24.
+
+**Flyby sweep:**
+- **Fixed-direction thrust:** median R = L/L_R = 1.000 for Π < 0.3, and 0.98 / 0.82 / 0.35 at
+  Π = 0.3–1 / 1–3 / 3–10.
+- **Prograde:** median 0.63 (range 0.50–1.05) at Π < 0.01, then 0.57 up to Π = 1, then 0.48 and
+  0.24.
+- **Agreement with theory:** at Π < 0.01 the measured R matches the leading-order theory to a
+  median of 1e-4 (max 1.1e-3).
+- **Exceeding the bound:** rows with Δv/c > 1, centered in time, exceed it (max R = 1.087
+  inertial, 1.049 prograde).
+
+**Confraria's escape setup, re-simulated** (LEO 200 km, Isp 300 s, tangential, exact extra Δv to
+reach the impulsive C3). Robbins' relative overestimate:
+- **127–131% at T/W₀ = 0.1** (Π ≈ 2.5–2.9), reproducing her "~125%";
+- 49–78% at T/W₀ = 0.5;
+- tending to the leading-order limits of 45–76% as T/W₀ → ∞, set by Δv.
+
+So "~125%" is the T/W₀ ≈ 0.1 point of a Π- and Δv-dependent curve, not a constant ratio. It also
+means Robbins ≈ 2.25 × actual, not 1.25 × actual.
+
+**Unresolved:** at T/W₀ = 0.5 our 49–78% sits above the ~40–60% read by eye from her Fig. 4.34.
+
+## 2026-10-04: Phase 4 case study replaced, now a finite-burn re-analysis of Hibberd et al. (2026)
+
+- **Check done.** Hibberd, Eubanks & Hein (arXiv:2601.02533) model the solar Oberth manoeuvre
+  **impulsively**. They write that the spacecraft "must apply all its ∆V at periapsis w.r.t. the
+  body in question", and the SOM is a massless Intermediate Point with ∆V = |V_D − V_A|. There
+  is no burn duration, thrust profile or gravity-loss discussion.
+- **Revised Phase 4 plan,** replacing the new 3I/ATLAS mission design:
+  1. **Inputs.** Reproduce their reference SOM: 3.2 R☉, ΔV = 8.36 km/s, post-burn speed
+     ≈ 352 km/s, and the arrival state implied by the E–J–SOM sequence.
+     - **[our inference]** The arrival is bound and near-parabolic: a fall from ~5.2 au gives
+       ≈ 345 km/s before the burn at 3.2 R☉.
+     - Their pre-burn state is not given in the paper. Ask the authors or rerun OITS (it is
+       open-source on GitHub) to get it.
+  2. **Simulator extension** to bound arrivals: an elliptic Kepler initial state, already
+     covered by the apse theory. The metric becomes the extra Δv and the v∞,out shortfall
+     against the impulsive SOM, both defined for bound arrivals (cf. the open question on
+     η_W / the Sun).
+  3. **Burn model.** Their solid-stage combinations (Table 2), with thrust and burn times from
+     manufacturer data **[to be sourced]**. Model staging as coast gaps, with burn timing
+     optimized (Phase 3 tools).
+  4. **Outputs:**
+     - the extra Δv,
+     - the change in deliverable payload (via their stage masses and exhaust velocities),
+     - the change in arrival speed / flight time,
+     - the thrust-to-weight below which the loss becomes significant.
+- **Pre-registered expectation** (estimate, to be tested):
+  - τ = r_p/v_p ≈ 2.23e9 m / 3.45e5 m/s ≈ 6,500 s at 3.2 R☉.
+  - If the stack's total burn lasts a few minutes (typical for solid stages; **not yet sourced**),
+    then Π ≈ 0.02–0.05. The leading-order theory then gives an extra Δv ≈ R·kΠ²Δv/24
+    ≈ 0.1–0.5 m/s, with k ≈ ½ and R ≈ 0.5–0.6. That is negligible against 8.36 km/s.
+  - If this holds, the case study's value lies elsewhere:
+    - in confirming the impulsive model for solid stages;
+    - in mapping the thrust level at which it fails (Π ~ 1 means t_b ~ 1.8 h);
+    - in quantifying staging-gap and thermal-dwell constraints near perihelion.
