@@ -1,0 +1,39 @@
+analysis,law,x,y,rms,mad,p95,n
+small-Pi collapse (Pi<0.5),prograde,Pi,log10(1-eta),0.28451959679134026,0.25555135978838495,0.4493862741703626,15375
+small-Pi collapse (Pi<0.5),prograde,Pi_sqrtC,log10(1-eta),0.001185673117051244,6.854323774696525e-05,0.0016956118171444156,15375
+small-Pi collapse (Pi<0.5),inertial,Pi,log10(1-eta),0.1936348718338266,0.1810356070370167,0.3025758809738347,16193
+small-Pi collapse (Pi<0.5),inertial,Pi_sqrtC,log10(1-eta),0.000948686471110486,6.0040625855961594e-05,0.0012841224115760492,16193
+full range,prograde,Pi,eta,0.07981275334026613,0.007496765477430584,0.19678792892649727,67855
+full range,prograde,Pi,eta - eta_lin(theory),0.008591487784552295,0.0010216414185715249,0.01151336688228043,67855
+full range,inertial,Pi,eta,0.29295641614960527,0.009182843311692612,0.25571473284656815,66104
+full range,inertial,Pi,eta - eta_lin(theory),0.28181269088122707,0.0014995353118025761,0.15771231196086663,66104
+explained fraction given Pi,prograde,Pi [Π < 1],v_inf_over_vesc,0.7288052405522781,nan,nan,30940
+explained fraction given Pi,prograde,Pi [Π < 1],dv_over_vp,0.3038469870969136,nan,nan,30940
+explained fraction given Pi,prograde,Pi [Π < 1],xi,0.5246613301860157,nan,nan,30940
+explained fraction given Pi,prograde,Pi [Π < 1],dv_over_c,0.046900844422322674,nan,nan,30940
+explained fraction given Pi,prograde,Pi [Π < 1],dv_tb,0.2798373671080263,nan,nan,30940
+explained fraction given Pi,prograde,Pi [1 ≤ Π < 100],v_inf_over_vesc,0.9244453223536221,nan,nan,14201
+explained fraction given Pi,prograde,Pi [1 ≤ Π < 100],dv_over_vp,0.12287846328680307,nan,nan,14201
+explained fraction given Pi,prograde,Pi [1 ≤ Π < 100],xi,0.8489672407999,nan,nan,14201
+explained fraction given Pi,prograde,Pi [1 ≤ Π < 100],dv_over_c,0.004318359617193845,nan,nan,14201
+explained fraction given Pi,prograde,Pi [1 ≤ Π < 100],dv_tb,0.06136198230211609,nan,nan,14201
+explained fraction given Pi,prograde,Pi [Π ≥ 100],v_inf_over_vesc,0.9089055862995006,nan,nan,22719
+explained fraction given Pi,prograde,Pi [Π ≥ 100],dv_over_vp,0.1387343643525658,nan,nan,22719
+explained fraction given Pi,prograde,Pi [Π ≥ 100],xi,0.9191314580793096,nan,nan,22719
+explained fraction given Pi,prograde,Pi [Π ≥ 100],dv_over_c,0.0011947476670181034,nan,nan,22719
+explained fraction given Pi,prograde,Pi [Π ≥ 100],dv_tb,0.07206658971025492,nan,nan,22719
+explained fraction given Pi,inertial,Pi [Π < 1],v_inf_over_vesc,0.7826010550149156,nan,nan,30940
+explained fraction given Pi,inertial,Pi [Π < 1],dv_over_vp,0.28089886500902295,nan,nan,30940
+explained fraction given Pi,inertial,Pi [Π < 1],xi,0.6712637000835979,nan,nan,30940
+explained fraction given Pi,inertial,Pi [Π < 1],dv_over_c,0.03779613696473627,nan,nan,30940
+explained fraction given Pi,inertial,Pi [Π < 1],dv_tb,0.23261111071544616,nan,nan,30940
+explained fraction given Pi,inertial,Pi [1 ≤ Π < 100],v_inf_over_vesc,0.24240203430271812,nan,nan,14106
+explained fraction given Pi,inertial,Pi [1 ≤ Π < 100],dv_over_vp,0.33904521006966204,nan,nan,14106
+explained fraction given Pi,inertial,Pi [1 ≤ Π < 100],xi,0.294378276835089,nan,nan,14106
+explained fraction given Pi,inertial,Pi [1 ≤ Π < 100],dv_over_c,0.07613387426838247,nan,nan,14106
+explained fraction given Pi,inertial,Pi [1 ≤ Π < 100],dv_tb,0.32583042080999125,nan,nan,14106
+explained fraction given Pi,inertial,Pi [Π ≥ 100],v_inf_over_vesc,0.08825350080094962,nan,nan,21063
+explained fraction given Pi,inertial,Pi [Π ≥ 100],dv_over_vp,0.12961014137676552,nan,nan,21063
+explained fraction given Pi,inertial,Pi [Π ≥ 100],xi,0.11596765365123352,nan,nan,21063
+explained fraction given Pi,inertial,Pi [Π ≥ 100],dv_over_c,0.018773604745639827,nan,nan,21063
+explained fraction given Pi,inertial,Pi [Π ≥ 100],dv_tb,0.12497531206483559,nan,nan,21063
