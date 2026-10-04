@@ -274,3 +274,35 @@ sourced hardware values. Results from `scripts/fig_example_trajectories.py`:
 - **Plotting** samples each adaptive integrator step through the dense output. Uniform time
   sampling under-resolved the periapsis passage for months-long burns. Coast arcs beyond the
   simulated span are display-only extensions, which enter no reported number.
+
+## 2026-10-03: Phase 1 complete: summary and open questions
+
+**Delivered:**
+- A three-segment finite-burn flyby simulator (`simulate_flyby`).
+- Pluggable steering: prograde, inertial, and a linear pitch law.
+- All brief metrics, plus η_E and the r_SOI ratio, each with per-run numerical error estimates
+  and flags.
+- The `oberth run` CLI, and 296 passing tests (~3 s).
+- Figures in `figures/`, regenerated from commit 5560507:
+  - `eta_vs_a0.png` and `.csv`
+  - `trajectory_*.png` for the four example configs
+
+**Required tests:**
+1. Coast-only flyby: v∞ and turn angle hold for all six bodies, three v∞ regimes and two spans.
+2. Coast energy drift is below 1e-11 μ/r_p (worst measured: 5.7e-12).
+3. Gravity-free burn matches the closed-form rocket solution to 1e-10.
+4. η → 1 with empirical order 2.00.
+5. Mass invariance holds to 1e-12 over nine decades of scale.
+
+**Open questions for the user before Phase 2:**
+1. **Δv is not a sweep dimension in the Phase 2 outline,** but it is one of the four
+   dimensionless groups. Should it be fixed (e.g., 1 km/s), set per engine class, or swept?
+2. **Should the Π-collapse use η, η_E, or both?** The two differ by up to 2× at large Π (Jupiter
+   Hall: 0.089 vs 0.162).
+3. **Energy-drift normalization:** consider v_p²/2 = |ε| + μ/r_p in place of μ/r_p, so that the
+   v∞ ≫ v_esc regime is covered. This only matters for coast arcs ≫ 50τ.
+4. **Inertial steering at large Π** drives the trajectory into the planet. Should impacted atlas
+   cells be masked and reported as a separate category (proposed), or should the inertial law be
+   restricted to Π ≲ 10?
+5. **The prefactor of Π² differs between cases** (0.010 to 0.024). Π alone will not collapse the
+   small-Π regime exactly. A secondary parameter is needed, as the brief anticipated.
