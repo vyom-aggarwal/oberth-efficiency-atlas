@@ -827,7 +827,7 @@ means Robbins ≈ 2.25 × actual, not 1.25 × actual.
   - τ = r_p/v_p ≈ 2.23e9 m / 3.45e5 m/s ≈ 6,500 s at 3.2 R☉.
   - If the stack's total burn lasts a few minutes (typical for solid stages; **not yet sourced**),
     then Π ≈ 0.02–0.05. The leading-order theory then gives an extra Δv ≈ R·kΠ²Δv/24
-    ≈ 0.1–0.5 m/s, with k ≈ ½ and R ≈ 0.5–0.6. That is negligible against 8.36 km/s.
+    ≈ 0.04–0.25 m/s, with k ≈ ½ and R ≈ 0.52 (for Δv/v ≈ 0.024). That is negligible against 8.36 km/s.
   - If this holds, the case study's value lies elsewhere:
     - in confirming the impulsive model for solid stages;
     - in mapping the thrust level at which it fails (Π ~ 1 means t_b ~ 1.8 h);
