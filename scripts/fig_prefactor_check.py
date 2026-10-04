@@ -34,14 +34,20 @@ def main(path: str) -> None:
     cmap = sequential_colormap()
     for ax, law in zip(axes[:2], ("prograde", "inertial")):
         g = d[d["steering"] == law]
-        sc = ax.scatter(g["Pi"], g["r_th"], c=np.log10(g["dv_over_vp"]), cmap=cmap, s=4, linewidths=0,
+        dev = np.abs(g["r_th"] - 1)
+        sc = ax.scatter(g["Pi"], dev.clip(lower=1e-8), c=np.log10(g["dv_over_vp"]), cmap=cmap, s=4, linewidths=0,
                         vmin=-3.5, vmax=0.5, rasterized=True)
-        ax.axhline(1.0, color=INK_2, linewidth=0.8)
+        pp = np.logspace(-2, -1, 20)
+        ax.plot(pp, 0.3 * pp**2, color=INK_2, linewidth=0.9, linestyle=(0, (4, 2)), label="∝ Π² (next order)")
+        ax.axhline(1e-3, color=MUTED, linewidth=0.8)
+        ax.text(6e-4, 1.3e-3, "noise ceiling set by the filter 1−η > 10³·δη", fontsize=7, color=INK_2)
         ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_ylim(1e-8, 1e-1)
         ax.set_xlabel("Π")
-        ax.set_ylabel("(1 − η) / (C_theory Π²)")
+        ax.set_ylabel("|(1 − η) / (C_theory Π²) − 1|")
         ax.set_title(f"Corrected theory, {law}")
-        ax.set_ylim(0.9, 1.02)
+        ax.legend(loc="upper left", fontsize=7.5)
     cb = fig.colorbar(sc, ax=axes[:2], shrink=0.85, pad=0.01)
     cb.set_label("log₁₀(Δv / v_p)")
 
@@ -57,7 +63,7 @@ def main(path: str) -> None:
     ax.set_xlabel("Δv / v_p")
     ax.set_ylabel("(1 − η) / (C Π²)   at Π < 0.01")
     ax.set_title("Hand formula underestimates by O(Δv/v_p)")
-    ax.legend(loc="lower left", fontsize=7.5, markerscale=3)
+    ax.legend(loc="upper left", fontsize=7.5, markerscale=3)
     fig.suptitle("Small-Π prefactor: measured 1 − η against C Π² over every sweep point with Π < 0.1",
                  fontsize=9.5, x=0.01, ha="left")
     save_figure(fig, ROOT / "figures" / "prefactor_check.png", "scripts/fig_prefactor_check.py")

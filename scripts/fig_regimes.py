@@ -100,7 +100,7 @@ def main(path: str) -> None:
     ax.scatter([r["Pi_half_data"] for r in hp], [r["v_inf_over_vesc"] for r in hp], s=10, color=SERIES[0],
                linewidths=0, label="η_W = 0.5, sweep data", zorder=3)
     ax.fill_betweenx(ratios, 1.0, np.maximum(PiT, 1.0), where=PiT > 1, color=SERIES[2], alpha=0.12, linewidth=0)
-    ax.text(30, 0.012, "II: parabolic core", fontsize=8, color=INK_2)
+    ax.text(150, 0.006, "II: parabolic core", fontsize=8, color=INK_2)
     ax.text(3e4, 0.4, "III: hyperbolic tail", fontsize=8, color=INK_2)
     ax.text(0.03, 0.05, "I: impulsive", fontsize=8, color=INK_2, rotation=90)
     ax.set_xscale("log")

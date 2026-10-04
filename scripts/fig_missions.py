@@ -45,7 +45,8 @@ def main(path: str) -> None:
     presets = load_presets()
     pro = m[(m["steering"] == "prograde") & (m["status"] == "ok")]
     xlim = (10 ** np.floor(np.log10(pro["Pi"].min())), 10 ** np.ceil(np.log10(pro["Pi"].max())))
-    ylim = (10 ** np.floor(np.log10(pro["v_inf_over_vesc"].min())), 10 ** np.ceil(np.log10(pro["v_inf_over_vesc"].max())))
+    ylim = (10 ** (np.floor(2 * np.log10(pro["v_inf_over_vesc"].min())) / 2),
+            10 ** (np.ceil(2 * np.log10(pro["v_inf_over_vesc"].max())) / 2))
 
     apply_style()
     fig, axes = plt.subplots(2, 3, figsize=(15.5, 9.5), layout="constrained", sharex=True, sharey=True)
@@ -58,11 +59,23 @@ def main(path: str) -> None:
                    norm=norm, s=9, linewidths=0, rasterized=True)
         ax.scatter(g.loc[~inside, "Pi"], g.loc[~inside, "v_inf_over_vesc"], facecolors="none",
                    edgecolors=cmap(norm(g.loc[~inside, "eta"].to_numpy())), s=9, linewidths=0.6, rasterized=True)
-        for bkey, gb in g.groupby("body"):
-            x, y = np.median(gb["Pi"]), np.median(gb["v_inf_over_vesc"])
-            ax.annotate(f"{bkey.capitalize()} {np.nanmedian(gb['eta']):.2f}", (x, y), fontsize=7.5, color=INK,
-                        ha="center", va="center",
-                        bbox=dict(boxstyle="round,pad=0.15", facecolor="#fcfcfbcc", edgecolor="none"))
+        lines = []
+        for bkey, gb in g.groupby("body", sort=False):
+            e = gb["eta"].to_numpy()
+            p10, p50, p90 = np.nanpercentile(e, [10, 50, 90])
+            lines.append(f"{bkey.capitalize():8s} {p50:5.2f}  ({p10:.2f}–{p90:.2f})  "
+                         f"{100 * (gb['soi_ratio_burn_start'] > 1).mean():3.0f}%")
+        # Put the summary in whichever corner holds fewer samples.
+        lx, ly = np.log10(g["Pi"]), np.log10(g["v_inf_over_vesc"])
+        midx, midy = np.log10(np.sqrt(xlim[0] * xlim[1])), np.log10(np.sqrt(ylim[0] * ylim[1]))
+        upper_left = ((lx < midx) & (ly > midy)).sum() <= ((lx > midx) & (ly < midy)).sum()
+        ax.text(0.02 if upper_left else 0.98, 0.98 if upper_left else 0.02,
+                "body      median η (p10–p90)  outside SOI
+" + "
+".join(lines),
+                transform=ax.transAxes, ha="left" if upper_left else "right", va="top" if upper_left else "bottom",
+                fontsize=7, family="monospace", color=INK,
+                bbox=dict(boxstyle="round,pad=0.3", facecolor="#fcfcfbe6", edgecolor="#e1e0d9"))
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlim(*xlim)
@@ -80,7 +93,8 @@ def main(path: str) -> None:
         "• Point color: simulated η (prograde, real body).",
         "• Hollow point: burn starts outside the body's",
         "  sphere of influence (model not physical there).",
-        "• Label: body and median η of its samples.",
+        "• Box: per body, median η (10th–90th percentile)",
+        "  and the share of samples starting outside the SOI.",
         "• Gray contours: Δv→0 theory η_W,lin.",
         "• Orange line: Π = Π_T (hyperbolic-tail regime",
         "  to its right). Gray line: Π = 1.",
