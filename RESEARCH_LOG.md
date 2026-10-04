@@ -306,3 +306,51 @@ sourced hardware values. Results from `scripts/fig_example_trajectories.py`:
    restricted to Π ≲ 10?
 5. **The prefactor of Π² differs between cases** (0.010 to 0.024). Π alone will not collapse the
    small-Π regime exactly. A secondary parameter is needed, as the brief anticipated.
+
+---
+
+# Phase 2
+
+## 2026-10-04: Phase 2 decisions (user answers to the Phase 1 questions)
+
+- **Q1 (Δv):** swept. The sweep runs directly over the four dimensionless groups
+  (v∞/V, Δv/V, Isp·g0/V, a0·r_p²/μ), for both prograde and inertial steering, on log grids
+  wide enough to cover every body and engine class. Every run stores r_min/r_p and
+  r_burn_start/r_p, so impact and SOI flags can be applied per body afterwards. Bodies and
+  engine presets are then overlaid as regions.
+- **Q2:** η is the primary collapse metric. η_E has a nonzero floor: a deep-space burn scores
+  (v∞Δv + Δv²/2)/(v_pΔv + Δv²/2), which mixes the baseline into the efficiency. η_E stays as a
+  secondary output, and a baseline-subtracted version will be defined before the Sun is tackled.
+- **Q3:** energy drift is normalized by v_p²/2 (see the entry below).
+- **Q4:** impact cells are masked as their own category, and the impact boundary is drawn as a
+  contour on the atlas.
+- **New task:** derive the leading small-Π prefactor analytically, test it, test whether Π·√C
+  collapses the small-Π data better than Π, and characterize the large-Π regime separately.
+
+## 2026-10-04: Energy-drift normalization changed to v_p²/2
+
+- **Reasoning:** round-off in ε = v²/2 − μ/r scales with the largest terms in ε, and along a
+  flyby the largest is v_p²/2 = |ε| + μ/r_p.
+  - For v∞ ≪ v_esc this equals μ/r_p, so nothing changes.
+  - For v∞ ≫ v_esc it tracks |ε|. This removes the Phase 1 artifact where a 500τ coast at
+    v∞ = 2 v_esc read 1.4e-11 relative to μ/r_p but only 2.8e-12 relative to v_p²/2.
+- **What it applies to:** both the coast energy drift and the energy-balance residual. It uses
+  the *unperturbed* v_p, which is slightly conservative on post-burn arcs where the speed is
+  higher.
+- **Threshold and tests:**
+  - The 1e-11 threshold is kept.
+  - Test 2 now also covers ±500τ spans, and all pass.
+  - Test 1's v∞ tolerance becomes max(1e-10, 1e-11·(v_p²/2)/v∞²) in the nondimensional units.
+- The η error estimate uses the absolute energy residual, so it is unaffected.
+
+## 2026-10-04: Simulator split into a body-free core
+
+- `simulate_nd(ṽ∞, Δṽ, c̃, ã0, steering, …)` runs entirely in nondimensional units and knows no
+  body. Radii come back in units of r_p.
+- Without a body, the only terminal radius is a floor at r = 1e-3 r_p, which avoids the r → 0
+  singularity. Any trajectory reaching it is inside every body with r_p < 1000 R.
+- Trajectories that pass "through" a planet keep going as point-mass orbits, so impact can be
+  decided per body afterwards from r_min/r_p < R/r_p. A test confirms this agrees exactly with a
+  real-body run that stops at the surface.
+- `simulate_flyby` is now a thin SI wrapper. All Phase 1 tests pass unchanged, except for the
+  intended normalization update.

@@ -8,7 +8,7 @@ from oberth_atlas.constants import BODIES, Body
 
 # v_inf as a fraction of the escape speed at r_p: low (strong Oberth), medium, high (weak Oberth).
 V_INF_RATIOS = [0.02, 0.3, 2.0]
-# Approved coast energy-drift threshold, relative to μ/r_p (RESEARCH_LOG 2026-10-03, decision Q4).
+# Approved coast energy-drift threshold, relative to v_p²/2 (RESEARCH_LOG: Q4 on 2026-10-03, renormalized 2026-10-04).
 ENERGY_DRIFT_TOL = 1e-11
 
 
