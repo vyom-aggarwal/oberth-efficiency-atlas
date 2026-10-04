@@ -70,9 +70,7 @@ def main(path: str) -> None:
         midx, midy = np.log10(np.sqrt(xlim[0] * xlim[1])), np.log10(np.sqrt(ylim[0] * ylim[1]))
         upper_left = ((lx < midx) & (ly > midy)).sum() <= ((lx > midx) & (ly < midy)).sum()
         ax.text(0.02 if upper_left else 0.98, 0.98 if upper_left else 0.02,
-                "body      median η (p10–p90)  outside SOI
-" + "
-".join(lines),
+                "body      median η (p10–p90)  outside SOI\n" + "\n".join(lines),
                 transform=ax.transAxes, ha="left" if upper_left else "right", va="top" if upper_left else "bottom",
                 fontsize=7, family="monospace", color=INK,
                 bbox=dict(boxstyle="round,pad=0.3", facecolor="#fcfcfbe6", edgecolor="#e1e0d9"))

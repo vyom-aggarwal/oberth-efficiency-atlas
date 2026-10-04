@@ -23,12 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 CANDIDATES = {                       # column → label
     "v_inf_over_vesc": "v∞ / v_esc",
     "dv_over_vp": "Δv / v_p",
-    "xi": "ξ
-(η_W → η map)",
-    "dv_over_c": "Δv / c
-(mass ratio)",
-    "dv_tb": "Δv·t_b / r_p
-(displacement)",
+    "xi": "ξ\n(η_W → η map)",
+    "dv_over_c": "Δv / c\n(mass ratio)",
+    "dv_tb": "Δv·t_b / r_p\n(displacement)",
 }
 
 
