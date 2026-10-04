@@ -207,3 +207,41 @@ asserted in `tests/test_coast.py` for spans of 5τ and 50τ.)
     v∞/v_esc matters at fixed Π, which is what Phase 2 is meant to investigate.
 - **Flag semantics fix:** an impact now always sets `unsafe_periapsis`. Previously, a zero safety
   margin left it unset, because the check was a strict r_min < R.
+
+## 2026-10-03: Test 4: impulsive limit and convergence order (checkpoint 5)
+
+Source: `scripts/fig_eta_vs_a0.py` → `figures/eta_vs_a0.png` and `figures/eta_vs_a0.csv`.
+Cases: Earth (h = 300 km, v∞ = 3 km/s, Δv = 1 km/s, Isp 465 s), with prograde and with inertial
+steering; Jupiter (r_p = 1.5 R_J, v∞ = 6 km/s, Δv = 2 km/s, Isp 850 s), prograde. Burns are
+centered on periapsis, and a0 runs from 1e-2 to 1e5 m/s².
+
+- **η → 1 monotonically,** with |1 − η| < 1e-6 by a0 = 1e4 m/s² (Π ~ 1e-4).
+- **The convergence order is exactly 2,** as the symmetry argument predicted. Fitted orders are
+  2.000 for all three cases, and (1 − η)/Π² is constant to four digits over six decades:
+  - Earth, prograde: 0.01489
+  - Jupiter, prograde: 0.01014
+  - Earth, inertial: 0.02444
+
+  Test 4 asserts an order of 2.00 ± 0.02. The fit uses only points with 1 − η > 1e3 × the
+  per-run error estimate and Π < 0.2.
+- **Below Π ≈ 5e-5, 1 − η flattens at ~1.5e-11,** matching the per-run error estimate δη ≈ 1e-11.
+  This is the numerical floor, and it is drawn on the figure.
+- **The coefficient of Π² depends on the case** (0.010 vs 0.015 for prograde at Jupiter vs Earth).
+  So Π alone does not fully collapse even the small-Π regime. A secondary parameter (v∞/v_esc,
+  Δv/v_p, …) sets the prefactor. This is a direct pointer for Phase 2.
+- **Inertial steering costs more than prograde** at the same Π (prefactor 0.024 vs 0.015),
+  because thrust and velocity are misaligned by an angle ∝ t.
+
+## 2026-10-03: Surprising result: inertial steering drives long burns into the planet
+
+With inertially fixed thrust along the unperturbed periapsis velocity ŷ, the thrust has a
+component *toward the planet* on the incoming leg. On the incoming asymptote, ŷ makes an angle
+of 90° − δ/2 with the velocity, and its normal component points to the planet side.
+- Long burns therefore pull periapsis down. At Earth (h = 300 km, v∞ = 3 km/s, Δv = 1 km/s,
+  Isp 465 s), every a0 ≤ 0.133 m/s² (Π ≳ 11) **impacts the planet**.
+- These runs are flagged `impact`, with NaN metrics, and omitted from the plot with an
+  on-figure note.
+- Prograde steering does not do this.
+- Consequence for Phase 2: inertial-law atlas cells at large Π will be masked by impact, which
+  is a real limitation of that law. Phase 3's altitude constraint will matter for any law that
+  pitches inward.
