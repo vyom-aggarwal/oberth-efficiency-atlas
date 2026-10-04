@@ -236,7 +236,7 @@ centered on periapsis, and a0 runs from 1e-2 to 1e5 m/s².
 
 With inertially fixed thrust along the unperturbed periapsis velocity ŷ, the thrust has a
 component *toward the planet* on the incoming leg. On the incoming asymptote, ŷ makes an angle
-of 90° − δ/2 with the velocity, and its normal component points to the planet side.
+δ/2 with the velocity (cos(δ/2) = √(e²−1)/e = ŷ·v̂_in), and its normal component points to the planet side.
 - Long burns therefore pull periapsis down. At Earth (h = 300 km, v∞ = 3 km/s, Δv = 1 km/s,
   Isp 465 s), every a0 ≤ 0.133 m/s² (Π ≳ 11) **impacts the planet**.
 - These runs are flagged `impact`, with NaN metrics, and omitted from the plot with an
