@@ -50,7 +50,7 @@ def main(path: str) -> None:
         big = P[P > 30 * theory.tail_crossover_pi(v)]
         ax.plot(big, [theory.large_pi_asymptote(v, x) for x in big], color=SERIES[1], linewidth=1.2, linestyle=ls,
                 label=f"III: tail, v∞/v_esc = {ratio:g}")
-    ax.plot([], [], color=INK_2, linewidth=0.9, label="I: 1 − C₀Π²")
+    ax.plot([], [], color=INK_2, linewidth=0.9, label="I: 1 − C₀Π²  (Robbins-1966 scaling)")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_ylim(1e-5, 1.5)

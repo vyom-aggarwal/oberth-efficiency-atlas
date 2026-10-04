@@ -59,7 +59,9 @@ def main(path: str) -> None:
             ax.set_title(f"{law}: binned RMS scatter of log₁₀(1−η) = {m['rms']:.3f} dex")
     cb = fig.colorbar(sc, ax=axes, shrink=0.6, pad=0.01)
     cb.set_label("log₁₀(v∞ / v_esc)")
-    fig.suptitle("Small-Π collapse (Π < 0.5): Π alone vs the theory-scaled Π√C", fontsize=9.5, x=0.01, ha="left")
+    fig.suptitle("Small-Π collapse (Π < 0.5): Π alone vs the theory-scaled Π√C "
+                 "(C: Robbins-1966-type prefactor, extended to hyperbolic flybys; see RELATED_WORK.md)",
+                 fontsize=9.5, x=0.01, ha="left")
     save_figure(fig, ROOT / "figures" / "collapse_small_pi.png", "scripts/fig_collapse.py")
     plt.close(fig)
 

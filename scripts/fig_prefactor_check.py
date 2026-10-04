@@ -1,8 +1,12 @@
 """Figure: small-Π prefactor, the corrected theory vs the hand formula, over the whole sweep.
 
+The (ω t_b)² Δv / 24 loss scaling, with ω² = μ/r³ (= kΠ² here), is Robbins (1966, AIAA J.
+4(8):1417), as quoted by Confraria (2020). The hand formula C_user is Robbins' expression
+converted to an energy deficit with v_p. The corrected C extends it to prograde steering, finite
+Δv/v_p, the thrust profile, and hyperbolic flybys (docs/theory.md; RELATED_WORK.md).
+
 For every reliable sweep row with Π < 0.1, plots (1 − η)/(C Π²) for the corrected theory C and
-for the user's hand formula C_user. Exact leading-order theory → 1 as Π → 0, with an O(Π²)
-correction.
+for C_user. Exact leading-order theory → 1 as Π → 0, with an O(Π²) correction.
 Writes figures/prefactor_check.png and prints summary statistics.
 Run:  .venv/Scripts/python scripts/fig_prefactor_check.py [results/sweep_nd.parquet]
 """
@@ -55,8 +59,8 @@ def main(path: str) -> None:
     small = d[d["Pi"] < 0.01]
     for i, law in enumerate(("prograde", "inertial")):
         g = small[small["steering"] == law]
-        ax.scatter(g["dv_over_vp"], g["r_user"], s=4, color=SERIES[i], linewidths=0, label=f"hand formula, {law}",
-                   rasterized=True)
+        ax.scatter(g["dv_over_vp"], g["r_user"], s=4, color=SERIES[i], linewidths=0,
+                   label=f"hand formula (Robbins-type), {law}", rasterized=True)
         ax.scatter(g["dv_over_vp"], g["r_th"], s=4, color=MUTED, linewidths=0, rasterized=True,
                    label="corrected theory (both)" if i == 0 else None)
     ax.set_xscale("log")
@@ -64,7 +68,9 @@ def main(path: str) -> None:
     ax.set_ylabel("(1 − η) / (C Π²)   at Π < 0.01")
     ax.set_title("Hand formula underestimates by O(Δv/v_p)")
     ax.legend(loc="upper left", fontsize=7.5, markerscale=3)
-    fig.suptitle("Small-Π prefactor: measured 1 − η against C Π² over every sweep point with Π < 0.1",
+    fig.suptitle("Small-Π prefactor, measured 1 − η against C Π² for every sweep point with Π < 0.1.\n"
+                 "Loss scaling (ωt)²Δv/24 after Robbins (1966); C extends it to prograde steering, "
+                 "finite Δv and hyperbolic flybys",
                  fontsize=9.5, x=0.01, ha="left")
     save_figure(fig, ROOT / "figures" / "prefactor_check.png", "scripts/fig_prefactor_check.py")
 
