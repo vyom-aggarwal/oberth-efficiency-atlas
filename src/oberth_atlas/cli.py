@@ -1,9 +1,12 @@
 """Command-line interface.
 
     oberth run CONFIG [--out DIR] [--no-plot]
-
-Runs one flyby from a YAML/JSON config. Prints the metrics, and writes
-<out>/<name>/result.json plus <out>/<name>/trajectory.png (default out: runs/).
+        One flyby from a YAML/JSON config. Prints the metrics, and writes <out>/<name>/result.json
+        and trajectory.png (default out: runs/).
+    oberth sweep [--presets PATH] [--out FILE] [--workers N] [--coarse]
+        Phase 2 dimensionless-grid sweep -> Parquet (default results/sweep_nd.parquet).
+    oberth missions [--presets PATH] [--n N] [--out FILE] [--workers N]
+        Sobol samples inside each (body, engine) envelope -> Parquet (default results/missions.parquet).
 """
 
 from __future__ import annotations
@@ -91,6 +94,29 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_sweep(args: argparse.Namespace) -> int:
+    from .presets import load_presets
+    from .sweep import grid_from_presets, run_sweep
+    presets = load_presets(args.presets) if args.presets else load_presets()
+    dens = {"v_inf": 1.0, "dv": 1.0, "c": 1.0, "a0": 1.0} if args.coarse else None
+    spec = grid_from_presets(presets, per_decade=dens)
+    for g in ("v_inf", "dv", "c", "a0"):
+        ax = getattr(spec, g)
+        print(f"  {g:6s} {ax.lo:.3e} .. {ax.hi:.3e}  ({ax.n} points)")
+    df = run_sweep(spec, args.out, args.workers)
+    print(f"wrote {args.out}: {len(df)} rows, {int((df['status'] != 'ok').sum())} errors")
+    return 0
+
+
+def cmd_missions(args: argparse.Namespace) -> int:
+    from .presets import load_presets
+    from .sweep import run_missions
+    presets = load_presets(args.presets) if args.presets else load_presets()
+    df = run_missions(presets, args.n, args.out, args.workers, seed=args.seed)
+    print(f"wrote {args.out}: {len(df)} rows, {int((df['status'] != 'ok').sum())} errors")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="oberth", description="Finite-burn Oberth efficiency simulator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -99,6 +125,19 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--out", default="runs", help="output directory (default: runs/)")
     run.add_argument("--no-plot", action="store_true", help="skip the trajectory plot")
     run.set_defaults(func=cmd_run)
+    sw = sub.add_parser("sweep", help="dimensionless-grid sweep (Phase 2) to Parquet")
+    sw.add_argument("--presets", default=None, help="presets YAML (default configs/atlas/presets.yaml)")
+    sw.add_argument("--out", default="results/sweep_nd.parquet")
+    sw.add_argument("--workers", type=int, default=None)
+    sw.add_argument("--coarse", action="store_true", help="1 point per decade (smoke test)")
+    sw.set_defaults(func=cmd_sweep)
+    mi = sub.add_parser("missions", help="simulate Sobol samples of every (body, engine) envelope")
+    mi.add_argument("--presets", default=None)
+    mi.add_argument("--n", type=int, default=256, help="samples per (body, engine) combination")
+    mi.add_argument("--seed", type=int, default=0)
+    mi.add_argument("--out", default="results/missions.parquet")
+    mi.add_argument("--workers", type=int, default=None)
+    mi.set_defaults(func=cmd_missions)
     args = parser.parse_args(argv)
     return args.func(args)
 
