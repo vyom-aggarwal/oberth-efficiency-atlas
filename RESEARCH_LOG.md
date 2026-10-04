@@ -492,3 +492,187 @@ the grid (tested in `test_grid_covers_every_mission_envelope`).
   This was measured on a 300-point random sample, not estimated.
 - **Mission samples:** 256 scrambled-Sobol points per (body, engine) envelope, log-uniform in
   (r_p, v∞, Δv, Isp, a0), simulated with the real body for both laws. That is 15,360 runs.
+
+## 2026-10-04: Sweep execution and data quality
+
+Every number below comes from `scripts/phase2_numbers.py` (→ `figures/phase2_numbers.json`) or
+the named figure script.
+
+- **Sweep:** 135,720 runs, **0 errors**, 133,969 reliable. The excluded rows are all inertial:
+  1,617 captured and 134 that hit the floor.
+- **Prograde:** none captured, none hit the floor.
+- **Mission samples:** 15,360 runs, 0 errors.
+- **Coast energy drift** (normalized by v_p²/2): median 3.5e-13, 99th percentile 1.7e-12.
+  - 69 runs (0.05%) exceed 1e-11, up to 1.6e-9.
+  - All 69 are inertial and none is reliable: 57 captured, the rest with no finite η. The
+    reliability mask already excludes them.
+- **Per-run η error estimate** over reliable rows: median 1.6e-10, max 3.8e-7. That is below the
+  1e-6 flag everywhere, so `eta_unreliable` never fires.
+- **Cost:** 2.3 CPU-hours (mean 62 ms per run). Three neighbouring grid cases logged ~88 s of
+  wall-clock each, but rerunning one alone takes 29 ms. Those were OS or contention stalls (a test
+  suite ran mid-sweep), not slow integrations. Note that `runtime_s` is wall-clock.
+- **Provenance:** the Parquet metadata records git 0500743, the HEAD when the file was written.
+  The modules that generate the sweep (simulate, theory, sweep, kepler) are identical between
+  88313e5 (launch) and 0500743.
+- **Prograde never lowers periapsis.** The minimum r_min/r_p over all 67,860 prograde runs is
+  1.0000000000000395, so prograde finite burns never dip below the unperturbed periapsis. All
+  prograde impact risk comes from the chosen r_p itself.
+
+## 2026-10-04: Small-Π prefactor validated across the whole sweep (fig_prefactor_check.py)
+
+**Corrected theory.** For every reliable row with Π < 0.01 and 1 − η > 10³·δη:
+- Prograde (n = 3,360): |(1−η)/(CΠ²) − 1| has median 1.2e-4 and max 1.1e-3.
+- Inertial (n = 4,160): median 9.7e-5, max 9.9e-4.
+
+The figure shows the expected V shape: noise falls as 1/Π², the next-order term rises as Π², and
+the two cross near 1e-5. The 1e-3 ceiling is set by the noise filter.
+
+**User's hand formula.** The ratio (1−η)/(C_user Π²) has median 1.14 and max 4.38 for prograde,
+and median 1.05 and max 2.30 for inertial. It grows with Δv/v_p, exactly as derived.
+
+**Validity in Π** (leading order, prograde; the error is |(1−η)/(CΠ²) − 1|):
+
+| Π band | median | max |
+|---|---|---|
+| 0.01–0.1 | 1.2e-4 | 3.4e-3 |
+| 0.1–0.3 | 0.23% | 3.1% |
+| 0.3–1 | 2.3% | 22% |
+| 1–3 | 18% | 63% |
+
+So the C·Π² regime is reliable to a few percent for Π ≲ 0.3.
+
+## 2026-10-04: Collapse quantified (fig_collapse.py, collapse_metrics.csv)
+
+**Metric note.** The scatter metric is the binned scatter of y, detrended inside each log-x bin.
+The first, undetrended version reported 0.072 dex for Π√C. That was exactly the slope artifact
+2/(8√12) for a y ∝ x² curve, not physics. Both metrics were fixed before any number below
+(commit 14b5f83).
+
+**Small Π (Π < 0.5),** scatter of log₁₀(1 − η):
+
+| collapse variable | prograde (n = 15,375) | inertial (n = 16,193) |
+|---|---|---|
+| Π | 0.285 dex | 0.194 dex |
+| Π·√C_user | 0.140 dex | 0.075 dex |
+| **Π·√C (corrected)** | **0.0012 dex** | **0.00095 dex** |
+
+The corrected scaling is about 240× and 200× tighter than Π alone. The remaining 0.1–0.3% is the
+next-order Π² term near Π = 0.5. **Π√C collapses the small-Π data essentially exactly; Π alone
+does not.**
+
+**Full range, prograde,** RMS scatter of η:
+- **0.080 about a single curve in Π.**
+- **0.061 about a single curve in Π√C.** That variable was not designed for large Π.
+- **0.0086 for the residual η − η_lin.** Here η_lin is the Δv→0 linear-response curve, mapped
+  through ξ, for that row's v∞. This is 9× better than Π alone.
+
+The remaining residual grows with Δv/v_p:
+
+| Δv/v_p | Π < 1 | 1 ≤ Π < 100 | Π ≥ 100 |
+|---|---|---|---|
+| < 0.01 | |η − η_lin| ≤ 3e-4 | ≤ 1.7e-3 | ≤ 8e-4 |
+| 0.01–0.1 | max 2.5e-3 | median 2.9e-3, max 0.014 | max 5e-3 |
+| 0.1–0.3 | | median 0.018, max 0.047 | |
+| 0.3–10 | | median 0.055, max 0.11 | |
+
+**Full range, inertial:** the residual is 0.28 RMS. The Δv→0 theory does not capture the inertial
+law beyond Π ~ 10. Its MAD is 0.0015, so the misses are a heavy tail, not general drift.
+
+## 2026-10-04: Secondary parameter (collapse_secondary.png)
+
+The explained fraction is the share of the scatter left after collapsing on Π, after subtracting a
+permutation null.
+
+**Prograde:**
+
+| candidate | Π < 1 | 1 ≤ Π < 100 | Π ≥ 100 |
+|---|---|---|---|
+| v∞/v_esc | 73% | 92% | 91% |
+| ξ | 52% | 85% | 92% |
+| Δv/v_p | 30% | 12% | 14% |
+| Δv·t_b/r_p | 28% | 6% | 7% |
+| Δv/c (mass ratio) | 5% | 0.4% | 0.1% |
+
+- **v∞/v_esc, the brief's own guess, is the dominant secondary parameter.** It enters through
+  k = μ/(r_p v_p²) in C and through the shape of η_lin(Π).
+- At small Π, the remainder is Δv/v_p, as the theory says: C depends on (k, Δv/v_p).
+- The mass ratio is irrelevant to the collapse.
+
+**Inertial:**
+- At Π < 1: v∞/v_esc 78%, ξ 67%.
+- At Π ≥ 100: **no single candidate explains more than 13%,** including the displacement scale.
+  The large-Π inertial behavior is geometric (displaced flybys, impacts, the asymptote
+  misalignment) and is not a one-parameter family.
+
+## 2026-10-04: Large-Π regimes and crossovers (fig_regimes.py, prograde)
+
+- **Three regimes confirmed in the data** (η_W, Δv/v_p < 0.03):
+  - **Regime II plateau:** η_W·(Π/4.5)^(1/3) over 3,767 points with 30 < Π < 0.03 Π_T has
+    median 0.983 and 10th–90th percentile 0.92–1.02.
+  - **Turnover into regime III** happens at Π ≈ Π_T = v_p V³/v∞³.
+  - Regime II exists only for v∞/v_esc ≲ 0.5 (Π_T > 1).
+- **Crossover I → II/III, the half-efficiency point.** η_W = 0.5 at Π½ = 8.4–40 across all 1,143
+  (v∞, Δv, c) families. The median is 26, and Π½ depends only weakly on v∞/v_esc.
+  - The Δv→0 theory predicts Π½ to 0.4% (median), 7.8% at worst.
+  - **Rule of thumb: a burn longer than ~10–40 periapsis timescales forfeits half the Oberth
+    bonus, at any body.**
+- **Refinement of the two-regime expectation.** At small v∞/v_esc the decay is not ln Π/Π right
+  away. It is Π^(−1/3) (parabolic core) over the decades up to Π_T, which spans 10² to 10⁶ for
+  v∞/v_esc = 0.1 to 0.01. That is why low-v∞ bodies (the Sun, Jupiter, Saturn) keep far more η at
+  a given Π.
+
+## 2026-10-04: Inertial steering characterized (sweep)
+
+- **Impacts** at h = 0.1 R (h = 1 R in parentheses), by Π band:
+
+  | Π band | impact fraction |
+  |---|---|
+  | < 1 | 0% |
+  | 1–10 | 2% (0%) |
+  | 10–10³ | 33% (13%) |
+  | 10³–10⁵ | 39% (19%) |
+  | ≥ 10⁵ | 0.6% |
+
+  At very large Π the sideways displacement carries the trajectory clear of the planet again.
+  The atlas shows the impact band and its contour.
+- **Negative η** (reliable runs):
+
+  | Π band | share with η < 0 |
+  |---|---|
+  | < 10 | 0% |
+  | 10–10³ | 33% |
+  | ≥ 10³ | 95% |
+
+  - **Every case with η < −2 dips below R/r_p = 0.91** (all 167), so the extreme values
+    (min −24) are impacts for any real flyby.
+  - Among non-impacting runs (h = 0.1 R) the minimum is −1.24, and 21% are negative.
+- **Conclusion:** below Π = 10, fixed-direction thrust never goes negative and impacts in only
+  2% of cases. Beyond Π ~ 10 it impacts or does worse than deep space in a large fraction of
+  cases.
+
+## 2026-10-04: Where real missions sit (fig_missions.py, mission_table.csv)
+
+Prograde, real bodies; values are the median η with the 10th–90th percentile in parentheses.
+
+| engine | Sun | Venus | Earth | Mars | Jupiter | Saturn |
+|---|---|---|---|---|---|---|
+| Hydrolox, methalox | 1.00 | 1.00 (≥ 0.98) | 1.00 (≥ 0.98) | 1.00 (≥ 0.98) | 1.00 | 1.00 |
+| Nuclear thermal | 1.00 | 0.96 (0.66–1.00) | 0.97 (0.70–1.00) | 0.96 (0.61–1.00) | 1.00 (0.98–1.00) | 1.00 (0.99–1.00) |
+| Hall | **0.42 (0.24–0.69)** | 0.011 | 0.018 | 0.009 | 0.12 (0.04–0.32) | 0.11 (0.03–0.32) |
+| Gridded ion | 0.30 (0.14–0.55) | 0.004 | 0.007 | 0.003 | 0.054 | 0.047 |
+
+- **Chemical:** median Π ≈ 0.004–0.2, so η is essentially 1 everywhere.
+- **Nuclear thermal:** median Π ≈ 1.4–1.6 at the terrestrial planets, so a few percent is lost on
+  median cases and up to ~40% in the low-a0 tail. At the giant planets τ is long, so η ≈ 1.
+- **Electric propulsion, terrestrial planets** (Π ~ 10³–10⁴): the burn starts outside the
+  sphere of influence in **95–100%** of samples. The planet-centered result is therefore not
+  physical there. These cells call for a heliocentric treatment (Phase 4), not a planetary one.
+- **Electric propulsion, Jupiter and Saturn:** 13–50% of samples start outside the SOI.
+- **The Sun is the only body where electric propulsion keeps a substantial Oberth bonus.** The
+  long τ at a few R☉ and the low v∞/v_esc put it in regime II. In absolute terms, though, the
+  median loss there is still ~6.7 km/s against an impulsive burn.
+- **Inertial steering for electric propulsion is worse than deep space at every planet:**
+  - median η = −0.22 to −0.26 at the terrestrial planets;
+  - median η = −0.13 to −0.29 at the giant planets;
+  - 4–27% of planetary samples impact.
+  - At the Sun the median stays positive (0.16 Hall, 0.06 ion), with 1–5% impacting.
