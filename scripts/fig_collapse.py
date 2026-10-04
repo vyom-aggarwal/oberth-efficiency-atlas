@@ -25,6 +25,7 @@ CANDIDATES = {                       # column → label
     "dv_over_vp": "Δv / v_p",
     "xi": "ξ (η_W → η map)",
     "dv_over_c": "Δv / c (mass ratio)",
+    "dv_tb": "Δv·t_b / r_p (displacement)",
 }
 
 

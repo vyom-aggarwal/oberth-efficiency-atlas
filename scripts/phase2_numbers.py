@@ -75,7 +75,7 @@ def main(sweep_path: str, missions_path: str) -> None:
         c[f"{law}_full_eta_rms"] = {"x=Pi": binned_scatter(g["Pi"], g["eta"])["rms"],
                                     "x=Pi_sqrtC": binned_scatter(g["Pi_sqrtC"], g["eta"])["rms"],
                                     "eta-eta_lin, x=Pi": binned_scatter(g["Pi"], res)["rms"]}
-        for cand in ("v_inf_over_vesc", "dv_over_vp", "xi", "dv_over_c"):
+        for cand in ("v_inf_over_vesc", "dv_over_vp", "xi", "dv_over_c", "dv_tb"):
             for name, sel in (("Pi<1", g["Pi"] < 1), ("1<=Pi<100", (g["Pi"] >= 1) & (g["Pi"] < 100)),
                               ("Pi>=100", g["Pi"] >= 100)):
                 gg = g[sel]

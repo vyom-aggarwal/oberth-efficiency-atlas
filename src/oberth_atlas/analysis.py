@@ -24,6 +24,10 @@ def load(path) -> pd.DataFrame:
         df["Pi_sqrtC_user"] = df["Pi"] * np.sqrt(df["C_user"]) if "C_user" in df else np.nan
     if "Pi_T" in df:
         df["Pi_over_PiT"] = df["Pi"] / df["Pi_T"]
+    if "t_b" in df:
+        # Thrust-induced displacement scale Δv·t_b (units of r_p). Sideways thrust changes the
+        # flyby geometry once this is O(1): the suspected driver of inertial behavior at large Π.
+        df["dv_tb"] = df["dv"] * df["t_b"]
     return df
 
 
@@ -56,30 +60,44 @@ def _log_bins(x: np.ndarray, per_decade: float) -> np.ndarray:
     return np.floor(lx * per_decade).astype(np.int64) - int(lo) if hi > lo else np.zeros(len(x), np.int64)
 
 
-def binned_scatter(x, y, per_decade: float = 8.0, min_count: int = 5) -> dict:
-    """RMS deviation of y from its bin median in log10(x) bins. Bins with < min_count points are
-    ignored. Returns rms, the median absolute deviation, the 95th percentile |dev|, and the count."""
+def binned_scatter(x, y, per_decade: float = 8.0, min_count: int = 5, detrend: bool = True) -> dict:
+    """Scatter of y about a single curve in x. In each log10(x) bin, y is compared with a local
+    straight line in log10(x) (detrend=True) or with the bin median (detrend=False).
+
+    Detrending matters for steep curves: without it, a perfect collapse onto y = 2 log10 x would
+    still show 2/(per_decade·√12) of "scatter" from the slope inside each bin. Bins with fewer than
+    min_count points are ignored. Returns rms, the median absolute deviation, the 95th percentile
+    |dev|, and the count.
+    """
     x, y = np.asarray(x, float), np.asarray(y, float)
     ok = np.isfinite(x) & np.isfinite(y) & (x > 0)
     x, y = x[ok], y[ok]
+    lx = np.log10(x)
     b = _log_bins(x, per_decade)
     dev = np.full(len(y), np.nan)
     for key in np.unique(b):
         idx = b == key
         if idx.sum() >= min_count:
-            dev[idx] = y[idx] - np.median(y[idx])
+            if detrend and np.ptp(lx[idx]) > 0:
+                slope, icpt = np.polyfit(lx[idx], y[idx], 1)
+                dev[idx] = y[idx] - (slope * lx[idx] + icpt)
+            else:
+                dev[idx] = y[idx] - np.median(y[idx])
     d = dev[np.isfinite(dev)]
     return {"rms": float(np.sqrt(np.mean(d**2))), "mad": float(np.median(np.abs(d))),
             "p95": float(np.percentile(np.abs(d), 95)), "n": int(d.size)}
 
 
-def _explained(b, y, z, z_bins, min_per_zbin):
+def _explained(b, y, z, z_bins, min_per_zbin, lx):
     within_x, within_xz = 0.0, 0.0
     for key in np.unique(b):
         idx = np.flatnonzero(b == key)
         if idx.size < min_per_zbin * z_bins:
             continue
         yy, zz = y[idx], z[idx]
+        if np.ptp(lx[idx]) > 0:                            # remove the within-bin trend in x first
+            slope, icpt = np.polyfit(lx[idx], yy, 1)
+            yy = yy - (slope * lx[idx] + icpt)
         within_x += np.sum((yy - yy.mean()) ** 2)
         order = np.argsort(zz, kind="stable")              # equal-count bins of z
         for part in np.array_split(order, z_bins):
@@ -91,8 +109,9 @@ def explained_fraction(x, y, z, per_decade: float = 8.0, z_bins: int = 8, min_pe
                        null_seed: int | None = 0) -> float:
     """Share of the scatter left after collapsing y on x that is explained by z.
 
-    Computed as [1 − E Var(y | x-bin, z-bin) / E Var(y | x-bin)] minus the same quantity with z
-    randomly permuted within each x-bin (null_seed=None skips this). The null removes the upward
+    Computed as [1 − E Var(y | x-bin, z-bin) / E Var(y | x-bin)] on y detrended against log10 x
+    inside each x-bin, minus the same quantity with z randomly permuted within each x-bin
+    (null_seed=None skips this). The null removes the upward
     bias from splitting finite samples into sub-bins. x-bins with fewer than min_per_zbin·z_bins
     points are skipped.
     """
@@ -100,7 +119,8 @@ def explained_fraction(x, y, z, per_decade: float = 8.0, z_bins: int = 8, min_pe
     ok = np.isfinite(x) & np.isfinite(y) & np.isfinite(z) & (x > 0)
     x, y, z = x[ok], y[ok], z[ok]
     b = _log_bins(x, per_decade)
-    wx, wxz = _explained(b, y, z, z_bins, min_per_zbin)
+    lx = np.log10(x)
+    wx, wxz = _explained(b, y, z, z_bins, min_per_zbin, lx)
     if wx <= 0:
         return math.nan
     frac = 1.0 - wxz / wx
@@ -110,7 +130,7 @@ def explained_fraction(x, y, z, per_decade: float = 8.0, z_bins: int = 8, min_pe
         for key in np.unique(b):
             idx = np.flatnonzero(b == key)
             zp[idx] = rng.permutation(z[idx])
-        _, wxz0 = _explained(b, y, zp, z_bins, min_per_zbin)
+        _, wxz0 = _explained(b, y, zp, z_bins, min_per_zbin, lx)
         frac -= 1.0 - wxz0 / wx
     return float(frac)
 

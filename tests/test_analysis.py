@@ -15,6 +15,15 @@ def test_binned_scatter_zero_for_perfect_collapse_and_positive_otherwise():
     assert perfect < 0.002 and scattered > 10 * perfect
 
 
+def test_detrending_removes_the_within_bin_slope():
+    """A perfect power-law collapse has zero scatter once detrended; the median version shows
+    ~2/(per_decade·√12) dex from the slope alone."""
+    x = np.logspace(-3, 0, 30000)
+    y = 2 * np.log10(x)
+    assert binned_scatter(x, y, per_decade=8)["rms"] < 1e-12
+    assert binned_scatter(x, y, per_decade=8, detrend=False)["rms"] == pytest.approx(2 / (8 * np.sqrt(12)), rel=0.05)
+
+
 def test_explained_fraction_detects_the_hidden_parameter():
     rng = np.random.default_rng(1)
     x = 10 ** rng.uniform(-2, 2, 40000)
