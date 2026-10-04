@@ -452,3 +452,43 @@ The full derivation is in `docs/theory.md`; the code is in `theory.py`; tests ar
    - The series error entered only the analytic initial state on near-parabolic arcs, at
      ≲ 1e-14 relative.
    - Every Phase 1 test passes unchanged.
+
+## 2026-10-04: Engine presets, mission envelopes, and the sweep grid
+
+**Presets** (`configs/atlas/presets.yaml`) are **representative assumptions**, not sourced hardware data.
+
+| engine | Isp (s) | a0 (m/s²) | notes |
+|---|---|---|---|
+| hydrolox | 440–465 | 1–15 | upper stage carrying a payload |
+| methalox (vac) | 360–380 | 2–30 | |
+| nuclear thermal | 800–900 | 0.1–3 | heavy reactor and shielding: low thrust-to-weight |
+| Hall | 1500–2000 | 5e-5 – 1e-3 | ~0.1–2 N on 0.5–3 t |
+| gridded ion | 3000–4000 | 1e-5 – 5e-4 | ~0.02–0.5 N on 0.5–3 t |
+
+The Isp ranges follow the brief.
+
+Body envelopes:
+- Sun: r_p = 3–20 R☉, v∞ 2–20 km/s. These are hyperbolic arrivals only; the bound-arrival
+  question is still open.
+- Venus and Earth: h = 200–5000 km, v∞ 2–10 and 1–10 km/s.
+- Mars: h = 200–3000 km, v∞ 1–8 km/s.
+- Jupiter: r_p = 1.05–10 R_J, v∞ 4–12 km/s.
+- Saturn: r_p = 1.2–10 R_S, v∞ 4–10 km/s.
+- Δv = 0.2–3 km/s for every engine class.
+
+**Sweep grid.** The bounds are the extremes of the four dimensionless groups over every
+(body, engine) envelope corner, widened ×1.5 on each side. So every envelope lies strictly inside
+the grid (tested in `test_grid_covers_every_mission_envelope`).
+
+| group | preset extremes | grid |
+|---|---|---|
+| ṽ∞ | 7.9e-3 – 3.09 | 15 log points |
+| Δṽ | 7.9e-4 – 1.16 | 12 points |
+| c̃ | 0.014 – 15.2 | 12 points |
+| ã0 | 3.3e-7 – 287 (8.9 decades) | 39 points |
+
+- (Δṽ, c̃) pairs with Δv/c > 2 are skipped as infeasible, since every preset has Δv/c ≤ 0.85.
+- **Size:** 135,720 runs (both steering laws) at ~25 ms each, about 25 minutes on 8 workers.
+  This was measured on a 300-point random sample, not estimated.
+- **Mission samples:** 256 scrambled-Sobol points per (body, engine) envelope, log-uniform in
+  (r_p, v∞, Δv, Isp, a0), simulated with the real body for both laws. That is 15,360 runs.
