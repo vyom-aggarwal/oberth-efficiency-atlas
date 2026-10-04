@@ -110,7 +110,7 @@ def _j_exact(lam: float, v_p: float, dv: float) -> float:
 
 def small_pi_deficit(v_inf: float, dv: float, c: float = math.inf, steering: str = "prograde",
                      x_c: float = 0.5, exact_dv: bool = True) -> float:
-    """D₂ = (W_imp − W_finite)/Π² to leading order in Π.
+    """D₂ = (W_imp − W_finite)/Π² to leading order in Π, for a burn about a hyperbola's periapsis.
 
     exact_dv=True keeps the speed dependence of the flight-path turn rate, ω(v) = v/r − μ/(r² v),
     exactly along a *prograde* burn (all orders in Δv). False uses its first-order form
@@ -120,8 +120,25 @@ def small_pi_deficit(v_inf: float, dv: float, c: float = math.inf, steering: str
     of motion are linear in the thrust vector up to O(t_b²), so W = ∫ A·v dt is exactly quadratic
     in Δv at O(Π²). Applying the ω(v) correction there would double-count, so exact_dv is ignored.
     """
+    return small_pi_deficit_apse(metrics.periapsis_speed(1.0, 1.0, v_inf), dv, c, steering, x_c, exact_dv)
+
+
+def small_pi_deficit_apse(v_apse: float, dv: float, c: float = math.inf, steering: str = "prograde",
+                          x_c: float = 0.5, exact_dv: bool = True) -> float:
+    """D₂ for a burn about an apse of ANY conic, with radius r = 1 and speed v_apse (units of sqrt(μ/r)).
+
+    k = 1/v_apse² covers every case:
+    - hyperbolic periapsis: k < ½;
+    - parabolic periapsis: k = ½;
+    - elliptic periapsis: ½ < k < 1;
+    - circular orbit: k = 1;
+    - elliptic apoapsis: k > 1.
+
+    The derivation (docs/theory.md, section 4) uses only γ = 0 at the expansion point, so it holds
+    unchanged. Π is t_b·v_apse/r, as for a flyby.
+    """
     s = _steering_flag(steering)
-    v_p = metrics.periapsis_speed(1.0, 1.0, v_inf)
+    v_p = v_apse
     k = 1.0 / v_p**2
     lam = dv / c if math.isfinite(c) else 0.0
     mom = profile_moments(lam, x_c)
@@ -139,9 +156,37 @@ def small_pi_prefactor(v_inf: float, dv: float, c: float = math.inf, steering: s
     return d / (metrics.v_inf_impulsive(1.0, 1.0, v_inf, dv) * metrics.oberth_bonus_impulsive(1.0, 1.0, v_inf, dv))
 
 
+def robbins_loss_per_pi2(v_apse: float, dv: float) -> float:
+    """Robbins' (1966) finite-burn loss expression, (1/24)(ω_s t_b)² Δv with ω_s² = μ/r³, divided by Π².
+
+    In our variables (ω_s t_b)² = k Π², so this is kΔv/24 (units of sqrt(μ/r)). The form is as
+    quoted by Confraria (2020, eq. 2.17), who describes it as an upper bound on the extra Δv. The
+    original paper (AIAA J. 4(8):1417–1423, doi:10.2514/3.3687) was not accessible (RELATED_WORK.md).
+    """
+    return dv / (24.0 * v_apse**2)
+
+
+def equivalent_dv_loss_per_pi2(v_apse: float, dv: float, c: float = math.inf, steering: str = "prograde",
+                               x_c: float = 0.5) -> float:
+    """Leading-order extra Δv a finite burn needs to match the impulsive burn's final energy, divided
+    by Π². This is D₂/(v_apse + Δv), since the marginal work per unit Δv at burnout is v_apse + Δv.
+    It is the quantity Robbins' expression bounds.
+
+    For constant-acceleration fixed-direction thrust centered on the apse it equals kΔv/24 exactly,
+    i.e. Robbins' expression. For prograde thrust it is smaller, by [(1−k)v + (1+k)Δv]/(v + Δv) at
+    first order in Δv.
+    """
+    return small_pi_deficit_apse(v_apse, dv, c, steering, x_c) / (v_apse + dv)
+
+
 def small_pi_prefactor_user(v_inf: float, dv: float, steering: str = "prograde") -> float:
     """The user's hand-derived prefactor (constant acceleration, unperturbed trajectory):
-    C = [k(1−k) + s k²] v_p Δv / (24 v∞,imp B_imp)."""
+    C = [k(1−k) + s k²] v_p Δv / (24 v∞,imp B_imp).
+
+    Its inertial case (s = 1) is Robbins' (1966) expression kΠ²Δv/24, turned into an energy
+    deficit with the pre-burn speed v_p. The exact conversion uses v_p + Δv, which accounts for
+    the factor v_p/(v_p + Δv) in its error (RESEARCH_LOG, literature review).
+    """
     s = _steering_flag(steering)
     v_p = metrics.periapsis_speed(1.0, 1.0, v_inf)
     k = 1.0 / v_p**2
