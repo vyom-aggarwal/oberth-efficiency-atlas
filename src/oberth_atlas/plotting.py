@@ -66,10 +66,11 @@ def apply_style() -> None:
 
 
 def git_revision() -> str:
-    """Short commit hash, with '-dirty' if the working tree has uncommitted changes."""
+    """Short commit hash, with '-dirty' if anything other than generated figures is uncommitted."""
     try:
         sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
-        dirty = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, check=True).stdout.strip()
+        dirty = subprocess.run(["git", "status", "--porcelain", "--", ".", ":(exclude)figures"],
+                               capture_output=True, text=True, check=True).stdout.strip()
         return sha + ("-dirty" if dirty else "")
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
