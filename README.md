@@ -27,3 +27,11 @@ python -m venv .venv
 
   Headline: the half-efficiency point is Π ≈ 10–40 at every body, and Π·√C collapses the
   small-Π data exactly.
+- **Phase 3 (burn optimization):** complete.
+  - Prograde family (linear pitch law plus burn timing) under a minimum-altitude constraint:
+    450 optimizations (`results/opt_phase3.parquet`), with a Nelder–Mead cross-check.
+  - `src/oberth_atlas/optimize.py`, figures `figures/phase3_*.png`.
+
+  Headline: the recoverable efficiency is mostly a timing effect. Put the Δv centroid, not the
+  time midpoint, at periapsis. This recovers up to ~40% of the finite-burn deficit for Δv/c = 3,
+  but < 8% for Δv/c ≤ 1.

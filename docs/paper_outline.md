@@ -6,7 +6,7 @@ for powered flybys*
 **Status key:**
 - ✅ done and verified in the repo
 - 🔶 provisional (see the claim register at the end)
-- ⏳ planned (Phases 3–5)
+- ⏳ planned (Phases 4–5)
 
 Figure paths are relative to `figures/`. Every figure has a generating script in `scripts/`.
 
@@ -95,13 +95,31 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
   greyed out as "planet-centred model invalid". Figure: `missions_regions.png`; table:
   `mission_table.csv`. The engine presets are representative assumptions (claim A1).
 
-## 9. Burn optimization ⏳ (Phase 3)
-- **Scope:** prograde family (pitch law plus timing), with inertial as a reference curve, over
-  1 ≲ Π ≲ 100, under a minimum-altitude constraint.
-- **Reporting:** η against the fixed-r_p and achieved-periapsis impulsive baselines.
-- **Contribution:** the *recoverable* efficiency against Π and v∞/v_esc. The inward tilt itself is
-  known (Confraria, Ferreira).
-- **Test:** the "start earlier than centered" timing hypothesis.
+## 9. Burn optimization ✅ (novelty 🔶 P6)
+- **Scope:** prograde family (linear pitch law α₀ + α₁s plus burn timing δ), with inertial as a
+  reference curve, over 1 ≤ Π ≤ 100 and r_min ≥ r_p (also 0.9 r_p). SLSQP with 5 starts;
+  Nelder–Mead cross-check.
+- **Recoverable efficiency:**
+  - ≤ 3.5 pp for Δv/c ≤ 1;
+  - up to 21.6 pp for Δv/c = 3;
+  - 13–35% of the deficit (median) at Δv/c = 3.
+  The inward tilt itself is known (Confraria, Ferreira); its marginal value once timing is
+  optimal is small.
+- **Timing hypothesis:**
+  - Confirmed at small Π: δ* = ½ − x̄ puts the Δv centroid at periapsis.
+  - Closed-form recovered fraction (x̄ − ½)²/⟨(x − ½)²⟩: 0.08%, 7.6% and 40% for Δv/c = 0.1, 1
+    and 3.
+  - At large Π: the optimum moves further earlier for high mass ratio, and reverses (later) for
+    near-constant-mass burns with large Δv/v_p, through periapsis lifting.
+- **Dual baselines:**
+  - A relaxed altitude constraint buys depth, not efficiency.
+  - For near-constant-mass burns the whole gain over centered is depth.
+- **Figures:**
+  - `phase3_recoverable.png` (main);
+  - `phase3_fraction.png` (theory vs simulation);
+  - `phase3_timing.png`;
+  - `phase3_baselines.png`;
+  - `phase3_pitch.png` (appendix).
 
 ## 10. Case study: finite-burn re-analysis of the 3I/ATLAS solar Oberth ⏳ (Phase 4)
 - **Input:** the reference SOM of Hibberd et al. (2026): 3.2 R☉, 8.36 km/s, a bound
@@ -136,6 +154,7 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 | P3 | Prograde loss lies below Robbins by [(1−k)v + (1+k)Δv]/(v + Δv); exact all-orders prograde prefactor | Derivation verified numerically. Novelty depends on whether Robbins or later work treats tangential steering | Read Robbins; database search |
 | P4 | Three large-Π regimes, Π_T, Π½ ≈ 8–40; linear-response η_lin and the η–η_W map | Web search only; Bombardelli, Baù & Peláez (2011) unread | Database search (AIAA/Springer); read Bombardelli et al. |
 | P5 | Confraria's ~125% explained by k = 1 plus finite-Π growth | Agrees at T/W₀ = 0.1. At 0.5 her digitized losses are 4–14% larger than ours (unresolved) | Her raw data or code; not pursued (user decision) |
+| P6 | Optimal burn placement puts the Δv centroid at periapsis; closed-form recoverable fraction; large-Π reversal | Robbins (1966) may treat burn placement; derivation and simulation agree to 5e-4 at Π = 0.1 | Read Robbins; database search for finite-burn timing/centering rules |
 | A1 | Mission-atlas η per body × engine | Representative presets (configs/atlas/presets.yaml); SOI validity filter | Sensitivity to the preset ranges |
 | A2 | All absolute flyby results | Point-mass gravity (J2 neglected); η argued to be less sensitive | Optional J2 run (future work) |
 

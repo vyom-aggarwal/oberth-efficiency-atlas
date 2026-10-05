@@ -53,6 +53,17 @@ unknown keys are rejected.
 - Parquet files carry provenance metadata (`sweep.read_metadata`).
 - The theory behind `theory.py` is derived in `docs/theory.md`.
 
+### Phase 3 (optimization)
+```bash
+.venv/Scripts/python scripts/run_phase3.py      # 450 optimizations + Nelder–Mead check, ~25 min on 8 cores
+.venv/Scripts/python scripts/fig_phase3.py      # figures/phase3_*.png and figures/phase3_numbers.json
+```
+- `optimize.optimize_case(case, mode)`: mode 'timing' (δ only) or 'full' (α₀, α₁, δ), with the
+  constraint r_min ≥ ρ r_p. The result reports η on both baselines (nominal r_p and achieved
+  periapsis).
+- `PitchLinear` pitches relative to the *fixed* incoming-plane normal. The instantaneous ĥ is
+  singular at h = 0 (RESEARCH_LOG 2026-10-04).
+
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.
 - **Config files** use unit-suffixed keys (`v_inf_in_km_s`, `periapsis_altitude_km`, `a0_m_s2`,
