@@ -1,167 +1,179 @@
-# Paper outline (working draft, 2026-10-04)
+# Paper outline (working draft, 2026-10-05)
 
 **Working title:** *How much of the Oberth bonus does a finite burn keep? Scaling laws and an atlas
 for powered flybys*
 
-**Status key:**
-- ✅ done and verified in the repo
-- 🔶 provisional (see the claim register at the end)
-- ⏳ planned (Phase 5)
+**Conventions** (author's instructions, 2026-10-05):
+- **Style:** captions and this outline use first-person singular and active voice.
+- **Citations:** superscript numbers in the text, e.g. <sup>2</sup>, keyed to the numbered
+  reference list at the end.
+- **Prose:** the author writes the paper text. The "draft captions" below are placeholders for
+  the author to rewrite.
+- **Numbers:** every number here comes from `figures/*numbers*.json`. Check a draft with
+  `.venv/Scripts/python scripts/check_numbers.py draft.md --allow 96,24,12`.
+
+**Status key:** ✅ done and verified in the repo · 🔶 provisional (claim register at the end).
 
 Figure paths are relative to `figures/`. Every figure has a generating script in `scripts/`.
 
 ---
 
 ## 1. Introduction
-- **Topic.** The Oberth effect, and the impulsive approximation used in mission design
-  (e.g. Hibberd et al. 2026, whose solar Oberth burn is impulsive).
+- **Topic.** The Oberth effect, and the impulsive approximation used in mission design. For
+  example, Hibberd et al.<sup>1</sup> treat their solar Oberth burn as impulsive.
 - **Prior work** (RELATED_WORK.md):
-  - finite-burn loss estimate: Robbins 1966;
-  - finite-thrust escape and capture charts: Willis 1966;
-  - steering-law losses and a test of Robbins: Confraria 2020;
-  - continuous thrust during a close approach: Ferreira et al. 2022;
-  - solar-electric Oberth at 0.3 au: Maraqten et al. 2026;
-  - low-thrust spiral-escape asymptotics: Tsien 1953 and successors.
-- **Gap.** No dimensionless account of how much of the impulsive Oberth bonus a finite burn keeps
-  during a hyperbolic flyby, across bodies and engines.
+  - finite-burn loss estimate<sup>2</sup>;
+  - finite-thrust escape and capture charts<sup>3</sup>;
+  - steering-law losses and a test of the loss estimate<sup>4</sup>;
+  - continuous thrust during a close approach<sup>5</sup>;
+  - solar-electric Oberth at 0.3 au<sup>6</sup>;
+  - low-thrust spiral-escape asymptotics<sup>7,8</sup>.
+- **Gap.** No dimensionless account exists of how much of the impulsive Oberth bonus a finite burn
+  keeps during a flyby, across bodies and engines.
+- **Optional opening figure:** `hero_loss_vs_pi.png` (see §10).
 - **Contributions:** the contribution statement in RELATED_WORK.md.
 
 ## 2. Problem formulation ✅
-- **Model:** planet-centred two-body problem with a variable-mass spacecraft; steering laws
-  (prograde, inertial, pitch-linear).
+- **Model.** I model a planet-centred two-body problem with a variable-mass spacecraft and
+  three steering laws (prograde, fixed direction, pitch).
 - **Metrics:**
-  - η = B_finite/B_imp (primary, never clipped);
-  - η_W, baseline-subtracted energy efficiency (secondary);
-  - η_E (deprecated);
-  - the equivalent-Δv penalty for bound arrivals.
-- **Burn parameter** Π = t_b/τ, and the four dimensionless groups (v∞/V, Δv/V, c/V, a0 r_p²/μ).
-  The scaling follows Willis (1966).
-- **Figure:** `trajectory_earth_hydrolox.png` (thrust arc, energy vs time). Optionally
-  `trajectory_jupiter_hall.png` as the long-burn contrast.
+  - η = B_finite/B_imp is primary and never clipped;
+  - η_W, the baseline-subtracted energy efficiency, is secondary;
+  - the equivalent-Δv loss is used for any arrival conic, bound ones included.
+- **Burn parameter.** I use Π = t_b/τ, with τ = r_p/v_p, and four dimensionless groups, following
+  the scaling of Willis<sup>3</sup>.
+- **Figure:** `trajectory_earth_hydrolox.png`.
+  - *Draft caption:* I simulate a hydrolox burn during an Earth flyby; the thick arc marks the
+    thrust, and the lower panel shows the specific energy against time.
 
 ## 3. Numerical method and validation ✅
-- **Integration:** segmented coast/burn/coast DOP853 at rtol = 1e-12, with an energy-balance state
-  W giving a per-run η error estimate. The estimate was validated against reruns at 1e-13: never
-  optimistic.
-- **Validation:** coast energy and turn angle, gravity-free closed form, mass invariance, frame
-  invariance, body independence, and the any-apse theory against direct integration.
-- **Figure:** `eta_vs_a0.png` (convergence to the impulsive limit, order 2.000).
+- **Integration.** I integrate coast, burn and coast segments with DOP853 at a 10⁻¹² tolerance.
+  An energy-balance state gives a per-run error estimate for η, which I checked against reruns
+  at 10⁻¹³.
+- **Validation:** coast invariants, the gravity-free closed form, mass and frame invariance,
+  body independence, and the any-apse theory against direct integration.
+- **Figure:** `eta_vs_a0.png`.
+  - *Draft caption:* As I raise the thrust acceleration, η converges to the impulsive limit at
+    second order.
 
-## 4. Small-Π theory and Robbins' expression ✅ (novelty 🔶)
-- **Loss scaling** (ω t_b)²Δv/24 = kΠ²Δv/24. **Attributed to Robbins (1966).**
-- **Exact leading-order energy deficit** at an apse of any conic:
+## 4. Small-Π theory, Robbins' expression and a practical rule ✅ (novelty 🔶)
+- **Loss scaling.** The loss scales as kΠ²Δv/24, which I attribute to Robbins<sup>2</sup>.
+- **Exact leading-order deficit** at an apse of any conic:
   - prograde to all orders in Δv;
-  - fixed-direction exactly quadratic in Δv;
-  - thrust profile through moments (mass ratio, timing).
-- **Fixed-direction thrust:** the equivalent-Δv loss equals Robbins' expression. This is
-  probably Robbins' own construction; claim P1.
-- **Prograde:** below Robbins by [(1−k)v + (1+k)Δv]/(v + Δv). Novelty claim P3.
-- **High-mass-ratio burns centered in time** exceed Robbins by up to ~9%. Claim P2.
-- **Confraria's ~125% reproduced and explained,** including the digitized comparison of her
-  Fig. 4.34 and the unresolved T/W₀ = 0.5 gap. Claim P5.
-- **Figures:** `prefactor_check.png`, `robbins_comparison.png`.
-- **Appendix:** the derivation (docs/theory.md §4).
+  - fixed direction exactly quadratic;
+  - thrust profiles through their moments.
+- **Fixed-direction thrust** reproduces Robbins' expression exactly (claim P1). **Prograde**
+  thrust lies below it (P3). **High-mass-ratio burns centred in time** exceed it (P2).
+- **Confraria's "~125%"**<sup>4</sup>, reproduced and explained (P5).
+- **Practical rule** (R1). For a prograde burn centred on periapsis, loss/Δv ≲ Π²/96, i.e. a burn
+  shorter than r_p/v_p is impulsive to within about 1%.
+  - **Exact bound** over the arrival conic: (1 + r)/(96(1 − r)), with r = Δv/v_p, times the
+    mass-ratio factor 12m₂.
+  - **Verification:** it holds to 1.010 of that bound for every sweep run with Π ≤ 1.
+  - **Framing:** likely close to practitioner heuristics, so not claimed as a discovery.
+- **Figures:**
+  - `prefactor_check.png`;
+  - `robbins_comparison.png`;
+  - `rule_check.png` (appendix).
+    - *Draft caption:* I plot the measured prograde loss in units of Π²/96 against Π; every
+      run with Π ≤ 1 stays within the closed-form bound for its own Δv/v_p.
+- **Appendix:** the derivations (docs/theory.md §4).
 
 ## 5. Linear response and the η–η_W map ✅ (novelty 🔶 P4)
-- **η_lin(Π; v∞/v_esc):** one universal curve per v∞/v_esc in the limit Δv → 0.
-- **The exact map** η = (√(1 + ξη_W) − 1)/(√(1 + ξ) − 1). It explains the non-monotonic Δv
-  dependence at low v∞.
+- **η_lin(Π; v∞/v_esc)** is one curve per arrival speed in the limit Δv → 0.
+- **The exact map** η = (√(1 + ξη_W) − 1)/(√(1 + ξ) − 1).
 - **Figure:** `eta_vs_pi_all.png`.
 
 ## 6. Large-Π regimes ✅ (novelty 🔶 P4)
-- **Three regimes:**
-  - I: CΠ²;
-  - II: (9/(2Π))^(1/3), the parabolic core;
-  - III: ln Π/Π, the hyperbolic tail.
+- **Three regimes:** CΠ²; (9/(2Π))^(1/3) from the parabolic core; ln Π/Π from the hyperbolic tail.
 - **Crossover:** Π_T = v_p V²/v∞³.
-- **Half-efficiency point** Π½ ≈ 8–40 at every body.
-- **Relation to prior work:** these are flyby analogues of the classical spiral-escape law
-  Δv ∝ 1 − c·ε^(1/4).
-- **Inertial steering at large Π:** an impact band, negative η, and the far-field misalignment
-  limit.
+- **Half-efficiency point:** Π½ ≈ 8–40 at every body.
+- **Relation to prior work:** these are flyby analogues of the classical spiral-escape
+  law<sup>7,8</sup>.
 - **Figure:** `regimes.png`.
 
 ## 7. Collapse and secondary parameters ✅
-- **Small-Π collapse:** Π√C collapses 1 − η to 0.001 dex, against 0.2–0.3 dex for Π alone.
-- **Full range:** the theory residual is 0.009 RMS in η, against 0.08 for Π alone.
-- **Secondary parameter:** v∞/v_esc dominates (73–92% of the remaining scatter); the mass ratio is
-  irrelevant at fixed Π.
+- **Collapse:** Π√C collapses the small-Π data far better than Π alone.
+- **Secondary parameter:** v∞/v_esc explains 73–92% of the remaining scatter.
 - **Figures:** `collapse_small_pi.png`, `collapse_secondary.png`.
 
 ## 8. Atlas and real missions ✅
-- **Dimensionless atlas:** η on (Π, v∞/v_esc), with impact cells masked and impact-boundary
-  contours (h = 0.1 R and 1 R). Figure: `atlas_eta.png`.
-- **Mission envelopes:** six bodies × five engine classes, with burns starting outside the SOI
-  greyed out as "planet-centred model invalid". Figure: `missions_regions.png`; table:
-  `mission_table.csv`. The engine presets are representative assumptions (claim A1).
+- **Figures:** `atlas_eta.png`; `missions_regions.png` (burns that start outside the SOI are
+  greyed out); `mission_table.csv`. The presets are representative assumptions (A1).
 
 ## 9. Burn optimization ✅ (novelty 🔶 P6)
-- **Baseline.** Lead with the nominal-r_p impulsive baseline (periapsis fixed by safety). Use the
-  achieved-periapsis baseline to split gains into depth and efficiency (user decision,
-  2026-10-05).
-- **Headline, from realistic missions** (`phase3_missions.png`, `phase3_mission_table.csv`). Over
-  the Phase 2 mission sample, the median recoverable gain from optimal placement is:
-  - chemical: 7e-6 pp (max 0.08);
+- **Baseline.** I lead with the nominal-r_p impulsive baseline, and use the achieved-periapsis
+  baseline to separate depth from efficiency.
+- **Headline, from realistic missions.** Across the Phase 2 mission sample, the median recoverable
+  gain from optimal placement is:
+  - chemical: 7e-6 pp (max 0.083);
   - nuclear thermal: 8e-5 pp (max 4.1);
-  - electric: 0.007 pp (max 1.2).
+  - electric: 0.0068 pp (max 1.2).
 
-  The centered prograde burn is effectively optimal for realistic engines. The rare larger gains
-  all come from starting *later*, which keeps the periapsis from being lifted; for electric
-  propulsion they are depth, not efficiency.
-- **Mechanism, from the controlled grid** (Π 1–100; Δv/c 0.1, 1, 3; `phase3_recoverable.png`,
-  `phase3_fraction.png`). The Δv/c = 3 corner (~95% propellant in one burn) shows the effect
-  clearly: up to 22 pp. It is an illustration, not the headline.
+  Every gain above 0.1 pp comes from starting later.
+  - **Figure:** `phase3_missions.png`.
+    - *Draft caption:* For each body and engine I optimize the timing of every valid prograde
+      burn; the dashed line marks the median at the unrealistic Δv/c = 3 corner for comparison.
+- **Mechanism, from the controlled grid.** The Δv/c = 3 corner is an illustration, not the
+  headline.
+  - **Figures:** `phase3_recoverable.png`, `phase3_fraction.png`.
 - **Timing:**
-  - The small-Π optimum puts the Δv-weighted *mean* at periapsis, δ* = ½ − x̄.
-  - Closed-form recovered share of the deficit: ≈ λ²/12 for small λ, 7.6% at λ = 1, 40% at 3.
-  - The half-Δv (median) rule captures 75–80% of the gain (`phase3_timing.png`).
-  - Large-Π departure from the rule tracks periapsis lift, an empirical result
-    (`phase3_reversal.png`); its theory is future work.
-- **Pitch:**
-  - Inward tilt is known (Confraria, Ferreira).
-  - Linear and 6-knot piecewise laws add ≤ 0.08 pp once the timing is optimal: "within smooth
-    steering laws tested".
-  - Figures: `phase3_pitch.png`, `phase3_baselines.png` (appendix).
-- **Context, not a finding:** prograde beats inertial everywhere.
+  - The small-Π optimum puts the Δv-weighted mean at periapsis.
+  - The recovered share follows in closed form.
+  - The half-Δv rule captures 75–80% of the gain.
+  - **Figures:** `phase3_timing.png`, `phase3_reversal.png`.
+    - *Draft caption (timing):* I compare the optimal burn offset with the centroid rule
+      (dashed) and the half-Δv rule (dotted).
+- **Pitch** adds ≤ 0.08 pp within the smooth laws tested.
+  - **Figures:** `phase3_pitch.png`, `phase3_baselines.png` (appendix).
 
-## 10. Case study: finite-burn re-analysis of the 3I/ATLAS solar Oberth ✅
+## 10. Case study: the 3I/ATLAS solar Oberth burn as a finite burn ✅
 - **Inputs:**
-  - Hibberd et al. (2026), reference SOM: 3.2 R☉, 8.36 km/s, bound arrival from 5.2 au;
-  - CASTOR 30B + STAR 48B (short nozzle), with Northrop Grumman catalog burn times;
-  - the equivalent-Δv metric for any arrival conic (`staged.py`).
+  - Hibberd et al.'s<sup>1</sup> reference burn: 3.2 R☉, 8.36 km/s, a bound arrival from 5.2 au;
+  - CASTOR 30B + STAR 48B, with catalog burn times<sup>9</sup>;
+  - the equivalent-Δv metric.
+- **Footnote needed** (the author writes it; neutral wording). The 17,754 kg total in their
+  Table 2, row m, could not be reconciled with the stage masses plus payload. The results use the
+  stage sum, which reproduces their ΔV.
 - **Result:**
-  - Loss 0.099 m/s time-centred, 0.090 m/s with the Δv centroid at perihelion (= optimal):
-    ~1e-5 of Δv. The pre-registered 0.04–0.25 m/s is confirmed.
-  - Robust to the staging coast (≤ 0.20 m/s at 60 s), the arrival orbit and the thrust-profile
-    shape.
-  - The impulsive model holds. Figure: `phase4_reference.png`.
-- **Where it fails** (`phase4_loss_vs_pi.png`):
-  - Loss is 0.1% at Π ≈ 0.3 and 1% at Π ≈ 1, i.e. burn duration ≈ τ.
-  - The loss(Π) curve is nearly universal across profiles: staged solids, nuclear thermal and
-    SEP agree within 8%.
-  - Nuclear thermal crosses 1% at a0 ≈ 0.85 m/s².
-  - Placing Maraqten et al.'s SEP perihelion arc on the curve with their own thrust model
-    (F ∝ r^−1.5): Π_eff ≈ 4.6–9.2, where the curve gives ≈ 12–20%. This is not a loss in their
-    analysis: they never assumed an impulsive burn, and their baseline is a 1 au spiral.
+  - The loss is 0.099 m/s time-centred and 0.090 m/s at the optimal timing.
+  - It stays below 0.2 m/s under every sensitivity.
+  - **Figure:** `phase4_reference.png`.
+    - *Draft caption:* I fly Hibberd et al.'s two-stage burn through perihelion with the
+      catalog burn times; the right panel shows the loss for each sensitivity I tested.
+- **Where the impulsive model fails.** At 1% of Δv when Π ≈ 1, i.e. thrust ÷ 30.
+  - Nuclear thermal crosses it at a0 ≈ 0.85 m/s².
+  - **Figure:** `phase4_loss_vs_pi.png`.
+- **Hero figure** (main text or poster): `hero_loss_vs_pi.png`.
+  - *Draft caption:* I place real burns on one curve: the finite-burn loss of a solar Oberth burn
+    depends on Π alone across thrust profiles. Phase 2 solar flybys (dots), Hibberd et
+    al.'s<sup>1</sup> burn (star), and Maraqten et al.'s<sup>6</sup> arc, placed with their own
+    thrust model (diamonds).
+  - **Framing for Maraqten et al.** Their analysis never assumed an impulsive burn; the curve
+    places their arc at Π_eff ≈ 4.6–9.2, where it gives about 12–20%.
 
 ## 11. Limitations
-- **Gravity model:** point-mass gravity; J2 neglected (RESEARCH_LOG). Neither Saturn's rings nor
-  Jupiter's radiation is modelled.
-- **Planet-centred frame:** electric-propulsion burns starting outside the SOI are invalid, and a
-  heliocentric low-thrust treatment is out of scope.
-- **Arrivals:** the atlas uses hyperbolic arrivals. Bound and parabolic arrivals are supported by the staged
-  simulator (Phase 4).
-- **Phase 4:** planar point-mass Sun; constant thrust per motor (two-level sensitivity ±6%); unknown staging
-  coast (bracketed); SEP r⁻² thrust variation and thermal constraints not modelled.
-- **Steering optimality:** only smooth pitch laws were tested (no costate solution).
-- **Presets:** representative assumptions, not hardware data.
+- **Gravity model.** Point-mass gravity, with J2 neglected.
+- **Frame.** The planet-centred frame is invalid for burns that start outside the SOI.
+- **Arrivals.** The atlas uses hyperbolic arrivals; the case study uses bound ones.
+- **Case study.** Planar point-mass Sun; constant thrust per motor (bracketed by two-level
+  profiles); unknown staging coast (bracketed); thermal limits not modelled. SEP at 3.2 R☉ in the
+  animation is hypothetical.
+- **Steering.** Only smooth pitch laws were tested.
+- **Presets.** Representative assumptions, not hardware data.
 
 ## 12. Conclusions
 
+**Supplementary material:**
+- the engine-comparison animation (`anim_engines.mp4`, `.gif`);
+- the interactive explorer (`explorer/oberth_explorer.html`), whose JavaScript simulator matches
+  the Python one to 2e-10 in η;
+- data and code (Parquet results with provenance metadata, scripts, configs).
+
 **Appendices:**
-- A: derivations (docs/theory.md);
+- A: derivations;
 - B: numerics and the test inventory;
-- C: data and code availability (Parquet results with provenance metadata, scripts, configs).
+- C: data and code availability.
 
 ---
 
@@ -169,18 +181,36 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 
 | ID | Claim | Depends on | What would settle it |
 |---|---|---|---|
-| P1 | For fixed-direction thrust, Robbins' expression is the exact leading-order loss | Robbins (1966) unread; probably his own fixed-attitude construction, so labelled **(a) probable** | Read Robbins (user obtaining it) |
-| P2 | High-mass-ratio burns centered in time exceed Robbins' bound (up to ~9%) | Robbins' assumptions on burn placement and thrust profile | Read Robbins |
-| P3 | Prograde loss lies below Robbins by [(1−k)v + (1+k)Δv]/(v + Δv); exact all-orders prograde prefactor | Derivation verified numerically. Novelty depends on whether Robbins or later work treats tangential steering | Read Robbins; database search |
-| P4 | Three large-Π regimes, Π_T, Π½ ≈ 8–40; linear-response η_lin and the η–η_W map | Web search only; Bombardelli, Baù & Peláez (2011) unread | Database search (AIAA/Springer); read Bombardelli et al. |
-| P5 | Confraria's ~125% explained by k = 1 plus finite-Π growth | Agrees at T/W₀ = 0.1. At 0.5 her digitized losses are 4–14% larger than ours (unresolved) | Her raw data or code; not pursued (user decision) |
-| P6 | Optimum is the Δv-weighted *mean* (not the median) at small Π; closed-form recovered fraction and half-Δv capture; two-baseline depth/efficiency split. (The qualitative "centre on Δv, not clock time" idea is likely known and is not claimed.) | Robbins (1966) may treat burn placement; derivation and simulation agree to 5e-4 at Π = 0.1 | Read Robbins; database search for finite-burn timing/centering rules |
-| A1 | Mission-atlas η per body × engine | Representative presets (configs/atlas/presets.yaml); SOI validity filter | Sensitivity to the preset ranges |
-| A2 | All absolute flyby results | Point-mass gravity (J2 neglected); η argued to be less sensitive | Optional J2 run (future work) |
+| P1 | For fixed-direction thrust, Robbins' expression is the exact leading-order loss | Robbins<sup>2</sup> unread; probably his own construction, labelled **(a) probable** | Read Robbins (author obtaining it) |
+| P2 | High-mass-ratio burns centred in time exceed Robbins' bound | Robbins' assumptions on placement and profile | Read Robbins |
+| P3 | Prograde loss lies below Robbins by [(1−k)v + (1+k)Δv]/(v + Δv); exact prograde prefactor | Whether Robbins or later work treats tangential steering | Read Robbins; database search |
+| P4 | Three large-Π regimes, Π_T, Π½; η_lin and the η–η_W map | Web search only; Bombardelli et al.<sup>8</sup> unread | Database search; read Bombardelli et al. |
+| P5 | Confraria's "~125%" explained | Agrees at T/W₀ = 0.1; unresolved gap at 0.5 | Her raw data (not pursued) |
+| P6 | The small-Π optimum is the Δv-weighted mean; closed-form recovered fraction and half-Δv capture; depth/efficiency split. The qualitative "centre on Δv" idea is not claimed | Robbins may treat burn placement | Read Robbins; database search |
+| R1 | Practical rule loss/Δv ≲ Π²/96, with an exact bound and conditions | Framed as close to practitioner heuristics (**(a)** qualitatively, **(b)** the exact form) | Practitioner literature search |
+| A1 | Mission-atlas η per body and engine | Representative presets; SOI filter | Sensitivity to the preset ranges |
+| A2 | All absolute flyby results | Point-mass gravity (J2 neglected) | Optional J2 run |
 
-**Verified and not provisional:**
-- all numerical results (test suite, error estimates);
-- agreement between theory and simulation (prefactor ≤ 1e-3; any-apse theory ≤ 2e-4; η_lin to
-  O(Δv/v_p));
-- the Π√C collapse numbers;
-- the Hibberd SOM being impulsive with a bound arrival (deduced from their Table 1).
+---
+
+## References
+
+1. A. Hibberd, T. M. Eubanks, A. M. Hein, "Catching 3I/ATLAS Using a Solar Oberth,"
+   arXiv:2601.02533 v2 (2026).
+2. H. M. Robbins, "An analytical study of the impulsive approximation," *AIAA J.* 4(8):1417–1423
+   (1966). doi:10.2514/3.3687.
+3. E. A. Willis, Jr., "Finite-thrust escape from and capture into circular and elliptic orbits,"
+   NASA TN D-3606 (1966).
+4. J. C. F. Confraria, "Finite burn losses in spacecraft maneuvers revisited," MSc thesis,
+   Instituto Superior Técnico, Lisbon (2020).
+5. A. F. S. Ferreira et al., "Low Thrust Propelled Close Approach Maneuvers," *Symmetry*
+   14(9):1786 (2022). doi:10.3390/sym14091786.
+6. N. Maraqten, W. van Lynden, C. Gómez de Olea Ballester, A. M. Hein, "High-temperature
+   photovoltaics for solar-electric Oberth maneuvers: ton-class payload feasibility for
+   interstellar-precursor missions," arXiv:2608.11113 v1 (2026).
+7. H. S. Tsien, "Take-off from satellite orbit," *J. Am. Rocket Soc.* (1953).
+8. C. Bombardelli, G. Baù, J. Peláez, "Asymptotic solution for the two-body problem with constant
+   tangential thrust acceleration," *Celest. Mech. Dyn. Astr.* (2011).
+9. Northrop Grumman, *Propulsion Products Catalog*, OSR No. 16-S-1432 (2016).
+10. JPL Solar System Dynamics, Astrodynamic Parameters (DE440) and Planetary Physical Parameters;
+    IAU 2015 Resolution B3 (nominal solar radius). Constants and sources: `constants.py`.

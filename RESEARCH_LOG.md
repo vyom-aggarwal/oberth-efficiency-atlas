@@ -1558,5 +1558,8 @@ losses in their analysis.
   regression test followed.
 - **Supporting file.** `scripts/literature_numbers.py` writes the quoted literature values and
   configured inputs, with sources, to `figures/literature_numbers.json`.
-- **On the outline.** 23 numbers are verified, 0 unmatched, and 33 one-figure numbers are listed
-  as unverified.
+- **Second bug, found by a test.** `before in "_#§^"` is true for an empty string, so every number
+  at the start of a line was skipped. Fixed, with a regression test.
+- **Bibliography.** The reference-list section, DOIs and vol(issue):pages patterns are skipped.
+- **On the restyled outline:** 21 numbers verified, 0 unmatched, 13 one-figure numbers listed as
+  unverified, with `--allow 96,24,12` for the constants of the rule and of Robbins' expression.

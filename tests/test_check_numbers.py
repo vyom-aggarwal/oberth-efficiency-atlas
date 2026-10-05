@@ -68,6 +68,13 @@ def test_coarse_numbers_are_listed_not_verified(tmp_path, jfile, capsys):
     assert run(tmp_path, jfile, "about 0.3 of them\n", "--strict") == 1
 
 
+def test_skips_reference_list_and_dois(tmp_path, jfile, capsys):
+    text = ("As shown in *AIAA J.* 4(8):1417–1423, doi:10.2514/3.3687.\n"
+            "## References\n1. A. Author, *J.* 14(9):1786 (2022). 42.7 pages.\n## Next\n0.0897\n")
+    assert run(tmp_path, jfile, text) == 0
+    assert "1 numbers checked" in capsys.readouterr().out
+
+
 def test_allow_and_strict(tmp_path, jfile, capsys):
     assert run(tmp_path, jfile, "loss ≈ Π²/96 for Π ≤ 1\n", "--allow", "96") == 0
     assert run(tmp_path, jfile, "loss ≈ Π²/96\n") == 1          # 96 is not in the JSON and not allowed

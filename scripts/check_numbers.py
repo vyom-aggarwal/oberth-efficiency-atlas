@@ -91,15 +91,19 @@ def numeric_leaves(obj, path=""):
 def strip_markdown(text: str) -> list[str]:
     """Blank out the parts of each line that must not be checked, keeping line numbers."""
     text = re.sub(r"<!--(?!\s*nocheck).*?-->", lambda m: " " * len(m.group()), text, flags=re.S)
-    out, fenced = [], False
+    out, fenced, refs = [], False, False
     for raw in text.split("\n"):
         if raw.lstrip().startswith(("```", "~~~")):
             fenced = not fenced
             out.append("")
             continue
-        if fenced or "<!-- nocheck -->" in raw:
+        heading = re.match(r"^#+\s+(.*)", raw)
+        if heading and not fenced:
+            refs = bool(re.match(r"(?i)(references|bibliography|works cited)\b", heading.group(1)))
+        if fenced or refs or "<!-- nocheck -->" in raw:
             out.append("")
             continue
+        raw = re.sub(r"(?i)\bdoi:\s*\S+|\b\d+\(\d+\):\d+(?:[–-]\d+)?", " ", raw)   # DOIs, vol(issue):pages
         s = re.sub(r"`[^`]*`", " ", raw)                                   # inline code
         s = re.sub(r"\]\([^)]*\)", "] ", s)                                  # link targets
         s = re.sub(r"<sup>.*?</sup>|\[\^[^\]]*\]", " ", s)                   # citations
@@ -118,7 +122,7 @@ def tokens(lines: list[str]) -> list[Token]:
         for m in NUMBER.finditer(s):
             a, b = m.span()
             before, after = s[a - 1:a] if a else "", s[b:b + 1]
-            if before.isalpha() or before in "_#§^" or (after.isalpha() and after not in "eE"):
+            if before.isalpha() or (before and before in "_#§^") or (after.isalpha() and after not in "eE"):
                 continue                                                    # identifiers: J2, 48B, P6
             if before and before in "⁰¹²³⁴⁵⁶⁷⁸⁹⁻":
                 continue
