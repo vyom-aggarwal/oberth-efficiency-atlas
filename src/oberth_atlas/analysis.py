@@ -147,13 +147,20 @@ def eta_half_point(Pi: np.ndarray, eta: np.ndarray) -> float:
 
 
 def mission_table(missions: pd.DataFrame, law: str = "prograde") -> pd.DataFrame:
-    """Per (body, engine): η quantiles, median Π, and the fractions impacting or outside the SOI."""
+    """Per (body, engine): η quantiles, median Π, and the fractions impacting or outside the SOI.
+
+    The η statistics use only *valid* samples: no impact, and a burn starting inside the body's
+    sphere of influence. Outside the SOI the planet-centred model is invalid (user decision Q2,
+    2026-10-04). n_valid counts those samples. Where fewer than 5 are valid, the η columns are NaN.
+    """
     m = missions[(missions["steering"] == law) & (missions["status"] == "ok")]
     rows = []
     for (b, e), g in m.groupby(["body", "engine"], sort=False):
-        ok = np.isfinite(g["eta"]) & ~g["flag_impact"]
+        ok = np.isfinite(g["eta"]) & ~g["flag_impact"] & (g["soi_ratio_burn_start"] <= 1.0)
+        if ok.sum() < 5:
+            ok = ok & False
         q = np.nanpercentile(g.loc[ok, "eta"], [10, 50, 90]) if ok.any() else [np.nan] * 3
-        rows.append(dict(body=b, engine=e, n=len(g), Pi_median=float(np.median(g["Pi"])),
+        rows.append(dict(body=b, engine=e, n=len(g), n_valid=int(ok.sum()), Pi_median=float(np.median(g["Pi"])),
                          eta_p10=q[0], eta_median=q[1], eta_p90=q[2],
                          dv_loss_median_m_s=float(np.nanmedian(g.loc[ok, "delta_v_loss"])) if ok.any() else np.nan,
                          frac_impact=float(g["flag_impact"].mean()), frac_outside_soi=float(g["flag_outside_soi"].mean()),
