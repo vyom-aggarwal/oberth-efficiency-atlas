@@ -1095,3 +1095,81 @@ family?
   - cost: 30 more cases, i.e. 450 instead of 360 optimizations.
 - **Effect on conclusions.** None identified: the results vary smoothly in Π (figures
   `phase3_*.png`), and the planned Π values lie between grid points.
+
+## 2026-10-05: Half-Δv rule versus the Δv-weighted mean (user review)
+
+The **half-Δv rule** puts periapsis where half the Δv has been delivered, i.e. at the median of the
+Δv distribution, x_med = (1 − e^(−λ/2))/μ_r. The small-Π optimum is the **mean**,
+x̄ = 1/μ_r − 1/λ (λ = Δv/c, μ_r = 1 − e^(−λ)).
+
+**Closed form** (`optimize.timing_rule_capture`, `timing_rule_extra_loss`). Because
+m₂(x_c) = σ² + (x̄ − x_c)², the share of the optimal retiming gain that a rule captures is
+1 − (x̄ − x_rule)²/(x̄ − ½)², for any Δv/v_p and v∞:
+
+| Δv/c | x̄ | x_med | half-Δv rule captures | extra loss over optimum (Δv → 0) |
+|---|---|---|---|---|
+| 0.1 | 0.5083 | 0.5125 | 75.0% | 0.02% |
+| 1 | 0.5820 | 0.6225 | 75.6% | 2.0% |
+| 3 | 0.7191 | 0.8176 | 79.8% | 13.3% |
+
+- **Small-Δv/c limit:** the capture tends to 75%, because x_med − ½ ≈ λ/8 against x̄ − ½ ≈ λ/12.
+- **User's estimates confirmed:** ≈ 80% and 13% at Δv/c = 3, ≈ 76% at 1.
+- **Simulation at Π = 0.1** (Δv/c = 1 and 3) agrees to ≤ 2e-3 in both the capture and the extra
+  loss. At finite Δv/v_p the extra loss is diluted by the j term: 12.3% (Δv/v_p = 0.03) and 10.0%
+  (0.3) at Δv/c = 3. Tests in `tests/test_optimize.py`.
+- **On the Phase 3 grid** (`results/opt_phase3_rules.parquet`; median share of the timing-only
+  gain at Π = 1, 3, 10, 30, 100):
+  - centroid rule: 1.00, 0.90, 0.59, 0.42, 0.32 (Δv/c = 1) and 1.00, 0.93, 0.68, 0.49, 0.37
+    (Δv/c = 3);
+  - half-Δv rule: 0.81, 0.96, 0.75, 0.59, 0.39 and 0.86, 0.99, 0.93, 0.75, 0.57.
+  - Beyond Π ≈ 3 the half-Δv rule does *better* than the centroid rule. The large-Π optimum moves
+    further earlier, past the centroid and toward the median.
+  - At Δv/c = 0.1 both rules have the wrong sign (the optimum is later; see the reversal entry).
+- **Added to** `phase3_timing.png` (dotted line) and to `phase3_numbers.json` (`followups`).
+
+## 2026-10-05: Recoverable efficiency for realistic missions (headline replaces the Δv/c = 3 corner)
+
+- **Method.** Every valid prograde Phase 2 mission sample (5,895: no impact, burn starting inside
+  the SOI) was timing-optimized, with the centroid and half-Δv rules evaluated
+  (`scripts/run_phase3_followups.py`, `results/opt_missions.parquet`). A stratified subsample of
+  156 (≤ 6 per body × engine, spread in Π) was also pitch + timing optimized.
+- **Checks.**
+  - The centered η reproduces Phase 2 exactly (max difference 0).
+  - No optimal timing moves the burn start outside the SOI.
+  - All 5,895 runs are ok.
+- **Results:** recoverable Δη by timing, nominal-r_p baseline, in percentage points
+  (`figures/phase3_missions.png`, `phase3_mission_table.csv`):
+
+  | engine group | median Δv/c | p10 | median | p90 | max | median share of deficit recovered | achieved-baseline gain ≤ 0 |
+  |---|---|---|---|---|---|---|---|
+  | chemical (hydrolox, methalox) | 0.19 | 1e-8 | 7e-6 | 0.0025 | 0.083 | 0.26% | 3% |
+  | nuclear thermal | 0.094 | 2e-7 | 8e-5 | 0.059 | 4.1 | 0.04% | 22% |
+  | electric (Hall, ion) | 0.029 | 5e-5 | 0.0068 | 0.17 | 1.2 | 0.009% | 71% |
+
+- **Chemical engines.** The centered prograde burn is effectively optimal. The share recovered,
+  0.26%, matches the small-Π closed form λ²/12 ≈ 0.3% at λ ≈ 0.19.
+- **Large gains are rare, and they come from starting *later*.** 322 of 5,895 samples gain
+  > 0.1 pp, and **all 322 have δ > 0**. They are long, large-Δv burns: nuclear thermal at Mars,
+  Earth and Venus (up to 4.1 pp), and electric propulsion at the giant planets (up to 1.2 pp). The
+  gain correlates with the centered burn's periapsis lift (Spearman 0.91).
+- **Electric propulsion gains are depth, not efficiency.** On the achieved-periapsis baseline the
+  gain is ≤ 0 in 71% of samples.
+- **Pitch.** It adds a median of 5e-5 pp and at most 0.069 pp on the subsample.
+- **Headline for the paper.** For realistic engine/body combinations, optimal burn placement
+  recovers a negligible fraction of the finite-burn loss. A chemical burn centered on periapsis is
+  within ~0.1 pp of the prograde-family optimum. The large recoverable gains of the Δv/c = 3 corner
+  need a ~95% propellant fraction in one burn, which no realistic single flyby burn has.
+
+## 2026-10-05: Quantitative check of the large-Π timing reversal (user decision 2: empirical)
+
+The departure of the timing optimum from the centroid rule, δ_opt − δ*, was correlated with the
+centered burn's periapsis lift, r_min/r_p − 1 (`phase3_reversal.png`, `phase3_numbers.json`):
+- **Pooled over the grid:** Spearman 0.27. By Δv/c: 0.83 (Δv/c = 0.1), 0.42 (1) and −0.59 (3).
+- **Within fixed (Δv/c, Π)**, where the centroid effect is fixed and only the lift varies:
+  positive in 14 of 15 groups, median 0.83. The exception is Δv/c = 3 at Π = 100 (−0.35).
+- **Paired test** (Δv/v_p 0.03 → 0.3 at fixed Π, v∞, Δv/c): the lift always increases (75/75).
+  The optimum moves later in 100% of cases at Δv/c = 0.1 and 1, and in 32% at Δv/c = 3.
+- **Mission sample:** gain against lift, Spearman 0.91; every gain > 0.1 pp has δ > 0.
+- **Conclusion (empirical).** Periapsis lifting by pre-periapsis thrust pushes the optimum later.
+  The centroid effect pushes it earlier, and dominates at high mass ratio. A large-Π asymptotic
+  theory of the competition is listed as future work.

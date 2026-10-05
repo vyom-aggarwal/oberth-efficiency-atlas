@@ -339,7 +339,11 @@ def followup_numbers(tim, rules, pw, mis, lam_vals):
 
     out = {"half_dv_rule_closed_form": {
         f"lam={lam:g}": {"x_centroid": 0.5 - timing_theory_delta(lam), "x_median": x_median(lam),
-                         "capture": timing_rule_capture(lam, x_median(lam))} for lam in lam_vals}}
+                         "capture": timing_rule_capture(lam, x_median(lam)),
+                         # extra deficit over the optimum as Δv → 0: (x̄ − x_med)²/σ², σ² = m₂(½) − (x̄ − ½)²
+                         "extra_loss_dv0": (0.5 - timing_theory_delta(lam) - x_median(lam)) ** 2
+                         / (theory.profile_moments(lam).m2 - timing_theory_delta(lam) ** 2)}
+        for lam in lam_vals}}
     t = tim.reset_index()
     dep = t["delta"] - t["dv_over_c"].map(timing_theory_delta)
     lift = t["r_min_centered"] - 1.0
