@@ -13,6 +13,8 @@ inferences of ours are marked **[our inference]**.
 | 3 | J. C. F. Confraria, "Finite burn losses in spacecraft maneuvers revisited," MSc thesis, Instituto Superior Técnico, Lisbon, Nov. 2020 ([extended abstract](https://fenix.tecnico.ulisboa.pt/downloadFile/1689244997261336/79157_resumo.pdf), [thesis](https://fenix.tecnico.ulisboa.pt/downloadFile/1689244997261337/79157_tese.pdf)) | Full text. | Extended abstract and thesis text. Figs. 4.33 and 4.34 were inspected visually; values quoted from them are read by eye. |
 | 4 | A. F. S. Ferreira, A. Elipe, R. V. de Moraes, A. F. B. A. Prado, O. C. Winter, V. M. Gomes, "Low Thrust Propelled Close Approach Maneuvers," *Symmetry* 14(9):1786, 2022. [doi:10.3390/sym14091786](https://doi.org/10.3390/sym14091786) | Full HTML via a browser. The direct PDF download returned 403. | Introduction, problem statement, parameter choices, conclusions. **[not verified]** spacecraft mass and full parameter tables (not found in the extracted text). |
 | 5 | A. Hibberd, T. M. Eubanks, A. M. Hein, "Catching 3I/ATLAS Using a Solar Oberth," [arXiv:2601.02533](https://arxiv.org/abs/2601.02533) v2, Jan. 2026 | Full text (arXiv PDF, v2). | Whole paper. |
+| 6 | N. Maraqten, W. van Lynden, C. Gómez de Olea Ballester, A. M. Hein, "High-temperature photovoltaics for solar-electric Oberth maneuvers: ton-class payload feasibility for interstellar-precursor missions," [arXiv:2608.11113](https://arxiv.org/abs/2608.11113) v1, Aug. 2026 | Full text (arXiv PDF, 31 pp.). | §§1–2 (theory and literature), §5 (results), §7 (conclusions). |
+| 7 | Low-thrust escape asymptotics: H. S. Tsien, "Take-off from satellite orbit," *J. Am. Rocket Soc.*, 1953; course notes MIT 16.522 (2015), Lecture 6; C. Bombardelli, G. Baù, J. Peláez, "Asymptotic solution for the two-body problem with constant tangential thrust acceleration," *Celest. Mech. Dyn. Astr.* (2011) | Tsien: [Caltech record](https://resolver.caltech.edu/CaltechAUTHORS:20091215-133451765), abstract only. MIT notes: full text ([OCW](https://ocw.mit.edu/courses/16-522-space-propulsion-spring-2015/7f725e54b9be201164d56ebbd5e08023_MIT16_522S15_Lecture6.pdf)). Bombardelli et al.: **not accessed** (ResearchGate 403). | Spiral-escape asymptotic law (MIT notes §"Spiral climb"). |
 
 **Citation corrections.**
 - **Willis, not "Villis".** Ref. 2 is by Edward A. **Willis**, Jr., NASA TN D-3606, dated **September 1966**.
@@ -177,6 +179,60 @@ inertial case is Robbins' expression converted to an energy deficit with v_p (se
   and the incoming heliocentric orbit is **bound and near-parabolic** (pre-burn ≈ 342–344 km/s).
   Phase 4 therefore needs bound-arrival support, with the equivalent-Δv penalty as its metric.
 
+## 6. Maraqten, van Lynden, Gómez de Olea Ballester & Hein (2026): solar-electric Oberth manoeuvre
+
+- **Problem.** A heliocentric, planar mission:
+  - an SEP spiral from 1 au lowers perihelion to ≈ 0.3 au;
+  - an SEP thrust arc is flown near perihelion;
+  - then an optional Jupiter gravity assist and escape to ~200 au.
+- **Propulsion.** High-temperature (~400 °C) photovoltaics powering electric propulsion
+  (Isp 6000 s, η = 0.75 in the reference case), with an array specific power of 200 W/kg at 1 au.
+  Steering and configuration are optimized by an evolutionary neurocontroller (their SOMBRERO
+  framework).
+- **Energy bookkeeping.** Their Eq. 1 is the finite-time work integral
+  **Δε = ∫ v·a_T dt = ∫ v (F/m) cos θ dt** over the thrust arc, contrasted with the impulsive limit
+  Δε = vΔv + Δv²/2. This is exactly our W formulation (`dynamics.py`, dW/dt = (T/m) u·v).
+- **Results:**
+  - about 3,080 kg to 200 au in 25 years with a Jupiter gravity assist (1,550 kg direct) on an
+    expendable Falcon Heavy;
+  - "a threefold increase in specific orbital energy for the same Δv compared with a 1 AU spiral"
+    (Δε ≈ 1.37e9 against 4.64e8 J/kg).
+- **Relation to this project.** Their baseline is a 1 au spiral, **not** an impulsive burn at
+  perihelion. They do not report the fraction of the impulsive Oberth bonus retained, a burn-length
+  parameter, or a planet-centered flyby. Their perihelion (0.3 au ≈ 65 R☉) is also far above our
+  solar envelope (3–20 R☉).
+- **Overlap.** It overlaps our electric-propulsion-at-the-Sun result qualitatively: near-Sun SEP
+  thrust arcs capture a substantial Oberth benefit, computed through the same work integral. Our
+  addition is quantitative: the retained fraction of the impulsive bonus (median η ≈ 0.3–0.4 for
+  Hall and ion engines at 3–20 R☉), its regime-II explanation, and the dependence on Π and v∞/v_esc.
+
+## 7. Prior large-burn (low-thrust) laws: targeted search
+
+The user asked for a targeted search of the low-thrust escape literature before labelling the
+three-regime result (finding 13) as new. Searches run on 2026-10-04 (web search; no subscription
+databases):
+- low-thrust escape asymptotic Δv laws (tangential thrust, fractional powers, Battin, Boltz,
+  near-parabolic);
+- finite-burn Oberth efficiency against burn duration, powered flyby, continuous-thrust asymptotics;
+- parabolic orbits under continuous thrust, t^(2/3) scaling;
+- Tsien (1953) take-off from satellite orbit.
+
+**What exists:**
+- **The classical spiral-escape law.** For escape from a circular orbit under weak circumferential
+  thrust (thrust/gravity ratio ε ≪ 1), Δv_esc ≈ v₀[1 − c·ε^(1/4)]. The MIT 16.522 notes derive
+  c = 2^(1/4) heuristically and fit c ≈ 0.754 numerically. The ε^(1/4) term comes from the final,
+  non-circular phase near escape.
+- **Related work.** Tsien (1953) computed take-off Δv for radial and circumferential thrust. Benney
+  (tangential) and Lawden (optimal) followed, as cited in those sources. Bombardelli, Baù & Peláez
+  (2011) give asymptotic solutions for constant tangential thrust (not accessed).
+
+**What we did not find:** any statement, for a burn of *prescribed* Δv centered on periapsis of a
+hyperbolic or parabolic flyby, of the regime-II law η ≈ (9/(2Π))^(1/3), the regime-III law
+η ~ (ln Π − const)/Π, or the crossover Π_T. Fractional-power laws arising from near-parabolic
+low-thrust motion are classical (the ε^(1/4) law above is one), so regime II is an *analogue* of
+known physics in a different problem. The specific flyby laws appear new, **provisionally**: this
+was a web search, not a database review, and Bombardelli et al. was not read.
+
 ---
 
 ## Comparison with Robbins' expression
@@ -224,8 +280,12 @@ also appear in RESEARCH_LOG (2026-10-04, literature review).
   Entries are Robbins' relative overestimate, (Robbins − actual)/actual. **This reproduces
   Confraria's ~125% at T/W₀ ≈ 0.1,** and explains it: the overestimate is the k = 1 limit
   (v + Δv)/(2Δv) − 1 plus finite-Π growth. At T/W₀ = 0.5 we get 49–78%, against roughly 40–60%
-  read by eye from her Fig. 4.34. That gap is **unresolved**. Possible causes: reading the figure
-  by eye, or differences in Earth constants, targeting tolerance or burn-time definition.
+  read by eye from her Fig. 4.34. That gap is **unresolved** and is not being pursued in Phase 3
+  (user decision). Possible causes:
+  - values read by eye from her figure;
+  - convergence of her direct-shooting optimizer, which she notes is sensitive to initial guesses;
+  - targeting differences (apogee vs C3);
+  - Earth constants and burn-time definition.
 
 ---
 
@@ -243,16 +303,18 @@ is provisional. Robbins may already state it.
 | 4 | Prograde burns never lower periapsis; fixed-direction burns lower it (impacts) | **(a)** for escape from circular orbits, **(b)** for flybys | Confraria (perigee rises for tangential/rotation, falls for fixed direction); we add impact statistics on hyperbolic flybys |
 | 5 | Thrust tilted toward the planet can help (the Phase 3 hypothesis) | **(a)** | Confraria (rotation law starts pointing inward); Ferreira (α < 0 best) |
 | 6 | Exact small-Π prefactor for **prograde** steering with finite Δv/v_p (all orders in Δv) and the exact thrust profile; it lies below Robbins by [(1−k)v + (1+k)Δv]/(v + Δv) | **(b)/(c)** | Extends 1 to prograde steering and hyperbolic apses; the closed-form factor appears new |
-| 7 | For fixed-direction thrust at an apse, Robbins' expression is the *exact* leading-order loss | **(c)** provisional | Not stated by Confraria; Robbins unread |
+| 7 | For fixed-direction thrust at an apse, Robbins' expression is the *exact* leading-order loss | **(a) probable** | Robbins may have derived his expression from a fixed-attitude burn, in which case this reproduces him. Treated as (a) until the original is read (user decision, 2026-10-04) |
 | 8 | Centered-in-time burns with Δv/c > 1 exceed Robbins' "bound" by up to ~9% | **(c)** provisional | Not reported by Confraria. Her Δv/c reaches ~2, but she starts from circular orbits, which have no preferred apse, so the centering effect cannot arise there |
 | 9 | Confraria's ~125% overestimate explained quantitatively (k = 1 limit plus finite-Π growth) | **(c)** | Re-simulation and theory above |
 | 10 | Π√C collapses small-Π η about 200× better than Π | **(b)** | A consequence of 1 + 6 applied to the Oberth efficiency of flybys |
 | 11 | Dominant secondary parameter v∞/v_esc (through k); mass ratio irrelevant at fixed Π | **(b)** | Willis tabulates f_v against dimensionless V∞; we quantify its share for η on flybys |
 | 12 | Linear-response curve η_lin(Π; v∞/v_esc) and the exact η ↔ η_W map through ξ | **(c)** | No accessible source |
-| 13 | Three regimes: CΠ², (9/(2Π))^(1/3) (parabolic core), ln Π/Π (hyperbolic tail), crossover at Π_T = v_p V²/v∞³ | **(c)** | No accessible source. Willis gives only a low-thrust bound on f_v for bound orbits |
+| 13 | Three regimes: CΠ², (9/(2Π))^(1/3) (parabolic core), ln Π/Π (hyperbolic tail), crossover at Π_T = v_p V²/v∞³ | **(c) provisional** | Targeted search (§7) found the classical spiral-escape law Δv ∝ 1 − c·ε^(1/4), an analogous near-parabolic fractional-power law in a different problem, but no prior prescribed-Δv flyby laws. Willis gives only a low-thrust bound on f_v for bound orbits |
 | 14 | Half-efficiency point Π½ ≈ 8–40 at every body (rule of thumb) | **(c)** | — |
 | 15 | Fixed-direction thrust on flybys: impact band at 10 ≲ Π ≲ 10⁵; η < 0 at large Π; far-field misalignment limit | **(b)/(c)** | Confraria shows fixed direction is worst for escape; the flyby impact band and negative-η structure appear new |
 | 16 | Cross-body, cross-engine mission atlas of η, with SOI validity | **(b)/(c)** | Ferreira covers low thrust at Jupiter only (CR3BP, energy maps); the multi-body η atlas appears new |
+| 17 | Electric propulsion at the Sun keeps a substantial Oberth benefit (median η ≈ 0.3–0.4 at 3–20 R☉), unlike at planets | **(a)** qualitatively, **(b)** quantitatively | Maraqten et al. (2026) show near-Sun SEP thrust arcs deliver ~3× the energy of a 1 au spiral, using the same finite-time work integral. We add the fraction of the impulsive bonus retained and its Π / regime-II dependence |
+| 18 | Finite-time work-integral bookkeeping, Δε = ∫ v·a_T dt (our energy-balance state W) | **(a)** | Standard; stated explicitly as Eq. 1 in Maraqten et al. (2026) |
 
 ## Contribution statement
 
@@ -263,14 +325,20 @@ hyperbolic flybys**, measured by the Oberth efficiency η = B_finite/B_imp.
 
 At small burn parameter Π = t_b/τ we derive and verify the exact leading-order loss for both
 fixed-direction and prograde steering, at any apse, including finite-Δv and mass-ratio effects:
-- Robbins' expression is the exact loss for fixed-direction thrust.
-- It over-predicts prograde losses by 1–2×.
-- Up to ~9% is lost beyond it when a high-mass-ratio burn is centered in time.
+- Robbins' expression is recovered exactly for fixed-direction thrust, probably as Robbins himself
+  derived it.
+- It over-predicts prograde losses by a factor of 1–2.
+- High-mass-ratio burns centered in time exceed it by up to ~9%.
 - This quantitatively explains the ~125% overestimate Confraria reported.
 
 The resulting Π√C collapses the small-Π data to 0.1%. Beyond small Π we identify three regimes
 (Π², Π^(−1/3) from the parabolic core, and ln Π/Π from the hyperbolic tail). The crossover sits at
 Π_T = v_p V²/v∞³, and the half-efficiency point Π ≈ 10–40 holds at every body.
+
+These regimes are flyby analogues of the classical fractional-power laws of low-thrust spiral
+escape. We quantify, for the first time as far as our search shows, how much of the impulsive bonus
+electric propulsion retains at the Sun (≈ 30–40%), complementing the near-Sun SEP mission study of
+Maraqten et al. (2026).
 
 Unlike the single-system continuous-thrust flyby study of Ferreira et al. (2022), we provide
 - a body- and engine-independent atlas of η,
