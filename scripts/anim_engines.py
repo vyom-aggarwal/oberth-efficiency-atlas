@@ -13,8 +13,9 @@ arcs from 0.03 r_p to 40 r_p are visible together. Thrust arcs are coloured by t
 gain a·v (W/kg, log scale shared by the panels). Bottom: orbital-energy gain as a fraction of the
 impulsive gain against time; time runs as τ·sinh(s), so the clock slows near perihelion.
 
-Writes figures/anim_engines.mp4, figures/anim_engines.gif and the final frame figures/anim_engines_final.png.
-Run:  .venv/Scripts/python scripts/anim_engines.py [--frames 360] [--fps 30]
+Writes the final frame figures/anim_engines_final.png, then figures/anim_engines.mp4 (360 frames, ~15 min),
+then figures/anim_engines.gif converted from the MP4 with ffmpeg (two-pass palette).
+Run:  .venv/Scripts/python scripts/anim_engines.py [--frames 360] [--fps 30] [--still-only | --gif-only]
 """
 
 from __future__ import annotations
@@ -107,7 +108,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--frames", type=int, default=360)
     ap.add_argument("--fps", type=int, default=30)
-    ap.add_argument("--gif-frames", type=int, default=150)
+    ap.add_argument("--still-only", action="store_true", help="only the final-frame PNG")
+    ap.add_argument("--gif-only", action="store_true", help="only convert the existing MP4 to GIF")
     a = ap.parse_args()
     cases, S, vp, dv = build_cases()
     tau = 1.0 / vp
@@ -200,16 +202,23 @@ def main() -> None:
         clock.set_text(f"t = {t_now * S.time / 3600:+.2f} h from perihelion")
         return []
 
+    import subprocess
+
     import imageio_ffmpeg
-    plt.rcParams["animation.ffmpeg_path"] = imageio_ffmpeg.get_ffmpeg_exe()
-    anim = animation.FuncAnimation(fig, lambda i: draw(frame_t[i]), frames=len(frame_t), blit=False)
-    anim.save(ROOT / "figures" / "anim_engines.mp4", writer=animation.FFMpegWriter(fps=a.fps, bitrate=4000), dpi=110)
-    idx = np.linspace(0, len(frame_t) - 1, a.gif_frames).round().astype(int)
-    anim_gif = animation.FuncAnimation(fig, lambda i: draw(frame_t[idx[i]]), frames=len(idx), blit=False)
-    anim_gif.save(ROOT / "figures" / "anim_engines.gif", writer=animation.PillowWriter(fps=15), dpi=65)
-    draw(frame_t[-1])
-    save_figure(fig, ROOT / "figures" / "anim_engines_final.png", "scripts/anim_engines.py")
+    ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    mp4, gif = ROOT / "figures" / "anim_engines.mp4", ROOT / "figures" / "anim_engines.gif"
+    if not a.gif_only:
+        draw(frame_t[-1])                                              # the still first: cheap and always useful
+        save_figure(fig, ROOT / "figures" / "anim_engines_final.png", "scripts/anim_engines.py")
+    if not (a.gif_only or a.still_only):
+        plt.rcParams["animation.ffmpeg_path"] = ffmpeg
+        anim = animation.FuncAnimation(fig, lambda i: draw(frame_t[i]), frames=len(frame_t), blit=False)
+        anim.save(mp4, writer=animation.FFMpegWriter(fps=a.fps, bitrate=4000), dpi=110)
     plt.close(fig)
+    if not a.still_only:
+        # GIF from the MP4 with a two-pass palette: fast, and identical frames to the video.
+        vf = "fps=15,scale=900:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer"
+        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(mp4), "-vf", vf, str(gif)], check=True)
     for (title, _), tr in zip(cases, trajs):
         r = tr["res"]
         print(f"{title.splitlines()[0]}: Π = {r.Pi:.4g}, loss = {100 * r.dv_loss_rel:.4g}% of Δv, "
