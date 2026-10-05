@@ -332,16 +332,22 @@ def simulate_staged_nd(v_p: float, stages: list, steering: SteeringLaw | None = 
         segments=segments if num.dense_output else None)
 
 
-def optimal_offset(v_p: float, stages: list[StageND], numerics: Numerics = Numerics(),
+def optimal_offset(v_p: float, stages: list, numerics: Numerics = Numerics(),
                    xatol_rel: float = 1e-6) -> tuple[float, StagedResult]:
-    """Prograde timing that minimizes the equivalent-Δv loss (bounded Brent over ±duration)."""
+    """Prograde timing that maximizes the final orbital energy ε_out (bounded Brent over ±duration).
+
+    For constant-thrust stages (fixed Δv) this is the same as minimizing the equivalent-Δv loss. For
+    power-law stages the delivered Δv depends on the placement, so the loss alone would be minimized
+    by moving the arc away from periapsis, where it delivers less Δv. Maximizing ε_out at fixed
+    duration and propellant budget is the mission objective.
+    """
     _, duration = schedule(stages)
     cache = {}
 
     def loss(d):
         r = simulate_staged_nd(v_p, stages, midpoint_offset=float(d), numerics=numerics)
         cache[float(d)] = r
-        return r.dv_loss if math.isfinite(r.dv_loss) else 1e3
+        return -r.eps_out if math.isfinite(r.eps_out) else 1e3
 
     res = minimize_scalar(loss, bounds=(-duration, duration), method="bounded",
                           options={"xatol": xatol_rel * duration})

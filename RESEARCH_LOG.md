@@ -1442,3 +1442,18 @@ This entry is the first written with the Edit tool under the new rule.
 0.25-yr arc centred on perihelion delivers 10.13 km/s. That is consistent with their "~10 km/s in
 the near-perihelion segment", so their duration and Δv statements agree under their own power
 model. It gives Π = 12.8 by duration and Π_eff = 9.2.
+
+## 2026-10-05: Bug fixed: "optimal timing" objective for variable-Δv stages (found in the rerun)
+
+- **Symptom.** In the first rerun, the "optimal" placement of the power-law SEP arcs moved the arc
+  entirely after perihelion. It delivered only 1.9 km/s instead of 10, with a *smaller absolute*
+  equivalent-Δv loss but a 58% relative loss.
+- **Cause.** `staged.optimal_offset` minimized the absolute loss Δv_rocket − Δv_eq. That equals
+  maximizing the final energy only when Δv is fixed. With distance-dependent thrust, the delivered
+  Δv depends on placement, so the minimizer simply avoided delivering Δv.
+- **Fix.** Maximize the final orbital energy ε_out at fixed duration and propellant budget (the
+  mission objective). For constant-thrust stages this is identical to the old objective, so all
+  constant-stage results are unchanged (they are regenerated anyway).
+- **Regression test** in `tests/test_staged.py`: the optimum stays near periapsis and its energy
+  is ≥ the centred arc's.
+- **Rerun** of `scripts/run_phase4.py` follows.

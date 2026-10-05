@@ -121,6 +121,17 @@ def test_power_law_thrust_concentrates_the_burn():
     assert r.dv_rocket > 0 and r.dv_loss > 0 and r.energy_balance < 1e-10
 
 
+def test_optimal_offset_maximizes_energy_for_power_law_stages():
+    """Regression: minimizing the loss alone slid a power-law arc off periapsis (less Δv, less loss)."""
+    from oberth_atlas.staged import PowerLawStageND
+    v_p = 1.39
+    plaw = [PowerLawStageND(thrust_ref=0.002, r_ref=1.0, kappa=1.5, c=0.5, duration=10.0)]
+    d, r = optimal_offset(v_p, plaw)
+    centred = simulate_staged_nd(v_p, plaw)
+    assert r.eps_out >= centred.eps_out - 1e-12
+    assert abs(d) < 0.25 * 10.0                          # stays near periapsis, where the thrust peaks
+
+
 def test_si_stack_nondimensionalization():
     from oberth_atlas.constants import GM_SUN, SUN
     from oberth_atlas.staged import StageSI, stack_mass, stages_to_nd
