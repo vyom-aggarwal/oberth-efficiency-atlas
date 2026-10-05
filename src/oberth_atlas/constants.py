@@ -38,6 +38,11 @@ KM3_S2 = 1.0e9      # (m^3/s^2) per (km^3/s^2)
 # Standard gravity, exact by definition (3rd CGPM, 1901). Used only to turn Isp into exhaust velocity.
 G0 = 9.80665  # m/s^2
 
+# US customary units used in motor datasheets, exact by definition (international yard and pound
+# agreement, 1959; NIST SP 811, 2008, App. B): 1 lbm = 0.45359237 kg, 1 lbf = 1 lbm × g0.
+LBM = 0.45359237     # kg
+LBF = LBM * G0       # N (= 4.4482216152605 N)
+
 # Astronomical unit, exact by definition (IAU 2012), as quoted by [DE440].
 AU = 149_597_870_700.0  # m
 
