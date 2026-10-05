@@ -49,6 +49,39 @@ class StageND:
 
 
 @dataclass(frozen=True)
+class StageSI:
+    """One motor in SI units. Thrust is constant at m_prop·c/burn_time (the burn-time average)."""
+
+    name: str
+    total_kg: float
+    dry_kg: float
+    exhaust_velocity: float      # m/s
+    burn_time: float             # s
+    coast_after: float = 0.0     # s before the next ignition
+
+    @property
+    def m_prop(self) -> float:
+        return self.total_kg - self.dry_kg
+
+    @property
+    def thrust(self) -> float:
+        return self.m_prop * self.exhaust_velocity / self.burn_time
+
+
+def stack_mass(stages: list[StageSI], payload_kg: float) -> float:
+    return sum(s.total_kg for s in stages) + payload_kg
+
+
+def stages_to_nd(stages: list[StageSI], payload_kg: float, mu: float, r_p: float) -> list[StageND]:
+    """Nondimensionalize a stack (all stages + payload) for a periapsis at r_p about a body of GM mu."""
+    from .units import Scales
+    sc = Scales(mu=mu, r_p=r_p, m0=stack_mass(stages, payload_kg))
+    return [StageND(thrust=s.thrust / (sc.m0 * sc.acceleration), c=s.exhaust_velocity / sc.velocity,
+                    m_prop=s.m_prop / sc.m0, m_drop=s.dry_kg / sc.m0, coast_after=s.coast_after / sc.time)
+            for s in stages]
+
+
+@dataclass(frozen=True)
 class StageTiming:
     t_ignition: float           # from the first ignition
     t_burnout: float
@@ -204,5 +237,5 @@ def optimal_offset(v_p: float, stages: list[StageND], numerics: Numerics = Numer
     return d, cache.get(d) or simulate_staged_nd(v_p, stages, midpoint_offset=d, numerics=numerics)
 
 
-__all__ = ["StageND", "StageTiming", "StagedResult", "schedule", "dv_centroid_time", "centroid_offset",
-           "simulate_staged_nd", "optimal_offset"]
+__all__ = ["StageND", "StageSI", "StageTiming", "StagedResult", "schedule", "dv_centroid_time", "centroid_offset",
+           "simulate_staged_nd", "optimal_offset", "stack_mass", "stages_to_nd"]

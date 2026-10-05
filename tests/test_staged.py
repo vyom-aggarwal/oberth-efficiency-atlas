@@ -71,6 +71,24 @@ def test_mass_bookkeeping_and_schedule():
         schedule([StageND(thrust=1.0, c=0.2, m_prop=1.2)])
 
 
+def test_si_stack_nondimensionalization():
+    from oberth_atlas.constants import GM_SUN, SUN
+    from oberth_atlas.staged import StageSI, stack_mass, stages_to_nd
+    from oberth_atlas.units import Scales
+    si = [StageSI("A", 13970.6, 1000.0, 2964.9, 126.7, coast_after=10.0), StageSI("B", 2137.0, 124.0, 2802.8, 84.1)]
+    r_p = 3.2 * SUN.radius_eq
+    nd = stages_to_nd(si, 546.0, GM_SUN, r_p)
+    sc = Scales(GM_SUN, r_p, stack_mass(si, 546.0))
+    assert stack_mass(si, 546.0) == pytest.approx(16653.6, rel=1e-12)
+    sched, duration = schedule(nd)
+    dv_si = sum(st.dv for st in sched) * sc.velocity
+    m0 = 16653.6
+    expect = 2964.9 * math.log(m0 / (m0 - 12970.6)) + 2802.8 * math.log((m0 - 13970.6) / (m0 - 13970.6 - 2013.0))
+    assert dv_si == pytest.approx(expect, rel=1e-12)
+    assert duration * sc.time == pytest.approx(126.7 + 10.0 + 84.1, rel=1e-12)
+    assert nd[0].thrust * sc.m0 * sc.acceleration == pytest.approx(si[0].thrust, rel=1e-12)
+
+
 def test_centroid_helpers():
     st = StageND(thrust=1.0, c=0.1, m_prop=0.5)
     lam = st.c * math.log(2.0) / st.c
