@@ -278,6 +278,28 @@ def tail_crossover_pi(v_inf: float) -> float:
     return metrics.periapsis_speed(1.0, 1.0, v_inf) / v_inf**3
 
 
+def prograde_loss_bound(dv_over_vp: float, lam: float = 0.0, x_c: float = 0.5, k_max: float = 1.0) -> float:
+    """Upper bound over the arrival conic on the leading-order prograde loss, (loss/Δv)/Π².
+
+    From D₂ = ½k(1−k)v m₂ + k(1+k)Δv j and loss = D₂Π²/(v + Δv), with r = Δv/v_p:
+        (loss/Δv)/Π² = [½k(1−k) m₂ + k(1+k) r j]/(1 + r),
+    maximized over k = 1/v_p² ≤ k_max (k_max = 1: periapsis of any conic, up to circular;
+    k_max = ½: hyperbolic and parabolic arrivals only). The expression is concave in k: with
+    A = ½m₂ + jr and B = ½m₂ − jr its maximum is at k* = A/(2B), giving A²/(4B(1 + r)).
+
+    For constant acceleration (m₂ = 1/12, j = 1/24) the unconstrained maximum is
+    (1 + r)/(96(1 − r)), at k* = (1 + r)/(2(1 − r)). The practical rule loss/Δv ≲ Π²/96 is its
+    r → 0 limit, attained at k = ½ (near-parabolic arrival). Leading order in Π; first order in the
+    turn-rate dependence on Δv (j, not the exact-Δv form).
+    """
+    m = profile_moments(lam, x_c)
+    r = dv_over_vp
+    A, B = 0.5 * m.m2 + m.j * r, 0.5 * m.m2 - m.j * r
+    k = A / (2.0 * B) if B > 0 else k_max
+    k = min(k, k_max)
+    return (0.5 * k * (1 - k) * m.m2 + k * (1 + k) * r * m.j) / (1.0 + r)
+
+
 def xi_parameter(v_inf: float, dv: float) -> float:
     """ξ = 2Δv(v_p − v∞)/(v∞ + Δv)²: how nonlinear the map from η_W to η is (ξ → 0: η = η_W)."""
     v_p = metrics.periapsis_speed(1.0, 1.0, v_inf)
