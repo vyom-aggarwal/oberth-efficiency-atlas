@@ -333,6 +333,20 @@ is provisional. Robbins may already state it.
 | 17 | Electric propulsion at the Sun keeps a substantial Oberth benefit (median η ≈ 0.3–0.4 at 3–20 R☉), unlike at planets | **(a)** qualitatively, **(b)** quantitatively | Maraqten et al. (2026) show near-Sun SEP thrust arcs deliver ~3× the energy of a 1 au spiral, using the same finite-time work integral. We add the fraction of the impulsive bonus retained and its Π / regime-II dependence |
 | 18 | Finite-time work-integral bookkeeping, Δε = ∫ v·a_T dt (our energy-balance state W) | **(a)** | Standard; stated explicitly as Eq. 1 in Maraqten et al. (2026) |
 
+## Classification of the Phase 3 findings
+
+Same labels as above. Source of every number: `figures/phase3_numbers.json` (`scripts/fig_phase3.py`).
+
+| # | Phase 3 finding | Label | Basis |
+|---|---|---|---|
+| 19 | At small Π the optimal prograde burn puts its **Δv centroid** (not its time midpoint) at periapsis, δ* = ½ − x̄: a rocket burn should start earlier than centered | **(c) provisional** | Same mechanism as row 8. Confraria's circular-orbit problem has no preferred apse, so it cannot arise there. Robbins may treat burn placement |
+| 20 | Fraction of the centered deficit 1 − η recovered by retiming at small Π, with no free parameter: [C(½) − C(x̄)]/C(½) → (x̄ − ½)²/⟨(x − ½)²⟩ as Δv → 0, i.e. ≈ 0.08%, 7.6% and 40% for Δv/c = 0.1, 1 and 3 | **(c) provisional** | Follows from row 6. Verified to 5e-4 at Π = 0.1 |
+| 21 | At larger Π the timing optimum leaves the centroid rule. It moves further earlier for Δv/c ≥ 1, and reverses (later) for near-constant-mass burns with large Δv/v_p, because pre-periapsis prograde thrust lifts the periapsis | **(c)** | — |
+| 22 | Pitching toward the planet adds little once the timing is optimal: timing gives a median 93–99% of the gain, and α₀ ≤ 18° | **(a)** that inward tilt helps; **(b)** its size on flybys | Confraria (rotation law starts inward); Ferreira (α < 0 best) |
+| 23 | Recoverable efficiency within the prograde family against Π and v∞/v_esc: ≤ 3.5 pp for Δv/c ≤ 1, up to 22 pp (median 12–14 pp at 10 ≤ Π ≤ 30) for Δv/c = 3 | **(b)/(c)** | The user-requested framing. No accessible source quantifies it for flybys |
+| 24 | A minimum-altitude constraint costs ≤ 0.9 pp on the nominal-r_p baseline and nothing on the achieved-periapsis baseline: relaxing it buys depth, not efficiency | **(c)** | — |
+| 25 | For near-constant-mass burns the whole gain over the centered burn is depth: the optimum keeps the actual periapsis low, while a centered prograde burn lifts it. On the achieved-periapsis baseline the gain is negative (median ratio −0.73 at Δv/c = 0.1, against ≈ 1.0 at Δv/c ≥ 1) | **(c)** | — |
+
 ## Contribution statement
 
 Finite-burn losses for escape and capture from parking orbits were charted by Willis (1966). An
@@ -362,5 +376,11 @@ Unlike the single-system continuous-thrust flyby study of Ferreira et al. (2022)
 - the impact and sphere-of-influence limits that make fixed-direction and electric-propulsion
   burns at terrestrial planets non-physical in a planet-centered model.
 
-The novelty claims touching the small-Π loss are provisional until Robbins (1966) can be read
-in full.
+Optimizing the prograde family (linear pitch law and burn timing, under a minimum-altitude
+constraint) shows that the recoverable efficiency is mostly a timing effect. At small Π its size
+follows in closed form from the thrust profile, by putting the Δv centroid at periapsis: up to
+≈ 40% of the deficit for Δv/c = 3, but < 8% for Δv/c ≤ 1. Inward pitch adds little. A relaxed
+altitude constraint buys depth rather than efficiency, as the achieved-periapsis baseline shows.
+
+The novelty claims touching the small-Π loss and burn placement are provisional until Robbins
+(1966) can be read in full.
