@@ -336,9 +336,8 @@ The resulting Π√C collapses the small-Π data to 0.1%. Beyond small Π we ide
 Π_T = v_p V²/v∞³, and the half-efficiency point Π ≈ 10–40 holds at every body.
 
 These regimes are flyby analogues of the classical fractional-power laws of low-thrust spiral
-escape. We quantify, for the first time as far as our search shows, how much of the impulsive bonus
-electric propulsion retains at the Sun (≈ 30–40%), complementing the near-Sun SEP mission study of
-Maraqten et al. (2026).
+escape. We also quantify the fraction of the impulsive bonus that electric propulsion retains at
+the Sun (≈ 30–40%), which complements the near-Sun SEP mission study of Maraqten et al. (2026).
 
 Unlike the single-system continuous-thrust flyby study of Ferreira et al. (2022), we provide
 - a body- and engine-independent atlas of η,
