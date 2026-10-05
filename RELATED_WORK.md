@@ -279,13 +279,30 @@ also appear in RESEARCH_LOG (2026-10-04, literature review).
 
   Entries are Robbins' relative overestimate, (Robbins − actual)/actual. **This reproduces
   Confraria's ~125% at T/W₀ ≈ 0.1,** and explains it: the overestimate is the k = 1 limit
-  (v + Δv)/(2Δv) − 1 plus finite-Π growth. At T/W₀ = 0.5 we get 49–78%, against roughly 40–60%
-  read by eye from her Fig. 4.34. That gap is **unresolved** and is not being pursued in Phase 3
-  (user decision). Possible causes:
-  - values read by eye from her figure;
-  - convergence of her direct-shooting optimizer, which she notes is sensitive to initial guesses;
+  (v + Δv)/(2Δv) − 1 plus finite-Π growth.
+
+  **Digitized comparison.** `scripts/digitize_confraria.py` → `figures/confraria_fig434_digitized.csv`
+  segments the two curves with unique colors in her Fig. 4.34, calibrated on the axis ticks
+  (residuals 2e-4 in T/W and 0.2%):
+
+  | T/W₀ | Δv = 3.5 km/s: hers / ours | Δv = 4.0 km/s: hers / ours |
+  |---|---|---|
+  | 0.10 | 120% / 130% | 123% / 127% |
+  | 0.20 | 87% / 91% | 78% / 81% |
+  | 0.30 | 72% / 83% | 68% / 71% |
+  | 0.50 | 57% / 78% | 54% / 66% |
+
+  Her implied losses are therefore 4–14% *larger* than ours (assuming the same Robbins value), by
+  about 3 m/s in absolute terms at T/W₀ = 0.5 and about 17 m/s at 0.1. The gap is **unresolved**
+  and is not being pursued in Phase 3 (user decision). Possible causes:
+  - digitization uncertainty, about ±3% from marker overlap;
+  - convergence of her direct-shooting optimizer, which she notes is sensitive to initial guesses,
+    and her integration tolerances (MATLAB ode45). The sign is consistent with incompletely
+    minimized losses;
   - targeting differences (apogee vs C3);
   - Earth constants and burn-time definition.
+
+  The 4.5 and 5 km/s curves reuse the 1 and 1.5 km/s colors and were not digitized.
 
 ---
 

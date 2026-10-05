@@ -857,3 +857,25 @@ So the column is the **post-burn** speed, and the arrival is **bound and near-pa
 (≈ 342–344 km/s before the burn). The user independently reached the same conclusion.
 RELATED_WORK.md (Hibberd section) records the reasoning. Phase 4 therefore uses bound-arrival
 support and the equivalent-Δv penalty (decision Q1).
+
+## 2026-10-04: Literature follow-ups (user review of the literature summary)
+
+- **Relabelled:** "Robbins is exact for fixed-direction thrust" is now **(a) probable**. Robbins
+  may have derived his expression from a fixed-attitude burn. This holds until the user obtains
+  the paper.
+- **Targeted search for prior large-burn laws** (RELATED_WORK §7):
+  - Found the classical low-thrust spiral-escape law Δv_esc ≈ v0[1 − c·ε^(1/4)] (Tsien 1953 and
+    MIT 16.522 notes, c ≈ 0.754). It is a near-parabolic fractional-power law, but in a
+    different problem.
+  - No prescribed-Δv flyby laws (Π^(−1/3), ln Π/Π, Π_T) were found. The three-regime result stays
+    **(c) provisional**, framed as a flyby analogue of the classical spiral-escape asymptotics.
+- **Added Maraqten et al. (2026)**, arXiv:2608.11113, on SEP solar Oberth at 0.3 au. It uses the
+  finite-time work integral (our W), and reports ~3× the energy gain of a 1 au spiral. Our
+  electric-propulsion-at-the-Sun result is now classified **(a)** qualitatively and **(b)**
+  quantitatively (fraction of the impulsive bonus retained).
+- **Confraria Fig. 4.34 digitized** (Δv = 3.5 and 4.0 km/s; RELATED_WORK, Robbins comparison):
+  - Her overestimates are 120/123% at T/W₀ = 0.1 and 57/54% at 0.5.
+  - Ours are 130/127% and 78/66%.
+  - So her implied losses are 4–14% larger than ours. **Unresolved, not pursued in Phase 3**
+    (user decision). Causes are listed in RELATED_WORK. The sign is consistent with incompletely
+    converged optimization in her direct shooting.
