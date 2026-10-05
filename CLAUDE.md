@@ -14,6 +14,19 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
   repo. If a test tolerance changes, log the measured floor that justifies it in RESEARCH_LOG.md.
 - **RESEARCH_LOG.md** gets a dated entry for every design decision, assumption, sourced parameter
   and surprising result.
+- **Deviations from an approved plan** (grids, thresholds, tolerances, scope) get a research-log
+  entry with the reason *at the time the change is made*, before running anything that depends on
+  it (user rule, 2026-10-05; the unannounced Phase 3 grid change is the precedent).
+- **Use the file-edit tools (Edit/Write), not shell heredocs or inline scripts, for multi-line
+  edits** of code, docs and logs. Shell quoting has corrupted text before (backticks executed,
+  escapes doubled).
+- **Writing.** The user writes the paper prose; do not draft paper text. Keep
+  `docs/paper_outline.md`, the figures and the `figures/*_numbers.json` files current.
+  `scripts/check_numbers.py` flags numbers in a Markdown draft that match no numbers JSON. In
+  captions and the outline use first-person singular, active voice, and superscript numbered
+  in-text citations (e.g. `<sup>3</sup>`) with a numbered reference list.
+- **AI-use disclosure.** `docs/ai_use_log.md` summarizes, per phase, what the assistant
+  implemented, derived or found and what the user decided. Update it at each phase end.
 - **Constants** (GM, radii, semi-major axes, g0) live only in `src/oberth_atlas/constants.py`,
   each with a source comment. Never hard-code a physical constant anywhere else.
 

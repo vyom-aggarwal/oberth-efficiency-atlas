@@ -1278,15 +1278,17 @@ With optimal timing the thresholds shift slightly, to Π = 0.32 and 1.03.
     0.1% at Π = 0.29, i.e. a0 ≈ 2.7–2.8 m/s². Both lie inside the preset range, so the impulsive model
     holds only for the high-thrust end of nuclear thermal. (The stack's a0 ≈ 0.61 m/s² at 1% is for
     solids; the same Π maps to a different a0 for a different Δv/c.)
-- **SEP, Maraqten et al. (2026)**, at their own geometry (0.308 au, v_p = 75.0 km/s, Isp
-  6,000 s, about 10 km/s in the perihelion arc):
-  - constant 49.8 N, with the start mass bracketed at 11,036–15,189 kg: Π = 3.3–4.6, loss
-    8.5–12.5% of the arc Δv;
-  - their 0.25-yr arc duration: Π = 12.8, loss 29%.
-  - Their thrust falls as r⁻² away from perihelion, which concentrates it near perihelion, so the
-    actual loss should lie inside this bracket (assumption; the r⁻² variation is not modelled).
-  - Their reference is a 1 au spiral, not an impulsive burn, so these numbers complement rather
-    than contradict their "threefold" result.
+- **SEP, Maraqten et al. (2026): placing their perihelion arc on our curve** (wording revised
+  2026-10-05, see "Phase 5 checks"). Maraqten et al. never assumed an impulsive burn; their
+  baseline is a 1 au spiral. The numbers below are the equivalent-Δv shortfall *on our curve*
+  relative to an impulsive burn of the same Δv at their perihelion, not a loss in their analysis.
+  Inputs: their geometry (0.308 au, v_p = 75.0 km/s), Isp 6,000 s, about 10 km/s in the
+  perihelion arc.
+  - Constant 49.8 N, with the start mass bracketed at 11,036–15,189 kg: the arc sits at
+    Π = 3.3–4.6, where the curve gives 8.5–12.5% of the arc Δv.
+  - Their 0.25-yr arc duration: Π = 12.8, where the curve gives 29%.
+  - Their thrust falls as r⁻² away from perihelion, which concentrates it near perihelion. The
+    power-law thrust stage (Phase 5) replaces this bracket.
 
 **Universality.** For a near-parabolic arrival, the loss as a fraction of Δv is close to a
 single function of Π:
@@ -1336,9 +1338,81 @@ single function of Π:
 **Open questions for the user:**
 1. **Phase 5 scope.** Proceed as in the original brief, or adjust in light of the Phase 3/4
    headlines?
-2. **SEP thrust variation.** The Maraqten placement is bracketed (Π 3.3–12.8, loss 8–29%) because
-   the r⁻² power law is not modelled. Should a power-law-thrust stage be added (small change in
+2. **SEP thrust variation.** The placement of Maraqten et al.'s arc on our curve is bracketed
+   (Π 3.3–12.8; the curve gives 8–29% there) because the r⁻² power law is not modelled. Should a power-law-thrust stage be added (small change in
    `staged.py`) if the paper makes a quantitative SEP statement?
 3. **Hibberd's Table 2 discrepancy.** Row m lists 1,100.4 kg more than its stages plus payload.
    Mention it in a footnote? (Recommended; it does not affect the conclusion.)
 4. **Robbins (1966)** is still unread. Claims P1–P3 and P6 remain provisional.
+
+## 2026-10-05: Phase 5 checks: the practical rule loss/Δv ≲ Π²/96 (user check 1)
+
+**Candidate rule** (user). For near-parabolic arrival (k = ½), the leading-order prograde loss is
+k(1−k)Π²/24 · Δv = Π²Δv/96. Since k(1−k) ≤ ¼ on any conic, loss/Δv ≲ Π²/96. In words: a burn
+shorter than one periapsis timescale τ = r_p/v_p is impulsive to within ~1%.
+
+**Exact statement** (`theory.prograde_loss_bound`, `tests/test_rule.py`). From the leading-order
+prograde deficit, with r = Δv/v_p:
+
+  (loss/Δv)/Π² = [½k(1−k) m₂ + k(1+k) r j]/(1 + r).
+
+This is concave in k. Its maximum over the arrival conic (k ≤ 1, a periapsis burn on any conic) is
+A²/(4B(1 + r)), with A = ½m₂ + jr and B = ½m₂ − jr. For constant acceleration (m₂ = 1/12,
+j = 1/24):
+- **any conic:** (1 + r)/(96(1 − r)), reached at k* = (1 + r)/(2(1 − r));
+- **hyperbolic or parabolic arrivals only** (k ≤ ½): (1 + 3r)/(96(1 + r)).
+
+**Conditions for loss/Δv ≲ Π²/96:**
+- prograde steering;
+- the burn centred in time on periapsis (centring the Δv centroid only lowers the loss);
+- leading order in Π (Π ≲ 1);
+- small Δv/v_p (factor (1 + r)/(1 − r));
+- small Δv/c (factor 12 m₂(λ) at r → 0: 1.064 at Δv/c = 1, 1.45 at 3).
+
+It does not apply to fixed-direction (inertial) steering, whose loss is Robbins' kΔv/24 · Π² (up
+to Π²/48 for hyperbolic k ≤ ½). The bound is *attained* at near-parabolic arrival, which is exactly
+the solar Oberth case.
+
+**Verification** (`scripts/rule_check.py`, `figures/rule_check.png`, `figures/rule_numbers.json`):
+- **Phase 2 prograde sweep**, hyperbolic, 20,860 runs with Π ≤ 1 whose loss is resolved to 1%:
+  every run satisfies R ≤ **1.010 ×** the closed-form bound for its own Δv/v_p and Δv/c. The 1%
+  excess already appears at Π ≤ 0.1, so it is the first-order turn-rate (j) approximation, not
+  higher order in Π.
+- **Maximum of 96R by Δv/v_p**, all Δv/c ≤ 1.3 (the bound at each bin's upper edge, Δv/c = 0,
+  k ≤ ½, in brackets):
+
+  | Δv/v_p | max of 96R |
+  |---|---|
+  | ≤ 0.01 | 1.096 (1.020) |
+  | 0.01–0.03 | 1.129 (1.058) |
+  | 0.03–0.1 | 1.207 (1.182) |
+  | 0.1–0.3 | 1.482 (1.462) |
+  | 0.3–1 | 1.722 (2.000) |
+  | 1–3 | 1.965 (2.500) |
+
+  With Δv/c ≤ 0.1 the maximum at Δv/v_p ≤ 0.01 is 1.018; the excess in the table comes from the
+  mass ratio (Δv/c up to 1.3).
+- **Phase 4** (bound arrival, Δv/v_p = 0.024, time-centred, Π ≤ 1):
+  - max 96R = 1.067 for the Hibberd stack (all scalings, including the reference) and 1.11 for
+    single nuclear-thermal stages (Δv/c ≈ 1);
+  - R/bound(λ = 0) ≤ 1.06, the mass-ratio factor.
+
+**Statement for the paper.** For a prograde burn centred on periapsis, loss/Δv ≤ Π²/96 to within
+about 10% when Δv/v_p ≲ 0.03 and Δv/c ≲ 1, on any arrival conic. Larger Δv/v_p or mass ratio
+scales it by the closed-form factor. Framing (user): a clean statement for flybys, likely close
+to practitioner heuristics, **not a discovery**. In time units, Π = 1 means burn duration = τ =
+r_p/v_p, which is 1/(2π) ≈ 16% of a circular orbit's period at r_p (≈ 11% at near-parabolic
+speed, since v_p = √2 v_c).
+
+**SEP framing (user check 2).** Maraqten et al. never assumed an impulsive burn; their baseline is
+a 1 au spiral. Every statement of the 8–29% figure has been reworded as *placing their arc on our
+curve*, in the Phase 4 entry above, RELATED_WORK row 31 and paper outline §10. It is not a loss in
+their analysis.
+
+**Working rules added to CLAUDE.md (user check 3):**
+- deviations from an approved plan are logged with their reason at the time they are made;
+- multi-line edits use the file-edit tools, not shell heredocs;
+- the writing conventions: no paper prose, the numbers checker, first-person singular active
+  voice, superscript numbered citations.
+
+This entry is the first written with the Edit tool under the new rule.
