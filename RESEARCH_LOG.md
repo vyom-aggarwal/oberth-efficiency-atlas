@@ -1304,3 +1304,41 @@ single function of Π:
 - unknown staging coast (bracketed);
 - no thermal, attitude or spin-up constraints;
 - SEP r⁻² thrust variation not modelled.
+
+## 2026-10-05: Phase 4 complete (with the Phase 3 follow-ups): summary and open questions
+
+**Phase 3 follow-ups delivered:**
+- The realistic-mission mapping now sets the headline: the centered prograde burn is near-optimal
+  for real engines.
+- Half-Δv rule: closed form plus simulation; it captures 75–80% of the optimal retiming gain.
+- 6-knot pitch check: ≤ 0.077 pp, so the claim is stated as "within smooth steering laws tested".
+- Reversal check: empirical; theory is future work.
+- Grid change recorded.
+- RELATED_WORK novelty narrowed: the Δv-weighted *mean* optimum, the closed-form fraction, and the
+  two-baseline decomposition. "Beats inertial" is context.
+
+**Phase 4 delivered:**
+- `staged.py`: any arrival conic, staged burns, the equivalent-Δv metric, and a leading-order
+  estimate (11 tests).
+- `configs/phase4/hibberd_som.yaml`, with Hibberd Table 2 and catalog sources.
+- `scripts/run_phase4.py` and `scripts/fig_phase4.py`; `results/phase4.parquet` (279 rows,
+  0 errors).
+- `figures/phase4_reference.png`, `figures/phase4_loss_vs_pi.png`, `figures/phase4_numbers.json`.
+- **Tests:** 473 pass.
+
+**Answer.** Hibberd's impulsive SOM is accurate. The finite staged burn loses 0.090–0.099 m/s of
+8.36 km/s, and < 0.2 m/s under every sensitivity tested. The impulsive model fails (loss > 1% of
+Δv) only when the burn lasts about τ = r_p/v_p (Π ≈ 1):
+- for the solid stack, 30× less thrust;
+- for nuclear thermal, a0 ≲ 0.85 m/s²;
+- SEP perihelion arcs (Π ≈ 3–13) are far beyond it.
+
+**Open questions for the user:**
+1. **Phase 5 scope.** Proceed as in the original brief, or adjust in light of the Phase 3/4
+   headlines?
+2. **SEP thrust variation.** The Maraqten placement is bracketed (Π 3.3–12.8, loss 8–29%) because
+   the r⁻² power law is not modelled. Should a power-law-thrust stage be added (small change in
+   `staged.py`) if the paper makes a quantitative SEP statement?
+3. **Hibberd's Table 2 discrepancy.** Row m lists 1,100.4 kg more than its stages plus payload.
+   Mention it in a footnote? (Recommended; it does not affect the conclusion.)
+4. **Robbins (1966)** is still unread. Claims P1–P3 and P6 remain provisional.
