@@ -206,3 +206,10 @@ RESEARCH_LOG.md (dated entries) and the git history (`git log` on `main`); see t
   perihelion. It now maximizes the final energy, with a regression test.
 - The first number checker was too permissive (unit scales let unrelated values match). It was
   made unit-aware, with one-significant-figure numbers reported as unverified.
+- A second checker bug, numbers at the start of a line being skipped, was found by a test and
+  fixed.
+- A hero-figure comparison briefly showed an interpolation artifact (a curve clamped below its
+  range). It was caught before any figure was committed.
+
+**Published:** the explorer, as a private Claude artifact for viewing; the repository copy is
+`explorer/oberth_explorer.html`.

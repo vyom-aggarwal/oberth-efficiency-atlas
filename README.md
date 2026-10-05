@@ -42,3 +42,11 @@ python -m venv .venv
   - The loss reaches 1% of Δv at Π ≈ 1 (burn duration ≈ r_p/v_p), on a near-universal loss(Π)
     curve.
   - Figures: `figures/phase4_*.png`.
+- **Phase 5 (checks and deliverables):** complete.
+  - **Practical rule:** a prograde burn centred on periapsis keeps loss/Δv ≲ Π²/96, with an exact
+    bound over the arrival conic (`theory.prograde_loss_bound`, `figures/rule_check.png`).
+  - **Hero figure:** `figures/hero_loss_vs_pi.png` and `.pdf`.
+  - **Animation:** `figures/anim_engines.mp4` and `.gif`.
+  - **Interactive explorer:** `explorer/oberth_explorer.html`, a self-contained page whose
+    JavaScript simulator is validated against Python in `tests/test_explorer_js.py`.
+  - **Numbers checker** for drafts: `scripts/check_numbers.py`.

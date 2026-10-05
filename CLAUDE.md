@@ -92,6 +92,24 @@ unknown keys are rejected.
 - The metric is the equivalent-Δv loss.
 - Motor data live in `configs/phase4/hibberd_som.yaml`, with sources (not in constants.py: they
   are mission inputs, not physical constants).
+- `PowerLawStageND` gives thrust ∝ r^−κ (SEP). Its Δv follows from the integrated mass.
+  `optimal_offset` maximizes the final energy.
+
+### Phase 5 (checks and deliverables)
+```bash
+.venv/Scripts/python scripts/rule_check.py          # loss/Δv ≲ Π²/96 vs sweep + Phase 4 → figures/rule_check.png, rule_numbers.json
+.venv/Scripts/python scripts/fig_hero.py            # figures/hero_loss_vs_pi.{png,pdf}, hero_numbers.json
+.venv/Scripts/python -m pip install -e ".[anim]"    # once: bundled ffmpeg for MP4
+.venv/Scripts/python scripts/anim_engines.py        # figures/anim_engines.{mp4,gif}, anim_engines_final.png (~15 min)
+.venv/Scripts/python scripts/build_explorer.py      # explorer/oberth_explorer.html (self-contained)
+.venv/Scripts/python scripts/literature_numbers.py  # figures/literature_numbers.json (quoted inputs, with sources)
+.venv/Scripts/python scripts/check_numbers.py draft.md --allow 96,24,12 [--verbose]
+```
+- **Explorer layout.** The page is built from `explorer/template.html`, `app.css`, `sim.js` and
+  `app.js`, with cached data in `explorer_data.json` (`--recompute` rebuilds it). Edit those
+  files, never the built HTML.
+- **`explorer/sim.js`** is the JS port of `simulate_nd`. `tests/test_explorer_js.py` runs it under
+  node (skipped without node) against Python on 10 cases, to |Δη| ≤ 1e-8.
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.

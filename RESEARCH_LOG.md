@@ -1563,3 +1563,42 @@ losses in their analysis.
 - **Bibliography.** The reference-list section, DOIs and vol(issue):pages patterns are skipped.
 - **On the restyled outline:** 21 numbers verified, 0 unmatched, 13 one-figure numbers listed as
   unverified, with `--allow 96,24,12` for the constants of the rule and of Robbins' expression.
+
+## 2026-10-05: Phase 5 complete: summary and open questions
+
+**Checks (user):**
+1. **The rule loss/Δv ≲ Π²/96** is verified, with an exact bound (1 + r)/(96(1 − r)) × 12m₂.
+   Every sweep run with Π ≤ 1 lies within 1.010 of its bound. It is framed as close to
+   practitioner heuristics (RELATED_WORK row 32, claim R1).
+2. **SEP wording.** Every SEP figure is worded as placing Maraqten et al.'s arc on our curve.
+3. **CLAUDE.md rules:** deviation logging, edit tools, writing conventions.
+4. **`docs/ai_use_log.md`.**
+
+**Decisions implemented:**
+1. **Power-law SEP thrust,** with Maraqten et al.'s own κ = 1.5 model. Their arc sits at
+   Π_eff ≈ 4.6–9.2, where the curve gives about 12–20%.
+2. **The animation** (MP4, GIF).
+3. **The explorer,** with JS validated against Python to 2e-10 in η.
+4. **The hero figure** (PNG and PDF).
+5. **The numbers checker.**
+6. **The outline restyled,** with draft captions and a numbered reference list.
+
+**Bugs found and fixed during the phase** (each logged above, with regression tests):
+- the timing objective for power-law stages;
+- the checker's permissive scaling;
+- the checker's line-start skip.
+
+**Tests:** 504 pass, including the node-based explorer validation.
+
+**Open questions for the user:**
+1. **What next?** Phase 5 closes the planned scope. Candidates:
+   - a J2 sensitivity run (claim A2);
+   - a practitioner-literature check for rule R1;
+   - Robbins (1966) when it arrives (P1–P3, P6).
+2. **The explorer handles hyperbolic arrivals only.** Port the staged, bound-arrival simulator to
+   JavaScript as well, so Hibberd's actual bound case runs live?
+3. **Figure-internal labels.** Some figures name sources inside the plot (e.g. "Hibberd et al.
+   2026", "Maraqten et al. 2026"). Keep these as identification labels, with numbered citations
+   in the captions only (recommended), or remove them?
+4. **The hero figure** shows the near-parabolic band only. Add a second band for fast arrivals
+   (v∞/v_esc ≈ 1) to show the v∞ dependence, or keep the poster figure single-message?
