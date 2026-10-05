@@ -339,13 +339,17 @@ Same labels as above. Source of every number: `figures/phase3_numbers.json` (`sc
 
 | # | Phase 3 finding | Label | Basis |
 |---|---|---|---|
-| 19 | At small Π the optimal prograde burn puts its **Δv centroid** (not its time midpoint) at periapsis, δ* = ½ − x̄: a rocket burn should start earlier than centered | **(c) provisional** | Same mechanism as row 8. Confraria's circular-orbit problem has no preferred apse, so it cannot arise there. Robbins may treat burn placement |
+| 19a | *Qualitative:* a rocket burn should be centred on its Δv, not on its clock time, so it starts earlier than time-centred | **(a) likely known** | An intuitive practical idea (user review, 2026-10-05); not claimed as new |
+| 19b | *Specific:* at small Π the optimum is the **Δv-weighted mean** time, δ* = ½ − x̄ with x̄ = 1/μ_r − 1/λ, exactly (not the median or the half-Δv point) | **(c) provisional** | Follows from the m₂ structure of row 6. Same mechanism as row 8. Robbins may treat burn placement |
 | 20 | Fraction of the centered deficit 1 − η recovered by retiming at small Π, with no free parameter: [C(½) − C(x̄)]/C(½) → (x̄ − ½)²/⟨(x − ½)²⟩ as Δv → 0, i.e. ≈ 0.08%, 7.6% and 40% for Δv/c = 0.1, 1 and 3 | **(c) provisional** | Follows from row 6. Verified to 5e-4 at Π = 0.1 |
 | 21 | At larger Π the timing optimum leaves the centroid rule. It moves further earlier for Δv/c ≥ 1, and reverses (later) for near-constant-mass burns with large Δv/v_p, because pre-periapsis prograde thrust lifts the periapsis | **(c)** | — |
 | 22 | Pitching toward the planet adds little once the timing is optimal: timing gives a median 93–99% of the gain, and α₀ ≤ 18° | **(a)** that inward tilt helps; **(b)** its size on flybys | Confraria (rotation law starts inward); Ferreira (α < 0 best) |
 | 23 | Recoverable efficiency within the prograde family against Π and v∞/v_esc: ≤ 3.5 pp for Δv/c ≤ 1, up to 21.6 pp (median 11.7–13.6 pp at 10 ≤ Π ≤ 30) for Δv/c = 3 | **(b)/(c)** | The user-requested framing. No accessible source quantifies it for flybys |
 | 24 | A minimum-altitude constraint costs ≤ 0.9 pp on the nominal-r_p baseline and nothing on the achieved-periapsis baseline: relaxing it buys depth, not efficiency | **(c)** | — |
 | 25 | For near-constant-mass burns the whole gain over the centered burn is depth: the optimum keeps the actual periapsis low, while a centered prograde burn lifts it. On the achieved-periapsis baseline the gain is negative (median ratio −0.73 at Δv/c = 0.1, against ≈ 1.0 at Δv/c ≥ 1) | **(c)** | — |
+| 26 | The half-Δv rule (periapsis when half the Δv is delivered, i.e. the median) captures 1 − (x̄ − x_med)²/(x̄ − ½)² of the optimal retiming gain: 75% as Δv/c → 0, 75.6% at Δv/c = 1 and 79.8% at 3. It leaves 2.0% and 13.3% more loss than the optimum (Δv → 0) | **(c) provisional** | Closed form; verified against simulation to 2e-3 at Π = 0.1. The user's estimate (≈ 80%, 76%, 13%) confirmed |
+
+**Context, not a finding:** that the optimized prograde family beats fixed-direction (inertial) steering in every case is expected (rows 3 and 15), and is stated only as context.
 
 ## Contribution statement
 
