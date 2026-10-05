@@ -70,7 +70,7 @@ def main(path: str) -> None:
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_ylim(1e-2, 3)
-    ax.set_xlabel("Π / Π_T     (Π_T = v_p V³/v∞³: hyperbola crossing time / τ)")
+    ax.set_xlabel("Π / Π_T     (Π_T = v_p V²/v∞³: hyperbola crossing time / τ)")
     ax.set_ylabel("η_W · (Π/4.5)^⅓")
     ax.set_title("Regime II plateau, turnover into III at Π ≈ Π_T  (Π > 3)")
     cb = fig.colorbar(sc, ax=axes[:2], shrink=0.85, pad=0.01)

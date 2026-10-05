@@ -151,7 +151,7 @@ The remaining discrepancy is the extraction noise of C from simulations, which s
 The speed excess along the hyperbola is δ(t) = |v_u(t)| − v. The hyperbola has a second timescale,
 the core-crossing time |a|/v = 1/v³. Its ratio to τ is
 
-> **Π_T = v_p/v³.**
+> **Π_T = v_p/v³**  (nondimensional; dimensionally Π_T = (μ/v∞³)/(r_p/v_p) = v_p V²/v∞³ = (v_p/V)(V/v∞)³).
 
 **I. Impulsive, Π ≪ 1:** 1 − η = CΠ² (section 4).
 

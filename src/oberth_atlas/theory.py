@@ -273,7 +273,8 @@ def parabolic_core_asymptote(Pi: float) -> float:
 
 
 def tail_crossover_pi(v_inf: float) -> float:
-    """Π_T = v_p/v∞³: the burn length (in units of τ) beyond which the hyperbolic 1/r tail dominates."""
+    """Π_T = v_p/v∞³ (nondimensional; dimensionally v_p V²/v∞³ = (v_p/V)(V/v∞)³): the burn length,
+    in units of τ, beyond which the hyperbolic 1/r tail dominates."""
     return metrics.periapsis_speed(1.0, 1.0, v_inf) / v_inf**3
 
 

@@ -238,7 +238,7 @@ is provisional. Robbins may already state it.
 | 10 | Π√C collapses small-Π η about 200× better than Π | **(b)** | A consequence of 1 + 6 applied to the Oberth efficiency of flybys |
 | 11 | Dominant secondary parameter v∞/v_esc (through k); mass ratio irrelevant at fixed Π | **(b)** | Willis tabulates f_v against dimensionless V∞; we quantify its share for η on flybys |
 | 12 | Linear-response curve η_lin(Π; v∞/v_esc) and the exact η ↔ η_W map through ξ | **(c)** | No accessible source |
-| 13 | Three regimes: CΠ², (9/(2Π))^(1/3) (parabolic core), ln Π/Π (hyperbolic tail), crossover at Π_T = v_p V³/v∞³ | **(c)** | No accessible source. Willis gives only a low-thrust bound on f_v for bound orbits |
+| 13 | Three regimes: CΠ², (9/(2Π))^(1/3) (parabolic core), ln Π/Π (hyperbolic tail), crossover at Π_T = v_p V²/v∞³ | **(c)** | No accessible source. Willis gives only a low-thrust bound on f_v for bound orbits |
 | 14 | Half-efficiency point Π½ ≈ 8–40 at every body (rule of thumb) | **(c)** | — |
 | 15 | Fixed-direction thrust on flybys: impact band at 10 ≲ Π ≲ 10⁵; η < 0 at large Π; far-field misalignment limit | **(b)/(c)** | Confraria shows fixed direction is worst for escape; the flyby impact band and negative-η structure appear new |
 | 16 | Cross-body, cross-engine mission atlas of η, with SOI validity | **(b)/(c)** | Ferreira covers low thrust at Jupiter only (CR3BP, energy maps); the multi-body η atlas appears new |
@@ -259,7 +259,7 @@ fixed-direction and prograde steering, at any apse, including finite-Δv and mas
 
 The resulting Π√C collapses the small-Π data to 0.1%. Beyond small Π we identify three regimes
 (Π², Π^(−1/3) from the parabolic core, and ln Π/Π from the hyperbolic tail). The crossover sits at
-Π_T = v_p V³/v∞³, and the half-efficiency point Π ≈ 10–40 holds at every body.
+Π_T = v_p V²/v∞³, and the half-efficiency point Π ≈ 10–40 holds at every body.
 
 Unlike the single-system continuous-thrust flyby study of Ferreira et al. (2022), we provide
 - a body- and engine-independent atlas of η,

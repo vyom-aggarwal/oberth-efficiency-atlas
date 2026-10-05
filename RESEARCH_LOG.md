@@ -613,7 +613,7 @@ permutation null.
 - **Three regimes confirmed in the data** (η_W, Δv/v_p < 0.03):
   - **Regime II plateau:** η_W·(Π/4.5)^(1/3) over 3,767 points with 30 < Π < 0.03 Π_T has
     median 0.983 and 10th–90th percentile 0.92–1.02.
-  - **Turnover into regime III** happens at Π ≈ Π_T = v_p V³/v∞³.
+  - **Turnover into regime III** happens at Π ≈ Π_T = v_p V²/v∞³.
   - Regime II exists only for v∞/v_esc ≲ 0.5 (Π_T > 1).
 - **Crossover I → II/III, the half-efficiency point.** η_W = 0.5 at Π½ = 8.4–40 across all 1,143
   (v∞, Δv, c) families. The median is 26, and Π½ depends only weakly on v∞/v_esc.
@@ -705,7 +705,7 @@ Prograde, real bodies; values are the median η with the 10th–90th percentile 
 3. **The dominant secondary parameter is v∞/v_esc.** It explains 73–92% of the scatter left after
    collapsing on Π (prograde). The mass ratio is irrelevant.
 4. **There are three regimes, not two:** C·Π², then (9/2Π)^(1/3), then ln Π/Π.
-   - Regime II exists when v∞ ≪ v_esc and ends at Π_T = v_p V³/v∞³.
+   - Regime II exists when v∞ ≪ v_esc and ends at Π_T = v_p V²/v∞³.
    - The half-efficiency point is Π½ = 8–40 for every body: the practical rule of thumb.
 5. **The prograde Δv→0 theory (η_lin mapped through ξ) collapses the full-range data to 0.009 RMS
    in η.** The residual is set by Δv/v_p.
@@ -832,3 +832,14 @@ means Robbins ≈ 2.25 × actual, not 1.25 × actual.
     - in confirming the impulsive model for solid stages;
     - in mapping the thrust level at which it fails (Π ~ 1 means t_b ~ 1.8 h);
     - in quantifying staging-gap and thermal-dwell constraints near perihelion.
+
+## 2026-10-04: Correction: dimensional form of Π_T
+
+The user caught an error. The Phase 2 summary, two research-log lines, RELATED_WORK.md and the
+regimes-figure axis label wrote Π_T = v_p V³/v∞³, which is not dimensionless.
+
+The crossing time μ/v∞³ divided by τ = r_p/v_p gives **Π_T = v_p V²/v∞³ = (v_p/V)(V/v∞)³**. In
+nondimensional units (V = 1) this is v_p/v∞³, which is what `theory.tail_crossover_pi` computes.
+So no number, figure value or test was affected. Only the written formula was wrong, and it is now
+corrected in all four places. docs/theory.md and the theory.py docstring now state the dimensional
+form explicitly.
