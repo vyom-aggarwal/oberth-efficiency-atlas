@@ -32,6 +32,13 @@ python -m venv .venv
     450 optimizations (`results/opt_phase3.parquet`), with a Nelder–Mead cross-check.
   - `src/oberth_atlas/optimize.py`, figures `figures/phase3_*.png`.
 
-  Headline: the recoverable efficiency is mostly a timing effect. Put the Δv centroid, not the
-  time midpoint, at periapsis. This recovers up to ~40% of the finite-burn deficit for Δv/c = 3,
-  but < 8% for Δv/c ≤ 1.
+  Headline: for realistic engines the centered prograde burn is already near-optimal. Across the
+  mission sample, the median recoverable gain is ≤ 0.007 pp (chemical: max 0.08 pp). The small-Π
+  optimum puts the Δv-weighted mean at periapsis; the half-Δv rule captures 75–80% of that gain.
+- **Phase 4 (solar Oberth case study):** complete. Staged finite burns about any arrival conic
+  (`src/oberth_atlas/staged.py`).
+  - The Hibberd et al. (2026) 3I/ATLAS solar Oberth burn loses ≈ 0.1 m/s of its 8.36 km/s, so the
+    impulsive model holds.
+  - The loss reaches 1% of Δv at Π ≈ 1 (burn duration ≈ r_p/v_p), on a near-universal loss(Π)
+    curve.
+  - Figures: `figures/phase4_*.png`.

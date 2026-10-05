@@ -175,6 +175,13 @@ Therefore:
   (`optimize.timing_theory_fraction`; verified against optimized simulations to 5e-4 at
   Π = 0.1.)
 - For constant acceleration (λ → 0), x̄ = ½: the centered burn is already optimal at this order.
+- **Any other placement rule** x_rule captures 1 − (x̄ − x_rule)²/(x̄ − ½)² of the optimal gain,
+  for any Δv/v_p and v∞ (`optimize.timing_rule_capture`).
+  - The **half-Δv rule** (the median, x_med = (1 − e^(−λ/2))/μ_r) captures 75% as λ → 0
+    (x_med − ½ ≈ λ/8 against x̄ − ½ ≈ λ/12), 75.6% at λ = 1 and 79.8% at λ = 3.
+  - Its extra deficit over the optimum is (x̄ − x_med)²/σ² as Δv → 0: 2.0% at λ = 1, 13.3% at λ = 3.
+- For small λ the recovered fraction is ≈ (λ/12)²/(1/12) = λ²/12, i.e. ≈ 0.3% at the λ ≈ 0.2 of
+  realistic chemical flyby burns.
 
 At larger Π the optimum leaves this rule. The measured behaviour is in RESEARCH_LOG
 (2026-10-04, Phase 3 results).

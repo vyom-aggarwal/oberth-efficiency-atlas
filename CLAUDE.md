@@ -63,6 +63,22 @@ unknown keys are rejected.
   periapsis).
 - `PitchLinear` pitches relative to the *fixed* incoming-plane normal. The instantaneous ĥ is
   singular at h = 0 (RESEARCH_LOG 2026-10-04).
+- Follow-ups (user review 2026-10-05):
+  ```bash
+  .venv/Scripts/python scripts/run_phase3_followups.py   # placement rules, missions (~12 min), 6-knot pitch (~21 min)
+  ```
+
+### Phase 4 (solar Oberth case study)
+```bash
+.venv/Scripts/python scripts/run_phase4.py      # → results/phase4.parquet (~2 min on 6 cores)
+.venv/Scripts/python scripts/fig_phase4.py      # figures/phase4_*.png and figures/phase4_numbers.json
+```
+- `staged.simulate_staged_nd(v_p, stages, ...)` handles any arrival conic, set by the periapsis
+  speed. The initial state comes from integrating backward from periapsis.
+- Stages are `StageND`, or `StageSI` → `stages_to_nd`.
+- The metric is the equivalent-Δv loss.
+- Motor data live in `configs/phase4/hibberd_som.yaml`, with sources (not in constants.py: they
+  are mission inputs, not physical constants).
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.
