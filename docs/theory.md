@@ -154,6 +154,31 @@ Its relative error is therefore O(Δv/v_p) + O(μ_r²):
 
 The remaining discrepancy is the extraction noise of C from simulations, which scales as 1/Δv.
 
+### Optimal burn placement (Phase 3)
+
+Let x_c be the periapsis position within the burn in normalized time, so a burn whose midpoint
+is offset by δ·t_b has x_c = ½ − δ. In the prograde D/Π² above, j does not depend on x_c, even
+in its exact-Δv form. Only m₂ does:
+
+> m₂(x_c) = σ² + (x̄ − x_c)²,  where σ² is the variance of the Δv distribution f and
+> x̄ = ∫ x f = 1/μ_r − 1/λ is its centroid (λ = Δv/c, μ_r = 1 − e^(−λ)).
+
+Therefore:
+- **Optimal offset:** x_c* = x̄, i.e. **δ* = ½ − x̄ < 0**. The burn should start early enough to
+  put its Δv centroid, not its time midpoint, at periapsis. For a rocket the thrust acceleration
+  grows as mass falls, so the centroid lies after the midpoint. (`optimize.timing_theory_delta`)
+- **Recovered fraction of the deficit** (and of 1 − η, at leading order):
+
+  > [D(½) − D(x̄)]/D(½) = ½k(1−k)v_pΔv(x̄ − ½)² / D(½) → (x̄ − ½)²/m₂(½) as Δv → 0.
+
+  For Δv/c = 0.1, 1 and 3 this is 0.083%, 7.58% and 39.7%. The finite-Δv term j dilutes it.
+  (`optimize.timing_theory_fraction`; verified against optimized simulations to 5e-4 at
+  Π = 0.1.)
+- For constant acceleration (λ → 0), x̄ = ½: the centered burn is already optimal at this order.
+
+At larger Π the optimum leaves this rule. The measured behaviour is in RESEARCH_LOG
+(2026-10-04, Phase 3 results).
+
 ## 5. Large Π: three regimes (prograde, linear response)
 
 The speed excess along the hyperbola is δ(t) = |v_u(t)| − v. The hyperbola has a second timescale,
