@@ -5,7 +5,8 @@ import math
 import numpy as np
 import pytest
 
-from oberth_atlas.steering import InertialFixed, PitchLinear, Prograde, SteeringContext, make_steering
+from oberth_atlas.steering import (InertialFixed, PitchLinear, PitchPiecewise, Prograde, SteeringContext,
+                                   make_steering)
 
 CTX = SteeringContext(t_start=-0.5, t_end=0.5)
 R = np.array([1.3, -0.2, 0.0])
@@ -69,6 +70,31 @@ def test_pitch_is_smooth_through_zero_angular_momentum():
     for u in us:
         assert np.all(np.isfinite(u)) and np.linalg.norm(u) == pytest.approx(1.0, rel=1e-15)
     np.testing.assert_allclose(us[0], us[2], atol=1e-8)
+
+
+@pytest.mark.parametrize("n", [2, 6])
+def test_piecewise_with_linear_knots_equals_pitch_linear(n):
+    a0, a1 = 0.3, -0.8
+    knots = tuple(a0 + a1 * s for s in np.linspace(-0.5, 0.5, n))
+    pw, lin = PitchPiecewise(knots).bind(CTX), PitchLinear(a0, a1).bind(CTX)
+    for t in (-0.5, -0.31, 0.0, 0.123, 0.5):
+        np.testing.assert_allclose(pw(t, R, V, 1.0), lin(t, R, V, 1.0), atol=1e-15)
+
+
+def test_piecewise_interpolates_between_knots():
+    law = PitchPiecewise((0.0, 1.0, -1.0)).bind(CTX)                 # knots at s = −½, 0, ½
+    vhat = V / np.linalg.norm(V)
+    for t, alpha in ((-0.25, 0.5), (0.0, 1.0), (0.25, 0.0), (0.5, -1.0)):
+        u = law(t, R, V, 1.0)
+        assert math.atan2(np.cross(vhat, u)[2], vhat @ u) == pytest.approx(alpha, abs=1e-14)
+    with pytest.raises(ValueError):
+        PitchPiecewise((0.1,))
+
+
+def test_make_piecewise_from_config():
+    law = make_steering({"law": "pitch_piecewise", "knots_deg": [0, 10, -5]})
+    assert isinstance(law, PitchPiecewise) and law.knots[1] == pytest.approx(math.radians(10))
+    assert law.to_dict()["knots_deg"] == pytest.approx([0, 10, -5])
 
 
 def test_pitch_zero_equals_prograde():

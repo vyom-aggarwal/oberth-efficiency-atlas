@@ -2,7 +2,8 @@
 
 A steering law is a frozen dataclass of parameters. `bind(ctx)` returns a fast closure
 `u(t, r, v, m) -> unit vector`. It is evaluated in nondimensional units on the burn segment.
-All laws are smooth within the burn, so the integrator never meets a discontinuity.
+All laws are continuous within the burn. All except PitchPiecewise (kinks at its knots) are
+smooth; the integrator's error control handles the kinks, and η_err reports the accuracy.
 
 Sign convention for pitch: the in-plane normal is n̂ = ẑ₀ × v̂, where ẑ₀ is the normal of the
 incoming flyby plane (fixed). For a prograde flyby, n̂ points toward the central-body side of the
@@ -129,7 +130,45 @@ class PitchLinear:
         return {"law": self.name, "alpha0_deg": math.degrees(self.alpha0), "alpha1_deg": math.degrees(self.alpha1)}
 
 
-STEERING_LAWS = {"prograde": Prograde, "inertial": InertialFixed, "pitch_linear": PitchLinear}
+@dataclass(frozen=True)
+class PitchPiecewise:
+    """In-plane pitch from the velocity, piecewise-linear in normalized burn time (radians).
+
+    `knots` holds α at n ≥ 2 equally spaced points s_i = −½ + i/(n − 1) of s = (t − t_mid)/t_b ∈
+    [−½, ½]; α is interpolated linearly between them. Same plane and sign convention as
+    PitchLinear (fixed incoming-plane normal ẑ₀, α > 0 toward the planet). With knots
+    α₀ + α₁ s_i it reproduces PitchLinear(α₀, α₁) exactly.
+    """
+
+    knots: tuple = (0.0, 0.0)
+    name: str = field(default="pitch_piecewise", init=False)
+
+    def __post_init__(self):
+        if len(self.knots) < 2:
+            raise ValueError("PitchPiecewise needs at least 2 knots")
+
+    def bind(self, ctx: SteeringContext) -> SteeringFn:
+        t_mid = 0.5 * (ctx.t_start + ctx.t_end)
+        t_b = ctx.t_end - ctx.t_start
+        inv_tb = 1.0 / t_b if t_b > 0 else 0.0
+        z0 = ctx.plane_normal
+        knots = [float(k) for k in self.knots]
+        n1 = len(knots) - 1
+
+        def u(t: float, r: np.ndarray, v: np.ndarray, m: float) -> np.ndarray:
+            vhat = v / math.sqrt(float(v @ v))
+            x = min(max(((t - t_mid) * inv_tb + 0.5) * n1, 0.0), float(n1))   # knot coordinate in [0, n−1]
+            i = min(int(x), n1 - 1)
+            alpha = knots[i] + (x - i) * (knots[i + 1] - knots[i])
+            return math.cos(alpha) * vhat + math.sin(alpha) * np.cross(z0, vhat)
+        return u
+
+    def to_dict(self) -> dict:
+        return {"law": self.name, "knots_deg": [math.degrees(k) for k in self.knots]}
+
+
+STEERING_LAWS = {"prograde": Prograde, "inertial": InertialFixed, "pitch_linear": PitchLinear,
+                 "pitch_piecewise": PitchPiecewise}
 
 
 def make_steering(spec: dict | None) -> SteeringLaw:
@@ -148,6 +187,10 @@ def make_steering(spec: dict | None) -> SteeringLaw:
         alpha1 = math.radians(float(spec.pop("alpha1_deg", 0.0)))
         _reject_extra(law, spec)
         return PitchLinear(alpha0=alpha0, alpha1=alpha1)
+    if law == "pitch_piecewise":
+        knots = tuple(math.radians(float(k)) for k in spec.pop("knots_deg", (0.0, 0.0)))
+        _reject_extra(law, spec)
+        return PitchPiecewise(knots=knots)
     raise ValueError(f"unknown steering law {law!r}; choose from {sorted(STEERING_LAWS)}")
 
 
@@ -157,6 +200,6 @@ def _reject_extra(law: str, spec: dict) -> None:
 
 
 __all__ = [
-    "SteeringContext", "SteeringLaw", "Prograde", "InertialFixed", "PitchLinear",
+    "SteeringContext", "SteeringLaw", "Prograde", "InertialFixed", "PitchLinear", "PitchPiecewise",
     "make_steering", "STEERING_LAWS",
 ]

@@ -16,7 +16,7 @@ Schema (unknown keys are rejected, which catches typos):
       delta_v_km_s: 1.0
       midpoint_offset_s: 0.0        # at most one of: midpoint_offset_s, midpoint_offset_tau, midpoint_offset_tb
     steering:
-      law: prograde                 # prograde | inertial (direction: [x, y, z]) | pitch_linear (alpha0_deg, alpha1_deg)
+      law: prograde                 # prograde | inertial (direction: [x, y, z]) | pitch_linear (alpha0_deg, alpha1_deg) | pitch_piecewise (knots_deg)
     safety_margin_km: 100.0
     numerics:                       # optional overrides of simulate.Numerics
       rtol: 1.0e-12
