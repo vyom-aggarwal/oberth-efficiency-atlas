@@ -62,6 +62,35 @@ def thrust_rhs(mu: float, a0: float, c: float, steer: SteeringFn) -> RHS:
     return rhs
 
 
+def variable_thrust_rhs(mu: float, thrust_of_r: Callable[[float], float], c: float, steer: SteeringFn) -> RHS:
+    """Point-mass gravity plus thrust T(|r|) (units m0 μ/r_p²) along steer(t, r, v, m); dm/dt = −T/c.
+
+    Used for solar-electric propulsion, whose available power (and so thrust, at constant Isp and
+    efficiency) depends on the distance from the Sun.
+    """
+
+    def rhs(t: float, y: np.ndarray) -> np.ndarray:
+        r = y[0:3]
+        v = y[3:6]
+        m = y[6]
+        x, yy, z = r[0], r[1], r[2]
+        r2 = x * x + yy * yy + z * z
+        rn = math.sqrt(r2)
+        k = -mu / (r2 * rn) if mu != 0.0 else 0.0
+        T = thrust_of_r(rn)
+        u = steer(t, r, v, m)
+        am = T / m
+        ax, ay, az = am * u[0], am * u[1], am * u[2]
+        return np.array([
+            v[0], v[1], v[2],
+            k * x + ax, k * yy + ay, k * z + az,
+            -T / c,
+            ax * v[0] + ay * v[1] + az * v[2],
+        ])
+
+    return rhs
+
+
 def specific_energy(y: np.ndarray, mu: float) -> np.ndarray:
     """ε = v²/2 − μ/r for a state array of shape (8,) or (8, N)."""
     r = np.sqrt(y[0] ** 2 + y[1] ** 2 + y[2] ** 2)

@@ -84,6 +84,43 @@ def test_leading_order_loss_matches_theory_and_simulation():
     assert leading_order_loss(v_p, stages) == pytest.approx(sim.dv_loss, rel=0.1)
 
 
+def test_power_law_stage_with_zero_exponent_equals_constant_stage():
+    from oberth_atlas.simulate import Numerics
+    from oberth_atlas.staged import PowerLawStageND
+    v_p, T, c, dur = 1.40, 0.4, 0.1, 0.05
+    const = StageND(thrust=T, c=c, m_prop=T * dur / c)
+    plaw = PowerLawStageND(thrust_ref=T, r_ref=1.0, kappa=0.0, c=c, duration=dur)
+    r1 = simulate_staged_nd(v_p, [const])
+    r2 = simulate_staged_nd(v_p, [plaw], numerics=Numerics(dense_output=True))
+    assert r2.eps_out == pytest.approx(r1.eps_out, abs=1e-11)
+    assert r2.dv_rocket == pytest.approx(r1.dv_rocket, rel=1e-10)
+    # Δv-weighted spread: dense-output quadrature (power-law path) equals the analytic moments.
+    assert r2.Pi_eff == pytest.approx(r1.Pi_eff, rel=1e-6)
+    with pytest.raises(ValueError):
+        dv_centroid_time([plaw])
+
+
+def test_effective_pi_of_a_rocket_burn():
+    v_p, dv, c, Pi = 1.40, 0.02, 0.02, 0.5             # Δv/c = 1
+    res = simulate_staged_nd(v_p, [single_stage(dv, c, Pi, v_p)])
+    lam = dv / c
+    var = theory.profile_moments(lam).m2 - (x_centroid(lam) - 0.5) ** 2
+    assert res.Pi_eff == pytest.approx(Pi * math.sqrt(12 * var), rel=1e-10)
+    assert res.Pi_eff < Pi                               # a rising-acceleration burn is more concentrated
+
+
+def test_power_law_thrust_concentrates_the_burn():
+    from oberth_atlas.simulate import Numerics
+    from oberth_atlas.staged import PowerLawStageND
+    v_p = 1.39
+    plaw = PowerLawStageND(thrust_ref=0.002, r_ref=1.0, kappa=1.5, c=0.5, duration=20.0)
+    r = simulate_staged_nd(v_p, [plaw], numerics=Numerics(dense_output=True))
+    # Thrust ∝ r^−1.5 peaks at periapsis. With r ∝ |t|^(2/3) away from it, a ∝ 1/|t|: heavy tails, so
+    # the spread shrinks only logarithmically, σ ≈ T/sqrt(8 ln(T/2t_c)) → Π_eff/Π ≈ 0.7 here (0.64 measured).
+    assert r.Pi_eff < 0.8 * r.Pi
+    assert r.dv_rocket > 0 and r.dv_loss > 0 and r.energy_balance < 1e-10
+
+
 def test_si_stack_nondimensionalization():
     from oberth_atlas.constants import GM_SUN, SUN
     from oberth_atlas.staged import StageSI, stack_mass, stages_to_nd
