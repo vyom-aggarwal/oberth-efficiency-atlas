@@ -922,3 +922,25 @@ entry, which pooled invalid samples.
   small Δv).
 - **Unchanged:** chemical and nuclear-thermal numbers (0% outside the SOI).
 - **Limitation:** a heliocentric low-thrust treatment of the invalid cases is out of scope.
+
+## 2026-10-04: Bug fixed: pitch-law singularity at zero angular momentum (found in Phase 3)
+
+- **Symptom.** The first Phase 3 campaign stalled: after about 17 minutes, fewer than 25 of 450
+  optimizations had finished, and the log showed a divide warning in `PitchLinear`.
+  A probe of the control-box corners hung on (α₀, α₁, δ) = (−1.2, −3, +1) at Π = 100,
+  v∞/v_esc = 0.03, Δv/v_p = 0.3, Δv/c = 3.
+- **Cause.** The in-plane normal was built from the *instantaneous* orbit normal ĥ. The sideways
+  thrust term changes |h| at the finite rate sin α·(r·v̂)·a, which does not vanish as h → 0. A
+  strong pitch therefore drives h to zero, ĥ flips, and the thrust direction chatters across
+  h = 0. This is a sliding mode: DOP853 takes ever-smaller steps without ever failing. Phase 1–2
+  never reached it because they used only small pitch angles; the optimizer probes the corners.
+- **Fix** (commit 9dfa5fd). The pitch is now measured from the fixed normal ẑ₀ of the incoming
+  flyby plane. This is identical to ĥ whenever the angular momentum keeps its sense, i.e. for every
+  flyby that does not reverse, and it is smooth through h = 0.
+- **Tests added:**
+  - equivalence with the ĥ-based law (perifocal and rotated frames, to 2e-16);
+  - continuity at h = 0;
+  - a regression test on the stalled corner.
+  All 451 tests pass. The corner probe now runs each evaluation in under 0.1 s.
+- **Effect on earlier results: none.** Every Phase 1–2 pitch-linear run kept h > 0, where the two
+  definitions coincide. The campaign was restarted from scratch with the fixed law.
