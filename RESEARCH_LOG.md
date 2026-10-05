@@ -1482,3 +1482,81 @@ losses in their analysis.
 - **Summary for the hero figure and outline.** Their arc sits at Π_eff ≈ 4.6–9.2, where our curve
   gives ≈ 12–20% of the arc Δv. This replaces the constant-thrust bracket of 8–29%.
 - **Hibberd reference:** Π_eff = 0.0314 (Π = 0.0326 by duration).
+
+## 2026-10-05: Phase 5 deliverables: hero figure, animation, explorer, numbers checker
+
+**Hero figure** (`scripts/fig_hero.py` → `figures/hero_loss_vs_pi.{png,pdf}`, `hero_numbers.json`):
+- **The band.** The universal loss-vs-Π band for a near-parabolic solar Oberth burn: the spread
+  over the staged solid stack and one stage at Isp 850 s and 6,000 s, from Phase 4. Its max/min
+  ratio is ≤ 1.06 for Π ≤ 1 and ≤ 1.074 (at Π = 10) up to Π = 1000.
+- **Overlays:** the Π²/96 rule and the 1% guide.
+- **Real cases placed on it:**
+  - the Phase 2 solar flyby samples at 3–20 R☉ for all five engines;
+  - Hibberd et al.'s SOM;
+  - Maraqten et al.'s arc at Π_eff.
+- **The samples lie on the band:** chemical and nuclear thermal within −7% to −2% of its centre
+  (5th–95th percentile), electric within −1% to +2%.
+- **Interpolation artifact caught.** A first comparison clamped the curve below its smallest Π
+  (0.01) and showed chemical samples 2× "below" it. The band is now continued at each profile's
+  constant (loss/Δv)/Π², which is exact at leading order. Samples below 1e-8 of Δv (the numerical
+  floor) are not drawn.
+
+**Animation** (`scripts/anim_engines.py` → `figures/anim_engines.mp4`, `.gif`,
+`anim_engines_final.png`). Hibberd's dive (3.2 R☉, Δv = 8.36 km/s, bound arrival), flown with:
+
+| engine | burn | Π | loss |
+|---|---|---|---|
+| Hibberd stack | 3.5 min | 0.033 | 0.0012% |
+| nuclear thermal (Isp 900 s, a0 = 0.5 m/s²) | 3.0 h | 1.67 | 2.8% |
+| SEP-class (Isp 6,000 s, a0 = 3.3e-3 m/s², Maraqten's peak acceleration) | 27.5 d | 368 | 76% |
+
+- **Layout:**
+  - top-down panels with a logarithmic radial axis;
+  - the thrust arc coloured by a·v (W/kg, log scale);
+  - an energy-gain strip on a sinh time axis.
+- **Assumption (stated in the panel title).** SEP at 3.2 R☉ is thermally infeasible. It is shown
+  only to compare propulsion physics at a fixed geometry.
+- **Rendering.** The matplotlib GIF pass stalled after the MP4 (the background job hit its 1 h
+  limit). The GIF is now converted from the MP4 by ffmpeg with a two-pass palette, which gives
+  identical frames. `imageio-ffmpeg` was added as the optional `anim` extra, providing ffmpeg 7.1.
+
+**Interactive explorer** (`explorer/`; built by `scripts/build_explorer.py` into the self-contained
+`explorer/oberth_explorer.html`, 79 kB):
+- **Simulator.** `explorer/sim.js` is a planar Dormand–Prince 5(4) port of `simulate_nd`, with
+  the initial state from backward integration, exact conic minima on coasts and Hermite-refined
+  minima on the burn.
+- **Validation** (`tests/test_explorer_js.py`, run through node): 10 reference cases spanning
+  Π 0.01–100, v∞/v_esc 0.03–3, Δv/v_p 0.01–0.3, Δv/c 0.1–3 and both steering laws.
+
+  | quantity | stated tolerance | measured maximum |
+  |---|---|---|
+  | η | 1e-8 | 2.0e-10 |
+  | v∞,out (relative) | 1e-9 | 5.4e-11 |
+  | r_min | 1e-8 r_p | 2.7e-10 r_p |
+  | loss/Δv | 1e-8 | 1.1e-10 |
+
+  The target mapping (Π, v∞/v_esc, Δv/v_p, Δv/c) → inputs equals `OptCase.from_targets` to 1e-14.
+- **Inputs:** a mission mode (body, periapsis, v∞, Δv, engine, Isp, a0) or a dimensionless mode
+  (Π, v∞/v_esc, Δv/v_p, Δv/c); prograde or fixed-direction steering; time-centred or Δv-centroid
+  placement.
+- **Views:** the trajectory; η; the loss in % and m/s; Π and burn duration; v∞,out against the
+  impulsive value; closest approach with an impact flag and an SOI check; the case on the
+  universal loss curve and on the η atlas.
+- **The atlas.** The embedded atlas is linear-response η (prograde, Δv → 0) on a 41 × 25
+  (Π, v∞/v_esc) grid.
+- **Published** as a private artifact for viewing (https://claude.ai/artifact/Hezb4GbvfCC4b6t5T8XTZj).
+
+**Numbers checker** (`scripts/check_numbers.py`, `tests/test_check_numbers.py`):
+- **What it does.** It flags numbers in a Markdown draft that match no value in
+  `figures/*numbers*.json`, at the written precision.
+- **Unit scale rules.** Scale 1 by default; ×100 only with % or pp; explicit units map to unit
+  suffixes in the JSON keys.
+- **Coarse numbers.** One-significant-figure numbers are listed as unverified rather than matched.
+- **Skipped:** code, links, citations, references, identifiers, years and arXiv IDs.
+- **Error found in my first version.** It allowed blanket ×10^±2, ±3, ±6 scales. On the outline
+  every number "matched", many by accident (e.g. "0.3" against 2.8e-7 × 10⁶). The fix and a
+  regression test followed.
+- **Supporting file.** `scripts/literature_numbers.py` writes the quoted literature values and
+  configured inputs, with sources, to `figures/literature_numbers.json`.
+- **On the outline.** 23 numbers are verified, 0 unmatched, and 33 one-figure numbers are listed
+  as unverified.
