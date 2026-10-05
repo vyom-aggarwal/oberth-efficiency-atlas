@@ -128,12 +128,13 @@ def fig_loss_vs_pi(df, theory_curve, thr):
         ax.annotate(f"NTP a0 = {a0:g} m/s²", (r["Pi"], 100 * r["loss_rel"]), xytext=(8, -10),
                     textcoords="offset points", fontsize=7.5, color=INK_2)
     sep = df[(df["kind"] == "sep") & (df["placement"] == "time_centred")].sort_values("Pi")
-    ax.plot(sep["Pi"], 100 * sep["loss_rel"], "D", color=SERIES[2], markersize=7, **MK,
-            label="SEP, Maraqten et al. (2026) perihelion arc (own geometry, 0.308 au)")
-    for _, r in sep.iterrows():
-        short = "0.25-yr arc" if "duration" in r["label"] else f"49.8 N, {r['label'].split('start mass ')[1]}"
-        ax.annotate(f"SEP {short}", (r["Pi"], 100 * r["loss_rel"]), xytext=(-8, 8), textcoords="offset points",
-                    fontsize=7.5, color=INK_2, ha="right")
+    ax.plot(sep["Pi"], 100 * sep["loss_rel"], "D", color=SERIES[2], markersize=6, markerfacecolor="none",
+            markeredgewidth=1.2, label="Maraqten et al. (2026) arc placed on the curve: constant-thrust bracket")
+    spw = df[(df["kind"] == "sep_power") & (df["placement"] == "time_centred")].sort_values("Pi_eff")
+    ax.plot(spw["Pi_eff"], 100 * spw["loss_rel"], "D", color=SERIES[2], markersize=7, **MK,
+            label="Maraqten et al. (2026) arc placed on the curve: their F ∝ r^−1.5 model, at Π_eff")
+    ax.annotate("their arc, F ∝ r^−1.5\n(start mass 11.0–15.2 t)", (spw["Pi_eff"].min(), 100 * spw["loss_rel"].min()),
+                xytext=(-10, 10), textcoords="offset points", fontsize=7.5, color=INK_2, ha="right")
     ax.axvline(thr["optimal"]["1%"]["Pi"], color=SERIES[0], linewidth=0.6, linestyle=DOTTED)
     ax.annotate(f"1% at Π ≈ {thr['time_centred']['1%']['Pi']:.2f}: thrust ÷ {1 / thr['time_centred']['1%']['f']:.0f},\n"
                 f"a0 ≈ {thr['time_centred']['1%']['a0_m_s2']:.2f} m/s²",
@@ -142,7 +143,7 @@ def fig_loss_vs_pi(df, theory_curve, thr):
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlim(0.01, 400)
-    ax.set_xlabel("Π = burn duration / τ   (τ = r_p/v_p)")
+    ax.set_xlabel("Π = burn duration / τ   (τ = r_p/v_p);  for the r^−1.5 SEP arcs, Π_eff = √12 σ_t/τ")
     ax.set_ylabel("equivalent-Δv loss  [% of Δv]")
     ax.legend(fontsize=7.5, loc="lower right")
     fig.suptitle("Where the impulsive model fails for a solar Oberth burn (bound, near-parabolic arrival at 3.2 R☉, "
@@ -248,6 +249,15 @@ def main() -> None:
         "sep": [{k: (float(r[k]) if isinstance(r[k], (float, np.floating)) else r[k])
                  for k in ("label", "placement", "Pi", "loss_rel", "dv_loss_m_s", "offset_s", "v_p_km_s")}
                 for _, r in df[df["kind"] == "sep"].iterrows()],
+        "sep_power": [{k: (float(r[k]) if isinstance(r[k], (float, np.floating)) else r[k])
+                       for k in ("label", "placement", "Pi", "Pi_eff", "loss_rel", "dv_rocket_m_s", "dv_loss_m_s",
+                                 "offset_s", "t_b_s", "m_start_kg")}
+                      for _, r in df[df["kind"] == "sep_power"].iterrows()],
+        # How well Π_eff places a concentrated (r^−1.5) arc on the one-stage SEP curve at the SOM geometry.
+        "sep_power_relative_to_curve_at_Pi_eff": {
+            r["label"]: float(r["loss_rel"] / at(c_sep, r["Pi_eff"]) - 1.0)
+            for _, r in df[(df["kind"] == "sep_power") & (df["placement"] == "time_centred")].iterrows()},
+        "hibberd_Pi_eff": float(ref["time_centred"]["Pi_eff"]),
     }
     (ROOT / "figures" / "phase4_numbers.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(json.dumps({k: out[k] for k in ("stack", "reference", "convergence_rtol_1e-13_diff_m_s", "leading_order_m_s",
