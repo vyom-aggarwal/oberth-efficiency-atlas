@@ -111,9 +111,9 @@ class NDResult:
     b_finite: float
     eta: float
     eta_err: float
-    eta_E: float
+    eta_E: float                     # DEPRECATED: Δε_fin/Δε_imp, nonzero deep-space floor (kept for continuity)
     eta_E_err: float
-    eta_W: float                     # baseline-subtracted energy efficiency (proposed; see theory.py)
+    eta_W: float                     # secondary metric (adopted 2026-10-04): baseline-subtracted energy efficiency
     eta_W_err: float
     delta_eps_finite: float
     delta_eps_imp: float
@@ -167,9 +167,9 @@ class FlybyResult:
     b_finite: float
     eta: float                       # B_finite / B_imp (NaN when b_imp_small)
     eta_err: float                   # numerical error estimate of eta
-    eta_E: float                     # Δε_finite / Δε_imp
+    eta_E: float                     # DEPRECATED: Δε_finite / Δε_imp (deep-space floor; use eta_W)
     eta_E_err: float
-    eta_W: float                     # (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep), proposed baseline-subtracted η_E
+    eta_W: float                     # secondary metric: (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep)
     eta_W_err: float
     delta_v_loss: float              # v_inf_imp − v_inf_out
     delta_eps_finite: float          # ε_out − ε_in

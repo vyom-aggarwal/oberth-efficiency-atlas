@@ -35,6 +35,14 @@ As λ → 0 these become f ≡ 1 and F = x (constant acceleration).
 
 ## 2. Exact energy bookkeeping
 
+**Metric status (user decision, 2026-10-04):**
+- **η** (speed-based, B_fin/B_imp) is the primary metric.
+- **η_W** below is the adopted energy-based secondary metric.
+- **η_E** = Δε_fin/Δε_imp is **deprecated**. A deep-space burn scores (v∞Δv + Δv²/2)/(v_pΔv + Δv²/2) > 0
+  on it, so the baseline leaks into the efficiency. It is still stored, for continuity only.
+- For bound arrivals (Phase 4) the metric is the equivalent-Δv penalty (extra Δv to reach the
+  impulsive final energy), given by `theory.equivalent_dv_loss_per_pi2` at small Π.
+
 Along any burn, dε/dt = a û·v, so ε_out = ε_in + W with W = ∫ a û·v dt. That gives three reference
 values of W and one exact identity:
 

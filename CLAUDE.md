@@ -71,6 +71,13 @@ unknown keys are rejected.
 - State vectors are 3D. An optional rotation matrix can rotate the whole problem; the scalar
   results are invariant under it, and this is tested.
 
+## Metrics
+- **η = B_finite/B_imp** (speed-based Oberth efficiency) is primary. It is never clipped.
+- **η_W = (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep)** is the secondary, energy-based metric. It is
+  linear in thrust, and η = map(η_W, ξ) exactly.
+- **η_E** is deprecated: it has a nonzero deep-space floor. It is stored only for continuity.
+- **Bound arrivals:** use the equivalent-Δv penalty instead.
+
 ## Numerics
 - `scipy.integrate.solve_ivp` with DOP853, default rtol = atol = 1e-12. Do not go below ~1e-13.
 - Integration is split into coast / burn / coast segments, so no step crosses a thrust

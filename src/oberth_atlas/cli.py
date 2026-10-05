@@ -50,7 +50,8 @@ def format_report(res: FlybyResult, name: str) -> str:
             ("  v_inf_imp (impulsive)", f"{_fmt(res.v_inf_imp, 1e3, 10)} km/s"),
             ("  B_finite / B_imp", f"{_fmt(res.b_finite, 1e3, 8)} / {_fmt(res.b_imp, 1e3, 8)} km/s"),
             ("  eta = B_finite / B_imp", f"{_fmt(res.eta, digits=10)}   (+/- {_fmt(res.eta_err, digits=2)})"),
-            ("  eta_E = deps_fin / deps_imp", f"{_fmt(res.eta_E, digits=10)}   (+/- {_fmt(res.eta_E_err, digits=2)})"),
+            ("  eta_W (energy, baseline-subtracted)", f"{_fmt(res.eta_W, digits=10)}   (+/- {_fmt(res.eta_W_err, digits=2)})"),
+            ("  eta_E (deprecated)", f"{_fmt(res.eta_E, digits=10)}"),
             ("  equivalent dv loss", f"{_fmt(res.delta_v_loss, 1.0, 6)} m/s"),
             ("  integrated dv (rocket eq.)", f"{_fmt(res.delta_v_integrated, 1e3, 12)} km/s"),
         ]

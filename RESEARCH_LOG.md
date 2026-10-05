@@ -879,3 +879,25 @@ support and the equivalent-Δv penalty (decision Q1).
   - So her implied losses are 4–14% larger than ours. **Unresolved, not pursued in Phase 3**
     (user decision). Causes are listed in RELATED_WORK. The sign is consistent with incompletely
     converged optimization in her direct shooting.
+
+## 2026-10-04: Phase 2 decisions applied (user, before Phase 3)
+
+- **Q1, metrics.**
+  - η_W = (Δε_fin − Δε_deep)/(Δε_imp − Δε_deep) is adopted as the energy-based secondary metric.
+  - η_E is kept in outputs but marked **deprecated** (deep-space floor) in code comments,
+    docs/theory.md §2, CLAUDE.md and the CLI report, which now prints η_W.
+  - Bound arrivals (Phase 4) use the equivalent-Δv penalty.
+- **Q2, electric propulsion outside the SOI.**
+  - Mission samples whose burn starts outside the body's sphere of influence are **greyed out**
+    in the mission atlas, labelled "planet-centred model invalid".
+  - Their η statistics are reported separately from the valid samples.
+  - A heliocentric low-thrust treatment is **out of scope** and recorded as a limitation.
+- **Q3, Phase 3 scope.**
+  - Optimize the prograde family only (pitch law plus timing), with inertial as a reference
+    curve, over 1 ≲ Π ≲ 100.
+  - Enforce a minimum-altitude constraint, and report η against both baselines (fixed-r_p
+    impulsive, and impulsive at the achieved periapsis).
+  - Frame the contribution as quantifying recoverable efficiency against Π and v∞/v_esc. The
+    inward tilt itself is known (Confraria, Ferreira).
+- **Q4, sweeps.** The exhaust-velocity axis is reduced to three values, Δv/c ≈ 0.1, 1 and 3
+  (high mass ratio is where Robbins is exceeded). The freed budget goes to Δv and v∞ resolution.
