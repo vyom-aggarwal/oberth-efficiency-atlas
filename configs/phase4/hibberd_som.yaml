@@ -1,0 +1,53 @@
+# Phase 4 reference: the solar Oberth manoeuvre (SOM) of Hibberd, Eubanks & Hein (2026),
+# "Catching 3I/ATLAS Using a Solar Oberth", arXiv:2601.02533 v2 — the 50-year, 2035-launch case
+# (Table 1, first row; Table 2, row m: CASTOR 30B + STAR 48 with a 546 kg payload).
+#
+# Sources:
+#  [H26]  Hibberd et al. (2026), Tables 1–2 (masses, exhaust velocities, SOM radius, ΔV).
+#  [NG16] Northrop Grumman Propulsion Products Catalog, OSR No. 16-S-1432, 5 April 2016:
+#         CASTOR 30B datasheet; STAR 48B short nozzle (TE-M-711-17) datasheet.
+# Hibberd's "STAR 48" matches the STAR 48B short nozzle: 2137 kg ≈ 4,705.4 lbm loaded, 124 kg ≈
+# 274.2 lbm inert, 2.8028 km/s ≈ Isp 286.0 s (RESEARCH_LOG 2026-10-05).
+
+som:
+  r_p_over_R_sun: 3.2            # [H26] Table 1 caption: SOM burn at 3.2 solar radii from the centre
+  delta_v_km_s: 8.355            # [H26] Table 1, 50-year row (Table 2 caption: 8.36)
+
+arrival:
+  # The incoming heliocentric orbit is bound and near-parabolic (RELATED_WORK §5). The SOM follows a
+  # passive Jupiter gravity assist, so the reference aphelion is Jupiter's distance (assumption).
+  aphelion: jupiter_sma          # constants.JUPITER.sma; sensitivity: 1 au, 30 au, parabolic, v∞ = 5 km/s
+
+payload_kg: 546.0                # [H26] Table 1 and Table 2 row m
+
+stages:                          # in firing order
+  - name: CASTOR 30B
+    total_kg: 13970.6            # [H26] Table 2 (= 30,800 lbm [NG16])
+    dry_kg: 1000.0               # [H26] Table 2 ([NG16] burnout 2,203 lbm = 999.3 kg)
+    exhaust_velocity_km_s: 2.9649  # [H26] Table 2 ([NG16] Isp 300.6 s → 2.948 km/s)
+    burn_time_s: 126.7           # [NG16]
+    max_thrust_lbf: 89090        # [NG16]; used only for the two-level profile sensitivity
+    avg_thrust_lbf: 67370        # [NG16]; cross-check of m_prop·c/burn_time
+  - name: STAR 48B (short nozzle)
+    total_kg: 2137.0             # [H26] Table 2
+    dry_kg: 124.0                # [H26] Table 2
+    exhaust_velocity_km_s: 2.8028  # [H26] Table 2 ([NG16] effective Isp 286.0 s → 2.805 km/s)
+    burn_time_s: 84.1            # [NG16] burn time (action time 85.2 s)
+    max_thrust_lbf: 17110        # [NG16]
+    avg_thrust_lbf: 15100        # [NG16]
+
+staging_coast_s: 0.0             # not given by [H26]; sensitivity 10 s and 60 s
+
+# Other propulsion placed on the same loss curve (same SOM geometry and ΔV unless stated).
+nuclear_thermal:                 # Phase 2 preset ranges (configs/atlas/presets.yaml)
+  isp_s: [800.0, 900.0]
+  a0_m_s2: [0.1, 3.0]
+sep_maraqten2026:                # Maraqten et al. (2026), arXiv:2608.11113, Table 5 (JGA case) and §5.3
+  r_p_au: 0.308                  # perihelion of the SEP–SOM
+  v_p_km_s: 75.0                 # their quoted perihelion speed at 0.3 au (fall from 5.2 au)
+  isp_s: 6000.0
+  thrust_N: 49.8                 # thrust at r_SOM (maximum); thrust falls as power ∝ r^-2 away from it
+  launch_mass_kg: 15189.0
+  propellant_kg: 5878.0
+  delta_v_arc_km_s: 10.0         # "~10 km/s ... delivered in a short near-perihelion thrust segment"
+  arc_duration_yr: 0.25          # no-JGA case, phase 4 "Solar Oberth (2.3–2.55 yr)" (Appendix B.7.2)
