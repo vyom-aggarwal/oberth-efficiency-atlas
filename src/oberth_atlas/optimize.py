@@ -186,5 +186,19 @@ def timing_theory_delta(dv_over_c: float) -> float:
     return 0.5 - (1.0 / mu_r - 1.0 / lam)
 
 
-__all__ = ["OptCase", "OptResult", "optimize_case", "timing_theory_delta", "eta_against_periapsis", "R_FLOOR",
-           "theory"]
+def timing_theory_fraction(case: OptCase) -> float:
+    """Small-Π fraction of the centered prograde deficit 1 − η that optimal retiming recovers.
+
+    [C(½) − C(x̄)]/C(½), with C(x_c) the finite-Δv small-Π prefactor (`theory.small_pi_prefactor`)
+    for periapsis at normalized burn time x_c. It is independent of Π at leading order. As Δv → 0
+    it tends to (x̄ − ½)²/⟨(x − ½)²⟩_f, because only the m₂ term depends on timing; the finite-Δv
+    term j is translation-invariant and dilutes the fraction.
+    """
+    x_bar = 0.5 - timing_theory_delta(case.dv / case.c)
+    c_mid = theory.small_pi_prefactor(case.v_inf, case.dv, case.c, "prograde", x_c=0.5)
+    c_bar = theory.small_pi_prefactor(case.v_inf, case.dv, case.c, "prograde", x_c=x_bar)
+    return (c_mid - c_bar) / c_mid
+
+
+__all__ = ["OptCase", "OptResult", "optimize_case", "timing_theory_delta", "timing_theory_fraction",
+           "eta_against_periapsis", "R_FLOOR", "theory"]

@@ -4,7 +4,9 @@ import math
 
 import pytest
 
-from oberth_atlas.optimize import OptCase, _Evaluator, eta_against_periapsis, optimize_case, timing_theory_delta
+from oberth_atlas import theory
+from oberth_atlas.optimize import (OptCase, _Evaluator, eta_against_periapsis, optimize_case, timing_theory_delta,
+                                   timing_theory_fraction)
 from oberth_atlas.simulate import Numerics
 
 
@@ -17,6 +19,23 @@ def test_small_pi_optimal_timing_matches_theory(lam):
     assert r.delta < 0
     assert r.delta == pytest.approx(timing_theory_delta(lam), abs=2e-3)
     assert r.eta_fixed >= r.eta_centered
+
+
+@pytest.mark.parametrize("lam, v_over_vesc, dv_over_vp", [(1.0, 0.03, 0.03), (3.0, 0.3, 0.3), (3.0, 3.0, 0.03)])
+def test_small_pi_recoverable_fraction_matches_theory(lam, v_over_vesc, dv_over_vp):
+    """The fraction of 1 − η recovered by retiming at small Π is predicted with no free parameter."""
+    case = OptCase.from_targets(v_over_vesc, dv_over_vp, lam, Pi=0.1)
+    r = optimize_case(case, "timing")
+    measured = (r.eta_fixed - r.eta_centered) / (1.0 - r.eta_centered)
+    assert measured == pytest.approx(timing_theory_fraction(case), abs=5e-4)
+
+
+def test_recoverable_fraction_small_dv_limit():
+    lam = 3.0
+    m2 = theory.profile_moments(lam).m2
+    limit = timing_theory_delta(lam) ** 2 / m2
+    case = OptCase.from_targets(0.3, 1e-6, lam, Pi=0.1)
+    assert timing_theory_fraction(case) == pytest.approx(limit, rel=1e-4)
 
 
 def test_timing_theory_values():
