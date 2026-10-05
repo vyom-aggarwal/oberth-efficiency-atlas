@@ -946,3 +946,100 @@ entry, which pooled invalid samples.
   `missions.parquet`) used only prograde and inertial steering. Pitch-linear appeared only in tests
   and in `configs/earth_pitch_example.json`, and all of those still pass. The campaign was restarted
   from scratch with the fixed law.
+
+## 2026-10-04: Phase 3 optimization campaign (`scripts/run_phase3.py`)
+
+**Setup.**
+- **Grid:** Π ∈ {1, 3, 10, 30, 100} × v∞/v_esc ∈ {0.03, 0.1, 0.3, 1, 3} × Δv/v_p ∈ {0.03, 0.3}
+  × Δv/c ∈ {0.1, 1, 3}, i.e. 150 cases.
+- **Three runs per case:**
+  - timing only (α ≡ 0, δ free; bounded Brent);
+  - pitch + timing (α₀, α₁, δ) with r_min ≥ r_p (SLSQP, 5 starts);
+  - the same with r_min ≥ 0.9 r_p.
+- **Size:** 450 optimizations, 23.4 min on 8 workers.
+- **Objective:** maximize η_W (equivalent to maximizing η, ε_out and v∞,out at fixed Δv, Isp, a0).
+- **Baselines:** η is reported against the impulsive burn at the nominal r_p ("fixed") and at the
+  trajectory's own r_min ("achieved").
+
+**Quality.** All numbers are from `figures/phase3_numbers.json`.
+- **Errors and feasibility:** 0 errors; all 450 optima are feasible.
+- **Bounds:** no optimum lies on a bound. The ranges are α₀ ∈ [−0.0002, 0.309] rad,
+  α₁ ∈ [−0.744, 0.004] rad and δ ∈ [−0.654, 0.329].
+- **Multi-start agreement:** in 296 of 300 constrained optimizations all 5 starts reach the same
+  optimum (spread ≤ 1e-6). In the other 4 (Π = 100, v∞/v_esc = 3, Δv/v_p = 0.3, Δv/c ∈ {0.1, 1})
+  one start, (0.3, 0, −0.3), stalls in an inferior local optimum (η ≈ −0.1); the other 4 starts
+  agree.
+- **Independent check:** penalty Nelder–Mead on 12 cases agrees with SLSQP. η_NM − η_SLSQP lies
+  in [+1e-14, +4.7e-9]; the largest difference comes with a 5e-7 constraint violation by NM.
+- **Integration error:** max η error estimate 7.2e-10.
+
+## 2026-10-04: Phase 3 results: recoverable efficiency in the prograde family
+
+1. **Recoverable efficiency** Δη = η_opt − η_centered (r_min ≥ r_p, fixed baseline). The
+   median (max) in percentage points:
+
+   | Δv/c | Π = 1 | 3 | 10 | 30 | 100 |
+   |---|---|---|---|---|---|
+   | 0.1 | 0.00 (0.03) | 0.08 (0.25) | 0.52 (1.42) | 0.68 (2.57) | 0.45 (3.13) |
+   | 1 | 0.10 (0.28) | 0.43 (1.57) | 0.84 (3.52) | 1.02 (3.32) | 1.02 (2.16) |
+   | 3 | 0.69 (2.02) | 4.00 (10.60) | 11.72 (21.56) | 13.64 (20.62) | 10.97 (15.93) |
+
+   - The **mass ratio controls** what can be recovered. Centered prograde burns are within
+     ~3.5 pp of the family optimum for Δv/c ≤ 1, but leave up to 22 pp on the table for Δv/c = 3.
+   - As a fraction of the deficit 1 − η_c, the median recovered is:
+     - 0.1–1% at Δv/c = 0.1;
+     - 1.5–6% at Δv/c = 1;
+     - 13–35% at Δv/c = 3.
+     It falls with Π.
+   - **v∞/v_esc** sets the size at fixed Π. Larger v∞/v_esc gives a larger Δη at Π ≲ 10, and
+     the curves cross at larger Π (figure `phase3_recoverable.png`).
+2. **Timing does most of the work.** Timing alone gives a median 93–99% of the full gain at every
+   Π. By Δv/c the median share is 0.74, 0.99 and 0.99. Inward pitch matters only for Δv/c = 3
+   with Δv/v_p = 0.3: there α₀ reaches 16° and α₁ −39° (pitching back toward prograde during the
+   burn). Elsewhere it is ≲ 1°.
+3. **Small-Π theory of the recoverable fraction** (new, `optimize.timing_theory_fraction`).
+   - **The mechanism:** only the m₂ term of the small-Π deficit depends on timing; the
+     finite-Δv term j is translation-invariant. Moving the Δv centroid to periapsis therefore
+     recovers [C(½) − C(x̄)]/C(½) of the deficit.
+   - **Δv → 0 limit:** (x̄ − ½)²/⟨(x − ½)²⟩_f = 0.083%, 7.58% and 39.7% for Δv/c = 0.1, 1 and 3.
+   - **Agreement:** to ≤ 2e-4 at Π = 0.1 for all v∞/v_esc and Δv/v_p tested. It still holds
+     within ~1 percentage point of the fraction at Π = 1 for Δv/v_p = 0.03. Tests in
+     `tests/test_optimize.py`.
+4. **Timing hypothesis.** "Start earlier than centered" is **confirmed at small Π** for every
+   case: δ_opt equals ½ − x̄ to 2e-3 at Π ≤ 0.2 and to ~0.01 at Π = 1.
+   - **Δv/c ≥ 1:** at larger Π the optimum moves *further* earlier. The median δ at
+     Π = 1, 3, 10, 30, 100 is:
+     - Δv/c = 3: −0.23, −0.29, −0.39, −0.45, −0.49 (theory −0.22);
+     - Δv/c = 1: −0.086, −0.106, −0.162, −0.219, −0.269 (theory −0.082).
+   - **Reversal:** for near-constant-mass burns with a large Δv the optimum moves *later*. 38 of
+     150 timing optima have δ > 0, all at Δv/c ≤ 1; e.g. Δv/c = 0.1, Δv/v_p = 0.3: δ = +0.06,
+     +0.17, +0.26 and +0.32 at Π = 3, 10, 30 and 100.
+   - **Mechanism, read off the data:** prograde thrust before periapsis lifts the actual
+     periapsis. The centered burn has r_min = 1.03, 1.14, 1.35 and 1.70 r_p at Π = 3–100
+     (v∞/v_esc = 0.03, Δv/c = 0.1, Δv/v_p = 0.3), and the later optimum keeps it at 1.02–1.16.
+     For high mass ratio the centroid effect dominates despite the lift (the early optimum
+     reaches r_min = 2.11 at Π = 100, Δv/c = 3).
+5. **Altitude constraint and the two baselines.**
+   - With r_min ≥ r_p the constraint is binding (relaxing it moves the optimum below r_p) in 20 of
+     150 cases: 17 at Δv/c = 3, 3 at Δv/c = 1, none at 0.1.
+   - Relaxing to 0.9 r_p gains at most 0.91 pp on the fixed baseline, but **≤ 7e-6 pp, and down to
+     −2.2 pp, on the achieved baseline.** Going deeper buys only what an impulsive burn at that
+     depth would buy: the constraint costs depth, not efficiency.
+   - With r_min ≥ r_p, η_achieved − η_fixed lies in [0, 0.040] (median 0.0018).
+   - Comparing both burns on their own achieved periapsis, the median ratio (achieved-baseline
+     gain)/(fixed-baseline gain) is −0.73 at Δv/c = 0.1 and 1.05 and 1.01 at Δv/c = 1 and 3. For
+     near-constant-mass burns the "recoverable efficiency" is therefore entirely depth: the
+     centered burn wastes it by lifting its periapsis. For high-mass-ratio burns it is a genuine
+     efficiency gain.
+6. **Inertial reference.** Inertial centered η has median 0.97, 0.84, 0.50, 0.18 and −0.05 at
+   Π = 1, 3, 10, 30 and 100 (min −1.36). The optimized prograde family beats it everywhere, by
+   ≥ 0.2 in η at Π ≥ 10 for the cases shown in `phase3_baselines.png`.
+
+**Figures:**
+- `phase3_recoverable.png`
+- `phase3_fraction.png`
+- `phase3_timing.png`
+- `phase3_baselines.png`
+- `phase3_pitch.png`
+
+All are generated by `scripts/fig_phase3.py`, which also writes `figures/phase3_numbers.json`.
