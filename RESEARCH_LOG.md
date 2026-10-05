@@ -1006,7 +1006,8 @@ entry, which pooled invalid samples.
      within ~1 percentage point of the fraction at Π = 1 for Δv/v_p = 0.03. Tests in
      `tests/test_optimize.py`.
 4. **Timing hypothesis.** "Start earlier than centered" is **confirmed at small Π** for every
-   case: δ_opt equals ½ − x̄ to 2e-3 at Π ≤ 0.2 and to ~0.01 at Π = 1.
+   case: δ_opt equals ½ − x̄ to 2e-3 at Π ≤ 0.2. At Π = 1 the deviation is median 0.011 and
+   max 0.025.
    - **Δv/c ≥ 1:** at larger Π the optimum moves *further* earlier. The median δ at
      Π = 1, 3, 10, 30, 100 is:
      - Δv/c = 3: −0.23, −0.29, −0.39, −0.45, −0.49 (theory −0.22);
@@ -1032,8 +1033,9 @@ entry, which pooled invalid samples.
      centered burn wastes it by lifting its periapsis. For high-mass-ratio burns it is a genuine
      efficiency gain.
 6. **Inertial reference.** Inertial centered η has median 0.97, 0.84, 0.50, 0.18 and −0.05 at
-   Π = 1, 3, 10, 30 and 100 (min −1.36). The optimized prograde family beats it everywhere, by
-   ≥ 0.2 in η at Π ≥ 10 for the cases shown in `phase3_baselines.png`.
+   Π = 1, 3, 10, 30 and 100 (min −1.36). The optimized prograde family beats it in all 150 cases.
+   The margin η_opt − η_inertial has median 0.008, 0.047, 0.155, 0.278 and 0.321 at those Π
+   (min 0.0013, max 1.60).
 
 **Figures:**
 - `phase3_recoverable.png`
