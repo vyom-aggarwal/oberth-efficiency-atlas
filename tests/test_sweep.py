@@ -37,6 +37,20 @@ def test_infeasible_mass_ratios_skipped():
     assert pairs == {(0.1, 0.1), (0.1, 1.0), (1.0, 1.0)}             # Δv/c = 10 is skipped
 
 
+def test_dv_over_c_axis_replaces_exhaust_velocity_axis():
+    spec = GridSpec(Axis(0.5, 0.5, 1), Axis(0.1, 1.0, 2), Axis(99.0, 99.0, 1), Axis(1.0, 1.0, 1),
+                    steering=("prograde",), dv_over_c=(0.1, 1.0, 3.0))
+    cases = list(spec.cases())
+    assert len(cases) == 2 * 3
+    for c in cases:
+        assert c["dv"] / c["c"] == pytest.approx((0.1, 1.0, 3.0)[c["i_c"]], rel=1e-15)
+
+
+def test_original_grid_indices_preserved_when_skipping():
+    spec = GridSpec(Axis(0.5, 0.5, 1), Axis(1.0, 1.0, 1), Axis(0.1, 1.0, 2), Axis(1.0, 1.0, 1), steering=("prograde",))
+    assert [c["i_c"] for c in spec.cases()] == [1]          # c = 0.1 skipped (Δv/c = 10), index 1 kept
+
+
 def test_small_sweep_roundtrip(tmp_path):
     spec = GridSpec(Axis(0.1, 2.0, 2), Axis(0.01, 0.3, 2), Axis(0.5, 5.0, 2), Axis(1e-3, 10.0, 3))
     out = tmp_path / "s.parquet"

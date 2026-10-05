@@ -53,15 +53,23 @@ class GridSpec:
     steering: tuple[str, ...] = ("prograde", "inertial")
     max_dv_over_c: float = 2.0                 # mass ratio >= e^-2; beyond every preset (max 0.85)
     numerics: dict = field(default_factory=dict)
+    # If set, the exhaust-velocity axis is replaced by these mass-loading values λ = Δv/c, and c =
+    # Δv/λ for each Δv (user decision Q4: λ ≈ 0.1, 1, 3). `c` is then ignored, and so is
+    # max_dv_over_c, since the list itself sets the mass ratio.
+    dv_over_c: tuple[float, ...] | None = None
+
+    def _c_values(self, dv: float) -> list[tuple[int, float]]:
+        """(axis index, c) pairs for this Δv. The index is the position on the c (or Δv/c) axis."""
+        if self.dv_over_c is not None:
+            return [(k, dv / lam) for k, lam in enumerate(self.dv_over_c)]
+        return [(k, float(c)) for k, c in enumerate(self.c.values) if dv / c <= self.max_dv_over_c]
 
     def cases(self) -> Iterator[dict]:
-        ax = {g: getattr(self, g).values for g in ("v_inf", "dv", "c", "a0")}
+        ax = {g: getattr(self, g).values for g in ("v_inf", "dv", "a0")}
         for law in self.steering:
             for i, v in enumerate(ax["v_inf"]):
                 for j, dv in enumerate(ax["dv"]):
-                    for k, c in enumerate(ax["c"]):
-                        if dv / c > self.max_dv_over_c:
-                            continue
+                    for k, c in self._c_values(float(dv)):
                         for m, a0 in enumerate(ax["a0"]):
                             yield dict(steering=law, i_v_inf=i, i_dv=j, i_c=k, i_a0=m,
                                        v_inf=float(v), dv=float(dv), c=float(c), a0=float(a0))
