@@ -1,0 +1,254 @@
+{
+ "stack": {
+  "m0_kg": 16653.6,
+  "hibberd_listed_total_kg": 17754.0,
+  "listed_minus_sum_kg": 1100.4000000000015,
+  "dv_rocket_m_s": 8362.375511834913,
+  "hibberd_dv_m_s": 8355.0,
+  "v_p_km_s": 344.7979045582285,
+  "tau_s": 6456.651767801096,
+  "duration_s": 210.79999999999995,
+  "Pi": 0.03264850073706095,
+  "constant_thrust_vs_catalog": {
+   "CASTOR 30B": 0.01283928516795707,
+   "STAR 48B (short nozzle)": -0.0012046207887993488
+  }
+ },
+ "reference": {
+  "time_centred": {
+   "dv_loss_m_s": 0.09909949409779928,
+   "loss_rel": 1.1850639086650437e-05,
+   "offset_s": 0.0,
+   "dv_loss_err_m_s": 1.3687263183879123e-07,
+   "v_inf_out_km_s": 74.13823127145183,
+   "v_inf_out_shortfall_m_s": 0.47206263451471386
+  },
+  "centroid": {
+   "dv_loss_m_s": 0.08973281818939122,
+   "loss_rel": 1.0730541586227046e-05,
+   "offset_s": -19.56181195160065,
+   "dv_loss_err_m_s": 1.367449594441544e-07,
+   "v_inf_out_km_s": 74.13827588994288,
+   "v_inf_out_shortfall_m_s": 0.42744414346884696
+  },
+  "optimal": {
+   "dv_loss_m_s": 0.08973281818939122,
+   "loss_rel": 1.0730541586227046e-05,
+   "offset_s": -19.564001961356443,
+   "dv_loss_err_m_s": 1.3664071614108092e-07,
+   "v_inf_out_km_s": 74.13827588994297,
+   "v_inf_out_shortfall_m_s": 0.427444143369371
+  }
+ },
+ "convergence_rtol_1e-13_diff_m_s": {
+  "time_centred": 1.2469179716534384e-09,
+  "centroid": 1.4637732831390693e-09,
+  "optimal": 1.3553456273962539e-09
+ },
+ "leading_order_m_s": {
+  "time_centred": 0.09301396431120854,
+  "centroid": 0.08364627836232735
+ },
+ "sensitivity_m_s": {
+  "reference (aphelion 5.2 au, no staging coast)": {
+   "time_centred": 0.09909949409779928,
+   "optimal": 0.08973281818939122
+  },
+  "staging coast 10 s": {
+   "time_centred": 0.1124161818337925,
+   "optimal": 0.1033818124949168
+  },
+  "staging coast 60 s": {
+   "time_centred": 0.19868271684905137,
+   "optimal": 0.19122043323859547
+  },
+  "aphelion 1 au": {
+   "time_centred": 0.0980251787864621,
+   "optimal": 0.08877271433054067
+  },
+  "aphelion 30 au": {
+   "time_centred": 0.0993108298893243,
+   "optimal": 0.0899216873380142
+  },
+  "parabolic arrival": {
+   "time_centred": 0.09935517425034449,
+   "optimal": 0.08996131780692726
+  },
+  "hyperbolic v∞ = 5 km/s": {
+   "time_centred": 0.09937391548181553,
+   "optimal": 0.08997806678874731
+  },
+  "two-level thrust, regressive": {
+   "time_centred": 0.10481569335820069,
+   "optimal": 0.10073474223970069
+  },
+  "two-level thrust, progressive": {
+   "time_centred": 0.09432983065641218,
+   "optimal": 0.07853447468522737
+  }
+ },
+ "thresholds": {
+  "time_centred": {
+   "0.1%": {
+    "Pi": 0.30075672874976234,
+    "f": 0.10855451471619569,
+    "thrust_scale_divisor": 9.211961405883434,
+    "a0_m_s2": 1.978487280396219,
+    "burn_duration_s": 1941.8814643602275,
+    "castor_thrust_kN": 32.94893577280647,
+    "star48_thrust_kN": 7.282622157111913
+   },
+   "1%": {
+    "Pi": 0.9757520301558694,
+    "f": 0.033459833777487076,
+    "thrust_scale_divisor": 29.886580030556946,
+    "a0_m_s2": 0.6098305142444097,
+    "burn_duration_s": 6300.091070441403,
+    "castor_thrust_kN": 10.1558734520207,
+    "star48_thrust_kN": 2.244727706427249
+   }
+  },
+  "optimal": {
+   "0.1%": {
+    "Pi": 0.31608197659459136,
+    "f": 0.10329124453349048,
+    "thrust_scale_divisor": 9.681362680026249,
+    "a0_m_s2": 1.8825602419216292,
+    "burn_duration_s": 2040.8312529495329,
+    "castor_thrust_kN": 31.35140524486604,
+    "star48_thrust_kN": 6.929523917470327
+   },
+   "1%": {
+    "Pi": 1.025764571268126,
+    "f": 0.031828454258951894,
+    "thrust_scale_divisor": 31.418428047562053,
+    "a0_m_s2": 0.5800974014820418,
+    "burn_duration_s": 6623.004632426079,
+    "castor_thrust_kN": 9.66071008532133,
+    "star48_thrust_kN": 2.135282966524871
+   }
+  }
+ },
+ "ntp": [
+  {
+   "label": "NTP Isp 800 s, a0 0.1 m/s²",
+   "placement": "time_centred",
+   "Pi": 7.965846164380362,
+   "loss_rel": 0.21567168755711702,
+   "dv_loss_m_s": 1803.5276386237458,
+   "offset_s": 0.0
+  },
+  {
+   "label": "NTP Isp 800 s, a0 0.1 m/s²",
+   "placement": "optimal",
+   "Pi": 7.965846164380362,
+   "loss_rel": 0.1997395315944848,
+   "dv_loss_m_s": 1670.2969677510955,
+   "offset_s": -9375.91949533566
+  },
+  {
+   "label": "NTP Isp 800 s, a0 3 m/s²",
+   "placement": "time_centred",
+   "Pi": 0.2655282054793454,
+   "loss_rel": 0.0008170897909604132,
+   "dv_loss_m_s": 6.8328116588976675,
+   "offset_s": 0.0
+  },
+  {
+   "label": "NTP Isp 800 s, a0 3 m/s²",
+   "placement": "optimal",
+   "Pi": 0.2655282054793454,
+   "loss_rel": 0.0007519406332175769,
+   "dv_loss_m_s": 6.288009937572303,
+   "offset_s": -150.143371564738
+  },
+  {
+   "label": "NTP Isp 900 s, a0 0.1 m/s²",
+   "placement": "time_centred",
+   "Pi": 8.369624882470807,
+   "loss_rel": 0.2228799607201863,
+   "dv_loss_m_s": 1863.8059256052131,
+   "offset_s": 0.0
+  },
+  {
+   "label": "NTP Isp 900 s, a0 0.1 m/s²",
+   "placement": "optimal",
+   "Pi": 8.369624882470807,
+   "loss_rel": 0.20994992911558574,
+   "dv_loss_m_s": 1755.68014594765,
+   "offset_s": -9016.41263278723
+  },
+  {
+   "label": "NTP Isp 900 s, a0 3 m/s²",
+   "placement": "time_centred",
+   "Pi": 0.27898749608236034,
+   "loss_rel": 0.0008902115583923888,
+   "dv_loss_m_s": 7.444283336252908,
+   "offset_s": 0.0
+  },
+  {
+   "label": "NTP Isp 900 s, a0 3 m/s²",
+   "placement": "optimal",
+   "Pi": 0.27898749608236034,
+   "loss_rel": 0.0008329789293550791,
+   "dv_loss_m_s": 6.965682600713377,
+   "offset_s": -140.8212388893692
+  }
+ ],
+ "sep": [
+  {
+   "label": "SEP constant 49.8 N, start mass 15189 kg",
+   "placement": "time_centred",
+   "Pi": 4.565651517841185,
+   "loss_rel": 0.12452598170959871,
+   "dv_loss_m_s": 1245.2598170959877,
+   "offset_s": 0.0,
+   "v_p_km_s": 75.0
+  },
+  {
+   "label": "SEP constant 49.8 N, start mass 15189 kg",
+   "placement": "optimal",
+   "Pi": 4.565651517841185,
+   "loss_rel": 0.12426754935930677,
+   "dv_loss_m_s": 1242.6754935930683,
+   "offset_s": 74073.83052538887,
+   "v_p_km_s": 75.0
+  },
+  {
+   "label": "SEP constant 49.8 N, start mass 11036 kg",
+   "placement": "time_centred",
+   "Pi": 3.3172593383058904,
+   "loss_rel": 0.08480158103006397,
+   "dv_loss_m_s": 848.01581030064,
+   "offset_s": 0.0,
+   "v_p_km_s": 75.0
+  },
+  {
+   "label": "SEP constant 49.8 N, start mass 11036 kg",
+   "placement": "optimal",
+   "Pi": 3.3172593383058904,
+   "loss_rel": 0.08473314536434906,
+   "dv_loss_m_s": 847.3314536434909,
+   "offset_s": 29044.89041976552,
+   "v_p_km_s": 75.0
+  },
+  {
+   "label": "SEP arc duration 0.25 yr",
+   "placement": "time_centred",
+   "Pi": 12.841894880460556,
+   "loss_rel": 0.2926783915410857,
+   "dv_loss_m_s": 2926.7839154108588,
+   "offset_s": 0.0,
+   "v_p_km_s": 75.0
+  },
+  {
+   "label": "SEP arc duration 0.25 yr",
+   "placement": "optimal",
+   "Pi": 12.841894880460556,
+   "loss_rel": 0.29090856477681104,
+   "dv_loss_m_s": 2909.0856477681114,
+   "offset_s": 577714.4552346627,
+   "v_p_km_s": 75.0
+  }
+ ]
+}
