@@ -178,6 +178,16 @@ inertial case is Robbins' expression converted to an energy deficit with v_p (se
   hyperbolic arrival faster than a fall from Jupiter allows. So the column is the post-burn speed,
   and the incoming heliocentric orbit is **bound and near-parabolic** (pre-burn ≈ 342–344 km/s).
   Phase 4 therefore needs bound-arrival support, with the equivalent-Δv penalty as its metric.
+- **Phase 4 outcome** (2026-10-05; RESEARCH_LOG, `figures/phase4_*.png`):
+  - Model: their reference SOM re-run as a finite, staged burn: CASTOR 30B then STAR 48B (short
+    nozzle), with catalog burn times of 126.7 s and 84.1 s, arriving on a bound orbit from 5.2 au.
+  - Loss: 0.099 m/s time-centred and 0.090 m/s with the Δv centroid at perihelion, i.e.
+    ~1.1e-5 of the 8.36 km/s. It stays below 0.2 m/s under every sensitivity tested, so their
+    impulsive treatment is accurate.
+  - Where it would fail: the loss reaches 1% of Δv only if the thrust were ~30× lower
+    (Π ≈ 1, burn duration ≈ τ = 6,457 s).
+  - Inconsistency in the source: row m of their Table 2 lists a total 1,100.4 kg above the
+    stage-plus-payload sum, unlike the other rows checked. The stage sum reproduces their ΔV.
 
 ## 6. Maraqten, van Lynden, Gómez de Olea Ballester & Hein (2026): solar-electric Oberth manoeuvre
 
@@ -349,6 +359,14 @@ Same labels as above. Source of every number: `figures/phase3_numbers.json` (`sc
 | 25 | For near-constant-mass burns the whole gain over the centered burn is depth: the optimum keeps the actual periapsis low, while a centered prograde burn lifts it. On the achieved-periapsis baseline the gain is negative (median ratio −0.73 at Δv/c = 0.1, against ≈ 1.0 at Δv/c ≥ 1) | **(c)** | — |
 | 26 | The half-Δv rule (periapsis when half the Δv is delivered, i.e. the median) captures 1 − (x̄ − x_med)²/(x̄ − ½)² of the optimal retiming gain: 75% as Δv/c → 0, 75.6% at Δv/c = 1 and 79.8% at 3. It leaves 2.0% and 13.3% more loss than the optimum (Δv → 0) | **(c) provisional** | Closed form; verified against simulation to 2e-3 at Π = 0.1. The user's estimate (≈ 80%, 76%, 13%) confirmed |
 
+| # | Phase 3 follow-up and Phase 4 finding | Label | Basis |
+|---|---|---|---|
+| 27 | For realistic engine/body combinations (the Phase 2 mission sample) the recoverable gain from optimal placement is negligible. Median: chemical 7e-6 pp, nuclear thermal 8e-5 pp, electric 0.007 pp. Max: 0.08, 4.1 and 1.2 pp. The rare large gains all come from starting *later* (periapsis lift), and for electric propulsion they are depth, not efficiency | **(c)** | Mission-sample mapping. The Δv/c = 3 grid corner (row 23) is not representative |
+| 28 | A 6-knot piecewise-linear pitch law gains ≤ 0.077 pp over linear pitch in the 15 hardest cases, so "pitch adds little" holds within the smooth steering laws tested (not proven globally optimal) | **(b)** | Extends row 22. No costate solution computed |
+| 29 | The departure of the timing optimum from the centroid rule tracks the centered burn's periapsis lift at fixed (Δv/c, Π): Spearman median 0.83, positive in 14/15 groups. At high mass ratio the centroid effect dominates | **(c)**, empirical | No large-Π theory yet (future work) |
+| 30 | Finite-burn re-analysis of the Hibberd et al. (2026) reference SOM: equivalent-Δv loss 0.090–0.099 m/s (1.1e-5 of Δv); the impulsive model holds | **(c)** | A new check of a published design; matches the pre-registered 0.04–0.25 m/s |
+| 31 | For near-parabolic solar Oberth burns the loss fraction is nearly one function of Π across thrust profiles (staged solids, nuclear thermal, SEP; within 8% for 0.1 ≤ Π ≤ 100). It is 0.1% at Π ≈ 0.3 and 1% at Π ≈ 1. Nuclear thermal crosses 1% at a0 ≈ 0.85 m/s²; Maraqten et al.'s SEP arc sits at Π ≈ 3–13 (8–29% loss against an impulsive burn) | **(b)** | Π scaling: rows 1–2 (Robbins, Willis). We add the bound-arrival thresholds and the cross-profile collapse |
+
 **Context, not a finding:** that the optimized prograde family beats fixed-direction (inertial) steering in every case is expected (rows 3 and 15), and is stated only as context.
 
 ## Contribution statement
@@ -380,11 +398,23 @@ Unlike the single-system continuous-thrust flyby study of Ferreira et al. (2022)
 - the impact and sphere-of-influence limits that make fixed-direction and electric-propulsion
   burns at terrestrial planets non-physical in a planet-centered model.
 
-Optimizing the prograde family (linear pitch law and burn timing, under a minimum-altitude
-constraint) shows that the recoverable efficiency is mostly a timing effect. At small Π its size
-follows in closed form from the thrust profile, by putting the Δv centroid at periapsis: up to
-≈ 40% of the deficit for Δv/c = 3, but < 8% for Δv/c ≤ 1. Inward pitch adds little. A relaxed
-altitude constraint buys depth rather than efficiency, as the achieved-periapsis baseline shows.
+Optimizing the prograde family (pitch law and burn timing, under a minimum-altitude constraint)
+shows that **for realistic engines the centered prograde burn is already near-optimal**. Across
+the Phase 2 mission sample the median recoverable gain is ≤ 0.007 pp, and for chemical engines it
+is at most 0.08 pp.
+
+Where gains exist, they come from timing:
+- **Small Π:** the optimum puts the Δv-weighted mean burn time at periapsis. The recovered share
+  of the deficit follows in closed form: ≈ λ²/12 for realistic Δv/c = λ, up to 40% only at
+  Δv/c = 3, which needs ~95% propellant in one burn.
+- **Half-Δv rule:** placing periapsis at the median Δv instead captures 75–80% of that gain.
+- **Long, large-Δv burns:** the optimum moves later, to avoid lifting the periapsis. That gain is
+  depth rather than efficiency, as the achieved-periapsis baseline shows.
+- **Pitch:** smooth inward pitch laws add little.
+
+Finally, a finite-burn re-analysis of the Hibberd et al. (2026) solar Oberth manoeuvre confirms
+its impulsive treatment (loss ≈ 0.1 m/s). A near-universal loss(Π) curve places nuclear thermal
+and SEP relative to the impulsive model's 1% limit at Π ≈ 1.
 
 The novelty claims touching the small-Π loss and burn placement are provisional until Robbins
 (1966) can be read in full.
