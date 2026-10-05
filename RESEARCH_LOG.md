@@ -807,8 +807,8 @@ means Robbins ≈ 2.25 × actual, not 1.25 × actual.
 - **Revised Phase 4 plan,** replacing the new 3I/ATLAS mission design:
   1. **Inputs.** Reproduce their reference SOM: 3.2 R☉, ΔV = 8.36 km/s, post-burn speed
      ≈ 352 km/s, and the arrival state implied by the E–J–SOM sequence.
-     - **[our inference]** The arrival is bound and near-parabolic: a fall from ~5.2 au gives
-       ≈ 345 km/s before the burn at 3.2 R☉.
+     - The arrival is bound and near-parabolic, which is now confirmed rather than inferred
+       (see the entry "Hibberd SOM speed is post-burn" below).
      - Their pre-burn state is not given in the paper. Ask the authors or rerun OITS (it is
        open-source on GitHub) to get it.
   2. **Simulator extension** to bound arrivals: an elliptic Kepler initial state, already
@@ -843,3 +843,17 @@ nondimensional units (V = 1) this is v_p/v∞³, which is what `theory.tail_cros
 So no number, figure value or test was affected. Only the written formula was wrong, and it is now
 corrected in all four places. docs/theory.md and the theory.py docstring now state the dimensional
 form explicitly.
+
+## 2026-10-04: Hibberd SOM speed is post-burn, so the arrival is bound (from their Table 1)
+
+Hibberd et al.'s text does not say whether the Table 1 "Heliocentric speed at SOM" is before or
+after the burn. Their table settles it:
+- **The speed tracks ΔV.** Across all five rows (ΔV = 8.355 to 29.991 km/s) the speed rises
+  almost one-for-one with ΔV, and speed − ΔV = 343.6, 343.7, 343.6, 342.9, 342.0 km/s.
+- **That pre-burn speed is bound.** Local escape speed at 3.2 R☉ is 345.3 km/s, and a fall from
+  Jupiter's distance arrives at 344.8 km/s.
+
+So the column is the **post-burn** speed, and the arrival is **bound and near-parabolic**
+(≈ 342–344 km/s before the burn). The user independently reached the same conclusion.
+RELATED_WORK.md (Hibberd section) records the reasoning. Phase 4 therefore uses bound-arrival
+support and the equivalent-Δv penalty (decision Q1).

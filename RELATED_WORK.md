@@ -161,10 +161,21 @@ inertial case is Robbins' expression converted to an energy deficit with v_p (se
 
   Table 2 lists two- and three-stage solid combinations, with exhaust velocities of
   2.80–2.96 km/s. A heat shield is needed against ~6 MW/m².
-- **[our inference]** The arrival is bound, not hyperbolic. Vis-viva for a fall from a ~5.2 au
-  aphelion to 3.2 R☉ gives ≈ 345 km/s before the burn and ≈ 353 km/s after it. So the quoted
-  352 km/s matches the *post-burn* speed of a near-parabolic, bound arrival. The paper does not
-  state which it is.
+- **The 352 km/s is the post-burn speed, and the arrival is bound.** The text does not say which
+  speed it is (the Table 1 column is headed only "Heliocentric speed at SOM"). Their own Table 1
+  settles it, together with two-body checks:
+  - **Local escape speed** at 3.2 R☉ (r = 2.226e6 km, GM☉ from DE440): sqrt(2μ/r) = 345.3 km/s.
+  - **Arrival speed:** a fall from Jupiter's distance (aphelion 5.20 au) to a 3.2 R☉ perihelion
+    arrives at 344.8 km/s (vis-viva). Adding the 8.355 km/s burn gives 353.2 km/s.
+  - **Table 1 rows** (ΔV 8.355, 9.291, 10.36, 14.077, 29.991 km/s) list speeds of 352, 353, 354,
+    357 and 372 km/s, which rise almost one-for-one with ΔV. Speed − ΔV is 343.6, 343.7, 343.6,
+    342.9 and 342.0 km/s. This is consistent across all rows, given the integer rounding of the
+    speeds, and always below the escape speed.
+
+  If the column were the *pre*-burn speed, it would not track ΔV, and 352 km/s would mean a
+  hyperbolic arrival faster than a fall from Jupiter allows. So the column is the post-burn speed,
+  and the incoming heliocentric orbit is **bound and near-parabolic** (pre-burn ≈ 342–344 km/s).
+  Phase 4 therefore needs bound-arrival support, with the equivalent-Δv penalty as its metric.
 
 ---
 
