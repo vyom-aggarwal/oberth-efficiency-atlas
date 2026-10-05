@@ -1416,3 +1416,29 @@ their analysis.
   voice, superscript numbered citations.
 
 This entry is the first written with the Edit tool under the new rule.
+
+## 2026-10-05: Phase 4 rerun: SEP power-law thrust (user decision 2) and extended Π range (logged before running)
+
+**Change to the approved Phase 4 runs**, recorded before the rerun per the deviation rule:
+1. **SEP placements** now use Maraqten et al.'s own thrust model (their §4.2.1): available power
+   P ∝ r^(−κ) with an effective κ = 1.5, constant Isp (6,000 s) and efficiency (0.75), so
+   F = 49.8 N × (r/r_SOM)^(−1.5). Full throttle on the arc (their §5.3).
+   - **Cap.** No separate cap is stated; the thrust peaks at perihelion. This is their model, not
+     the r⁻² fallback, so no fallback assumption is needed.
+   - **Arcs** (`staged.PowerLawStageND`; start mass bracketed at 11,036–15,189 kg; time-centred
+     and optimal), each run for both start masses:
+     - (a) the duration that delivers their stated ~10 km/s;
+     - (b) their 0.25-yr arc (no-JGA case).
+   - **Placement coordinate.** These arcs are placed by **Π_eff = √12 σ_t/τ**, the uniform-burn
+     duration with the same Δv-weighted time spread, as well as by duration. A concentrated
+     profile is fairly compared with the universal curve only through its spread.
+   - **Kept.** The earlier constant-thrust placements stay, as the bracket.
+2. **The single-stage curves** (Isp 850 s and 6,000 s at the SOM geometry) are extended from
+   Π ≤ 10^2.5 to Π ≤ 10^3.5, so the hero figure can place the Phase 2 solar electric-propulsion
+   samples (Π up to ~10³).
+3. **Each row now records Π_eff.** For constant stages it is analytic.
+
+**Probe before the rerun.** With their r^(−1.5) thrust and the full 15,189 kg start mass, a
+0.25-yr arc centred on perihelion delivers 10.13 km/s. That is consistent with their "~10 km/s in
+the near-perihelion segment", so their duration and Δv statements agree under their own power
+model. It gives Π = 12.8 by duration and Π_eff = 9.2.

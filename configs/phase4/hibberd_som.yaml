@@ -51,3 +51,10 @@ sep_maraqten2026:                # Maraqten et al. (2026), arXiv:2608.11113, Tab
   propellant_kg: 5878.0
   delta_v_arc_km_s: 10.0         # "~10 km/s ... delivered in a short near-perihelion thrust segment"
   arc_duration_yr: 0.25          # no-JGA case, phase 4 "Solar Oberth (2.3–2.55 yr)" (Appendix B.7.2)
+  # Their power model (§4.2.1): P_max(r) = P_1AU (r/1 AU)^(−κ) with an effective κ = 1.5 (temperature
+  # losses near the Sun), constant Isp and thrust efficiency (η = 0.75), so thrust ∝ r^(−1.5). Table 5:
+  # P_1AU = 334.2 kW, P_max(r_SOM) = 1,954.9 kW, F_T,max = 49.8 N at r_SOM. Full throttle on the arc
+  # (u_P ≈ 1, §5.3). No separate cap is stated; the thrust peaks at perihelion.
+  power_exponent_kappa: 1.5
+  power_1au_kW: 334.2
+  thrust_efficiency: 0.75

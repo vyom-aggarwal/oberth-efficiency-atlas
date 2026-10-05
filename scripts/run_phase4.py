@@ -35,8 +35,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from oberth_atlas.constants import AU, G0, GM_SUN, JUPITER, KM, LBF, SUN  # noqa: E402
 from oberth_atlas.simulate import Numerics  # noqa: E402
-from oberth_atlas.staged import (StageND, StageSI, centroid_offset, optimal_offset, schedule,  # noqa: E402
-                                 simulate_staged_nd, stack_mass, stages_to_nd)
+from oberth_atlas.staged import (PowerLawStageND, StageND, StageSI, centroid_offset, optimal_offset,  # noqa: E402
+                                 schedule, simulate_staged_nd, stack_mass, stages_to_nd)
+from scipy.optimize import brentq  # noqa: E402
 from oberth_atlas.sweep import _metadata, _write_parquet  # noqa: E402
 from oberth_atlas.units import Scales  # noqa: E402
 
@@ -79,6 +80,11 @@ def single_stage(dv: float, c: float, Pi: float, v_p: float) -> list[StageND]:
     return [StageND(thrust=m_prop * c * v_p / Pi, c=c, m_prop=m_prop)]
 
 
+def Pi_guess_dur(m_start: float, frac: float, c: float, sep: dict, S: Scales) -> float:
+    """Duration (nondimensional) of the constant-thrust arc at the peak thrust: a lower bracket for the root."""
+    return m_start * frac * c / sep["thrust_N"] / S.time
+
+
 def run(job) -> list[dict]:
     """job = (kind, label, params, v_p_nd, stages, scales_dict, placements, numerics)."""
     kind, label, params, v_p, stages, sc, placements, num = job
@@ -96,7 +102,8 @@ def run(job) -> list[dict]:
             v_inf_out = math.sqrt(2.0 * r.eps_out) * V if r.eps_out > 0 else math.nan
             e_imp = 0.5 * (v_p + r.dv_rocket) ** 2 - 1.0
             rows.append(dict(kind=kind, label=label, placement=placement, status="ok", error="", **params,
-                             v_p_km_s=v_p * V / KM, r_p_m=scales.r_p, Pi=r.Pi, duration_s=r.duration * scales.time,
+                             v_p_km_s=v_p * V / KM, r_p_m=scales.r_p, Pi=r.Pi, Pi_eff=r.Pi_eff,
+                             duration_s=r.duration * scales.time,
                              offset_s=off * scales.time, centroid_time_s=r.centroid_time * scales.time,
                              dv_rocket_m_s=r.dv_rocket * V, dv_loss_m_s=r.dv_loss * V, loss_rel=r.dv_loss_rel,
                              dv_loss_err_m_s=r.dv_loss_err * V, r_min_over_rp=r.r_min, impacted=r.impacted,
@@ -140,7 +147,7 @@ def main() -> None:
     dv_nd = sum(st.dv for st in schedule(nd)[0])
     for tag, isp in (("single, nuclear thermal Isp 850 s", 850.0), ("single, SEP Isp 6000 s", 6000.0)):
         c = isp * G0 / S.velocity
-        for Pi in np.logspace(-2, 2.5, 28):
+        for Pi in np.logspace(-2, 3.5, 34):
             jobs.append(("single", tag, {"isp_s": isp, "Pi_target": float(Pi)}, vp_ref,
                          single_stage(dv_nd, c, float(Pi), vp_ref), sc, ("time_centred", "optimal"), num))
     ntp = CFG["nuclear_thermal"]
@@ -168,6 +175,26 @@ def main() -> None:
         jobs.append(("sep", tag, {"t_b_s": t_b}, vp_sep, single_stage(dv_sep / S_sep.velocity, c_sep / S_sep.velocity,
                                                                    Pi, vp_sep),
                      dict(mu=GM_SUN, r_p=r_sep, m0=1.0), ("time_centred", "optimal"), num))
+    # Their own thrust model: F ∝ r^(−κ), κ = 1.5, 49.8 N at perihelion (configs/phase4/hibberd_som.yaml).
+    num_dense = Numerics(dense_output=True)
+    for m_start in (m_hi, m_lo):
+        S_m = Scales(GM_SUN, r_sep, m_start)
+        T_ref = sep["thrust_N"] / (m_start * S_m.acceleration)
+
+        def law(duration, T_ref=T_ref):
+            return [PowerLawStageND(thrust_ref=T_ref, r_ref=1.0, kappa=sep["power_exponent_kappa"],
+                                    c=c_sep / S_m.velocity, duration=duration)]
+        # Duration that delivers the stated ~10 km/s on a time-centred arc.
+        target = dv_sep / S_m.velocity
+        lo, hi = 0.5 * Pi_guess_dur(m_start, frac, c_sep, sep, S_m), 50.0 * Pi_guess_dur(m_start, frac, c_sep, sep, S_m)
+        dur = brentq(lambda dd: simulate_staged_nd(vp_sep, law(dd)).dv_rocket - target, lo, hi, xtol=1e-10)
+        jobs.append(("sep_power", f"SEP r^-1.5 thrust, 10 km/s, start mass {m_start:.0f} kg",
+                     {"m_start_kg": m_start, "t_b_s": dur * S_m.time}, vp_sep, law(dur),
+                     dict(mu=GM_SUN, r_p=r_sep, m0=m_start), ("time_centred", "optimal"), num_dense))
+        dur_yr = sep["arc_duration_yr"] * YEAR / S_m.time
+        jobs.append(("sep_power", f"SEP r^-1.5 thrust, 0.25-yr arc, start mass {m_start:.0f} kg",
+                     {"m_start_kg": m_start, "t_b_s": sep["arc_duration_yr"] * YEAR}, vp_sep, law(dur_yr),
+                     dict(mu=GM_SUN, r_p=r_sep, m0=m_start), ("time_centred", "optimal"), num_dense))
     jobs.sort(key=lambda j: j[0] != "sweep")                       # long sweep jobs first
     print(f"phase 4: {len(jobs)} jobs on {a.workers} workers; stack m0 = {m0:.1f} kg, "
           f"ΔV = {dv_nd * S.velocity:.2f} m/s, v_p = {vp_ref * S.velocity / KM:.3f} km/s", flush=True)
