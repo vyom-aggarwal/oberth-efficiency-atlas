@@ -1079,3 +1079,19 @@ family?
    decomposition? Recommended.
 4. **Phase 4.** Proceed to the Hibberd finite-burn re-analysis: bound-arrival support plus the
    equivalent-Δv metric, as already agreed.
+
+## 2026-10-05: Record of the Phase 3 grid change (user review)
+
+- **What changed.** The posted Phase 3 plan specified 120 cases: Π ∈ {2, 5, 20, 100} ×
+  v∞/v_esc ∈ {0.03, 0.1, 0.3, 1, 3} × Δv/v_p ∈ {0.03, 0.3} × Δv/c ∈ {0.1, 1, 3}. The campaign
+  ran 150 cases with Π ∈ {1, 3, 10, 30, 100}; the other axes were unchanged.
+- **When.** The grid was changed when `scripts/run_phase3.py` was written (commit b24e945). It was
+  neither announced nor logged at the time; it should have been.
+- **Why.** No rationale was recorded, so none is claimed here.
+- **Consequences** (stated as properties of the new grid, not as the reason):
+  - half-decade log spacing that includes both ends of the requested 1 ≲ Π ≲ 100;
+  - Π = 10 lies inside the Phase 2 half-efficiency range Π½ ≈ 8–40;
+  - Π = 1 is the point closest to the small-Π theory;
+  - cost: 30 more cases, i.e. 450 instead of 360 optimizations.
+- **Effect on conclusions.** None identified: the results vary smoothly in Π (figures
+  `phase3_*.png`), and the planned Π values lie between grid points.
