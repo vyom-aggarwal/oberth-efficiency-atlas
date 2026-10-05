@@ -904,8 +904,8 @@ support and the equivalent-Δv penalty (decision Q1).
 
 ## 2026-10-04: Mission table restated on valid samples only (Q2)
 
- and  now compute η statistics only over samples whose burn
-starts inside the SOI and does not impact. Outside the SOI the planet-centred model is invalid.
+`analysis.mission_table` and `figures/missions_regions.png` now compute η statistics only over
+samples whose burn starts inside the SOI and does not impact. Outside the SOI the planet-centred model is invalid.
 This **supersedes the electric-propulsion medians** in the Phase 2 "Where real missions sit"
 entry, which pooled invalid samples.
 
