@@ -4,7 +4,8 @@ import math
 
 import pytest
 
-from oberth_atlas.optimize import OptCase, eta_against_periapsis, optimize_case, timing_theory_delta
+from oberth_atlas.optimize import OptCase, _Evaluator, eta_against_periapsis, optimize_case, timing_theory_delta
+from oberth_atlas.simulate import Numerics
 
 
 @pytest.mark.parametrize("lam", [0.1, 1.0, 3.0])
@@ -39,6 +40,14 @@ def test_constraint_is_enforced_when_active():
     case = OptCase(base.v_inf, base.dv, base.c, base.a0, rho=rho)
     r = optimize_case(case, "full")
     assert r.feasible and r.r_min >= rho - 1e-6
+
+
+def test_extreme_pitch_corner_evaluates():
+    """Regression: under the old ĥ-based pitch law this corner of the control box drove h → 0 and
+    stalled the integrator (sliding mode). It must now run and give a finite energy outcome."""
+    case = OptCase.from_targets(0.03, 0.3, 3.0, Pi=100.0)
+    e = _Evaluator(case, Numerics())(-1.2, -3.0, 1.0)
+    assert math.isfinite(e.eta_W) and not e.impacted
 
 
 def test_eta_rereferencing():

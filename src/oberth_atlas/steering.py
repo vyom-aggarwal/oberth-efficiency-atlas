@@ -4,9 +4,9 @@ A steering law is a frozen dataclass of parameters. `bind(ctx)` returns a fast c
 `u(t, r, v, m) -> unit vector`. It is evaluated in nondimensional units on the burn segment.
 All laws are smooth within the burn, so the integrator never meets a discontinuity.
 
-Sign convention for pitch: the in-plane normal is n̂ = ĥ × v̂ (ĥ = orbit normal).
-For a prograde flyby, n̂ points toward the central-body side of the velocity, so α > 0
-tilts thrust toward the planet.
+Sign convention for pitch: the in-plane normal is n̂ = ẑ₀ × v̂, where ẑ₀ is the normal of the
+incoming flyby plane (fixed). For a prograde flyby, n̂ points toward the central-body side of the
+velocity, so α > 0 tilts thrust toward the planet.
 """
 
 from __future__ import annotations
@@ -33,6 +33,11 @@ class SteeringContext:
     def periapsis_velocity_dir(self) -> np.ndarray:
         """Unperturbed periapsis velocity direction (perifocal ŷ) in the simulation frame."""
         return self.rotation @ np.array([0.0, 1.0, 0.0])
+
+    @property
+    def plane_normal(self) -> np.ndarray:
+        """Normal of the incoming flyby plane (perifocal ẑ) in the simulation frame."""
+        return self.rotation @ np.array([0.0, 0.0, 1.0])
 
 
 class SteeringLaw(Protocol):
@@ -94,7 +99,13 @@ class PitchLinear:
 
     s = (t − t_mid) / t_b runs over [−1/2, 1/2], so `alpha1` is the total pitch change over the
     burn. This keeps both parameters O(1) for any burn duration.
-    u = cos α · v̂ + sin α · (ĥ × v̂), where ĥ is the instantaneous orbit normal.
+    u = cos α · v̂ + sin α · (ẑ₀ × v̂), where ẑ₀ is the fixed normal of the incoming flyby plane.
+
+    ẑ₀ equals the instantaneous orbit normal ĥ while the angular momentum keeps its sense, i.e. for
+    every flyby that does not reverse direction. Using ĥ itself is singular at h = 0: the sideways
+    term changes |h| at the finite rate sin α · (r·v̂) · a, so a strong pitch can drive h to zero,
+    where ĥ flips and the thrust direction chatters (a sliding mode that stalls the integrator).
+    Found in the Phase 3 optimizer, which probes such controls (RESEARCH_LOG 2026-10-04).
     """
 
     alpha0: float = 0.0
@@ -106,13 +117,12 @@ class PitchLinear:
         t_b = ctx.t_end - ctx.t_start
         a0, a1 = self.alpha0, self.alpha1
         inv_tb = 1.0 / t_b if t_b > 0 else 0.0
+        z0 = ctx.plane_normal
 
         def u(t: float, r: np.ndarray, v: np.ndarray, m: float) -> np.ndarray:
             vhat = v / math.sqrt(float(v @ v))
-            h = np.cross(r, v)
-            hhat = h / math.sqrt(float(h @ h))
             alpha = a0 + a1 * (t - t_mid) * inv_tb
-            return math.cos(alpha) * vhat + math.sin(alpha) * np.cross(hhat, vhat)
+            return math.cos(alpha) * vhat + math.sin(alpha) * np.cross(z0, vhat)
         return u
 
     def to_dict(self) -> dict:
