@@ -1274,7 +1274,10 @@ With optimal timing the thresholds shift slightly, to Π = 0.32 and 1.03.
 - **Nuclear thermal** (Phase 2 presets, Isp 800–900 s), at the SOM geometry:
   - a0 = 3 m/s²: Π = 0.27–0.28, loss 0.08–0.09% (6.8–7.4 m/s);
   - a0 = 0.1 m/s²: Π = 8.0–8.4, loss 21.6–22.3% (1.80–1.86 km/s).
-  - The 1% threshold falls at a0 ≈ 0.6 m/s², inside the preset range.
+  - From the one-stage curve (Isp 850 s), 1% of Δv is reached at Π = 0.95, i.e. a0 ≈ 0.83–0.88 m/s², and
+    0.1% at Π = 0.29, i.e. a0 ≈ 2.7–2.8 m/s². Both lie inside the preset range, so the impulsive model
+    holds only for the high-thrust end of nuclear thermal. (The stack's a0 ≈ 0.61 m/s² at 1% is for
+    solids; the same Π maps to a different a0 for a different Δv/c.)
 - **SEP, Maraqten et al. (2026)**, at their own geometry (0.308 au, v_p = 75.0 km/s, Isp
   6,000 s, about 10 km/s in the perihelion arc):
   - constant 49.8 N, with the start mass bracketed at 11,036–15,189 kg: Π = 3.3–4.6, loss

@@ -180,6 +180,35 @@ def main() -> None:
                              "a0_m_s2": si[0].thrust * f_c / m0,
                              "burn_duration_s": float(ref["time_centred"]["duration_s"] / f_c),
                              "castor_thrust_kN": si[0].thrust * f_c / 1e3, "star48_thrust_kN": si[1].thrust * f_c / 1e3}
+    # Thresholds for one nuclear-thermal stage (single-stage curve, Isp 850 s), converted to the
+    # initial thrust acceleration for the preset Isp range: t_b = (c/a0)(1 − e^(−Δv/c)) = Π τ.
+    sn = df[(df["kind"] == "single") & (df["isp_s"] == 850.0) & (df["placement"] == "time_centred")].sort_values("Pi")
+    dv_si = float(ref["time_centred"]["dv_rocket_m_s"])
+    tau_s = S.time / vp
+    ntp_thr = {}
+    for lvl, name in ((1e-3, "0.1%"), (1e-2, "1%")):
+        Pi_c = crossing(sn["Pi"].to_numpy(), sn["loss_rel"].to_numpy(), lvl)
+        ntp_thr[name] = {"Pi": Pi_c, **{f"a0_m_s2_isp{isp:g}": (isp * P.G0) * -math.expm1(-dv_si / (isp * P.G0))
+                                         / (Pi_c * tau_s) for isp in P.CFG["nuclear_thermal"]["isp_s"]}}
+    # Universality of loss(Π) across thrust profiles (stack, one stage at Isp 850 s and 6000 s), and the
+    # SEP points (own geometry) against the one-stage SEP curve at the SOM geometry.
+    def curve(sel):
+        g = sel.sort_values("Pi")
+        return g["Pi"].to_numpy(), g["loss_rel"].to_numpy()
+
+    def at(c, x):
+        return float(np.exp(np.interp(np.log(x), np.log(c[0]), np.log(c[1]))))
+
+    c_stack = curve(sw[sw["placement"] == "time_centred"])
+    c_ntp = curve(sn)
+    c_sep = curve(df[(df["kind"] == "single") & (df["isp_s"] == 6000.0) & (df["placement"] == "time_centred")])
+    universality = {f"Pi={x:g}": {"stack": at(c_stack, x), "one_stage_isp850": at(c_ntp, x),
+                                  "one_stage_isp6000": at(c_sep, x),
+                                  "max_over_min": max(at(c, x) for c in (c_stack, c_ntp, c_sep))
+                                  / min(at(c, x) for c in (c_stack, c_ntp, c_sep))}
+                    for x in (0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0)}
+    sep_rows = df[(df["kind"] == "sep") & (df["placement"] == "time_centred")]
+    sep_vs_curve = {r["label"]: float(r["loss_rel"] / at(c_sep, r["Pi"]) - 1.0) for _, r in sep_rows.iterrows()}
     # Leading-order theory curve for the scaled stack (Π²).
     fs = np.logspace(0, -2, 30)
     th_Pi = np.array([ref["time_centred"]["Pi"] / f for f in fs])
@@ -210,6 +239,9 @@ def main() -> None:
         "leading_order_m_s": {"time_centred": lead_tc, "centroid": lead_c},
         "sensitivity_m_s": {lab: {"time_centred": float(tc), "optimal": float(op)} for lab, tc, op in bars},
         "thresholds": thr,
+        "thresholds_ntp_single_stage": ntp_thr,
+        "universality": universality,
+        "sep_relative_to_som_curve": sep_vs_curve,
         "ntp": [{k: (float(r[k]) if isinstance(r[k], (float, np.floating)) else r[k])
                  for k in ("label", "placement", "Pi", "loss_rel", "dv_loss_m_s", "offset_s")}
                 for _, r in df[df["kind"] == "ntp"].iterrows()],
