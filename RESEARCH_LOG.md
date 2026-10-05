@@ -1457,3 +1457,28 @@ model. It gives Π = 12.8 by duration and Π_eff = 9.2.
 - **Regression test** in `tests/test_staged.py`: the optimum stays near periapsis and its energy
   is ≥ the centred arc's.
 - **Rerun** of `scripts/run_phase4.py` follows.
+
+## 2026-10-05: Maraqten et al.'s arc placed on our curve with their own thrust model
+
+Rerun: `results/phase4.parquet`, 311 rows, 0 errors. The Hibberd reference and all
+constant-stage results are unchanged: 0.0991 / 0.0897 m/s.
+
+**Their arc under F = 49.8 N (r/r_SOM)^(−1.5)**, at their geometry (0.308 au, v_p = 75.0 km/s).
+These are placements on our curve, relative to an impulsive burn of the same Δv; they are not
+losses in their analysis.
+
+| arc | start mass | Π (duration) | Π_eff | Δv | value on our curve (time-centred / optimal timing) |
+|---|---|---|---|---|---|
+| 10 km/s | 15,189 kg | 12.3 | 8.9 | 10.0 km/s | 19.8% / 19.4% |
+| 10 km/s | 11,036 kg | 5.5 | 4.6 | 10.0 km/s | 11.8% / 11.8% |
+| 0.25 yr | 15,189 kg | 12.8 | 9.2 | 10.13 km/s | 20.2% / 19.8% |
+| 0.25 yr | 11,036 kg | 12.8 | 9.2 | 13.8 km/s | 20.1% / 19.5% |
+
+- **Optimal timing** starts the arc 0.6–6.7 days later than centred: the periapsis-lift effect of
+  Phase 3.
+- **Π_eff as the placement coordinate.** The concentrated r^(−1.5) arcs lie 1–13% *below* the
+  uniform-thrust curve at the same Π_eff, so Π_eff places them on the curve to that accuracy. By
+  duration Π they would be placed too far right.
+- **Summary for the hero figure and outline.** Their arc sits at Π_eff ≈ 4.6–9.2, where our curve
+  gives ≈ 12–20% of the arc Δv. This replaces the constant-thrust bracket of 8–29%.
+- **Hibberd reference:** Π_eff = 0.0314 (Π = 0.0326 by duration).

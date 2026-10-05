@@ -140,9 +140,9 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
   - The loss(Π) curve is nearly universal across profiles: staged solids, nuclear thermal and
     SEP agree within 8%.
   - Nuclear thermal crosses 1% at a0 ≈ 0.85 m/s².
-  - Placing Maraqten et al.'s SEP perihelion arc on the curve: Π ≈ 3–13, where the curve gives
-    8–29%. This is not a loss in their analysis: they never assumed an impulsive burn, and their
-    baseline is a 1 au spiral. To be updated with the power-law thrust stage.
+  - Placing Maraqten et al.'s SEP perihelion arc on the curve with their own thrust model
+    (F ∝ r^−1.5): Π_eff ≈ 4.6–9.2, where the curve gives ≈ 12–20%. This is not a loss in their
+    analysis: they never assumed an impulsive burn, and their baseline is a 1 au spiral.
 
 ## 11. Limitations
 - **Gravity model:** point-mass gravity; J2 neglected (RESEARCH_LOG). Neither Saturn's rings nor
