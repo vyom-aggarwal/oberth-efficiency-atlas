@@ -942,5 +942,7 @@ entry, which pooled invalid samples.
   - continuity at h = 0;
   - a regression test on the stalled corner.
   All 451 tests pass. The corner probe now runs each evaluation in under 0.1 s.
-- **Effect on earlier results: none.** Every Phase 1–2 pitch-linear run kept h > 0, where the two
-  definitions coincide. The campaign was restarted from scratch with the fixed law.
+- **Effect on earlier results: none.** The Phase 1–2 sweeps (`sweep_nd.parquet`,
+  `missions.parquet`) used only prograde and inertial steering. Pitch-linear appeared only in tests
+  and in `configs/earth_pitch_example.json`, and all of those still pass. The campaign was restarted
+  from scratch with the fixed law.
