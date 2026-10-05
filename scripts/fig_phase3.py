@@ -238,6 +238,8 @@ def numbers(d, full1, full9, tim, lam_vals):
         "rho1_achieved_minus_fixed": stats(full1["eta_achieved"] - full1["eta_fixed"]),
         "eta_inertial_by_Pi": {f"Pi={p:g}": stats(g) for p, g in full1["eta_inertial"].groupby(level="Pi")},
         "eta_centered_by_Pi": {f"Pi={p:g}": stats(g) for p, g in full1["eta_centered"].groupby(level="Pi")},
+        "full_minus_inertial_by_Pi": {f"Pi={p:g}": stats(g) for p, g in (full1["eta_fixed"] - full1["eta_inertial"]).groupby(level="Pi")},
+        "timing_delta_minus_theory_abs_by_Pi": {f"Pi={p:g}": stats(g) for p, g in (tim["delta"] - tim.index.get_level_values("dv_over_c").map(timing_theory_delta).to_numpy()).abs().groupby(level="Pi")},
         "max_eta_err": float(d["eta_err"].max()),
         "optima_at_a_bound": {k: int(((d[k] - lo).abs() < 1e-6).sum() + ((d[k] - hi).abs() < 1e-6).sum())
                               for k, (lo, hi) in BOUNDS.items()},
