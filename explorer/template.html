@@ -1,0 +1,112 @@
+<title>Oberth Flyby Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>/*__CSS__*/</style>
+<!--__BODY__-->
+<main class="wrap">
+  <header class="masthead">
+    <h1>Oberth Flyby Explorer</h1>
+    <p class="lede">A powered flyby, simulated live: how much of the impulsive Oberth bonus a finite burn keeps
+      (η), what it costs in equivalent Δv, and where the case sits on the universal loss curve and the
+      η atlas. Prograde or fixed-direction thrust; one constant-thrust burn centred on periapsis.</p>
+  </header>
+
+  <section class="layout">
+    <form class="controls" id="controls" autocomplete="off">
+      <fieldset class="seg" aria-label="Input mode">
+        <legend class="eyebrow">Input</legend>
+        <label><input type="radio" name="mode" id="mode-mission" value="mission" checked> Mission</label>
+        <label><input type="radio" name="mode" id="mode-nd" value="nd"> Dimensionless</label>
+      </fieldset>
+
+      <div id="mission-inputs" class="group">
+        <label class="field" for="body"><span>Body</span>
+          <select id="body"></select></label>
+        <label class="field" for="rp"><span id="rp-label">Periapsis</span>
+          <input type="range" id="rp" min="0" max="1000" step="1">
+          <output id="rp-out"></output></label>
+        <label class="field" for="vinf"><span>Arrival v∞</span>
+          <input type="range" id="vinf" min="0" max="1000" step="1">
+          <output id="vinf-out"></output></label>
+        <label class="field" for="dv"><span>Δv of the burn</span>
+          <input type="range" id="dv" min="0" max="1000" step="1">
+          <output id="dv-out"></output></label>
+        <label class="field" for="engine"><span>Engine</span>
+          <select id="engine"></select></label>
+        <label class="field" for="isp"><span>Specific impulse</span>
+          <input type="range" id="isp" min="0" max="1000" step="1">
+          <output id="isp-out"></output></label>
+        <label class="field" for="a0"><span>Initial thrust acceleration</span>
+          <input type="range" id="a0" min="0" max="1000" step="1">
+          <output id="a0-out"></output></label>
+      </div>
+
+      <div id="nd-inputs" class="group" hidden>
+        <label class="field" for="pi"><span>Π = t<sub>b</sub> / (r<sub>p</sub>/v<sub>p</sub>)</span>
+          <input type="range" id="pi" min="0" max="1000" step="1">
+          <output id="pi-out"></output></label>
+        <label class="field" for="vr"><span>v∞ / v<sub>esc</sub></span>
+          <input type="range" id="vr" min="0" max="1000" step="1">
+          <output id="vr-out"></output></label>
+        <label class="field" for="dvr"><span>Δv / v<sub>p</sub></span>
+          <input type="range" id="dvr" min="0" max="1000" step="1">
+          <output id="dvr-out"></output></label>
+        <label class="field" for="lam"><span>Δv / c (mass ratio e<sup>Δv/c</sup>)</span>
+          <input type="range" id="lam" min="0" max="1000" step="1">
+          <output id="lam-out"></output></label>
+      </div>
+
+      <fieldset class="seg" aria-label="Steering">
+        <legend class="eyebrow">Steering</legend>
+        <label><input type="radio" name="steer" id="steer-pro" value="prograde" checked> Prograde</label>
+        <label><input type="radio" name="steer" id="steer-in" value="inertial"> Fixed direction</label>
+      </fieldset>
+      <fieldset class="seg" aria-label="Burn placement">
+        <legend class="eyebrow">Placement</legend>
+        <label><input type="radio" name="place" id="place-time" value="time" checked> Centred in time</label>
+        <label><input type="radio" name="place" id="place-dv" value="centroid"> Δv centroid at periapsis</label>
+      </fieldset>
+    </form>
+
+    <div class="stage" id="stage">
+      <div class="readouts" id="readouts">
+        <div class="tile key"><span class="k">η, bonus kept</span><span class="v" id="r-eta">–</span></div>
+        <div class="tile"><span class="k">Finite-burn loss</span><span class="v" id="r-loss">–</span><span class="s" id="r-loss-si"></span></div>
+        <div class="tile"><span class="k">Π</span><span class="v" id="r-pi">–</span><span class="s" id="r-tb"></span></div>
+        <div class="tile"><span class="k">Outgoing v∞</span><span class="v" id="r-vout">–</span><span class="s" id="r-vimp"></span></div>
+        <div class="tile"><span class="k">Closest approach</span><span class="v" id="r-rmin">–</span><span class="chip" id="r-flag" hidden></span></div>
+      </div>
+
+      <figure class="panel traj">
+        <canvas id="cv-traj" aria-label="Top-down view of the flyby trajectory"></canvas>
+        <figcaption>Top-down view in units of the periapsis radius r<sub>p</sub>. The thick arc is the burn; the dashed
+          curve is the unpowered arrival hyperbola continued through periapsis.</figcaption>
+      </figure>
+
+      <div class="charts">
+        <figure class="panel">
+          <canvas id="cv-loss" aria-label="Finite-burn loss against Π"></canvas>
+          <figcaption>Loss as a fraction of Δv against Π. Grey band: every thrust profile at near-parabolic arrival
+            (solid stack, nuclear thermal, SEP); dashed: loss/Δv = Π²/96. Faster arrivals sit below the band.</figcaption>
+        </figure>
+        <figure class="panel">
+          <canvas id="cv-atlas" aria-label="Atlas of η against Π and arrival speed"></canvas>
+          <figcaption>η atlas, prograde, small-Δv limit: darker means more of the impulsive bonus kept. The ring marks this
+            case.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <p>Planar two-body problem with point-mass gravity; one constant-thrust burn with the rocket mass loss; Dormand–Prince
+      5(4) integration at a 10<sup>−12</sup> tolerance. This JavaScript simulator reproduces the project's Python simulator
+      to 2×10<sup>−10</sup> in η on ten reference cases. η is undefined for captured arrivals; burns that start outside the
+      body's sphere of influence are flagged, because the planet-centred model does not apply there. Engine and body
+      ranges are the project's representative presets, not hardware data.</p>
+  </footer>
+</main>
+<script>/*__SIM__*/</script>
+<script>/*__DATA__*/</script>
+<script>/*__APP__*/</script>
