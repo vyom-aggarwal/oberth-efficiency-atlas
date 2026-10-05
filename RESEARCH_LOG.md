@@ -901,3 +901,24 @@ support and the equivalent-Δv penalty (decision Q1).
     inward tilt itself is known (Confraria, Ferreira).
 - **Q4, sweeps.** The exhaust-velocity axis is reduced to three values, Δv/c ≈ 0.1, 1 and 3
   (high mass ratio is where Robbins is exceeded). The freed budget goes to Δv and v∞ resolution.
+
+## 2026-10-04: Mission table restated on valid samples only (Q2)
+
+ and  now compute η statistics only over samples whose burn
+starts inside the SOI and does not impact. Outside the SOI the planet-centred model is invalid.
+This **supersedes the electric-propulsion medians** in the Phase 2 "Where real missions sit"
+entry, which pooled invalid samples.
+
+**Prograde electric propulsion,** median η (10th–90th percentile), valid samples only:
+
+| engine | Sun | Jupiter | Saturn | Earth | Mars | Venus |
+|---|---|---|---|---|---|---|
+| Hall | 0.42 (0.24–0.69) | 0.14 (0.06–0.33) | 0.12 (0.05–0.34) | 0.13 (0.07–0.17), n = 18 | 0.08 (0.07–0.12), n = 13 | no valid samples |
+| Gridded ion | 0.30 (0.14–0.55) | 0.11 (0.05–0.25) | 0.08 (0.04–0.24) | no valid samples | no valid samples | no valid samples |
+
+- At the Sun all samples are valid. 17–47% of the Jupiter/Saturn samples were invalid.
+- **Interpretation.** The earlier terrestrial-planet medians of ~0.01 were dominated by invalid
+  long burns. The few valid terrestrial electric-propulsion cases are short-Π outliers (high a0,
+  small Δv).
+- **Unchanged:** chemical and nuclear-thermal numbers (0% outside the SOI).
+- **Limitation:** a heliocentric low-thrust treatment of the invalid cases is out of scope.
