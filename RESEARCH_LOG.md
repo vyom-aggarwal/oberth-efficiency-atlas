@@ -1173,3 +1173,131 @@ centered burn's periapsis lift, r_min/r_p − 1 (`phase3_reversal.png`, `phase3_
 - **Conclusion (empirical).** Periapsis lifting by pre-periapsis thrust pushes the optimum later.
   The centroid effect pushes it earlier, and dominates at high mass ratio. A large-Π asymptotic
   theory of the competition is listed as future work.
+
+## 2026-10-05: Richer pitch law check: 6-knot piecewise-linear pitch (user decision 1)
+
+- **Setup.** `steering.PitchPiecewise` with 6 equally spaced knots in normalized burn time, plus
+  timing δ, i.e. 7 controls (`optimize.optimize_piecewise`). SLSQP with r_min ≥ r_p and three
+  starts: the linear optimum mapped onto the knots, zero pitch, and a perturbed copy.
+- **Cases.** The 15 hardest: Δv/c = 3, Δv/v_p = 0.3, Π ∈ {10, 30, 100}, all five v∞/v_esc
+  (`results/opt_phase3_piecewise.parquet`, 1,266 s).
+- **Results:**
+  - Gain over the linear-pitch optimum: **median 0.0032 pp, max 0.077 pp** (Π = 10,
+    v∞/v_esc = 0.1). It is below the 0.1 pp bar in all 15 cases.
+  - The same gain on the achieved-periapsis baseline: the constraint is active in all 15, so
+    r_min = r_p.
+  - All three starts agree in every case. Max η error estimate 3.7e-11 (the kinks at the knots
+    do not degrade accuracy).
+- **Shape of the optimum.** It is close to linear but slightly concave: e.g. 40°, 29°, 18°, 8°, 2°
+  and −0° toward the planet at Π = 10, v∞/v_esc = 0.1.
+- **Claim wording** (per the user). "Pitch adds little once the timing is optimal" holds *within
+  the smooth steering laws tested* (linear, and 6-knot piecewise-linear). It is not a statement of
+  global optimality; no optimal-control (costate) solution was computed.
+
+## 2026-10-05: Phase 4: finite-burn re-analysis of the Hibberd et al. (2026) solar Oberth manoeuvre
+
+**Model** (`src/oberth_atlas/staged.py`, 11 tests):
+- The arrival conic can have any eccentricity. It is set by the periapsis speed, and the initial
+  state comes from integrating the coast backward from periapsis, so bound near-parabolic arrivals
+  need no special Kepler solver.
+- Stages fire in sequence, each with constant thrust, its own exhaust velocity, propellant and
+  inert mass (dropped at burnout), and an optional coast.
+- Metric: the equivalent-Δv penalty, Δv_rocket − [sqrt(2(ε_out + μ/r_p)) − v_p], i.e. the
+  impulsive Δv at perihelion that gives the same final energy.
+- Verification:
+  - single-stage hyperbolic runs equal `simulate_nd` to 1e-11 in ε_out;
+  - small-Π loss for bound, parabolic and hyperbolic arrivals equals `theory.equivalent_dv_loss_per_pi2`
+    to 2e-3;
+  - Π² scaling;
+  - two identical stages equal one stage;
+  - mass bookkeeping;
+  - the SI → nondimensional stack conversion.
+
+**Inputs** (`configs/phase4/hibberd_som.yaml`):
+- **Hibberd Table 2, row m.** CASTOR 30B (13,970.6 kg, 1,000 kg dry, c = 2.9649 km/s) plus
+  "STAR 48" (2,137 kg, 124 kg dry, 2.8028 km/s), with a 546 kg payload.
+- **Burn times** from the Northrop Grumman Propulsion Products Catalog (OSR 16-S-1432, 5 April
+  2016): CASTOR 30B 126.7 s; STAR 48B short nozzle 84.1 s.
+- **"STAR 48" identified as the STAR 48B short nozzle (TE-M-711-17).** Its 4,705.4 lbm loaded,
+  274.2 lbm inert and Isp 286.0 s match Hibberd's 2,137 kg, 124 kg and 2.8028 km/s; Table 1 of the
+  paper says "STAR 48B".
+- **Constant-thrust model** (m_prop·c/t_b) versus the catalog burn-time-average thrust: +1.3%
+  (CASTOR 30B; Hibberd's c is 0.6% above the catalog Isp of 300.6 s) and −0.1% (STAR 48B).
+- **ΔV check.** The rocket equation gives 8,362.4 m/s, against Hibberd's 8,355 (Table 1) and 8.36
+  km/s (Table 2).
+- **Mass discrepancy in the source.** The Table 2 totals equal the stage masses plus payload in the
+  rows checked (n, o), but row m lists 17,754 kg against a sum of 16,653.6 kg (+1,100.4 kg).
+  - We use the stage sum, which reproduces their ΔV.
+  - Carrying the extra mass as inert through both burns would give only ≈ 6.0 km/s, inconsistent
+    with their ΔV.
+- **Arrival.** Bound, aphelion at Jupiter's semi-major axis (5.2029 au; the SOM follows a Jupiter
+  gravity assist), giving v_p = 344.798 km/s at 3.2 R☉ and τ = r_p/v_p = 6,457 s.
+- **Steering.** Prograde.
+
+**Reference result.** Burn duration 210.8 s, Π = 0.0326.
+
+| placement | equivalent-Δv loss | fraction of Δv | v∞,out shortfall (of 74.14 km/s) |
+|---|---|---|---|
+| time-centred | 0.0991 m/s | 1.19e-5 | 0.47 m/s |
+| Δv centroid at perihelion (19.56 s earlier) | 0.0897 m/s | 1.07e-5 | 0.43 m/s |
+| optimal timing (19.56 s earlier) | 0.0897 m/s | 1.07e-5 | 0.43 m/s |
+
+- **Pre-registered expectation** (2026-10-04): 0.04–0.25 m/s. **Confirmed.**
+- **Accuracy:**
+  - rerun at rtol = atol = 1e-13: differences ≤ 1.5e-9 m/s;
+  - energy-balance error estimate 1.4e-7 m/s.
+- **Independent leading-order estimate.** The Π² second moment of the staged profile
+  (`staged.leading_order_loss`) gives 0.093 and 0.084 m/s, 6–7% below the simulation; that gap is
+  the expected size of the neglected finite-Δv j term.
+- **Optimal timing** coincides with the Δv-centroid rule (Phase 3) to 0.002 s.
+
+**Sensitivities** (time-centred / optimal, m/s):
+- staging coast 10 s: 0.112 / 0.103;
+- staging coast 60 s: 0.199 / 0.191;
+- arrival orbit (aphelion 1 au, 30 au, parabolic, hyperbolic v∞ = 5 km/s): 0.098–0.0994 / 0.0888–0.0900;
+- two-level thrust per motor (catalog maximum thrust for half the burn, the complement for the
+  other half): regressive 0.105 / 0.101, progressive 0.094 / 0.079.
+
+The loss stays below 2.4e-5 of Δv in every case. **The impulsive model is accurate for this SOM.**
+
+**Where the impulsive model fails** (`phase4_loss_vs_pi.png`). Both motors' thrust was scaled by f
+at fixed propellant:
+
+| threshold | Π | thrust | initial a0 | burn duration |
+|---|---|---|---|---|
+| loss 0.1% of Δv | 0.30 | ÷ 9.2 | 1.98 m/s² | 1,942 s |
+| loss 1% of Δv | 0.98 | ÷ 30 | 0.61 m/s² | 6,300 s ≈ τ |
+
+With optimal timing the thresholds shift slightly, to Π = 0.32 and 1.03.
+
+**Placements on the curve:**
+- **Nuclear thermal** (Phase 2 presets, Isp 800–900 s), at the SOM geometry:
+  - a0 = 3 m/s²: Π = 0.27–0.28, loss 0.08–0.09% (6.8–7.4 m/s);
+  - a0 = 0.1 m/s²: Π = 8.0–8.4, loss 21.6–22.3% (1.80–1.86 km/s).
+  - The 1% threshold falls at a0 ≈ 0.6 m/s², inside the preset range.
+- **SEP, Maraqten et al. (2026)**, at their own geometry (0.308 au, v_p = 75.0 km/s, Isp
+  6,000 s, about 10 km/s in the perihelion arc):
+  - constant 49.8 N, with the start mass bracketed at 11,036–15,189 kg: Π = 3.3–4.6, loss
+    8.5–12.5% of the arc Δv;
+  - their 0.25-yr arc duration: Π = 12.8, loss 29%.
+  - Their thrust falls as r⁻² away from perihelion, which concentrates it near perihelion, so the
+    actual loss should lie inside this bracket (assumption; the r⁻² variation is not modelled).
+  - Their reference is a 1 au spiral, not an impulsive burn, so these numbers complement rather
+    than contradict their "threefold" result.
+
+**Universality.** For a near-parabolic arrival, the loss as a fraction of Δv is close to a
+single function of Π:
+- **Across profiles:** the two-stage solid stack, one stage at Isp 850 s and one at 6,000 s agree
+  within 8% for 0.1 ≤ Π ≤ 100. At Π = 0.03 the staged stack is 20% higher, a profile-shape effect
+  through m₂.
+- **Across geometry:** the SEP points at 0.308 au lie within 0.1–9% of the curve computed at
+  3.2 R☉.
+- **Rule of thumb:** loss ≈ 1% of Δv at Π ≈ 1 and 0.1% at Π ≈ 0.3, i.e. the burn should be
+  shorter than about τ = r_p/v_p.
+
+**Assumptions and limits:**
+- planar point-mass Sun; prograde steering;
+- constant thrust per motor (with the two-level sensitivity);
+- unknown staging coast (bracketed);
+- no thermal, attitude or spin-up constraints;
+- SEP r⁻² thrust variation not modelled.
