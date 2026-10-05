@@ -71,6 +71,19 @@ def test_mass_bookkeeping_and_schedule():
         schedule([StageND(thrust=1.0, c=0.2, m_prop=1.2)])
 
 
+def test_leading_order_loss_matches_theory_and_simulation():
+    from oberth_atlas.staged import leading_order_loss
+    v_p, c, Pi = 1.40, 0.1, 0.02
+    st = single_stage(1e-5, c, Pi, v_p)                  # Δv → 0: only the m₂ term survives
+    th = theory.equivalent_dv_loss_per_pi2(v_p, 1e-5, c, "prograde", x_c=0.5) * Pi**2
+    assert leading_order_loss(v_p, [st]) == pytest.approx(th, rel=1e-4)
+    # Two stages with a coast gap: the m₂ estimate tracks the simulation up to the small j term.
+    stages = [StageND(thrust=2.0, c=0.012, m_prop=0.75, m_drop=0.06, coast_after=0.001),
+              StageND(thrust=0.6, c=0.0115, m_prop=0.12, m_drop=0.008)]
+    sim = simulate_staged_nd(v_p, stages)
+    assert leading_order_loss(v_p, stages) == pytest.approx(sim.dv_loss, rel=0.1)
+
+
 def test_si_stack_nondimensionalization():
     from oberth_atlas.constants import GM_SUN, SUN
     from oberth_atlas.staged import StageSI, stack_mass, stages_to_nd

@@ -119,6 +119,27 @@ def centroid_offset(stages: list[StageND]) -> float:
     return 0.5 * duration - dv_centroid_time(stages)
 
 
+def leading_order_loss(v_p: float, stages: list[StageND], midpoint_offset: float = 0.0, n: int = 64) -> float:
+    """O(Π²) equivalent-Δv loss of a prograde staged burn from its second moment about periapsis.
+
+    ½ K ∫ a(t) t² dt / (v_p + Δv), with K = k(1 − k)v_p³ = v_p − 1/v_p (docs/theory.md §4) and t
+    measured from the unperturbed periapsis. This is the m₂ term of the small-Π deficit,
+    generalized to any staged profile. It neglects the finite-Δv term j, of relative size
+    ~2(1 + k)Δv j/((1 − k) v_p m₂), and O(Π⁴).
+    """
+    sched, duration = schedule(stages)
+    t_ign = midpoint_offset - 0.5 * duration
+    xg, wg = np.polynomial.legendre.leggauss(n)
+    moment = 0.0
+    for s, st in zip(stages, sched):
+        tb, mdot = s.burn_time, s.thrust / s.c
+        tt = 0.5 * (xg + 1.0) * tb
+        a = s.thrust / (st.m_ignition - mdot * tt)
+        moment += 0.5 * tb * float(np.sum(wg * a * (t_ign + st.t_ignition + tt) ** 2))
+    dv = sum(st.dv for st in sched)
+    return 0.5 * (v_p - 1.0 / v_p) * moment / (v_p + dv)
+
+
 @dataclass
 class StagedResult:
     v_p: float
@@ -238,4 +259,4 @@ def optimal_offset(v_p: float, stages: list[StageND], numerics: Numerics = Numer
 
 
 __all__ = ["StageND", "StageSI", "StageTiming", "StagedResult", "schedule", "dv_centroid_time", "centroid_offset",
-           "simulate_staged_nd", "optimal_offset", "stack_mass", "stages_to_nd"]
+           "simulate_staged_nd", "optimal_offset", "stack_mass", "stages_to_nd", "leading_order_loss"]
