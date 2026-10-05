@@ -20,6 +20,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+anim = ["imageio-ffmpeg>=0.5"]   # bundled ffmpeg binary for MP4 export (scripts/anim_engines.py); GIF needs only Pillow
 
 [project.scripts]
 oberth = "oberth_atlas.cli:main"
