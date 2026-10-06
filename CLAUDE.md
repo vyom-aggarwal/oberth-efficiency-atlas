@@ -111,6 +111,18 @@ unknown keys are rejected.
 - **`explorer/sim.js`** is the JS port of `simulate_nd`. `tests/test_explorer_js.py` runs it under
   node (skipped without node) against Python on 10 cases, to |Δη| ≤ 1e-8.
 
+### Wrap-up (feature freeze, 2026-10-06)
+```bash
+.venv/Scripts/python scripts/anim_numbers.py        # animation cross-check → figures/anim_numbers.json
+.venv/Scripts/python scripts/j2_sensitivity.py      # J2 on η, 10 cases → figures/j2_numbers.json, j2_cases.csv
+.venv/Scripts/python scripts/fig_loss_vinf.py       # arrival-speed dependence → figures/loss_vs_pi_vinf.png
+.venv/Scripts/python scripts/rebuild_all.py         # rebuild EVERYTHING in dependency order (~2.5 h); timings → runs/
+.venv/Scripts/python scripts/repro_audit.py REF_DIR REBUILT_DIR   # compare outputs, ignoring provenance stamps
+```
+- **Feature freeze:** only Robbins (1966) follow-ups when the paper arrives.
+- **Exact environment:** `requirements-lock.txt` pins the audited package versions. See
+  `docs/repro.md`.
+
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.
 - **Config files** use unit-suffixed keys (`v_inf_in_km_s`, `periapsis_altitude_km`, `a0_m_s2`,

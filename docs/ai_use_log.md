@@ -213,3 +213,32 @@ RESEARCH_LOG.md (dated entries) and the git history (`git log` on `main`); see t
 
 **Published:** the explorer, as a private Claude artifact for viewing; the repository copy is
 `explorer/oberth_explorer.html`.
+
+## Wrap-up: precision fixes, J2, reproducibility (2026-10-06)
+
+**Author decided:**
+- Word the Π²/96 rule as a leading-order bound that holds within 1% for Π ≤ 1.
+- Label the explorer atlas as linear-response theory.
+- Add an independent cross-check of the animation numbers.
+- A feature freeze after: a J2 sensitivity check of about 10 cases; no practitioner-literature
+  search; Robbins on arrival.
+- The explorer keeps hyperbolic arrivals only, with a labelled Hibberd approximation.
+- Source names stay inside figures, with numbered citations in captions.
+- A single-band hero figure, plus a separate arrival-speed figure.
+- A reproducibility audit (fresh clone, fresh venv, full rebuild) before tagging `v1.0-analysis`.
+  The author pushes.
+
+**Assistant implemented:**
+- The wording changes, with the factual note that the 1.010 maximum is reached already at
+  Π ≤ 0.1.
+- The animation cross-check (`anim_numbers.json`). The SEP case's Π is 368, not the ≈ 377 in the
+  request.
+- The J2 module and its 10 cases: max |Δη| = 0.0026.
+- The arrival-speed figure.
+- The labelled explorer preset. The assistant found that the single equivalent stage loses
+  0.137 m/s against the staged 0.099 m/s, and said so on the page.
+- `rebuild_all.py`, `repro_audit.py`, `requirements-lock.txt` and `docs/repro.md`, and the audit
+  itself.
+
+**Assistant found** (with the checker): two outline numbers that existed only as JSON keys, now
+added to the numbers file as values.

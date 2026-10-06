@@ -51,3 +51,8 @@ python -m venv .venv
   - **Interactive explorer:** `explorer/oberth_explorer.html`, a self-contained page whose
     JavaScript simulator is validated against Python in `tests/test_explorer_js.py`.
   - **Numbers checker** for drafts: `scripts/check_numbers.py`.
+- **Wrap-up (feature freeze):**
+  - J2 sensitivity: oblateness changes η by at most 0.0026 (`figures/j2_numbers.json`).
+  - Arrival-speed figure: `figures/loss_vs_pi_vinf.png`.
+  - Reproducibility: one command rebuilds everything (`scripts/rebuild_all.py`); see
+    [docs/repro.md](docs/repro.md).
