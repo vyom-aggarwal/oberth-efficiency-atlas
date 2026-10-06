@@ -154,7 +154,8 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
     places their arc at Π_eff ≈ 4.6–9.2, where it gives about 12–20%.
 
 ## 11. Limitations
-- **Gravity model.** Point-mass gravity, with J2 neglected.
+- **Gravity model.** Point-mass gravity. A J2 check (10 cases at 1.1 R) changes η by at most
+  0.0026 (`j2_numbers.json`).
 - **Frame.** The planet-centred frame is invalid for burns that start outside the SOI.
 - **Arrivals.** The atlas uses hyperbolic arrivals; the case study uses bound ones.
 - **Case study.** Planar point-mass Sun; constant thrust per motor (bracketed by two-level
@@ -190,7 +191,7 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 | P6 | The small-Π optimum is the Δv-weighted mean; closed-form recovered fraction and half-Δv capture; depth/efficiency split. The qualitative "centre on Δv" idea is not claimed | Robbins may treat burn placement | Read Robbins; database search |
 | R1 | Practical rule: loss/Δv at most about Π²/96, a leading-order bound that holds within 1% for Π ≤ 1, with its conditions | Framed as close to practitioner heuristics (**(a)** qualitatively, **(b)** the exact form) | Practitioner literature search |
 | A1 | Mission-atlas η per body and engine | Representative presets; SOI filter | Sensitivity to the preset ranges |
-| A2 | All absolute flyby results | Point-mass gravity (J2 neglected) | Optional J2 run |
+| A2 | All absolute flyby results | Point-mass gravity. J2 checked on 10 cases at 1.1 R (Jupiter, Saturn; Π = 0.1–100): max \|Δη\| = 0.0026, ≤ 4.9% of the deficit 1 − η; absolute v∞,out shifts by 21–28 m/s | Settled for η (`j2_numbers.json`); absolute values stay point-mass |
 
 ---
 

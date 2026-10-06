@@ -1662,3 +1662,29 @@ losses in their analysis.
   the conserved total energy including the J2 potential.
 - **Reported:** Δη = η_J2 − η_point-mass, from the same code path with J2 = 0. The answer to "does
   oblateness matter?" is the largest |Δη|.
+
+## 2026-10-06: J2 sensitivity result: oblateness changes η by at most 0.003
+
+Code: `src/oberth_atlas/j2.py` (4 tests) and `scripts/j2_sensitivity.py`, writing
+`figures/j2_numbers.json` and `j2_cases.csv`. Runtime 2.5 s.
+
+| body, geometry | Π = 0.1 | Π = 1 | Π = 10 | Π = 100 |
+|---|---|---|---|---|
+| Jupiter equatorial: Δη | −2.2e-6 | −2.0e-4 | −2.2e-3 | −1.7e-3 |
+| Saturn equatorial: Δη | −2.9e-6 | −2.6e-4 | −2.6e-3 | −1.7e-3 |
+| Jupiter polar: Δη | – | −4.4e-4 | −1.0e-3 | – |
+
+- **One-number answer:** max |Δη| = **0.0026** (Saturn, equatorial, Π = 10); max |Δη/η| = 0.55%.
+  Oblateness does not change any conclusion about η at the 1.1 R flybys tested.
+- **As a fraction of the deficit 1 − η:** about 2.5% at small Π for equatorial passes, and up to
+  4.9% for the polar Jupiter pass at Π = 1. That is a few-percent change to a quantity that is
+  itself small there. It falls to 0.26% at Π = 100.
+- **Mechanism, read off the data:**
+  - The equatorial J2 pull lowers the actual periapsis to 0.994 r_p (Jupiter) and 0.9936 r_p
+    (Saturn), with stronger gravity near it.
+  - The polar pass reaches 1.0062 r_p.
+  - The impulsive v∞,out itself shifts by 21–28 m/s on equatorial passes, but η, a ratio within
+    one field, largely cancels it. This confirms the 2026-10-03 argument for neglecting J2,
+    with numbers.
+- **Accuracy:** energy balance ≤ 1.9e-12 in every run.
+- **Claim A2** is updated in the paper outline: the J2 effect on η is now quantified.
