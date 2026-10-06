@@ -11,8 +11,9 @@ RESEARCH_LOG.md (dated entries) and the git history (`git log` on `main`); see t
   made the scientific and scope decisions listed below, contributed derivations and checks, and
   writes the paper prose. The assistant drafts no paper text (CLAUDE.md, 2026-10-05).
 - **Verification:**
-  - Every reported number comes from code in the repository, with tests (484+ at Phase 5) and
-    per-run numerical error estimates.
+  - Every reported number comes from code in the repository, with tests (509 at v1.0-analysis)
+    and per-run numerical error estimates.
+  - A fresh-clone rebuild reproduces every committed output (`docs/repro.md`).
   - Figures carry the generating script and git commit in their metadata.
   - Quoted numbers are collected in `figures/*_numbers.json`, and `scripts/check_numbers.py`
     checks drafts against them.
@@ -242,3 +243,27 @@ RESEARCH_LOG.md (dated entries) and the git history (`git log` on `main`); see t
 
 **Assistant found** (with the checker): two outline numbers that existed only as JSON keys, now
 added to the numbers file as values.
+
+**Reproducibility audit (assistant ran it; details in `docs/repro.md`):**
+- Fresh clone, fresh venv and full rebuild: 508 tests passed and all 26 steps ran.
+- After fixes, 56/56 outputs are identical to the committed ones, ignoring provenance and
+  wall-clock fields.
+- One input is not regenerable: the Confraria digitization, which needs an external image.
+
+**Assistant errors, disclosed (found by the audit):**
+- **Stale committed outputs.** Some outputs were not regenerated after later code changes:
+  - Phase 1 figures, after the Phase 2 refactor;
+  - `phase2_numbers.json`, after the valid-samples mission table;
+  - the Phase 3 campaign and its dependants, after the optimizer's cache change in the
+    follow-ups.
+
+  The differences were at the 1e-6 level or below in optimal controls and 1e-12 in η, and no
+  quoted number changed. All were regenerated from committed code.
+- **An animation bug.** It was introduced when the script was reordered to draw the still first:
+  frame 0 kept the markers from the still. It is fixed, with a regression test. The committed
+  video predates the bug and was already correct.
+- **A process slip.** One refresh commit (533227d) was made by a command chain that did not check
+  the comparison it printed (False). The remaining difference turned out to be wall-clock
+  statistics only, which the audit now ignores.
+- **Audit wall times are indicative.** The machine slept during the clone's sweep, and step times
+  varied by up to 4× between runs.

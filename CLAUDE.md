@@ -116,12 +116,15 @@ unknown keys are rejected.
 .venv/Scripts/python scripts/anim_numbers.py        # animation cross-check → figures/anim_numbers.json
 .venv/Scripts/python scripts/j2_sensitivity.py      # J2 on η, 10 cases → figures/j2_numbers.json, j2_cases.csv
 .venv/Scripts/python scripts/fig_loss_vinf.py       # arrival-speed dependence → figures/loss_vs_pi_vinf.png
-.venv/Scripts/python scripts/rebuild_all.py         # rebuild EVERYTHING in dependency order (~2.5 h); timings → runs/
+.venv/Scripts/python scripts/rebuild_all.py         # rebuild EVERYTHING in dependency order (~45–80 min); timings → runs/
 .venv/Scripts/python scripts/repro_audit.py REF_DIR REBUILT_DIR   # compare outputs, ignoring provenance stamps
 ```
 - **Feature freeze:** only Robbins (1966) follow-ups when the paper arrives.
 - **Exact environment:** `requirements-lock.txt` pins the audited package versions. See
   `docs/repro.md`.
+- **Audit (v1.0-analysis):** a fresh-clone rebuild reproduces all 56 committed outputs. After any
+  code change, regenerate every output that depends on it, then rerun `repro_audit.py`. The
+  audit found outputs that had gone stale after code changes.
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.

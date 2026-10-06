@@ -971,6 +971,8 @@ entry, which pooled invalid samples.
   agree.
 - **Independent check:** penalty Nelder–Mead on 12 cases agrees with SLSQP. η_NM − η_SLSQP lies
   in [+1e-14, +4.7e-9]; the largest difference comes with a 5e-7 constraint violation by NM.
+  *[2026-10-06: the regenerated campaign gives [−1.2e-15, +4.6e-9]; see the reproducibility
+  audit.]*
 - **Integration error:** max η error estimate 7.2e-10.
 
 ## 2026-10-04: Phase 3 results: recoverable efficiency in the prograde family
@@ -1776,4 +1778,51 @@ regenerated after a later code change. They are not reproducibility failures of 
     frame 0.
   - The committed MP4 and GIF are already correct. Rerunning the animation from the fixed code
     should reproduce them frame for frame, and that is checked below.
+  - *Verified:* the test fails against the old `draw()` and passes with the fix. In the clone, the
+    fixed code reproduces the committed MP4 and GIF frame for frame.
+
+## 2026-10-06: Reproducibility audit result: 56/56 outputs identical
+
+Details and timings are in `docs/repro.md`.
+
+**Sequence:**
+1. **Fresh clone of 8283401** with a fresh venv (plain `pip install -e ".[dev,anim]"`, which
+   resolved the 24 locked versions).
+   - 508 tests passed, none skipped.
+   - All 26 rebuild steps ran.
+2. **First comparison:** differences in Phase 1 outputs, `phase2_numbers.json`, seven Phase 3
+   files and the animation. Each was traced to stale committed outputs or the animation bug
+   (entries above). None was nondeterminism.
+3. **Regenerated in the repository,** with the code committed first so the stamps are clean:
+   - Phase 1 outputs (1f7299d);
+   - `phase2_numbers.json` (533227d);
+   - the Phase 3 campaign (e98a73e), follow-ups (9f1beb7), and figures and numbers (8ecacb2).
+   - Each regenerated file matched the clone's.
+4. **Final code in the clone:** the clone's code was updated to the fixed commit (dcc3463), which
+   is identical to the tagged code. There, 509 tests passed and the animation was rerun.
+5. **Final comparison:** **56/56 identical**, ignoring provenance stamps and wall-clock fields.
+   - `confraria_fig434_digitized.csv` is among the 56 but is not regenerated: it is a digitized
+     literature input whose source image is not in the repository.
+
+**Effect of the Phase 3 refresh on reported numbers:**
+- The optimal controls move by ≤ 7e-6; η_fixed by ≤ 1.9e-12 and η_achieved by ≤ 5.3e-8.
+- Relative changes above 1e-4 in `phase3_numbers.json` occur only for near-zero quantities:
+  - pitch extremes of ~0.01°;
+  - gains of ~1e-6 pp;
+  - error estimates;
+  - the cross-check minimum.
+- **Nelder–Mead agreement:** now [−1.2e-15, +4.6e-9], against [+1e-14, +4.7e-9] logged on
+  2026-10-04 (annotated there).
+- **Multi-start agreement:** 296 of 300 constrained optimizations, max spread 5e-12. Unchanged.
+- **Paper outline:** `check_numbers.py docs/paper_outline.md` gives 34 checked, 0 unmatched.
+
+**Audit-tool rules added during the audit,** each for a wall-clock or provenance field:
+- JSON keys containing "runtime" are ignored (0ae4c5a);
+- the PDF `startxref` offset is ignored (490135f). The committed hero PDF has a local-time
+  creation date because it predates `SOURCE_DATE_EPOCH` in the rebuild driver.
+
+**Timings:** wall times varied by up to 4× between the audit rebuild and later reruns on the same
+machine, for example the Phase 3 follow-ups at 33.8 vs 7.7 min. The cause was not identified;
+the laptop's power or thermal state is likely. `docs/repro.md` gives both columns: a full rebuild
+takes about 43–79 min, with the sweep at about 17 min.
 

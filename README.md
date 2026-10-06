@@ -54,5 +54,5 @@ python -m venv .venv
 - **Wrap-up (feature freeze):**
   - J2 sensitivity: oblateness changes η by at most 0.0026 (`figures/j2_numbers.json`).
   - Arrival-speed figure: `figures/loss_vs_pi_vinf.png`.
-  - Reproducibility: one command rebuilds everything (`scripts/rebuild_all.py`); see
-    [docs/repro.md](docs/repro.md).
+  - Reproducibility: one command rebuilds everything (`scripts/rebuild_all.py`), and a
+    fresh-clone audit reproduces all 56 committed outputs; see [docs/repro.md](docs/repro.md).
