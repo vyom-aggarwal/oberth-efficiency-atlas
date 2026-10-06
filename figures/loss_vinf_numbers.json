@@ -2,7 +2,14 @@
  "selection": {
   "dv_over_vp_max": 0.03,
   "dv_over_c_max": 0.3,
-  "n_runs": 11160
+  "n_runs": 11160,
+  "v_over_vesc": [
+   0.0098,
+   0.1107,
+   0.473,
+   1.2455,
+   3.2791
+  ]
  },
  "by_v_over_vesc": {
   "0.0098": {
