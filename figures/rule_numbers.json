@@ -1,5 +1,5 @@
 {
- "rule": "loss/Δv ≲ Π²/96 (prograde, time-centred; leading order in Π)",
+ "rule": "loss/Δv at most ≈ Π²/96 (prograde, time-centred): a leading-order bound, holds within 1% for Π ≤ 1",
  "bound_closed_form_lam0": "(1 + r)/(96(1 − r)) for any conic (k ≤ 1); (1 + 3r)/(96(1 + r)) for k ≤ ½; r = Δv/v_p",
  "bound_96_examples": {
   "r=0": {
