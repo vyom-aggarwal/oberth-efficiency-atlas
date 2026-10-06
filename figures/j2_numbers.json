@@ -1,0 +1,159 @@
+{
+ "cases": [
+  {
+   "body": "jupiter",
+   "geometry": "equatorial",
+   "Pi": 0.1,
+   "eta_point_mass": 0.9999039282824653,
+   "eta_j2": 0.9999016837085304,
+   "delta_eta": -2.2445739349397087e-06,
+   "rel_delta_eta": -2.2447895957316744e-06,
+   "rel_delta_deficit": 0.02336352458911343,
+   "r_periapsis_j2_over_rp": 0.9940093460442762,
+   "energy_balance": 1.631066809393289e-12,
+   "v_inf_out_impulsive_shift_m_s": 27.705872355507452
+  },
+  {
+   "body": "jupiter",
+   "geometry": "equatorial",
+   "Pi": 1.0,
+   "eta_point_mass": 0.9908763586143287,
+   "eta_j2": 0.9906731499074317,
+   "delta_eta": -0.00020320870689694015,
+   "rel_delta_eta": -0.00020507978127676124,
+   "rel_delta_deficit": 0.022272763506035968,
+   "r_periapsis_j2_over_rp": 0.9940092942322613,
+   "energy_balance": 1.9029968573169853e-12,
+   "v_inf_out_impulsive_shift_m_s": 27.713080709274056
+  },
+  {
+   "body": "jupiter",
+   "geometry": "equatorial",
+   "Pi": 10.0,
+   "eta_point_mass": 0.7694055219126664,
+   "eta_j2": 0.7672245083343282,
+   "delta_eta": -0.00218101357833822,
+   "rel_delta_eta": -0.0028346736749645814,
+   "rel_delta_deficit": 0.009458221187378995,
+   "r_periapsis_j2_over_rp": 0.9940088777572633,
+   "energy_balance": 1.6721624085391795e-12,
+   "v_inf_out_impulsive_shift_m_s": 27.771023832522413
+  },
+  {
+   "body": "jupiter",
+   "geometry": "equatorial",
+   "Pi": 100.0,
+   "eta_point_mass": 0.36919513612611327,
+   "eta_j2": 0.3675239007364362,
+   "delta_eta": -0.0016712353896770615,
+   "rel_delta_eta": -0.004526699368829671,
+   "rel_delta_deficit": 0.0026493698533231066,
+   "r_periapsis_j2_over_rp": 0.9940077927201533,
+   "energy_balance": 1.395157427086513e-12,
+   "v_inf_out_impulsive_shift_m_s": 27.921979463644963
+  },
+  {
+   "body": "saturn",
+   "geometry": "equatorial",
+   "Pi": 0.1,
+   "eta_point_mass": 0.9998851543279332,
+   "eta_j2": 0.9998822596813052,
+   "delta_eta": -2.894646628059938e-06,
+   "rel_delta_eta": -2.8949791038807427e-06,
+   "rel_delta_deficit": 0.02520466445071724,
+   "r_periapsis_j2_over_rp": 0.9936237126960236,
+   "energy_balance": 1.7468596014147408e-12,
+   "v_inf_out_impulsive_shift_m_s": 21.32345328117843
+  },
+  {
+   "body": "saturn",
+   "geometry": "equatorial",
+   "Pi": 1.0,
+   "eta_point_mass": 0.9891260706426246,
+   "eta_j2": 0.988865707219994,
+   "delta_eta": -0.0002603634226305829,
+   "rel_delta_eta": -0.00026322572052056776,
+   "rel_delta_deficit": 0.023943821416679275,
+   "r_periapsis_j2_over_rp": 0.9936236635134255,
+   "energy_balance": 1.7076062786003376e-12,
+   "v_inf_out_impulsive_shift_m_s": 21.326540003729228
+  },
+  {
+   "body": "saturn",
+   "geometry": "equatorial",
+   "Pi": 10.0,
+   "eta_point_mass": 0.7359492604730214,
+   "eta_j2": 0.7333739323683108,
+   "delta_eta": -0.002575328104710617,
+   "rel_delta_eta": -0.0034993283409991602,
+   "rel_delta_deficit": 0.009753156190071912,
+   "r_periapsis_j2_over_rp": 0.9936232701273352,
+   "energy_balance": 1.6745563269360275e-12,
+   "v_inf_out_impulsive_shift_m_s": 21.35122873306759
+  },
+  {
+   "body": "saturn",
+   "geometry": "equatorial",
+   "Pi": 100.0,
+   "eta_point_mass": 0.3096330195997196,
+   "eta_j2": 0.30792196866014915,
+   "delta_eta": -0.0017110509395704687,
+   "rel_delta_eta": -0.005526060953649073,
+   "rel_delta_deficit": 0.002478465784354848,
+   "r_periapsis_j2_over_rp": 0.9936222759503417,
+   "energy_balance": 1.481623851384839e-12,
+   "v_inf_out_impulsive_shift_m_s": 21.413621872301484
+  },
+  {
+   "body": "jupiter",
+   "geometry": "polar",
+   "Pi": 1.0,
+   "eta_point_mass": 0.9908763586143287,
+   "eta_j2": 0.9904314951142746,
+   "delta_eta": -0.00044486350005401576,
+   "rel_delta_eta": -0.00044895964686868326,
+   "rel_delta_deficit": 0.04875942414315766,
+   "r_periapsis_j2_over_rp": 1.0062214442194395,
+   "energy_balance": 1.7432305599029974e-12,
+   "v_inf_out_impulsive_shift_m_s": -0.5107699166270308
+  },
+  {
+   "body": "jupiter",
+   "geometry": "polar",
+   "Pi": 10.0,
+   "eta_point_mass": 0.7694055219126664,
+   "eta_j2": 0.7683889589418393,
+   "delta_eta": -0.001016562970827084,
+   "rel_delta_eta": -0.0013212317066558198,
+   "rel_delta_deficit": 0.004408444552787941,
+   "r_periapsis_j2_over_rp": 1.006199433232315,
+   "energy_balance": 1.6732205898595254e-12,
+   "v_inf_out_impulsive_shift_m_s": -0.46207696206638504
+  }
+ ],
+ "max_abs_delta_eta": 0.002575328104710617,
+ "max_abs_rel_delta_eta": 0.005526060953649073,
+ "max_rel_delta_deficit": 0.04875942414315766,
+ "rel_delta_deficit_by_Pi_equatorial": {
+  "Pi=0.1": 0.02520466445071724,
+  "Pi=1": 0.023943821416679275,
+  "Pi=10": 0.009753156190071912,
+  "Pi=100": 0.0026493698533231066
+ },
+ "worst_case": {
+  "body": "saturn",
+  "geometry": "equatorial",
+  "Pi": 10.0
+ },
+ "max_energy_balance": 1.9029968573169853e-12,
+ "setup": {
+  "r_p_over_R": 1.1,
+  "v_inf_m_s": 6000.0,
+  "dv_m_s": 1000.0,
+  "isp_s": 900.0,
+  "J2": {
+   "jupiter": 0.014736,
+   "saturn": 0.016298
+  }
+ }
+}
