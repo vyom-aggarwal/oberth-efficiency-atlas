@@ -103,14 +103,11 @@ def log_xy(x, y):
     return rho * x / r, rho * y / r
 
 
-def main() -> None:
-    sys.stdout.reconfigure(encoding="utf-8")
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--frames", type=int, default=360)
-    ap.add_argument("--fps", type=int, default=30)
-    ap.add_argument("--still-only", action="store_true", help="only the final-frame PNG")
-    ap.add_argument("--gif-only", action="store_true", help="only convert the existing MP4 to GIF")
-    a = ap.parse_args()
+def build_figure(n_frames: int):
+    """The animation figure and its frame function: returns (fig, draw, frame_t, cases, trajs, S).
+
+    draw(t) sets every animated artist from t alone, so a frame never depends on the frames drawn before it.
+    """
     cases, S, vp, dv = build_cases()
     tau = 1.0 / vp
     # Window: cover the SEP burn (the longest) with margin.
@@ -180,7 +177,7 @@ def main() -> None:
                  "radial axis logarithmic", fontsize=11, x=0.5)
 
     s_max = math.asinh(window_tau)
-    frame_t = tau * np.sinh(np.linspace(-s_max, s_max, a.frames))
+    frame_t = tau * np.sinh(np.linspace(-s_max, s_max, n_frames))
 
     def draw(t_now):
         for art, tr in zip(artists, trajs):
@@ -189,6 +186,8 @@ def main() -> None:
             art["trail"].set_data(X, Yy)
             if k:
                 art["dot"].set_data([X[-1]], [Yy[-1]])
+            else:
+                art["dot"].set_data([], [])                              # no dot before the path starts
             on = tr["av"][:k] > 0
             pts = np.column_stack([X, Yy])
             segs = np.stack([pts[:-1], pts[1:]], axis=1) if k > 1 else np.empty((0, 2, 2))
@@ -201,6 +200,19 @@ def main() -> None:
         cursor.set_xdata([t_now / tau, t_now / tau])
         clock.set_text(f"t = {t_now * S.time / 3600:+.2f} h from perihelion")
         return []
+
+    return fig, draw, frame_t, cases, trajs, S
+
+
+def main() -> None:
+    sys.stdout.reconfigure(encoding="utf-8")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--frames", type=int, default=360)
+    ap.add_argument("--fps", type=int, default=30)
+    ap.add_argument("--still-only", action="store_true", help="only the final-frame PNG")
+    ap.add_argument("--gif-only", action="store_true", help="only convert the existing MP4 to GIF")
+    a = ap.parse_args()
+    fig, draw, frame_t, cases, trajs, S = build_figure(a.frames)
 
     import subprocess
 

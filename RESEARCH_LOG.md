@@ -1753,3 +1753,27 @@ regenerated after a later code change. They are not reproducibility failures of 
 - The committed sweep's per-run compute, Σ runtime_s / 8 workers, is 17.4 min.
 - The computation was unaffected: the sweep is deterministic and matches the committed table
   exactly apart from `runtime_s`.
+
+## 2026-10-06: Bug found by the audit: the animation's frame 0 depended on draw order
+
+- **Symptom:** the rebuilt `anim_engines.mp4` differed from the committed one in exactly 250 of
+  360 decoded frames, by up to 251/255 in frame 0 and ≤ 65/255 afterwards. Frames 250–359 were
+  identical, and so was the final-frame PNG.
+- **Cause:**
+  - In `draw()`, the spacecraft dot was set only when the frame had at least one sample (`if k:`).
+    Frame 0 has none, since the frame times and trajectory samples share the τ·sinh grid. So the
+    dot kept whatever the previous draw left.
+  - Since a97a34f, the script draws the final-frame still before the MP4. Frame 0 therefore showed
+    the dots at their final positions.
+  - The committed MP4 was rendered from a fresh figure (the earlier order), so its frame 0 has
+    no dots, which is correct.
+  - x264 predicts later frames from earlier ones, so the changed frame 0 alters every frame up to
+    the next keyframe (keyint 250). That explains the 250.
+- **Fix:** the dot is always set and cleared before the path starts, so each frame depends only
+  on its time.
+  - Figure construction moves into `build_figure()`. No output change is intended.
+  - Regression test: draw the final frame then frame 0, and compare the pixels with a fresh
+    frame 0.
+  - The committed MP4 and GIF are already correct. Rerunning the animation from the fixed code
+    should reproduce them frame for frame, and that is checked below.
+
