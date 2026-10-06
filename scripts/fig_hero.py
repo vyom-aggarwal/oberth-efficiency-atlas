@@ -4,7 +4,7 @@
   across thrust profiles (Hibberd's two-stage solid stack with thrust scaled; one constant-thrust
   stage at Isp 850 s and at 6000 s); results/phase4.parquet. Below Π = 0.01 each profile is
   continued at its constant (loss/Δv)/Π², which is exact at leading order (figures/rule_numbers.json).
-- Rule: loss/Δv = Π²/96.
+- Rule: the leading-order bound loss/Δv = Π²/96, which holds within 1% for Π ≤ 1 (not a strict inequality).
 - Real cases: the Phase 2 solar mission samples (3–20 R☉, all five engine classes, prograde, centred;
   results/missions.parquet), Hibberd et al. (2026) reference SOM, and Maraqten et al. (2026) perihelion
   arc placed on the curve with their own F ∝ r^−1.5 thrust (at Π_eff). Samples whose loss is below
@@ -86,7 +86,7 @@ def main() -> None:
     ax.plot(x, 100 * np.sqrt(lo * hi), color=INK_2, linewidth=1.4, zorder=3)
     xr = x[x <= 3]
     ax.plot(xr, 100 * xr**2 / 96, color=INK, linewidth=2.0, linestyle=(0, (5, 3)), zorder=4,
-            label="rule of thumb: loss/Δv = Π²/96")
+            label="leading-order bound Π²/96 (holds within 1% for Π ≤ 1)")
     ax.axhline(1.0, color=INK_2, linewidth=1.0, linestyle=(0, (1, 2)), zorder=1)
     ax.text(2400, 1.15, "1% of Δv", fontsize=13, color=INK_2, ha="right", va="bottom")
     for name, (engines, col) in GROUPS.items():

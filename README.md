@@ -43,8 +43,9 @@ python -m venv .venv
     curve.
   - Figures: `figures/phase4_*.png`.
 - **Phase 5 (checks and deliverables):** complete.
-  - **Practical rule:** a prograde burn centred on periapsis keeps loss/Δv ≲ Π²/96, with an exact
-    bound over the arrival conic (`theory.prograde_loss_bound`, `figures/rule_check.png`).
+  - **Practical rule:** for a prograde burn centred on periapsis, loss/Δv is at most about
+    Π²/96. This is a leading-order bound that holds within 1% for Π ≤ 1
+    (`theory.prograde_loss_bound`, `figures/rule_check.png`).
   - **Hero figure:** `figures/hero_loss_vs_pi.png` and `.pdf`.
   - **Animation:** `figures/anim_engines.mp4` and `.gif`.
   - **Interactive explorer:** `explorer/oberth_explorer.html`, a self-contained page whose

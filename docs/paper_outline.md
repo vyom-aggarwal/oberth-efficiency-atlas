@@ -65,18 +65,19 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 - **Fixed-direction thrust** reproduces Robbins' expression exactly (claim P1). **Prograde**
   thrust lies below it (P3). **High-mass-ratio burns centred in time** exceed it (P2).
 - **Confraria's "~125%"**<sup>4</sup>, reproduced and explained (P5).
-- **Practical rule** (R1). For a prograde burn centred on periapsis, loss/Δv ≲ Π²/96, i.e. a burn
-  shorter than r_p/v_p is impulsive to within about 1%.
-  - **Exact bound** over the arrival conic: (1 + r)/(96(1 − r)), with r = Δv/v_p, times the
+- **Practical rule** (R1). For a prograde burn centred on periapsis, loss/Δv is at most about
+  Π²/96, i.e. a burn shorter than r_p/v_p is impulsive to within about 1%.
+  - **Status:** a *leading-order bound that holds within 1% for Π ≤ 1*, not a strict inequality.
+    Sweep runs reach 1.010 of it.
+  - **Leading-order form** over the arrival conic: (1 + r)/(96(1 − r)), with r = Δv/v_p, times the
     mass-ratio factor 12m₂.
-  - **Verification:** it holds to 1.010 of that bound for every sweep run with Π ≤ 1.
   - **Framing:** likely close to practitioner heuristics, so not claimed as a discovery.
 - **Figures:**
   - `prefactor_check.png`;
   - `robbins_comparison.png`;
   - `rule_check.png` (appendix).
     - *Draft caption:* I plot the measured prograde loss in units of Π²/96 against Π; every
-      run with Π ≤ 1 stays within the closed-form bound for its own Δv/v_p.
+      run with Π ≤ 1 stays within 1% of the leading-order bound for its own Δv/v_p.
 - **Appendix:** the derivations (docs/theory.md §4).
 
 ## 5. Linear response and the η–η_W map ✅ (novelty 🔶 P4)
@@ -187,7 +188,7 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 | P4 | Three large-Π regimes, Π_T, Π½; η_lin and the η–η_W map | Web search only; Bombardelli et al.<sup>8</sup> unread | Database search; read Bombardelli et al. |
 | P5 | Confraria's "~125%" explained | Agrees at T/W₀ = 0.1; unresolved gap at 0.5 | Her raw data (not pursued) |
 | P6 | The small-Π optimum is the Δv-weighted mean; closed-form recovered fraction and half-Δv capture; depth/efficiency split. The qualitative "centre on Δv" idea is not claimed | Robbins may treat burn placement | Read Robbins; database search |
-| R1 | Practical rule loss/Δv ≲ Π²/96, with an exact bound and conditions | Framed as close to practitioner heuristics (**(a)** qualitatively, **(b)** the exact form) | Practitioner literature search |
+| R1 | Practical rule: loss/Δv at most about Π²/96, a leading-order bound that holds within 1% for Π ≤ 1, with its conditions | Framed as close to practitioner heuristics (**(a)** qualitatively, **(b)** the exact form) | Practitioner literature search |
 | A1 | Mission-atlas η per body and engine | Representative presets; SOI filter | Sensitivity to the preset ranges |
 | A2 | All absolute flyby results | Point-mass gravity (J2 neglected) | Optional J2 run |
 

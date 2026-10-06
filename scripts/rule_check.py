@@ -73,7 +73,7 @@ def main() -> None:
     d = sweep_ratios()
     p = phase4_ratios()
     out = {
-        "rule": "loss/Δv ≲ Π²/96 (prograde, time-centred; leading order in Π)",
+        "rule": "loss/Δv at most ≈ Π²/96 (prograde, time-centred): a leading-order bound, holds within 1% for Π ≤ 1",
         "bound_closed_form_lam0": "(1 + r)/(96(1 − r)) for any conic (k ≤ 1); (1 + 3r)/(96(1 + r)) for k ≤ ½; r = Δv/v_p",
         "bound_96_examples": {f"r={r:g}": {"any_conic": 96 * theory.prograde_loss_bound(r),
                                            "hyperbolic": 96 * theory.prograde_loss_bound(r, k_max=0.5),
@@ -137,8 +137,9 @@ def main() -> None:
     proxies = [Line2D([], [], marker="o", linestyle="", color=SERIES[0], markersize=5)
                if isinstance(h, PathCollection) else h for h in handles]
     ax.legend(proxies, labels, fontsize=7, loc="upper left", bbox_to_anchor=(0, -0.13), ncol=2, frameon=False)
-    fig.suptitle("The practical rule loss/Δv ≲ Π²/96: exact as Δv/v_p → 0 at near-parabolic arrival; "
-                 "grows as (1 + r)/(1 − r) with r = Δv/v_p and with the burn's mass ratio", fontsize=9.5, x=0.01, ha="left")
+    fig.suptitle("Practical rule: loss/Δv ≈ Π²/96 at most, a leading-order bound that holds within 1% for Π ≤ 1 "
+                 "(attained as Δv/v_p → 0 at near-parabolic arrival; grows as (1 + r)/(1 − r), r = Δv/v_p, and with the "
+                 "mass ratio)", fontsize=9.5, x=0.01, ha="left")
     save_figure(fig, ROOT / "figures" / "rule_check.png", "scripts/rule_check.py")
     plt.close(fig)
 

@@ -51,7 +51,8 @@
     const b = D.bodies[$("body").value];
     if (b.rp_over_R) { sl.rp = slider($("rp"), b.rp_over_R[0], b.rp_over_R[1], true); sl.rp.kind = "R"; }
     else { sl.rp = slider($("rp"), b.altitude_km[0], b.altitude_km[1], true); sl.rp.kind = "alt"; }
-    sl.vinf = slider($("vinf"), b.v_inf_km_s[0], b.v_inf_km_s[1], false);
+    // The explorer lets v∞ go below the preset envelope, down to a near-parabolic 0.05 km/s.
+    sl.vinf = slider($("vinf"), Math.min(0.05, b.v_inf_km_s[0]), b.v_inf_km_s[1], false);
     $("rp-label").textContent = sl.rp.kind === "R" ? "Periapsis radius" : "Periapsis altitude";
   }
   function engineRanges() {
@@ -68,10 +69,18 @@
   sl.dvr = slider($("dvr"), 1e-3, 1, true);
   sl.lam = slider($("lam"), 1e-2, 3, true);
 
-  // Opening state: a solar Oberth dive with a solid motor (Hibberd et al. 2026 class), as an example.
-  $("body").value = "sun"; bodyRanges(); sl.rp.set(3.2); sl.vinf.set(2.0);
-  $("engine").value = "solid"; engineRanges(); sl.isp.set(286); sl.a0.set(25);
-  sl.dv.set(8.36);
+  // Example case: Hibberd et al. (2026) solar Oberth, approximated as a parabolic arrival with one
+  // equivalent stage (same Δv and burn time as their two-stage stack; Phase 4 has the full model).
+  function hibberd() {
+    $("body").value = "sun"; bodyRanges(); sl.rp.set(3.2); sl.vinf.set(0.05);
+    $("engine").value = "solid"; engineRanges(); sl.isp.set(286);
+    const c = 286 * G0, dv = 8360, tb = 210.8;                    // Isp 286 s; 8.36 km/s in 210.8 s
+    sl.dv.set(dv / 1e3);
+    sl.a0 = slider($("a0"), Math.min(sl.a0.lo, 5), sl.a0.hi, true);
+    sl.a0.set((c / tb) * -Math.expm1(-dv / c));
+    $("case-note").hidden = false;
+  }
+  $("case").value = "hibberd"; hibberd();
   sl.pi.set(1.0); sl.vr.set(0.1); sl.dvr.set(0.03); sl.lam.set(0.3);
 
   // ---------- model inputs
@@ -355,6 +364,13 @@
   }
   $("controls").addEventListener("submit", (e) => e.preventDefault());
   $("controls").addEventListener("input", (e) => {
+    if (e.target.id === "case") {
+      if ($("case").value === "hibberd") hibberd(); else $("case-note").hidden = true;
+      return schedule();
+    }
+    if (["body", "rp", "vinf", "dv", "engine", "isp", "a0"].includes(e.target.id)) {
+      $("case").value = "custom"; $("case-note").hidden = true;         // any edit leaves the example case
+    }
     if (e.target.id === "body") { bodyRanges(); sl.rp.set(geoMid(sl.rp)); sl.vinf.set(geoMid(sl.vinf)); }
     if (e.target.id === "engine") { engineRanges(); sl.isp.set(geoMid(sl.isp)); sl.a0.set(geoMid(sl.a0)); }
     if (e.target.name === "mode") return setMode();

@@ -72,6 +72,7 @@ body { font-family: var(--font-body); font-size: var(--step-0); line-height: 1.5
 .field select { grid-column: 1 / -1; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--axis);
   border-radius: 6px; padding: 6px 8px; }
 .field input[type="range"] { width: 100%; accent-color: var(--accent); }
+.note { margin: 0; font-size: var(--step--1); color: var(--ink-2); border-left: 2px solid var(--accent); padding-left: 8px; }
 .field output { font-family: var(--font-data); font-size: var(--step--1); color: var(--ink); min-width: 9ch; text-align: right;
   font-variant-numeric: tabular-nums; }
 select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -123,6 +124,17 @@ figcaption { font-size: var(--step--1); color: var(--ink-2); max-width: 75ch; }
       </fieldset>
 
       <div id="mission-inputs" class="group">
+        <label class="field" for="case"><span>Example case</span>
+          <select id="case">
+            <option value="custom">Custom</option>
+            <option value="hibberd">Hibberd et al. 2026 solar Oberth (approximated)</option>
+          </select></label>
+        <p class="note" id="case-note" hidden>Approximated as a parabolic arrival (v∞ = 0.05 km/s) with one equivalent
+          stage: the same 8.36 km/s Δv in the same 211 s, instead of their two stages and bound arrival from 5.2 au.
+          The full Phase 4 model gives a loss of 0.099 m/s. Changing the arrival orbit from a 1 au aphelion to a
+          hyperbolic v∞ = 5 km/s moves it by under 0.002 m/s, and every Phase 4 sensitivity stays below 0.2 m/s.
+          The single stage shown here loses somewhat more, because one stage with a mass ratio near 20 back-loads its
+          thrust. Both losses are about 10<sup>−5</sup> of Δv.</p>
         <label class="field" for="body"><span>Body</span>
           <select id="body"></select></label>
         <label class="field" for="rp"><span id="rp-label">Periapsis</span>
@@ -190,12 +202,13 @@ figcaption { font-size: var(--step--1); color: var(--ink-2); max-width: 75ch; }
         <figure class="panel">
           <canvas id="cv-loss" aria-label="Finite-burn loss against Π"></canvas>
           <figcaption>Loss as a fraction of Δv against Π. Grey band: every thrust profile at near-parabolic arrival
-            (solid stack, nuclear thermal, SEP); dashed: loss/Δv = Π²/96. Faster arrivals sit below the band.</figcaption>
+            (solid stack, nuclear thermal, SEP); dashed: Π²/96, a leading-order bound that holds within 1% for
+            Π ≤ 1. Faster arrivals sit below the band.</figcaption>
         </figure>
         <figure class="panel">
           <canvas id="cv-atlas" aria-label="Atlas of η against Π and arrival speed"></canvas>
-          <figcaption>η atlas, prograde, small-Δv limit: darker means more of the impulsive bonus kept. The ring marks this
-            case.</figcaption>
+          <figcaption>η atlas from linear-response theory (prograde, Δv → 0, constant acceleration), not sweep data: darker
+            means more of the impulsive bonus kept. The ring marks this case; finite Δv shifts its η slightly.</figcaption>
         </figure>
       </div>
     </div>
@@ -495,7 +508,8 @@ figcaption { font-size: var(--step--1); color: var(--ink-2); max-width: 75ch; }
     const b = D.bodies[$("body").value];
     if (b.rp_over_R) { sl.rp = slider($("rp"), b.rp_over_R[0], b.rp_over_R[1], true); sl.rp.kind = "R"; }
     else { sl.rp = slider($("rp"), b.altitude_km[0], b.altitude_km[1], true); sl.rp.kind = "alt"; }
-    sl.vinf = slider($("vinf"), b.v_inf_km_s[0], b.v_inf_km_s[1], false);
+    // The explorer lets v∞ go below the preset envelope, down to a near-parabolic 0.05 km/s.
+    sl.vinf = slider($("vinf"), Math.min(0.05, b.v_inf_km_s[0]), b.v_inf_km_s[1], false);
     $("rp-label").textContent = sl.rp.kind === "R" ? "Periapsis radius" : "Periapsis altitude";
   }
   function engineRanges() {
@@ -512,10 +526,18 @@ figcaption { font-size: var(--step--1); color: var(--ink-2); max-width: 75ch; }
   sl.dvr = slider($("dvr"), 1e-3, 1, true);
   sl.lam = slider($("lam"), 1e-2, 3, true);
 
-  // Opening state: a solar Oberth dive with a solid motor (Hibberd et al. 2026 class), as an example.
-  $("body").value = "sun"; bodyRanges(); sl.rp.set(3.2); sl.vinf.set(2.0);
-  $("engine").value = "solid"; engineRanges(); sl.isp.set(286); sl.a0.set(25);
-  sl.dv.set(8.36);
+  // Example case: Hibberd et al. (2026) solar Oberth, approximated as a parabolic arrival with one
+  // equivalent stage (same Δv and burn time as their two-stage stack; Phase 4 has the full model).
+  function hibberd() {
+    $("body").value = "sun"; bodyRanges(); sl.rp.set(3.2); sl.vinf.set(0.05);
+    $("engine").value = "solid"; engineRanges(); sl.isp.set(286);
+    const c = 286 * G0, dv = 8360, tb = 210.8;                    // Isp 286 s; 8.36 km/s in 210.8 s
+    sl.dv.set(dv / 1e3);
+    sl.a0 = slider($("a0"), Math.min(sl.a0.lo, 5), sl.a0.hi, true);
+    sl.a0.set((c / tb) * -Math.expm1(-dv / c));
+    $("case-note").hidden = false;
+  }
+  $("case").value = "hibberd"; hibberd();
   sl.pi.set(1.0); sl.vr.set(0.1); sl.dvr.set(0.03); sl.lam.set(0.3);
 
   // ---------- model inputs
@@ -799,6 +821,13 @@ figcaption { font-size: var(--step--1); color: var(--ink-2); max-width: 75ch; }
   }
   $("controls").addEventListener("submit", (e) => e.preventDefault());
   $("controls").addEventListener("input", (e) => {
+    if (e.target.id === "case") {
+      if ($("case").value === "hibberd") hibberd(); else $("case-note").hidden = true;
+      return schedule();
+    }
+    if (["body", "rp", "vinf", "dv", "engine", "isp", "a0"].includes(e.target.id)) {
+      $("case").value = "custom"; $("case-note").hidden = true;         // any edit leaves the example case
+    }
     if (e.target.id === "body") { bodyRanges(); sl.rp.set(geoMid(sl.rp)); sl.vinf.set(geoMid(sl.vinf)); }
     if (e.target.id === "engine") { engineRanges(); sl.isp.set(geoMid(sl.isp)); sl.a0.set(geoMid(sl.a0)); }
     if (e.target.name === "mode") return setMode();

@@ -21,6 +21,17 @@
       </fieldset>
 
       <div id="mission-inputs" class="group">
+        <label class="field" for="case"><span>Example case</span>
+          <select id="case">
+            <option value="custom">Custom</option>
+            <option value="hibberd">Hibberd et al. 2026 solar Oberth (approximated)</option>
+          </select></label>
+        <p class="note" id="case-note" hidden>Approximated as a parabolic arrival (v∞ = 0.05 km/s) with one equivalent
+          stage: the same 8.36 km/s Δv in the same 211 s, instead of their two stages and bound arrival from 5.2 au.
+          The full Phase 4 model gives a loss of 0.099 m/s. Changing the arrival orbit from a 1 au aphelion to a
+          hyperbolic v∞ = 5 km/s moves it by under 0.002 m/s, and every Phase 4 sensitivity stays below 0.2 m/s.
+          The single stage shown here loses somewhat more, because one stage with a mass ratio near 20 back-loads its
+          thrust. Both losses are about 10<sup>−5</sup> of Δv.</p>
         <label class="field" for="body"><span>Body</span>
           <select id="body"></select></label>
         <label class="field" for="rp"><span id="rp-label">Periapsis</span>
@@ -88,12 +99,13 @@
         <figure class="panel">
           <canvas id="cv-loss" aria-label="Finite-burn loss against Π"></canvas>
           <figcaption>Loss as a fraction of Δv against Π. Grey band: every thrust profile at near-parabolic arrival
-            (solid stack, nuclear thermal, SEP); dashed: loss/Δv = Π²/96. Faster arrivals sit below the band.</figcaption>
+            (solid stack, nuclear thermal, SEP); dashed: Π²/96, a leading-order bound that holds within 1% for
+            Π ≤ 1. Faster arrivals sit below the band.</figcaption>
         </figure>
         <figure class="panel">
           <canvas id="cv-atlas" aria-label="Atlas of η against Π and arrival speed"></canvas>
-          <figcaption>η atlas, prograde, small-Δv limit: darker means more of the impulsive bonus kept. The ring marks this
-            case.</figcaption>
+          <figcaption>η atlas from linear-response theory (prograde, Δv → 0, constant acceleration), not sweep data: darker
+            means more of the impulsive bonus kept. The ring marks this case; finite Δv shifts its η slightly.</figcaption>
         </figure>
       </div>
     </div>
