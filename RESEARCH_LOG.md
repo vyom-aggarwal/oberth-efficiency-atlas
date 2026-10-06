@@ -1602,3 +1602,63 @@ losses in their analysis.
    in the captions only (recommended), or remove them?
 4. **The hero figure** shows the near-parabolic band only. Add a second band for fast arrivals
    (v∞/v_esc ≈ 1) to show the v∞ dependence, or keep the poster figure single-message?
+
+---
+
+# Wrap-up (after Phase 5 approval)
+
+## 2026-10-06: User decisions, precision fixes and feature freeze
+
+**Decisions (user):**
+- **Feature freeze** after the following small items:
+  - a J2 sensitivity of about 10 cases;
+  - no broad practitioner-literature search, keeping the "likely close to heuristics" framing;
+  - Robbins (1966) when it arrives.
+- **Explorer:** bound arrivals are not ported.
+- **Figures:** source names stay in figures as identification labels, with numbered citations in
+  captions.
+- **Hero figure:** keeps a single band; arrival-speed dependence goes in a separate paper figure.
+
+**Precision fixes:**
+1. **The rule is worded as a leading-order bound that holds within 1% for Π ≤ 1,** not a strict
+   inequality. Changed in RELATED_WORK row 32, outline §4 and R1, README, the hero and rule figure
+   labels, and the explorer caption.
+   - *Factual note:* `rule_numbers.json` shows the 1.010 maximum is already reached at Π ≤ 0.1.
+     It is the first-order turn-rate (j) approximation, not an effect near Π ≈ 1.
+2. **The explorer's η atlas is labelled as linear-response theory** (prograde, Δv → 0, constant
+   acceleration), not sweep data.
+   - The Hibberd example is now a labelled preset, "approximated as a parabolic arrival":
+     v∞ = 0.05 km/s and one equivalent stage with the same 8.36 km/s in 211 s.
+   - Its note cites the Phase 4 arrival-orbit sensitivity: 0.0980–0.0994 m/s from a 1 au
+     aphelion to hyperbolic v∞ = 5 km/s, and every sensitivity below 0.2 m/s.
+   - The single equivalent stage gives 0.137 m/s against Phase 4's 0.099 m/s, because one stage
+     with mass ratio ≈ 20 back-loads its thrust. The note says so.
+   - Republished to the same artifact URL.
+3. **Independent cross-check of the animation numbers** (`scripts/anim_numbers.py` →
+   `figures/anim_numbers.json`). It re-simulates without rendering and compares with theory.
+   - **Solid stack**, Π = 0.0326: loss/Δv = 1.19e-5. That is 1.067 × Π²/96 and 1.065 × the exact
+     leading-order loss of its staged profile. The excess over Π²/96 is the finite-Δv
+     (Δv/v_p = 0.024) and staged-profile factor, covered by the closed-form bound.
+   - **Nuclear thermal**, Π = 1.67: loss/Δv = 2.79%, which is 0.955 × Π²/96 (2.92%) and
+     0.924 × the leading-order loss. The true curve bends below Π² past Π ≈ 1, as expected.
+   - **SEP-class**, Π = 368, not the ≈ 377 in the user's note. The run uses a0 = 49.8 N/15,189 kg
+     and the 8.36 km/s Δv, giving t_b = 2.378e6 s = 368 τ. The regime-II law gives 0.2303.
+     - Equivalent-Δv kept fraction: 0.2413, i.e. 1.048 × the law.
+     - Energy-gain fraction Δε_fin/Δε_imp: 0.2391, i.e. 1.038 × the law.
+   - **Caveat** (in the JSON note): the animation reports the equivalent-Δv loss. The arrival is
+     bound, so η is undefined, and the loss is not identical to 1 − η. The regime-II law is the
+     Δv → 0 limit of either kept fraction.
+
+**J2 sensitivity: design, logged before running.**
+- **Cases (10):** Jupiter and Saturn at r_p = 1.1 R, v∞ = 6 km/s, Δv = 1 km/s, Isp 900 s,
+  prograde, burn centred on the periapsis time of the J2 trajectory.
+  - Equatorial flybys at Π = 0.1, 1, 10 and 100 for both planets (8).
+  - Polar flybys at Jupiter, Π = 1 and 10 (2), with the pole in the orbit plane and periapsis
+    over the equator.
+- **Model:** the J2 acceleration (3D) is added to point-mass gravity, with J2 from the NSSDC fact
+  sheets already logged (2026-10-03), referred to the equatorial radius.
+- **η in the J2 field:** finite and impulsive burns both run in the same J2 field. The impulsive
+  Δv is applied at the J2 trajectory's own periapsis (located by an event), and v∞ follows from
+  the conserved total energy including the J2 potential.
+- **Reported:** Δη = η_J2 − η_point-mass, from the same code path with J2 = 0. The answer to "does
+  oblateness matter?" is the largest |Δη|.
