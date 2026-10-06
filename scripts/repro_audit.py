@@ -4,7 +4,7 @@ Every file under figures/ and results/, plus explorer/oberth_explorer.html and e
 is compared by content, ignoring provenance stamps and wall-clock fields:
 - PNG: decoded pixels (text metadata such as the script path and git commit is ignored);
 - PDF: bytes with /CreationDate, /ModDate and /Producer removed;
-- JSON: parsed values, exactly;
+- JSON: parsed values, exactly, without wall-clock entries (keys containing "runtime");
 - CSV, HTML, other text: bytes;
 - Parquet: the table, exactly, without its key-value metadata and without wall-clock columns
   (runtime_s); on a difference, the columns and the largest absolute difference are reported;
@@ -77,6 +77,15 @@ def video_frames_hash(p: Path) -> str:
     return h.hexdigest()
 
 
+def drop_wall_clock(x):
+    """Remove wall-clock entries (any key containing 'runtime') from parsed JSON, recursively."""
+    if isinstance(x, dict):
+        return {k: drop_wall_clock(v) for k, v in x.items() if "runtime" not in str(k)}
+    if isinstance(x, list):
+        return [drop_wall_clock(v) for v in x]
+    return x
+
+
 def compare(a: Path, b: Path):
     if not b.exists():
         return False, "missing in rebuild"
@@ -86,7 +95,9 @@ def compare(a: Path, b: Path):
     if s == ".pdf":
         return strip_pdf(a) == strip_pdf(b), ""
     if s == ".json":
-        return json.loads(a.read_text(encoding="utf-8")) == json.loads(b.read_text(encoding="utf-8")), ""
+        x, y = (json.loads(p.read_text(encoding="utf-8")) for p in (a, b))
+        same = drop_wall_clock(x) == drop_wall_clock(y)
+        return same, "(wall-clock keys ignored)" if same and x != y else ""
     if s == ".parquet":
         return parquet_equal(a, b)
     if s in (".mp4", ".gif"):
