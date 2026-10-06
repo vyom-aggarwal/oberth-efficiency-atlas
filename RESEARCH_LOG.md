@@ -1688,3 +1688,24 @@ Code: `src/oberth_atlas/j2.py` (4 tests) and `scripts/j2_sensitivity.py`, writin
     with numbers.
 - **Accuracy:** energy balance ≤ 1.9e-12 in every run.
 - **Claim A2** is updated in the paper outline: the J2 effect on η is now quantified.
+
+## 2026-10-06: Arrival-speed dependence figure (separate from the hero figure)
+
+`scripts/fig_loss_vinf.py` writes `figures/loss_vs_pi_vinf.png` and `loss_vinf_numbers.json`.
+
+- **Data:** the Phase 2 prograde sweep (centred burns, hyperbolic arrivals), restricted to
+  Δv/v_p ≤ 0.03 and Δv/c ≤ 0.3 (11,160 runs) so that arrival speed is the only parameter.
+- **Plotted:** median loss/Δv in log-Π bins for v∞/v_esc = 0.0098, 0.11, 0.47, 1.25 and 3.28,
+  each with its leading-order law k(1−k)Π²/24.
+- **Results:**
+
+  | v∞/v_esc | Π at 1% | Π at 0.1% | loss at Π = 10 |
+  |---|---|---|---|
+  | 0.0098 | 0.991 | 0.307 | 24.3% |
+  | 0.11 | 0.991 | 0.312 | 24.1% |
+  | 0.47 | 1.004 | 0.314 | 20.7% |
+  | 1.25 | 1.31 | 0.397 | 10.3% |
+  | 3.28 | 3.64 | 0.79 | 2.2% |
+
+- **Reading:** up to v∞/v_esc ≈ 0.5 the curves coincide with the near-parabolic band, because
+  k(1−k) stays within 3% of ¼. Faster arrivals lose less at every Π.

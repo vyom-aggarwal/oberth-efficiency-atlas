@@ -96,6 +96,13 @@ Figure paths are relative to `figures/`. Every figure has a generating script in
 ## 7. Collapse and secondary parameters ✅
 - **Collapse:** Π√C collapses the small-Π data far better than Π alone.
 - **Secondary parameter:** v∞/v_esc explains 73–92% of the remaining scatter.
+- **Arrival-speed dependence** (companion to the single-band hero figure). Faster arrivals lose
+  less, and the 1% point moves from Π ≈ 0.99 (v∞/v_esc ≤ 0.47) to 1.31 (1.25) and 3.64 (3.28).
+  Each curve follows k(1−k)Π²/24 at small Π.
+  - **Figure:** `loss_vs_pi_vinf.png`.
+    - *Draft caption:* I plot the median finite-burn loss from the sweep against Π for five
+      arrival speeds; the dashed lines are the leading-order law for each, and the grey band is
+      the near-parabolic curve of the hero figure.
 - **Figures:** `collapse_small_pi.png`, `collapse_secondary.png`.
 
 ## 8. Atlas and real missions ✅
