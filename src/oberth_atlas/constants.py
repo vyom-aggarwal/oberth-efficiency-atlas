@@ -17,6 +17,10 @@ source. Sources were retrieved on 2026-10-03:
           axis at J2000. https://ssd.jpl.nasa.gov/planets/approx_pos.html
 [IAU2015] IAU 2015 Resolution B3, nominal solar radius R_sun^N = 695 700 km.
           (Not tabulated by JPL SSD.)
+[NSSDC]   NASA NSSDC planetary fact sheets (Jupiter, Saturn, Earth), zonal harmonic J2,
+          referred to the equatorial radius. Retrieved 2026-10-03 (RESEARCH_LOG "J2
+          oblateness neglected"). Used only by the J2 sensitivity study (j2.py).
+          https://nssdc.gsfc.nasa.gov/planetary/factsheet/
 
 Choices recorded in RESEARCH_LOG.md (2026-10-03):
 - Jupiter and Saturn use planet-only GM [SATS], not the DE440 system values
@@ -123,6 +127,14 @@ SATURN = Body(
     radius_eq=60268.0 * KM,                      # [PHYS] equatorial radius, +/- 4 km
     sma=9.53667594 * AU,                         # [APPROX] Table 1, J2000
 )
+
+# Zonal harmonic J2 (dimensionless), referred to the equatorial radius above [NSSDC].
+# The point-mass model neglects it everywhere except the J2 sensitivity study (j2.py).
+J2 = {
+    "jupiter": 14736e-6,                         # [NSSDC] Jupiter fact sheet, J2 = 14 736 × 10^-6
+    "saturn": 16298e-6,                          # [NSSDC] Saturn fact sheet, J2 = 16 298 × 10^-6
+    "earth": 1082.63e-6,                         # [NSSDC] Earth fact sheet, J2 = 1 082.63 × 10^-6
+}
 
 BODIES: dict[str, Body] = {b.name: b for b in (SUN, VENUS, EARTH, MARS, JUPITER, SATURN)}
 
