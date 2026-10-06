@@ -64,7 +64,8 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(10.5, 6.2), layout="constrained")
     ax.fill_between(xb, 100 * lo, 100 * hi, color=MUTED, alpha=0.35, linewidth=0,
                     label="near-parabolic solar Oberth band (hero figure)")
-    out = {"selection": {"dv_over_vp_max": 0.03, "dv_over_c_max": 0.3, "n_runs": int(len(d))}, "by_v_over_vesc": {}}
+    out = {"selection": {"dv_over_vp_max": 0.03, "dv_over_c_max": 0.3, "n_runs": int(len(d)), "v_over_vesc": list(VR)},
+           "by_v_over_vesc": {}}
     cols = BLUE_RAMP[2:]
     for i, vr in enumerate(VR):
         g = d[d["vr"] == vr]
