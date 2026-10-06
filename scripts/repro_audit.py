@@ -3,7 +3,8 @@
 Every file under figures/ and results/, plus explorer/oberth_explorer.html and explorer/explorer_data.json,
 is compared by content, ignoring provenance stamps and wall-clock fields:
 - PNG: decoded pixels (text metadata such as the script path and git commit is ignored);
-- PDF: bytes with /CreationDate, /ModDate and /Producer removed;
+- PDF: bytes with /CreationDate, /ModDate and /Producer removed, and the startxref byte offset
+  (it shifts with the length of the date string);
 - JSON: parsed values, exactly, without wall-clock entries (keys containing "runtime");
 - CSV, HTML, other text: bytes;
 - Parquet: the table, exactly, without its key-value metadata and without wall-clock columns
@@ -37,7 +38,9 @@ def png_equal(a: Path, b: Path):
 
 
 def strip_pdf(p: Path) -> bytes:
-    return re.sub(rb"/(CreationDate|ModDate|Producer) \([^)]*\)", b"", p.read_bytes())
+    """PDF bytes without the date/producer stamps and the startxref offset (which moves with their length)."""
+    b = re.sub(rb"/(CreationDate|ModDate|Producer) \([^)]*\)", b"", p.read_bytes())
+    return re.sub(rb"startxref\s+\d+", b"startxref", b)
 
 
 def parquet_equal(a: Path, b: Path):
