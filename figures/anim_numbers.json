@@ -1,0 +1,45 @@
+{
+ "solid_stack": {
+  "Pi": 0.03264850073706095,
+  "Pi_eff": 0.031361692263508004,
+  "loss_rel": 1.1850639086650437e-05,
+  "loss_m_s": 0.09909949409779928,
+  "burn_s": 210.79999999999995,
+  "energy_gain_fraction": 0.9999880073777331,
+  "kept_fraction_equivalent_dv": 0.9999881493609134,
+  "rule_Pi2_over_96": 1.110338125393614e-05,
+  "leading_order_exact": 1.1122911686944677e-05,
+  "sim_over_rule": 1.0673000247063835,
+  "sim_over_leading_order": 1.0654259801918518
+ },
+ "nuclear_thermal": {
+  "Pi": 1.673924976494162,
+  "Pi_eff": 1.6616191182956266,
+  "loss_rel": 0.02786627868768578,
+  "loss_m_s": 233.02828650387073,
+  "burn_s": 10807.950658647438,
+  "energy_gain_fraction": 0.9718091536515022,
+  "kept_fraction_equivalent_dv": 0.9721337213123142,
+  "rule_Pi2_over_96": 0.02918775861386438,
+  "leading_order_exact": 0.030148732343107453,
+  "sim_over_rule": 0.9547248576479974,
+  "sim_over_leading_order": 0.9242935447684426
+ },
+ "sep_class": {
+  "Pi": 368.2361609334436,
+  "Pi_eff": 368.174204215726,
+  "loss_rel": 0.7586897612676241,
+  "loss_m_s": 6344.44868070426,
+  "burn_s": 2377572.6594592077,
+  "energy_gain_fraction": 0.23911672562588662,
+  "kept_fraction_equivalent_dv": 0.2413102387323759,
+  "rule_Pi2_over_96": 1412.4778147812603,
+  "leading_order_exact": 1380.8764871699068,
+  "sim_over_rule": 0.0005371339311160201,
+  "sim_over_leading_order": 0.0005494262291499738,
+  "regime_II_law": 0.2303361092057955,
+  "kept_over_regime_II": 1.0476439823717587,
+  "energy_fraction_over_regime_II": 1.0381208853894723
+ },
+ "note": "Loss is the equivalent-Δv loss (bound arrival: η undefined); it is not identical to 1 − η. Regime-II law (9/(2Π))^(1/3) is the Δv → 0, constant-acceleration limit for near-parabolic arrival."
+}
