@@ -1746,6 +1746,10 @@ regenerated after a later code change. They are not reproducibility failures of 
 - **Not regenerable:** `figures/confraria_fig434_digitized.csv`. `scripts/digitize_confraria.py`
   needs an image of Fig. 4.34 from Confraria's thesis, which is not in the repository.
 
-**Wall-clock caveat:** the machine slept for about 6 h during the clone's sweep step, so its
-recorded wall time (561 min) is invalid. The computation was unaffected, since the sweep is
-deterministic and matches the committed table exactly apart from `runtime_s`.
+**Wall-clock caveat:** the machine slept during the clone's sweep step. Its progress log shows a
+9.1-h gap between two 6,786-run chunks, so the recorded wall time (561 min) is invalid.
+- From the progress log, excluding the gap (counted as one typical ~70 s chunk), the sweep took
+  ≈ 17 min awake.
+- The committed sweep's per-run compute, Σ runtime_s / 8 workers, is 17.4 min.
+- The computation was unaffected: the sweep is deterministic and matches the committed table
+  exactly apart from `runtime_s`.
