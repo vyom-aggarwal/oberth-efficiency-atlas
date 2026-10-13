@@ -267,3 +267,15 @@ added to the numbers file as values.
   statistics only, which the audit now ignores.
 - **Audit wall times are indicative.** The machine slept during the clone's sweep, and step times
   varied by up to 4× between runs.
+
+## Phase 6: project website (2026-10-13, in progress)
+
+**Author decided:**
+- The brief: a GitHub Pages site, presentation only under the feature freeze.
+- The author writes all prose.
+- The plan-first gate and the checkpoints.
+
+**Assistant proposed** (`docs/site_plan.md`, awaiting approval):
+- The information architecture, the data export, the tech stack, and a two-pass design plan.
+- These rest on measurements: simulator timing, font coverage, palette validation, and package
+  publish dates.

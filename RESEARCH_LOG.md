@@ -1826,3 +1826,41 @@ machine, for example the Phase 3 follow-ups at 33.8 vs 7.7 min. The cause was no
 the laptop's power or thermal state is likely. `docs/repro.md` gives both columns: a full rebuild
 takes about 43–79 min, with the sweep at about 17 min.
 
+---
+
+# Phase 6: project website (presentation only; feature freeze in force)
+
+## 2026-10-13: Phase 6 brief and plan (proposed, awaiting approval)
+
+**Brief (author):**
+- A public GitHub Pages site that replaces the artifact explorer: a long-form home page, a
+  redesigned explorer, and a deployment workflow.
+- The site reads only committed outputs. Problems found in the data are reported, not patched.
+- The author writes all explanatory prose; I write only interface text.
+- Every displayed number comes from exported data or the numbers JSONs.
+- The offline explorer stays as a fallback.
+
+**Plan:** `docs/site_plan.md`. Facts measured for it:
+- **Simulator speed:** the JS simulator takes 1.3–5.5 ms per flyby at rtol 1e-12 (Π = 0.03–300,
+  node 24.18.1). The hero can re-simulate on every drag frame; a Web Worker is needed only for
+  multi-run sweeps.
+- **Typefaces:** of 15 candidates checked with fontTools, nine have no Greek (η, Π), which rules them
+  out. Source Serif 4 and Fira Sans have Greek, tabular figures and true italics. No candidate has ☉,
+  ≲ or ∝, so KaTeX renders those.
+- **Palette:** generated in OKLCH and checked with the dataviz validator (ordinal ramp checks, WCAG
+  contrast).
+  - The Burn (a·v) ramp passes in both themes after re-stepping:
+    - its light-mode light end was 1.43:1 at first, then 2.07:1;
+    - its dark hue spread was 42° at first, then 36°.
+  - The Slate (η) ramp is monotone and one hue. Its light end recedes by design, since it is used
+    for heatmap cells only.
+  - Ink and Graphite text reach 15.7:1 and 6.5:1 on light, 14.5:1 and 7.9:1 on dark.
+- **Colour assignment:** the committed paper figures use the blue ramp for a·v, η and other
+  magnitudes. The site reserves Burn for a·v, so the two will differ (open question 1 in the plan).
+- **The animation's trajectories** are not saved by `anim_engines.py`. The plan proposes importing
+  its own functions in the export (open question 2).
+- **Packages:** `npm install --before=2026-09-29` enforces the 14-day rule across the whole tree.
+  This excludes vite 8.3.4, katex 0.19.0 and @playwright/test 1.64.0 in favour of 8.3.1, 0.18.9 and
+  1.63.0.
+- **Repository:** public, so Pages from Actions works on the free plan.
+
