@@ -17,3 +17,9 @@ runs/
 
 # Long-run logs
 *.log
+
+# Site (Phase 6)
+site/node_modules/
+site/dist/
+site/test-results/
+site/playwright-report/
