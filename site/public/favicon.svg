@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .ink { stroke: #17202b; }
+    .burn { stroke: #be5802; }
+    @media (prefers-color-scheme: dark) { .ink { stroke: #e9edf2; } .burn { stroke: #f79942; } }
+  </style>
+  <!-- A flyby past a body, with the burn arc at periapsis (Ink and Burn step 4 from src/styles/palette.css). -->
+  <circle class="ink" cx="21" cy="16" r="5.5" fill="none" stroke-width="2"/>
+  <path class="ink" d="M2 2 Q18 16 2 30" fill="none" stroke-width="2" stroke-linecap="round"/>
+  <path class="burn" d="M9.28 11.8 Q10.72 16 9.28 20.2" fill="none" stroke-width="4" stroke-linecap="round"/>
+</svg>

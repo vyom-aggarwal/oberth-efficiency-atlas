@@ -201,10 +201,12 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
          "Pi_range": num(hero, "maraqten_Pi_eff_range"), "loss_rel_range": num(hero, "maraqten_loss_rel_range"),
          "data": hero},
     ]
+    stat = "Pi_p10_med_p90"                                     # the percentiles are read from the key name
+    lo_p, hi_p = (int(v) for v in re.fullmatch(r"Pi_p(\d+)_med_p(\d+)", stat).groups())
     ranges = [{"id": key.split(" ")[0], "label": key, "n": num(hero, "solar_samples", key, "n_above_floor"),
-               "Pi": num(hero, "solar_samples", key, "Pi_p10_med_p90"),
+               "percentiles": [lo_p, hi_p], "Pi": num(hero, "solar_samples", key, stat),
                "loss_rel": num(hero, "solar_samples", key, "loss_rel_p10_med_p90"), "data": hero}
-              for key in ("chemical", "nuclear thermal", "electric (Hall, ion)")]
+              for key in num.cache.setdefault(hero, load_source(hero))["solar_samples"]]
 
     d = V.data()
     family = []

@@ -1,0 +1,56 @@
+/* Figures: framed by their own axes on Paper; no cards. Simulation solid, theory dashed, published hollow. */
+
+.figure { margin: var(--s7) 0; max-width: var(--figure); }
+.figure-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s2) var(--s5);
+               margin-bottom: var(--s3); }
+.figure-title { margin: 0; }
+.figure-title .fig-n { color: var(--text-2); font-weight: 400; margin-right: 0.4em; }
+.prov-key { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); font-size: var(--t-label); color: var(--text-2); }
+.prov-key span { display: inline-flex; align-items: center; gap: 6px; }
+.prov-key svg { overflow: visible; }
+
+.plot { position: relative; width: 100%; }
+.plot svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.plot .overlay { position: absolute; inset: 0; pointer-events: none; }
+.annot-html { position: absolute; font-family: var(--sans-cond); font-size: var(--t-annot); color: var(--text); white-space: nowrap; line-height: 1.25; }
+.annot-html a { pointer-events: auto; }
+.annot-html .annot-text { margin-left: 0.3em; }
+
+.axis path, .axis line { stroke: var(--graphite); }
+.axis text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.annot { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
+.annot-2 { fill: var(--text-2); font-family: var(--sans-cond); font-size: var(--t-annot); }
+.leader { stroke: var(--text-2); stroke-width: 1; fill: none; }
+
+.band { fill: var(--band-fill); stroke: none; }
+.band-edge { fill: none; stroke: var(--band-edge); stroke-width: 1; }
+.theory-line { fill: none; stroke: var(--theory); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.threshold { stroke: var(--graphite); stroke-width: 1; stroke-dasharray: 1 3; }
+.sim-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.mark-sim { fill: var(--ink); stroke: var(--paper); stroke-width: 2; }
+.mark-pub { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.range-bar { stroke: var(--graphite); stroke-width: 1.25; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; padding: 0; margin: var(--s3) 0 0;
+          font-size: var(--t-label); color: var(--text-2); max-width: var(--figure); }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { overflow: visible; flex: none; }
+.range-box { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.hit { fill: transparent; cursor: pointer; }
+.hit:focus { outline: none; }
+.hit:focus-visible + .focus-ring, .hover .focus-ring { stroke: var(--ink); }
+.focus-ring { fill: none; stroke: transparent; stroke-width: 2; stroke-dasharray: 3 2; }
+
+/* Tooltip: Paper, Graphite edge, no shadow. Values in tabular figures. */
+.tooltip { position: absolute; z-index: 10; pointer-events: auto; min-width: 200px; max-width: min(320px, 90vw);
+           background: var(--paper); color: var(--text); border: 1px solid var(--graphite); border-radius: var(--radius);
+           padding: var(--s2) var(--s3); font-size: 0.875rem; line-height: 1.45; }
+.tooltip[hidden] { display: none; }
+.tooltip .tt-title { font-weight: 500; }
+.tooltip .tt-detail { color: var(--text-2); margin: 2px 0 var(--s1); white-space: pre-line; }
+.tooltip dl { display: grid; grid-template-columns: auto auto; gap: 0 var(--s3); margin: var(--s1) 0; }
+.tooltip dt { color: var(--text-2); }
+.tooltip dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums lining-nums; }
+.tooltip .tt-source { font-size: var(--t-label); color: var(--text-2); }
+
+.summary { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin-top: var(--s2); }

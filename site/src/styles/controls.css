@@ -1,0 +1,78 @@
+/* Controls drawn like instruments: 1 px Graphite edges, 2 px radius, no shadows, no gradients.
+   All are native elements (range, number, select, checkbox, radio, button, details), so keyboard
+   operation and screen-reader semantics come from the platform. */
+
+.controls { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; margin: 0 0 var(--s3); }
+.control-label { font-size: var(--t-label); color: var(--text-2); margin-right: var(--s2); }
+
+/* Checkbox chips */
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); border: 0; padding: 0; margin: 0; }
+.chips legend { float: left; font-size: var(--t-label); color: var(--text-2); margin: 0 var(--s2) 0 0; padding: 6px 0 0; }
+.chip { position: relative; display: inline-flex; align-items: center; gap: var(--s2); min-height: 32px;
+        padding: 2px var(--s2) 2px 6px; cursor: pointer; user-select: none; }
+.chip input { appearance: none; width: 14px; height: 14px; margin: 0; border: 1px solid var(--control-edge);
+              border-radius: var(--radius); background: var(--paper); display: grid; place-content: center; cursor: pointer; }
+.chip input::before { content: ""; width: 8px; height: 8px; background: var(--ink); transform: scale(0); }
+.chip input:checked::before { transform: scale(1); }
+.chip input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.chip .glyph { display: inline-block; width: 14px; height: 14px; }
+
+/* Segmented control: a radio group */
+.segmented { display: inline-flex; border: 1px solid var(--control-edge); border-radius: var(--radius); padding: 0; margin: 0; }
+.segmented legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.segmented label { position: relative; display: inline-flex; align-items: center; min-height: 32px; padding: 0 var(--s3);
+                   cursor: pointer; font-size: var(--t-ui); color: var(--text); }
+.segmented label + label { border-left: 1px solid var(--control-edge); }
+.segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.segmented label:has(input:checked) { background: var(--ink); color: var(--paper); }
+.segmented label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; z-index: 1; }
+
+/* Select, number field, button */
+.select, .number, .button {
+  font: inherit; font-size: var(--t-ui); color: var(--text); background: var(--paper);
+  border: 1px solid var(--control-edge); border-radius: var(--radius); min-height: 32px;
+}
+.select { appearance: none; padding: 0 28px 0 var(--s2);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.number { width: 9ch; padding: 0 var(--s2); font-variant-numeric: tabular-nums; text-align: right; }
+.button { padding: 0 var(--s3); cursor: pointer; }
+.button:hover { background: var(--rule); }
+.button:active { background: var(--ink); color: var(--paper); }
+
+/* Range slider drawn as a Π axis: the native input is the control; the SVG scale beneath it is decoration
+   aligned to the same track. */
+.axis-slider { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s3); align-items: center; }
+.axis-slider .slider-label { font-size: var(--t-ui); }
+.axis-slider .track { position: relative; }
+.axis-slider input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0;
+  background: transparent; cursor: pointer; }
+.axis-slider input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
+.axis-slider input[type="range"]::-moz-range-track { height: 2px; background: var(--ink); }
+.axis-slider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
+  border-radius: 50%; background: var(--ink); border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
+.axis-slider input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink);
+  border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
+.axis-slider input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
+.axis-slider svg text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
+.axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
+@media (pointer: coarse) {
+  .axis-slider input[type="range"] { height: 44px; }
+  .axis-slider input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12px; }
+}
+
+/* Disclosure ("Show data") */
+details.data { margin-top: var(--s3); }
+details.data summary { cursor: pointer; font-size: var(--t-ui); width: max-content; }
+details.data summary::marker { color: var(--text-2); }
+.data-table { border-collapse: collapse; margin-top: var(--s3); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
+.data-table caption { text-align: left; color: var(--text-2); padding-bottom: var(--s2); }
+.data-table th, .data-table td { text-align: left; padding: 4px var(--s3) 4px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.data-table td.num { text-align: right; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+
+/* Warnings: icon + text + Ink outline; never colour alone. */
+.note-warn { display: flex; gap: var(--s2); align-items: flex-start; border: 1px solid var(--ink); border-radius: var(--radius);
+             padding: var(--s2) var(--s3); font-size: var(--t-ui); max-width: var(--measure); }
+.note-warn svg { flex: none; margin-top: 3px; }

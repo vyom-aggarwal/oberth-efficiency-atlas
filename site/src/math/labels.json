@@ -1,0 +1,15 @@
+{
+  "Pi": "\\Pi",
+  "PiDef": "\\Pi = t_b / \\tau",
+  "eta": "\\eta",
+  "lossRel": "\\text{loss} / \\Delta v",
+  "bound": "\\Pi^2 / 96",
+  "vRatio": "\\vinf / \\vesc",
+  "dvOverVp": "\\Delta v / \\vp",
+  "dvOverC": "\\Delta v / c",
+  "av": "a \\cdot v",
+  "tau": "\\tau = r_p / \\vp",
+  "PiEff": "\\Pi_{\\mathrm{eff}}",
+  "Rsun": "\\Rsun",
+  "leadingOrderFamily": "k(1-k)\\,\\Pi^2 / 24"
+}

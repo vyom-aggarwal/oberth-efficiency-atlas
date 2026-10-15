@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="robots" content="noindex" />
+    <title>Design reference</title>
+    <script>
+      try { var t = localStorage.getItem("oberth-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+    </script>
+    <script type="module" src="/src/pages/style.ts"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="../">Oberth Efficiency Atlas</a>
+      <nav class="site-nav" aria-label="Site">
+        <a href="../">Home</a>
+        <a href="../explorer/">Explorer</a>
+        <a href="../#methods">Methods</a>
+        <a id="repo-link" href="#">Source</a>
+        <div class="theme-switch" id="theme-switch"></div>
+      </nav>
+    </header>
+    <main class="page">
+      <div class="wrap">
+        <h1>Design reference</h1>
+        <p class="dev-banner">Development page (not deployed): the site's tokens, type scale, one figure and one set of controls, in the current theme.</p>
+
+        <section class="section" aria-labelledby="h-colour">
+          <h2 id="h-colour">Colour</h2>
+          <div class="swatches" id="swatches"></div>
+          <div id="ramps"></div>
+          <p class="checks" id="checks"></p>
+        </section>
+
+        <section class="section" aria-labelledby="h-type">
+          <h2 id="h-type">Type</h2>
+          <div class="specimen"><div class="meta" data-size="display">Hero title: Source Serif 4, optical size 60</div><div class="h1-specimen" style="font-family: var(--serif); font-size: var(--t-display); font-weight: 560; font-variation-settings: 'opsz' 60; line-height: 1.1">Sphinx of black quartz, judge my vow</div></div>
+          <div class="specimen"><div class="meta" data-size="h2">Section title: Source Serif 4, optical size 36</div><h2 style="margin: 0">Sphinx of black quartz, judge my vow</h2></div>
+          <div class="specimen"><div class="meta" data-size="h3">Figure title: Source Serif 4, optical size 24</div><h3 style="margin: 0"><span style="color: var(--text-2); font-weight: 400">Figure 1</span> Sphinx of black quartz, judge my vow</h3></div>
+          <div class="specimen"><div class="meta" data-size="prose">Prose: Source Serif 4; italic for variables; KaTeX for math</div>
+            <p class="prose">Type specimen. Lining figures 0123456789 and proportional figures in running text; italic for variables such as <i>v</i>, <i>r</i> and <i>t</i>; Greek letters η, Π, Δ, τ, μ and ε in the text face; math set by KaTeX at build time, for example <x-tex>\Pi = t_b/\tau</x-tex>, <x-tex>\eta</x-tex>, <x-tex>\vinf/\vesc</x-tex> and <x-tex>\Pi^2/96</x-tex>. The quick brown fox jumps over the lazy dog.</p></div>
+          <div class="specimen"><div class="meta" data-size="caption">Caption: Source Serif 4, Graphite</div><p class="caption">Caption specimen. Captions are the author's prose; this line only shows their size, colour and measure.</p></div>
+          <div class="specimen"><div class="meta" data-size="ui">Interface: Fira Sans, tabular lining figures</div><div style="font-size: var(--t-ui)">Controls and readouts 0123456789 ηΠΔτ</div></div>
+          <div class="specimen"><div class="meta" data-size="annot">Annotation: Fira Sans Condensed</div><div style="font-family: var(--sans-cond); font-size: var(--t-annot)">On-plot labels and leaders 0123456789</div></div>
+          <div class="specimen"><div class="meta" data-size="label">Label: Fira Sans, Graphite</div><div class="label-text">Tick labels, legends and table cells 0.001 0.01 0.1 1 10 100 1000</div></div>
+        </section>
+
+        <section class="section" aria-labelledby="h-figure">
+          <h2 id="h-figure">Figure</h2>
+          <figure class="figure" id="fig-curve"></figure>
+        </section>
+
+        <section class="section" aria-labelledby="h-controls">
+          <h2 id="h-controls">Controls</h2>
+          <div class="ctl-row" id="ctl-slider"><div class="meta">Log slider drawn as the shared Π axis, with the engines of the engines-compared section marked</div></div>
+          <div class="ctl-row" id="ctl-steering"><div class="meta">Segmented choice (radio group)</div></div>
+          <div class="ctl-row" id="ctl-select"><div class="meta">Select and button</div></div>
+          <div class="ctl-row" id="ctl-warn"><div class="meta">Warning state: icon, text and an Ink outline</div></div>
+        </section>
+
+        <section class="section" aria-labelledby="h-refs">
+          <h2 id="h-refs">References</h2>
+          <ol class="references" id="references"></ol>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
