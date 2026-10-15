@@ -143,6 +143,7 @@ def test_hero_units_and_nondimensional_case():
     h = load("hero.json")
     V = np.sqrt(GM_SUN / P.R_P)
     assert h["units"]["V_m_s"] == V
+    assert h["units"]["time_s"] == P.R_P / V and h["units"]["av_W_per_kg"] == V**3 / P.R_P
     assert h["nd"]["dv"] == h["propulsion"]["dv_m_s"]["value"] / V
     assert h["nd"]["c"] == h["propulsion"]["c_km_s"]["value"] * 1000 / V
     assert [m["id"] for m in h["marks"]] == ["solid_stack", "nuclear_thermal", "sep_class"]
