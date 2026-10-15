@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Explorer: Oberth Efficiency Atlas</title>
+    <meta name="description" content="Simulate one finite-burn flyby live and place it on the universal curve and the atlas." />
+    <script>
+      try { var t = localStorage.getItem("oberth-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+    </script>
+    <script type="module" src="/src/pages/explorer.ts"></script>
+  </head>
+  <body class="page-explorer">
+    <!--#header-->
+    <main id="main" class="page">
+      <div class="wrap">
+        <h1 class="page-title">Explorer</h1>
+        <div class="explorer-layout" data-explorer>
+          <section class="explorer-controls" aria-label="Case"></section>
+          <section class="explorer-view" aria-label="Trajectory"></section>
+          <section class="explorer-readouts" aria-label="Results"></section>
+          <section class="explorer-placement" aria-label="Placement on the universal curve and the atlas"></section>
+        </div>
+        <p class="explorer-fallback">The <a href="{{base}}explorer/classic/">single-file explorer</a> works offline and without this page.</p>
+      </div>
+    </main>
+    <!--#footer-->
+  </body>
+</html>

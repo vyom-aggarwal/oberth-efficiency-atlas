@@ -1,12 +1,5 @@
 // /style/: the design reference page (development only; docs/site_plan.md §7, checkpoint 1).
-import "katex/dist/katex.min.css";
-import "../styles/palette.css";
-import "../styles/fonts.css";
-import "../styles/base.css";
-import "../styles/controls.css";
-import "../styles/chart.css";
-import "../styles/layout.css";
-
+import { initShell } from "./shell";
 import { universalCurve, type CurveData } from "../charts/universal-curve";
 import { axisSlider } from "../controls/axis-slider";
 import { segmented } from "../controls/segmented";
@@ -15,12 +8,10 @@ import { loadData, type SiteData } from "../lib/data";
 import { h, s } from "../lib/dom";
 import { sig } from "../lib/format";
 import { signal } from "../lib/signal";
-import { themePref, themeShown, cssVar, type ThemePref } from "../lib/theme";
+import { themeShown, cssVar } from "../lib/theme";
 
 const $ = (id: string) => document.getElementById(id)!;
-
-// Theme switch (header).
-$("theme-switch").append(segmented<ThemePref>("theme", "Theme", [["system", "System"], ["light", "Light"], ["dark", "Dark"]], themePref));
+initShell("style");
 
 // ---------------------------------------------------------------- colour (values read from the generated tokens)
 const NAMED: [string, string, string][] = [
@@ -68,7 +59,6 @@ for (const meta of document.querySelectorAll<HTMLElement>(".specimen .meta")) {
 
 // ---------------------------------------------------------------- data-driven parts
 const [site, curve] = await Promise.all([loadData<SiteData>("site.json"), loadData<CurveData>("curve.json")]);
-$("repo-link").setAttribute("href", site.repo.url);
 universalCurve($("fig-curve"), curve, site, { figN: 2, title: "The universal curve" });
 
 $("references").append(...site.references.map((r) => h("li", { id: `ref-${r.n}`, value: r.n, html: referenceHTML(r.text) })));

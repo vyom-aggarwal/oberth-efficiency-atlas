@@ -2,7 +2,8 @@
 // sideways scrolling. Images are written to runs/screens/ for review (gitignored).
 import { expect, test } from "@playwright/test";
 
-const PAGES = (process.env.SCREEN_PAGES ?? "style/").split(",");
+// Pages to capture ("" is the home page). /style/ exists only on the dev server.
+const PAGES = (process.env.SCREEN_PAGES ?? ",explorer/,404.html,style/").split(",");
 const WIDTHS = [1440, 390];
 const THEMES = ["light", "dark"] as const;
 const OUT = "../runs/screens";
