@@ -1864,3 +1864,45 @@ takes about 43–79 min, with the sweep at about 17 min.
   1.63.0.
 - **Repository:** public, so Pages from Actions works on the free plan.
 
+## 2026-10-14: Phase 6 plan approved, with additions (author decisions)
+
+**Additions:**
+1. **Hero case:**
+   - Hibberd et al.'s solar-dive geometry (near-parabolic arrival), simulated with the other
+     parameters fixed and stated on the page.
+   - The three engines from the engines-compared section are marked on the hero's Π axis, with
+     values read from `anim_numbers.json`: solid stack ≈ 0.03, nuclear thermal ≈ 1.7,
+     SEP-class ≈ 370.
+2. **Performance:** benchmark the simulator at Π = 1000 (the slider's top), throttle re-simulation
+   to one run per animation frame, and report the worst-case frame time.
+3. **Tooltip provenance:** the citation number and a short source name (e.g. "Hibberd et al.¹",
+   numbered as in the paper outline), with the data file as a link, not a bare path.
+
+**Answers:**
+1. **Colour divergence** is accepted for now.
+   - After the site is finished: a presentation-only recolour of the paper figures to the site
+     palette.
+   - Only colour constants in the figure scripts change. The figures are regenerated, and
+     `repro_audit` must show unchanged numbers JSONs, with only images differing.
+   - Logged, then tagged `v1.1-figures`. Not started before the site is done.
+2. **Engine trajectories:** the export imports `build_cases` and `trajectory` from
+   `scripts/anim_engines.py`, with a test of the arrays against `anim_numbers.json`.
+3. **Theory curves:** evaluating them by calling the frozen library functions unchanged is within the
+   freeze. These exports go through `test_site_data.py` and `repro_audit` like everything else.
+4. **Section changes approved:** the new order, the mission-sample layer, the body selector for the
+   SOI, and the Limitations section.
+5. **Unwritten sections are hidden in production:**
+   - Any section whose content file still contains a TODO marker is omitted from the production
+     build, with its navigation entry and its figure. The build prints the list of hidden sections.
+   - Dev builds show such sections with a visible TODO banner.
+   - The hero question is the author's text too.
+6. **Playwright runs in CI.**
+7. **`/style/` is dev only.**
+8. **Working section titles** are fine; the author renames them along with the prose.
+
+**Next:** checkpoint 1, the `/style/` page in both themes, with screenshots at 1440 and 390 px.
+- Its one chart is the universal curve, drawn from exported data. The first piece of
+  `scripts/export_site_data.py` (`curve.json`) is therefore written now. The rest of the export
+  follows at checkpoint 2.
+- The npm cutoff moves with the install day: `--before=2026-09-30` for an install on 2026-10-14.
+

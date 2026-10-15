@@ -1,6 +1,9 @@
 # Phase 6 plan: project website on GitHub Pages
 
-Status: proposed on 2026-10-13. Awaiting the author's approval. No site code is written yet.
+Status: proposed 2026-10-13; **approved 2026-10-14 with additions and answers.** RESEARCH_LOG
+2026-10-14 records them: the hero uses Hibberd's geometry with the three engines marked on its Π axis,
+a Π = 1000 benchmark, citation-style tooltip provenance, and unwritten sections hidden in production.
+The open questions in §6 are answered there.
 
 ## 0. Findings that shape the plan
 
