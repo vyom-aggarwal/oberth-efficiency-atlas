@@ -1906,3 +1906,63 @@ takes about 43–79 min, with the sweep at about 17 min.
   follows at checkpoint 2.
 - The npm cutoff moves with the install day: `--before=2026-09-30` for an install on 2026-10-14.
 
+## 2026-10-14: Checkpoint 1: the `/style/` design reference
+
+**Built:**
+- **Packages:** `site/package.json` with exact versions installed by
+  `npm install --before=2026-09-30`. `tools/check-package-age.mjs` confirms that all 131 locked
+  packages, transitive dependencies included, predate the cutoff. The newest is std-env 4.3.0
+  (2026-09-29). KaTeX resolved to 0.18.9 because 0.18.10 was published on the cutoff day.
+- **Palette:** `tools/palette.mjs` generates `src/styles/palette.css` from the OKLCH definitions
+  and re-runs the checks: ramp monotonicity, ΔL, single hue, Burn's faint end ≥ 2:1, text contrast,
+  and Burn against Slate. The hex values equal the approved plan's.
+- **Data export:** `scripts/export_site_data.py` (part 1) writes `site.json` and `curve.json`
+  (34.7 KB).
+  - Every printed number is a `{value, src}` pointer into a numbers JSON, a YAML config, or a frozen
+    script's function result (the animation's `build_cases()` titles).
+  - `tests/test_site_data.py` (7 tests) checks every pointer, recomputes the plotted arrays exactly
+    through `fig_hero` and `fig_loss_vinf`, and cross-checks the band against `hero_numbers.json`.
+- **Page:** `/style/`, served by the dev server only and excluded from the production build. It
+  shows:
+  - the colour tokens, with contrast computed from the live tokens;
+  - the type specimens, with sizes read from computed styles;
+  - the universal curve from `curve.json`, with direct labels and leaders, a legend, tooltips with
+    the citation (paper-outline numbering) and a data-file link at the tag, a crosshair readout
+    along the band, a "Show data" table and a generated text summary;
+  - the axis slider with the three engines marked;
+  - the segmented, select, button and warning controls;
+  - the numbered references.
+- **Tests:** Playwright uses the installed Chrome (`channel: "chrome"`), so nothing is downloaded.
+  - Screenshots at 1440 and 390 px in both themes go to `runs/screens/`. The spec asserts no console
+    errors and no sideways scrolling: 4 passed.
+  - An interaction spec covers hover and focus tooltips, a case toggle and the slider's keyboard
+    behaviour: passed.
+  - Full Python suite: 516 passed.
+
+**Deviations from the approved plan, with reasons:**
+1. **Control edges use Graphite, not Rule.** WCAG 1.4.11 requires 3:1 for the boundary of an input,
+   and Rule is 1.33:1 on Paper. Rule now serves gridlines and quiet dividers only. The band uses
+   Slate step 2 in light mode and step 3 in dark.
+2. **The universal curve has a legend at every width,** as well as direct labels on desktop. On
+   screens under 560 px the on-plot labels are dropped and the legend carries identification, so
+   identity never rests on position or colour alone.
+3. **Mission-sample ranges are drawn as thin Graphite bars with end caps.** The first draft's Ink
+   crosses dominated the band.
+4. **The plugin directory is `site/plugins/`, not `site/build/`.** The root `.gitignore` ignores
+   `build/`, a Python packaging pattern.
+5. **The case descriptions and threshold labels contain no numbers typed in the export.**
+   - Engine descriptions are the animation's own case titles.
+   - Maraqten et al.'s description is a template filled from `configs/phase4/hibberd_som.yaml`.
+   - Threshold levels and the percentile names are parsed from the source JSON keys.
+   - The style page's band label uses the exported profile count.
+6. **The export has its own revision check.** `plotting.git_revision` (frozen) counted the
+   untracked `site/public/data/` as uncommitted, so every export was stamped `-dirty`. The export's
+   own check excludes that directory.
+
+**Measured:** the style page loads 432 KB of fonts in 10 files: Source Serif 4 roman and italic,
+Latin and Greek; Fira Sans; KaTeX Main and Math. That is more than the plan's ~250 KB estimate.
+- The variable Source Serif files, with weight and optical-size axes, are 119–127 KB each.
+- First-load data plus fonts is still well under 1.5 MB.
+- If Lighthouse performance needs it (checkpoint 6), I will instance Source Serif to two weights,
+  keeping the optical-size axis.
+
