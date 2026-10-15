@@ -25,8 +25,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from oberth_atlas.plotting import git_revision
-
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 OUT = ROOT / "site" / "public" / "data"
@@ -35,6 +33,15 @@ SIG = 6                                           # significant figures for plot
 
 
 # ---------------------------------------------------------------- helpers
+
+def git_revision() -> str:
+    """Short commit, with '-dirty' if anything other than generated outputs (figures/, this script's output
+    directory) is uncommitted. Like plotting.git_revision, which cannot exclude the site data directory."""
+    run = lambda *a: subprocess.run(["git", *a], capture_output=True, text=True, check=True, cwd=ROOT).stdout.strip()
+    sha = run("rev-parse", "--short", "HEAD")
+    dirty = run("status", "--porcelain", "--", ".", ":(exclude)figures", ":(exclude)site/public/data")
+    return sha + ("-dirty" if dirty else "")
+
 
 def sha256(rel: str) -> str:
     return hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
