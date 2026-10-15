@@ -186,11 +186,12 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
          "detail": num(titles, 0, 0, 0),
          "Pi": num(hero, "hibberd", "Pi"), "loss_rel": num(hero, "hibberd", "loss_rel"),
          "loss_m_s": num(p4, "reference", "time_centred", "dv_loss_m_s"), "data": p4},
-        {"id": "ntp", "label": "Nuclear thermal", "ref": None, "kind": "simulation",
+        # The same dive flown by other engines (author, 2026-10-15): labelled by the site as Hibberd's dive.
+        {"id": "ntp", "label": "Nuclear thermal", "ref": None, "kind": "simulation", "dive_of": "hibberd",
          "detail": num(titles, 0, 1, 0),
          "Pi": num(anim, "nuclear_thermal", "Pi"), "loss_rel": num(anim, "nuclear_thermal", "loss_rel"),
          "loss_m_s": num(anim, "nuclear_thermal", "loss_m_s"), "data": anim},
-        {"id": "sep", "label": "SEP-class", "ref": None, "kind": "simulation",
+        {"id": "sep", "label": "SEP-class", "ref": None, "kind": "simulation", "dive_of": "hibberd",
          "detail": num(titles, 0, 2, 0),
          "Pi": num(anim, "sep_class", "Pi"), "loss_rel": num(anim, "sep_class", "loss_rel"),
          "loss_m_s": num(anim, "sep_class", "loss_m_s"), "data": anim},
@@ -225,10 +226,17 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
             "theory": {"Pi": round_sig(xs), "loss_rel": round_sig(k["value"] * (1 - k["value"]) * xs**2 / 24)},
         })
 
+    # The band's spread across thrust profiles over the whole plotted range (RESEARCH_LOG 2026-10-15: the numbers
+    # JSON samples it at six Π values only; its maximum lies between samples).
+    ratio = hi / lo
+    i_max = int(np.nanargmax(ratio))
     payload = {
         "band": {"Pi": round_sig(x), "lo": round_sig(lo), "hi": round_sig(hi), "profiles": list(curves),
                  "max_over_min": {f"Pi={v:g}": num(hero, "band_max_over_min", f"Pi={v:g}")
                                   for v in (0.01, 0.1, 1.0, 10.0, 100.0, 1000.0)},
+                 "spread": {"max_over_min": float(ratio[i_max]), "at_Pi": float(x[i_max]),
+                            "Pi_range": [float(x[0]), float(x[-1])],
+                            "computed_from": "band = fig_hero.profile_curves/on_grid on results/phase4.parquet"},
                  "data": "results/phase4.parquet"},
         "bound": {"Pi": round_sig(x[x <= 10]), "loss_rel": round_sig(x[x <= 10] ** 2 / 96),
                   "statement": num("figures/rule_numbers.json", "rule"),

@@ -45,9 +45,10 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
   });
 
   let width = 0;
+  // Redraw in the next frame: drawing changes the scale's height, which must not happen inside the observer.
   new ResizeObserver(([e]) => {
     const w = Math.round(e.contentRect.width);
-    if (w !== width) { width = w; drawScale(); }
+    if (w !== width) { width = w; requestAnimationFrame(drawScale); }
   }).observe(track);
 
   function drawScale(): void {

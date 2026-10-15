@@ -87,6 +87,21 @@ def test_curve_band_agrees_with_hero_numbers():
         assert np.exp(np.interp(np.log(Pi), lx, np.log(ratio))) == pytest.approx(item["value"], rel=1e-5), key
 
 
+def test_band_spread_is_the_maximum_over_the_plotted_range():
+    """The quoted spread (max/min across thrust profiles) is the band's maximum over the whole plotted grid,
+    recomputed at full precision, and it is at least every value hero_numbers.json samples."""
+    import fig_hero as H
+    c = load("curve.json")
+    curves = H.profile_curves(pd.read_parquet(ROOT / "results" / "phase4.parquet"))
+    x = np.logspace(-3, np.log10(3000), 400)
+    Y = np.vstack([H.on_grid(cv, x) for cv in curves.values()])
+    ratio = np.nanmax(Y, axis=0) / np.nanmin(Y, axis=0)
+    i = int(np.nanargmax(ratio))
+    spread = c["band"]["spread"]
+    assert spread["max_over_min"] == float(ratio[i]) and spread["at_Pi"] == float(x[i])
+    assert all(spread["max_over_min"] >= item["value"] for item in c["band"]["max_over_min"].values())
+
+
 def test_reference_numbers_follow_the_paper_outline():
     site = load("site.json")
     curve = load("curve.json")

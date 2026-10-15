@@ -15,7 +15,7 @@ import { signal } from "../lib/signal";
 type Detail = Sourced<string> | { template: string; fields: Record<string, Sourced<number | string>> };
 interface Case {
   id: string; label: string; ref: number | null; kind: "published" | "simulation" | "published-range";
-  detail: Detail; data: string;
+  detail: Detail; data: string; dive_of?: string;
   Pi?: Sourced; loss_rel?: Sourced; loss_m_s?: Sourced;
   Pi_range?: Sourced<number[]>; loss_rel_range?: Sourced<number[]>;
 }
@@ -26,7 +26,8 @@ interface FamilyCurve {
 }
 export interface CurveData {
   provenance: Provenance;
-  band: { Pi: number[]; lo: (number | null)[]; hi: (number | null)[]; profiles: string[]; data: string };
+  band: { Pi: number[]; lo: (number | null)[]; hi: (number | null)[]; profiles: string[]; data: string;
+          spread: { max_over_min: number; at_Pi: number } };
   bound: { Pi: number[]; loss_rel: number[]; statement: Sourced<string>; max_ratio_Pi_le_1: Sourced; data: string };
   thresholds: { level: string; loss_rel: number; Pi: Sourced }[];
   cases: Case[];
@@ -107,7 +108,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
   const redraw = () => draw(width);
   new ResizeObserver(([entry]) => {
     const w = Math.round(entry.contentRect.width);
-    if (w !== width) { width = w; redraw(); }
+    if (w !== width) { width = w; requestAnimationFrame(redraw); }   // never resize inside the observer
   }).observe(plot);
   shown.subscribe(() => width && redraw());
   mode.subscribe(() => width && redraw());
@@ -164,7 +165,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       for (const k of [1, 2] as const) svg.append(s("path", { class: "band-edge", d: line<[number, number, number]>().x((d) => x(d[0])).y((d) => y(d[k]))(bandPts) ?? "" }));
       if (!narrow) {
         const hiAt = interpLog(bandPts, BAND_LABEL_AT_PI, 2);
-        label("band", x(BAND_LABEL_AT_PI), y(hiAt), document.createTextNode(`Band: ${data.band.profiles.length} thrust profiles`));
+        label("band", x(BAND_LABEL_AT_PI), y(hiAt), document.createTextNode(bandLabel(data)));
       }
     } else {
       data.arrival_family.curves.forEach((c, i) => {
@@ -213,8 +214,8 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
         const gr = s("g", {}, rect);
         svg.append(gr);
         const cx = (x(a) + x(b)) / 2, cy = (y(lo) + y(hi)) / 2;
-        hit(gr, cx, cy, c.label, () => caseTip(c, site));
-        if (!narrow) label(c.id, x(b), y(lo), citation(c.label, c.ref));
+        hit(gr, cx, cy, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
+        if (!narrow) label(c.id, x(b), y(lo), caseLabel(c, data.cases, true));
         continue;
       }
       const px = x(c.Pi!.value), py = y(c.loss_rel!.value);
@@ -225,8 +226,8 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
           : s("rect", { class: "mark-sim", x: px - 5.5, y: py - 5.5, width: 11, height: 11 });
       const gr = s("g", {}, mark);
       svg.append(gr);
-      hit(gr, px, py, c.label, () => caseTip(c, site));
-      if (!narrow) label(c.id, px, py, citation(c.label, c.ref));
+      hit(gr, px, py, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
+      if (!narrow) label(c.id, px, py, caseLabel(c, data.cases, true));
     }
 
     // Crosshair readout along the band (pointer; the data table carries the same values for keyboard users).
@@ -289,6 +290,32 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
 const ordinal = (n: number) => `${n}${[11, 12, 13].includes(n % 100) ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th")}`;
 const pct = ([a, b]: [number, number]) => `${ordinal(a)} to ${ordinal(b)} percentile`;
 
+// Cases that are Hibberd's dive flown by other engines are labelled as such (author, 2026-10-15), with the
+// caveat line of the animation's own case title, e.g. "(hypothetical at 3.2 R☉)".
+const engineName = (s: string) => (/^[A-Z][a-z]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s);
+function caveat(c: Case): string {
+  const second = fillTemplate(c.detail).split("\n")[1] ?? "";
+  return second.startsWith("(") ? second : "";
+}
+/** The case's display label; `lines` breaks it for on-plot use. */
+function caseLabel(c: Case, all: Case[], lines = false): HTMLElement {
+  const el = h("span", {});
+  const owner = c.dive_of ? all.find((o) => o.id === c.dive_of) : undefined;
+  if (!owner) {
+    el.append(citation(c.label, c.ref));
+    return el;
+  }
+  const brk = () => (lines ? h("br") : document.createTextNode(" "));
+  el.append(citation(`${owner.label}’s dive`, owner.ref), brk(), `flown with ${engineName(c.label)}`);
+  if (caveat(c)) el.append(brk(), caveat(c));
+  return el;
+}
+function caseLabelText(c: Case, all: Case[]): string {
+  const owner = c.dive_of ? all.find((o) => o.id === c.dive_of) : undefined;
+  if (!owner) return c.label;
+  return `${owner.label}’s dive flown with ${engineName(c.label)}${caveat(c) ? ` ${caveat(c)}` : ""}`;
+}
+
 function glyph(kind: "solid" | "dashed" | "hollow"): SVGSVGElement {
   const g = s("svg", { width: 22, height: 10, "aria-hidden": "true" });
   if (kind === "hollow") g.append(s("circle", { cx: 11, cy: 5, r: 4, class: "mark-pub", "stroke-width": 1.5 }));
@@ -306,12 +333,12 @@ function legend(d: CurveData): HTMLElement {
       : c.Pi_range ? mk([s("rect", { class: "range-box", x: -8, y: -5, width: 16, height: 10 })])
         : c.id === "ntp" ? mk([s("path", { class: "mark-sim", d: "M0,-7 l7,7 l-7,7 l-7,-7z" })])
           : mk([s("rect", { class: "mark-sim", x: -5.5, y: -5.5, width: 11, height: 11 })]);
-    items.push([g, citation(c.label, c.ref)]);
+    items.push([g, caseLabel(c, d.cases)]);
   }
   items.push([mk([s("line", { class: "range-bar", x1: -10, x2: 10, y1: 0, y2: 0 }), s("circle", { class: "mark-sim", r: 4 })]),
     document.createTextNode(`Mission samples at the Sun: median, ${pct(d.ranges[0].percentiles)}`)]);
   items.push([mk([s("rect", { class: "band", x: -10, y: -3, width: 20, height: 6 }), s("line", { class: "band-edge", x1: -10, x2: 10, y1: -3, y2: -3 }),
-    s("line", { class: "band-edge", x1: -10, x2: 10, y1: 3, y2: 3 })]), document.createTextNode(`Band: ${d.band.profiles.length} thrust profiles (simulation)`)]);
+    s("line", { class: "band-edge", x1: -10, x2: 10, y1: 3, y2: 3 })]), document.createTextNode(`${bandLabel(d)} (simulation)`)]);
   const boundLabel = h("span", {});
   boundLabel.append(frag(tex.bound), " leading-order bound (theory)");
   items.push([mk([s("line", { class: "theory-line", x1: -10, x2: 10, y1: 0, y2: 0 })]), boundLabel]);
@@ -343,7 +370,12 @@ function interpLog(pts: [number, number, number][], P: number, k: 1 | 2): number
   return Math.exp(Math.log(a[k]) + t * (Math.log(b[k]) - Math.log(a[k])));
 }
 
-function caseTip(c: Case, site: SiteData): HTMLElement {
+/** "Band: 3 thrust profiles, spread ≤ 7.5 %": the profile count and the measured max/min over the plotted range. */
+function bandLabel(d: CurveData): string {
+  return `Band: ${d.band.profiles.length} thrust profiles, spread ≤ ${sig(100 * (d.band.spread.max_over_min - 1), 2)} %`;
+}
+
+function caseTip(c: Case, all: Case[], site: SiteData): HTMLElement {
   const rows: [string, string][] = [];
   if (c.Pi) rows.push(["Π", sig(c.Pi.value)]);
   if (c.Pi_range) rows.push(["Π_eff", `${sig(c.Pi_range.value[0])} to ${sig(c.Pi_range.value[1])}`]);
@@ -351,7 +383,7 @@ function caseTip(c: Case, site: SiteData): HTMLElement {
   if (c.loss_rel_range) rows.push(["loss/Δv", `${lossRel(c.loss_rel_range.value[0])} to ${lossRel(c.loss_rel_range.value[1])}`]);
   if (c.loss_m_s) rows.push(["loss", speed(c.loss_m_s.value)]);
   return h("div", {},
-    h("div", { class: "tt-title" }, citation(c.label, c.ref)),
+    h("div", { class: "tt-title" }, caseLabel(c, all)),
     h("div", { class: "tt-detail" }, fillTemplate(c.detail)),
     h("dl", {}, ...rows.flatMap(([k, v]) => [h("dt", {}, k), h("dd", {}, v)])),
     h("div", { class: "tt-source" }, "Source: ", c.ref !== null ? citation(c.label, c.ref) : "this project (simulation)"),
@@ -374,7 +406,7 @@ function dataTable(d: CurveData, site: SiteData): HTMLDetailsElement {
   for (const c of d.cases) {
     const Pi = c.Pi ? sig(c.Pi.value) : `${sig(c.Pi_range!.value[0])} to ${sig(c.Pi_range!.value[1])}`;
     const L = c.loss_rel ? lossRel(c.loss_rel.value) : `${lossRel(c.loss_rel_range!.value[0])} to ${lossRel(c.loss_rel_range!.value[1])}`;
-    rows.push(h("tr", {}, h("th", { scope: "row" }, citation(c.label, c.ref)), h("td", {}, c.kind === "simulation" ? "simulation" : "published"),
+    rows.push(h("tr", {}, h("th", { scope: "row" }, caseLabel(c, d.cases)), h("td", {}, c.kind === "simulation" ? "simulation" : "published"),
       h("td", { class: "num" }, Pi), h("td", { class: "num" }, L), h("td", { class: "num" }, c.loss_m_s ? speed(c.loss_m_s.value) : ""),
       h("td", {}, sourceLink(site, c.data))));
   }
@@ -399,9 +431,11 @@ function dataTable(d: CurveData, site: SiteData): HTMLDetailsElement {
 function summaryText(d: CurveData): string {
   const [t1, t2] = d.thresholds;
   const parts = d.cases.map((c) => c.Pi
-    ? `${c.label} at Π = ${sig(c.Pi.value)} (loss ${lossRel(c.loss_rel!.value)} of Δv)`
-    : `${c.label} at an effective Π of ${sig(c.Pi_range!.value[0])} to ${sig(c.Pi_range!.value[1])}`);
-  return `Log–log plot of finite-burn loss as a fraction of Δv against Π. The band of thrust profiles reaches ` +
-    `${t1.level.replace("%", " %")} loss at Π = ${sig(t1.Pi.value)} and ${t2.level.replace("%", " %")} at Π = ${sig(t2.Pi.value)}. ` +
+    ? `${caseLabelText(c, d.cases)} at Π = ${sig(c.Pi.value)} (loss ${lossRel(c.loss_rel!.value)} of Δv)`
+    : `${caseLabelText(c, d.cases)} at an effective Π of ${sig(c.Pi_range!.value[0])} to ${sig(c.Pi_range!.value[1])}`);
+  const sp = d.band.spread;
+  return `Log–log plot of finite-burn loss as a fraction of Δv against Π. The band of ${d.band.profiles.length} thrust ` +
+    `profiles is ${sig(100 * (sp.max_over_min - 1), 2)} % wide at most (max/min ${sig(sp.max_over_min, 4)} at Π = ${sig(sp.at_Pi)}). ` +
+    `It reaches ${t1.level.replace("%", " %")} loss at Π = ${sig(t1.Pi.value)} and ${t2.level.replace("%", " %")} at Π = ${sig(t2.Pi.value)}. ` +
     `The dashed line is the leading-order bound Π²/96. Cases: ${parts.join("; ")}.`;
 }

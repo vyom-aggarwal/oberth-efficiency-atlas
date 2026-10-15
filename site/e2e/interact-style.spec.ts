@@ -13,13 +13,22 @@ test("universal curve and controls respond", async ({ page }) => {
   await expect(tip.getByRole("link", { name: "phase4_numbers.json" })).toHaveAttribute("href", /\/blob\/v1\.0-analysis\/figures\/phase4_numbers\.json$/);
   await page.locator("#fig-curve").screenshot({ path: "../runs/screens/style-tooltip-1440-light.png" });
 
-  // Keyboard: focus the nuclear-thermal mark.
-  await page.getByRole("button", { name: "Nuclear thermal: details" }).focus();
-  await expect(tip).toContainText("Nuclear thermal");
+  // Keyboard: focus the nuclear-thermal mark (Hibberd's dive flown by another engine).
+  await page.getByRole("button", { name: /dive flown with nuclear thermal: details$/ }).focus();
+  await expect(tip).toContainText("flown with nuclear thermal");
+
+  // The SEP-class point carries the animation's caveat in its label, tooltip and data table.
+  const sep = page.getByRole("button", { name: /flown with SEP-class \(hypothetical at .* R☉\): details$/ });
+  await sep.focus();
+  await expect(tip).toContainText("(hypothetical at");
+  await expect(page.locator("#fig-curve .data-table")).toContainText("(hypothetical at");
+
+  // The band's label quotes its measured spread.
+  await expect(page.locator("#fig-curve .legend")).toContainText(/spread ≤ \d/);
 
   // Toggle a case off: its mark disappears.
   await page.locator(".chip", { hasText: "SEP-class" }).locator("input").uncheck();
-  await expect(page.getByRole("button", { name: "SEP-class: details" })).toHaveCount(0);
+  await expect(sep).toHaveCount(0);
 
   // Slider: keyboard moves the value and the readout follows.
   const out = page.locator("output[for=pi-slider]");
