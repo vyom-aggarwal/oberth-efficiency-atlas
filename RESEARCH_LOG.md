@@ -1966,3 +1966,42 @@ Latin and Greek; Fira Sans; KaTeX Main and Math. That is more than the plan's ~2
 - If Lighthouse performance needs it (checkpoint 6), I will instance Source Serif to two weights,
   keeping the optical-size axis.
 
+## 2026-10-15: Checkpoint 1 review: author decisions, the heredoc hook, and one deviation
+
+**Author decisions:**
+1. **Fonts:** keep the subsets. Preload only the upright Latin text face used above the fold.
+   Revisit at checkpoint 6 only if Lighthouse performance is below 90.
+2. **Cases on the curve:** the set is right.
+   - The nuclear-thermal and SEP-class points are labelled as Hibberd's dive flown by other engines.
+   - The SEP-class point carries the animation's own wording, "(hypothetical at 3.2 R☉)", in its
+     label, tooltip and data table.
+3. **Band:** keep it; its reading as a line is the finding. Its measured spread goes in its label
+   and in the text summary.
+4. **Mobile header:** fixed at checkpoint 2.
+5. **Process:** the heredoc rule slipped three times in Phase 6, so it is enforced by a hook.
+
+**The hook (done):**
+- `.claude/hooks/block-heredoc-writes.mjs` is registered as a project `PreToolUse` hook on Bash and
+  PowerShell in `.claude/settings.json`.
+- It blocks every heredoc or here-string whose statement is not a `git commit`. Interpreter heredocs
+  are included (one of the three slips was `python - <<'PY'` editing a TypeScript file, which no static
+  check can tell apart from a read-only script).
+- Tests: `tests/test_hooks.py` (17 cases) passes.
+- Live checks in this session:
+  - a heredoc write to a scratch file was blocked, and the file was not created;
+  - a commit with a heredoc message (3d439de) went through.
+- Documented in CLAUDE.md.
+
+**Deviation (logged before use): the band's spread is the maximum over the plotted range, not the
+numbers JSON's largest sampled value.**
+- `hero_numbers.json` quotes the band's max/min across thrust profiles at six Π values only
+  (0.01 … 1000). The largest is 1.0740, at Π = 10.
+- Over the plotted range (Π = 0.001–3000), the band itself reaches 1.0749 at Π ≈ 14.9. The band is
+  `fig_hero.profile_curves` and `on_grid` on `results/phase4.parquet`, the same committed data.
+- Quoting 1.074 as the maximum "over the plotted range" would be slightly wrong. So the export
+  computes the maximum and its location from the band at full precision.
+- `tests/test_site_data.py` recomputes it and checks that it is at least every sampled value in
+  `hero_numbers.json`.
+- The two differ in the fourth significant figure; both are below 7.5 %.
+
+
