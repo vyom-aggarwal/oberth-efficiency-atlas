@@ -1,11 +1,12 @@
 """Compare the outputs of two checkouts (the reference repository and a fresh rebuild).
 
-Every file under figures/ and results/, plus explorer/oberth_explorer.html and explorer/explorer_data.json,
-is compared by content, ignoring provenance stamps and wall-clock fields:
+Every file under figures/, results/ and site/public/data/, plus explorer/oberth_explorer.html and
+explorer/explorer_data.json, is compared by content, ignoring provenance stamps and wall-clock fields:
 - PNG: decoded pixels (text metadata such as the script path and git commit is ignored);
 - PDF: bytes with /CreationDate, /ModDate and /Producer removed, and the startxref byte offset
   (it shifts with the length of the date string);
-- JSON: parsed values, exactly, without wall-clock entries (keys containing "runtime");
+- JSON: parsed values, exactly, without wall-clock entries (keys containing "runtime") and without the site
+  data's commit stamp (key "git" inside "provenance"; the source-file hashes beside it are still compared);
 - CSV, HTML, other text: bytes;
 - Parquet: the table, exactly, without its key-value metadata and without wall-clock columns
   (runtime_s); on a difference, the columns and the largest absolute difference are reported;
@@ -80,10 +81,11 @@ def video_frames_hash(p: Path) -> str:
     return h.hexdigest()
 
 
-def drop_wall_clock(x):
-    """Remove wall-clock entries (any key containing 'runtime') from parsed JSON, recursively."""
+def drop_wall_clock(x, parent: str = ""):
+    """Remove wall-clock entries (any key containing 'runtime') and provenance commit stamps from parsed JSON."""
     if isinstance(x, dict):
-        return {k: drop_wall_clock(v) for k, v in x.items() if "runtime" not in str(k)}
+        return {k: drop_wall_clock(v, str(k)) for k, v in x.items()
+                if "runtime" not in str(k) and not (parent == "provenance" and k == "git")}
     if isinstance(x, list):
         return [drop_wall_clock(v) for v in x]
     return x
@@ -115,7 +117,7 @@ def main() -> int:
     ap.add_argument("rebuilt", type=Path)
     ap.add_argument("--json", type=Path)
     a = ap.parse_args()
-    files = sorted([p for d in ("figures", "results") for p in (a.reference / d).glob("*") if p.is_file()]
+    files = sorted([p for d in ("figures", "results", "site/public/data") for p in (a.reference / d).glob("*") if p.is_file()]
                    + [a.reference / "explorer" / "oberth_explorer.html", a.reference / "explorer" / "explorer_data.json"])
     report, bad = [], 0
     for f in files:

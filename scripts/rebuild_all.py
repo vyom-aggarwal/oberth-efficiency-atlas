@@ -53,6 +53,8 @@ STEPS = [
     ("build_explorer", [PY, "scripts/build_explorer.py", "--recompute"]),
     ("j2_sensitivity", [PY, "scripts/j2_sensitivity.py"]),
     ("fig_loss_vinf", [PY, "scripts/fig_loss_vinf.py"]),
+    # Phase 6: the website's data (reads only the outputs above)
+    ("export_site_data", [PY, "scripts/export_site_data.py"]),
 ]
 
 

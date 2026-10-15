@@ -2004,4 +2004,62 @@ numbers JSON's largest sampled value.**
   `hero_numbers.json`.
 - The two differ in the fourth significant figure; both are below 7.5 %.
 
+## 2026-10-15: Checkpoint 2: the full site-data export
+
+`scripts/export_site_data.py` now writes 12 files to `site/public/data/` (about 0.7 MB in all) in 26 s:
+- eager: site, curve, hero;
+- lazy: regimes, atlas, missions, engines (JSON header plus a Float32 binary), timing, case, methods;
+- explorer: presets.
+
+Everything is read from committed results and numbers JSONs, or evaluated by frozen library functions.
+
+**Decisions:**
+- **The hero case is Hibberd et al.'s dive, simulated live:**
+  - parabolic arrival (the JS simulator takes hyperbolic or parabolic arrivals; Phase 4's
+    arrival-orbit sensitivity is exported for the page: parabolic 0.0994 m/s against the reference
+    0.0991 m/s);
+  - one equivalent constant-thrust stage with the stack's rocket-equation Δv and the STAR 48B
+    exhaust velocity from Hibberd et al. Table 2, the same single-stage approximation as the
+    existing explorer's preset;
+  - non-dimensional inputs from `constants.GM_SUN` and `run_phase4.R_P`.
+  - **Consequence:** a single stage with mass ratio ≈ 20 loses somewhat more than the staged stack
+    (0.137 against 0.099 m/s at the reference). The hero therefore shows η and Π, not the loss in
+    m/s, and states the approximation.
+- **Engine trajectories:** `build_cases` and `trajectory` are imported from `anim_engines.py` (author
+  decision). The window and normalizations repeat its `build_figure`. Every 3rd of the 6000
+  samples goes into a Float32 binary (102 KB).
+- **Regimes:** the selection is `fig_regimes.py`'s, with the asymptotes it draws. The η_W = 0.5
+  points per (Δv, c) family are stored as compact arrays rather than one source pointer each; the
+  pointers made the file 467 KB, the arrays 156 KB. The test re-reads the CSV.
+- **Methods:** the v1.0 audit report was never committed; it existed only in a scratch directory,
+  now gone. The site cannot quote the 56/56 result from committed data. I propose re-running the
+  fresh-clone audit at checkpoint 6 and committing its report under `docs/`.
+
+**Finding for the regimes figure (checkpoint 4):** in the regimes selection (reliable, prograde,
+Δv/v_p < 0.03; 44,577 runs), η and η_W differ by up to 0.21.
+- The large differences are for near-parabolic arrivals: max 0.21 for v∞/v_esc ≤ 0.01, 0.17 for
+  0.01–0.1, 0.06 for 0.1–0.5, and below 0.003 for v∞/v_esc > 0.5.
+- They occur at Π = 1–1000. Medians stay below 0.01.
+- The asymptotes (Π², (9/(2Π))^(1/3), ln Π/Π) describe η_W. A figure of "η against Π" with these
+  asymptotes would be wrong for slow arrivals. Decision needed from the author.
+
+**Tests:** `tests/test_site_data.py` now has 38 tests.
+- Each derived file must equal a fresh export from the committed sources, as a staleness check.
+- Independent cross-checks:
+  - the timing closed forms against `phase3_numbers.json` (to 1e-9 relative);
+  - the engines' Π and loss against `anim_numbers.json`;
+  - the band spread against the hero samples;
+  - the methods test count against a live `pytest --collect-only`.
+
+**New test tolerance, with its measured floor:** the engines' integrated loss against
+`anim_numbers.json` uses rel = 2e-6.
+- The animation integrates longer coasts than `anim_numbers.py`.
+- Measured differences: solid stack 6.6e-7 relative (8e-12 of Δv), nuclear thermal 4e-10,
+  SEP-class 3e-12. Π matches exactly.
+
+**Pipeline:**
+- `rebuild_all.py` ends with an `export_site_data` step.
+- `repro_audit.py` also compares `site/public/data/`. It ignores only the provenance commit stamp;
+  the source-file hashes are still compared.
+
 
