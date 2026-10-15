@@ -64,20 +64,46 @@ def pointer_escape(key: str) -> str:
     return key.replace("~", "~0").replace("/", "~1")
 
 
+def load_source(rel: str):
+    """A source document: a numbers JSON, a YAML config, or the return value of a frozen script's function
+    (`scripts/x.py#func()`: the document is `func()`, called with no arguments)."""
+    if "#" in rel:
+        path, call = rel.split("#", 1)
+        mod = __import__(Path(path).stem)
+        return getattr(mod, call.removesuffix("()"))()
+    text = (ROOT / rel).read_text(encoding="utf-8")
+    if rel.endswith((".yaml", ".yml")):
+        import yaml
+        return yaml.safe_load(text)
+    return json.loads(text)
+
+
+def resolve(src: str):
+    """Value at `<document>#/<pointer>` (RFC 6901 pointer; list indices allowed)."""
+    doc, ptr = src.rsplit("#/", 1) if "#/" in src else (src, "")
+    node = load_source(doc)
+    for part in filter(None, ptr.split("/")):
+        key = part.replace("~1", "/").replace("~0", "~")
+        node = node[int(key)] if isinstance(node, (list, tuple)) else node[key]
+    return node
+
+
 class Numbers:
-    """Reads values from figures/*_numbers.json and returns them with a source pointer."""
+    """Reads values from numbers JSONs, configs or frozen script functions, with a source pointer."""
 
     def __init__(self):
-        self.cache: dict[str, dict] = {}
+        self.cache: dict[str, object] = {}
         self.used: set[str] = set()
 
     def __call__(self, rel: str, *keys) -> dict:
         if rel not in self.cache:
-            self.cache[rel] = json.loads((ROOT / rel).read_text(encoding="utf-8"))
+            self.cache[rel] = load_source(rel)
         node = self.cache[rel]
         for k in keys:
             node = node[k]
-        self.used.add(rel)
+        if isinstance(node, tuple):
+            node = list(node)
+        self.used.add(rel.split("#", 1)[0])
         return {"value": node, "src": rel + "#/" + "/".join(pointer_escape(str(k)) for k in keys)}
 
 
@@ -149,24 +175,29 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
     lo, hi = np.nanmin(Y, axis=0), np.nanmax(Y, axis=0)
 
     hero, anim, p4 = "figures/hero_numbers.json", "figures/anim_numbers.json", "figures/phase4_numbers.json"
-    lv = "figures/loss_vinf_numbers.json"
+    lv, som = "figures/loss_vinf_numbers.json", "configs/phase4/hibberd_som.yaml"
+    titles = "scripts/anim_engines.py#build_cases()"        # the animation's own case titles (frozen code)
     hib, mar = ref_number(refs, "Hibberd"), ref_number(refs, "Maraqten")
 
+    # Descriptions carry no hand-typed numbers: they are the animation's case titles, or templates whose
+    # {fields} are filled from source pointers by the site.
     cases = [
         {"id": "hibberd", "label": "Hibberd et al.", "ref": hib, "kind": "published",
-         "detail": "3I/ATLAS solar Oberth: CASTOR 30B + STAR 48B solid stack",
+         "detail": num(titles, 0, 0, 0),
          "Pi": num(hero, "hibberd", "Pi"), "loss_rel": num(hero, "hibberd", "loss_rel"),
          "loss_m_s": num(p4, "reference", "time_centred", "dv_loss_m_s"), "data": p4},
         {"id": "ntp", "label": "Nuclear thermal", "ref": None, "kind": "simulation",
-         "detail": "the same dive flown with one nuclear-thermal stage (Isp 900 s, a0 = 0.5 m/s²)",
+         "detail": num(titles, 0, 1, 0),
          "Pi": num(anim, "nuclear_thermal", "Pi"), "loss_rel": num(anim, "nuclear_thermal", "loss_rel"),
          "loss_m_s": num(anim, "nuclear_thermal", "loss_m_s"), "data": anim},
         {"id": "sep", "label": "SEP-class", "ref": None, "kind": "simulation",
-         "detail": "the same dive flown with one SEP-class stage (Isp 6000 s); hypothetical at 3.2 R☉",
+         "detail": num(titles, 0, 2, 0),
          "Pi": num(anim, "sep_class", "Pi"), "loss_rel": num(anim, "sep_class", "loss_rel"),
          "loss_m_s": num(anim, "sep_class", "loss_m_s"), "data": anim},
         {"id": "maraqten", "label": "Maraqten et al.", "ref": mar, "kind": "published-range",
-         "detail": "SEP perihelion arc at 0.3 au with their F ∝ r^−1.5 thrust, placed at Π_eff",
+         "detail": {"template": "SEP perihelion arc at {r_p} au, thrust ∝ r^−{kappa}, placed at Π_eff",
+                    "fields": {"r_p": num(som, "sep_maraqten2026", "r_p_au"),
+                               "kappa": num(som, "sep_maraqten2026", "power_exponent_kappa")}},
          "Pi_range": num(hero, "maraqten_Pi_eff_range"), "loss_rel_range": num(hero, "maraqten_loss_rel_range"),
          "data": hero},
     ]
@@ -201,8 +232,10 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
                   "statement": num("figures/rule_numbers.json", "rule"),
                   "max_ratio_Pi_le_1": num("figures/rule_numbers.json", "sweep_prograde_Pi_le_1", "max_R_over_bound"),
                   "data": "figures/rule_numbers.json"},
-        "thresholds": [{"level": "0.1%", "loss_rel": 1e-3, "Pi": num(p4, "thresholds", "time_centred", "0.1%", "Pi")},
-                       {"level": "1%", "loss_rel": 1e-2, "Pi": num(p4, "thresholds", "time_centred", "1%", "Pi")}],
+        # Threshold levels are the numbers JSON's own keys ("0.1%", "1%"), parsed, not typed here.
+        "thresholds": [{"level": key, "loss_rel": float(key.rstrip("%")) / 100,
+                        "Pi": num(p4, "thresholds", "time_centred", key, "Pi")}
+                       for key in json.loads((ROOT / p4).read_text(encoding="utf-8"))["thresholds"]["time_centred"]],
         "cases": cases,
         "ranges": ranges,
         "arrival_family": {"selection": {"dv_over_vp_max": num(lv, "selection", "dv_over_vp_max"),
@@ -211,7 +244,7 @@ def curve_data(num: Numbers, refs: list[dict]) -> tuple[dict, list[str]]:
                            "curves": family, "data": lv},
     }
     sources = ["results/phase4.parquet", "results/sweep_nd.parquet", "scripts/fig_hero.py", "scripts/fig_loss_vinf.py",
-               "docs/paper_outline.md", *num.used]
+               "scripts/run_phase4.py", "docs/paper_outline.md", *num.used]
     linked = [c["data"] for c in cases] + [r["data"] for r in ranges] + [payload["bound"]["data"], lv, "results/phase4.parquet"]
     return {"provenance": provenance(sources), **payload}, linked
 

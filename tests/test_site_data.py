@@ -29,11 +29,9 @@ def load(name: str) -> dict:
 
 
 def resolve(src: str):
-    rel, ptr = src.split("#", 1)
-    node = json.loads((ROOT / rel).read_text(encoding="utf-8"))
-    for part in ptr.lstrip("/").split("/"):
-        node = node[part.replace("~1", "/").replace("~0", "~")]
-    return node
+    """Source value (numbers JSON, YAML config, or a frozen script's function result), freshly loaded."""
+    value = E.resolve(src)
+    return list(value) if isinstance(value, tuple) else value
 
 
 def pointers(x, path=""):
