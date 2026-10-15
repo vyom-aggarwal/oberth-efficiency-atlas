@@ -1,7 +1,7 @@
 """Build the self-contained interactive explorer: explorer/oberth_explorer.html.
 
-Inlines explorer/app.css, explorer/sim.js (the validated JS simulator), the embedded data and
-explorer/app.js into explorer/template.html. The embedded data (explorer/explorer_data.json, cached):
+Inlines explorer/app.css, the validated JS simulator (site/src/sim/oberth-sim.js, shared with the website
+since Phase 6; wrapped as a classic script), the embedded data and explorer/app.js into explorer/template.html. The embedded data (explorer/explorer_data.json, cached):
 - curve: the universal loss-vs-Π band for a near-parabolic solar Oberth burn (results/phase4.parquet,
   as in the hero figure), plus its centre line;
 - atlas: linear-response η (prograde, Δv → 0, constant acceleration, centred) on a (Π, v∞/v_esc) grid,
@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -64,10 +65,22 @@ def make_data() -> dict:
     }
 
 
+SIM = ROOT / "site" / "src" / "sim" / "oberth-sim.js"     # shared ES module (moved from explorer/sim.js, Phase 6)
+
+
+def classic_sim() -> str:
+    """The shared simulator module as a classic script for the single-file explorer: the `export` keywords are
+    dropped and the module body is wrapped so that it sets window.OberthSim, as explorer/app.js expects."""
+    code = re.sub(r"^(\s*)export (function|const) ", r"\1\2 ", SIM.read_text(encoding="utf-8"), flags=re.M)
+    code = code.replace("// @ts-check\n", "")
+    return ("window.OberthSim = (function () {\n  \"use strict\";\n" + code +
+            "\n  return { simulate, fromTargets, integrate, R_FLOOR };\n})();\n")
+
+
 def build(data: dict, full_document: bool) -> str:
     tpl = (EXP / "template.html").read_text(encoding="utf-8")
     css = (EXP / "app.css").read_text(encoding="utf-8")
-    sim = (EXP / "sim.js").read_text(encoding="utf-8")
+    sim = classic_sim()
     app = (EXP / "app.js").read_text(encoding="utf-8")
     body = (tpl.replace("/*__CSS__*/", css)
                .replace("/*__SIM__*/", sim)

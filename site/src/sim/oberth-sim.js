@@ -6,14 +6,11 @@
  * inertial (fixed along the periapsis velocity) steering. Integrator: Dormand–Prince 5(4), adaptive.
  * The initial state comes from integrating the coast backward from periapsis (as staged.py does).
  * Validated against the Python simulator by tests/test_explorer_js.py.
- * Works as a browser global (OberthSim) and as a CommonJS module (node).
+ * An ES module shared by the website (site/src), the node validation test, and the single-file explorer
+ * (scripts/build_explorer.py inlines it with a small adapter that sets window.OberthSim). Moved here from
+ * explorer/sim.js in Phase 6; the code is unchanged apart from the module wrapper. Types: oberth-sim.d.ts.
  */
-(function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory();
-  else root.OberthSim = factory();
-})(typeof self !== "undefined" ? self : this, function () {
-  "use strict";
-  const R_FLOOR = 1e-3;
+  export const R_FLOOR = 1e-3;
   const PRE_COAST_TAU = 5.0;
   const POST_COAST_TAU = 5.0;
 
@@ -49,7 +46,7 @@
 
   /* Adaptive DP5(4) from t0 to t1 (either direction). Stops early if |r| < rImpact (located by
    * bisection on the cubic Hermite interpolant). Records accepted states when `record` is true. */
-  function integrate(f, t0, t1, y0, opt) {
+  export function integrate(f, t0, t1, y0, opt) {
     const rtol = opt.rtol, atol = opt.atol, n = y0.length;
     const dir = t1 >= t0 ? 1 : -1;
     const k = Array.from({ length: 7 }, () => new Float64Array(n));
@@ -170,7 +167,7 @@
 
   /* simulate({v_inf, dv, c, a0, steering, offset, impactRadius, rtol, atol, record})
    * Returns η, the equivalent-Δv loss, r_min and (optionally) the trajectory. */
-  function simulate(p) {
+  export function simulate(p) {
     const vInf = p.v_inf, dv = p.dv, c = p.c, a0 = p.a0;
     const steering = p.steering || "prograde";
     const opt = { rtol: p.rtol || 1e-12, atol: p.atol || 1e-12, maxSteps: p.maxSteps || 5e6, record: true,
@@ -221,11 +218,9 @@
   }
 
   /* Map the dimensionless targets (Π, v∞/v_esc, Δv/v_p, Δv/c) to the simulator inputs. */
-  function fromTargets(Pi, vOverVesc, dvOverVp, dvOverC) {
+  export function fromTargets(Pi, vOverVesc, dvOverVp, dvOverC) {
     const v = vOverVesc * Math.SQRT2, vp = Math.sqrt(v * v + 2);
     const dv = dvOverVp * vp, c = dv / dvOverC, tb = Pi / vp;
     return { v_inf: v, dv: dv, c: c, a0: (c / tb) * -Math.expm1(-dvOverC) };
   }
 
-  return { simulate, fromTargets, integrate, R_FLOOR };
-});

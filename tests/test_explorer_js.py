@@ -1,4 +1,4 @@
-"""The explorer's JavaScript simulator (explorer/sim.js) reproduces the Python simulator.
+"""The JavaScript simulator (site/src/sim/oberth-sim.js; explorer/sim.js until Phase 6) reproduces the Python simulator.
 
 Ten reference cases span Π (0.01–100), v∞/v_esc (0.03–3), Δv/v_p (0.01–0.3), Δv/c (0.1–3) and both
 steering laws. Stated tolerances (DP5(4) at rtol = atol = 1e-12 in JS, DOP853 at 1e-12 in Python):
@@ -38,15 +38,19 @@ CASES = [
 TOL = {"eta": 1e-8, "v_inf_out_rel": 1e-9, "r_min": 1e-8, "loss_rel": 1e-8}
 
 
+SIM = ROOT / "site" / "src" / "sim" / "oberth-sim.js"     # the shared ES module (moved from explorer/sim.js)
+
+
 def run_js(params: list[dict]) -> list[dict]:
-    code = ("const S = require(process.argv[1]);"
-            "const cases = JSON.parse(require('fs').readFileSync(0, 'utf8'));"
+    code = ("const { pathToFileURL } = await import('node:url');"
+            "const S = await import(pathToFileURL(process.argv[1]).href);"
+            "const cases = JSON.parse((await import('node:fs')).readFileSync(0, 'utf8'));"
             "process.stdout.write(JSON.stringify(cases.map(c => {"
             " if (c.targets) return S.fromTargets(...c.targets);"
             " const r = S.simulate(c);"
             " return {eta: r.eta, v_inf_out: r.v_inf_out, r_min: r.r_min, loss_rel: r.loss_rel, Pi: r.Pi,"
             " impacted: r.impacted}; })));")
-    out = subprocess.run([NODE, "-e", code, str(ROOT / "explorer" / "sim.js")], input=json.dumps(params),
+    out = subprocess.run([NODE, "--input-type=module", "-e", code, str(SIM)], input=json.dumps(params),
                          capture_output=True, text=True, timeout=600, check=True)
     return json.loads(out.stdout)
 

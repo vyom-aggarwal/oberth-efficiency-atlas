@@ -116,11 +116,15 @@ unknown keys are rejected.
 .venv/Scripts/python scripts/literature_numbers.py  # figures/literature_numbers.json (quoted inputs, with sources)
 .venv/Scripts/python scripts/check_numbers.py draft.md --allow 96,24,12 [--verbose]
 ```
-- **Explorer layout.** The page is built from `explorer/template.html`, `app.css`, `sim.js` and
-  `app.js`, with cached data in `explorer_data.json` (`--recompute` rebuilds it). Edit those
-  files, never the built HTML.
-- **`explorer/sim.js`** is the JS port of `simulate_nd`. `tests/test_explorer_js.py` runs it under
-  node (skipped without node) against Python on 10 cases, to |Δη| ≤ 1e-8.
+- **Explorer layout.** The page is built from `explorer/template.html`, `app.css`, `app.js` and the
+  shared simulator, with cached data in `explorer_data.json` (`--recompute` rebuilds it). Edit
+  those files, never the built HTML.
+- **The JS simulator** is the port of `simulate_nd`: `site/src/sim/oberth-sim.js`, an ES module
+  (moved from `explorer/sim.js` in Phase 6). Types are in `oberth-sim.d.ts`.
+  - The website imports it.
+  - `build_explorer.py` inlines it as a classic script that sets `window.OberthSim`.
+  - `tests/test_explorer_js.py` runs it under node against Python on 10 cases, to |Δη| ≤ 1e-8
+    (skipped without node).
 
 ### Wrap-up (feature freeze, 2026-10-06)
 ```bash
