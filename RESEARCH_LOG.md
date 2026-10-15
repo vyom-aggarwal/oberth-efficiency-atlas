@@ -2062,4 +2062,56 @@ Everything is read from committed results and numbers JSONs, or evaluated by fro
 - `repro_audit.py` also compares `site/public/data/`. It ignores only the provenance commit stamp;
   the source-file hashes are still compared.
 
+## 2026-10-15: Checkpoint 2: the site skeleton
+
+**Built:**
+- **Content:** `site/content/` holds `sections.json` (order and figure per section) and one Markdown
+  file per section, each starting as TODO notes for the author.
+- **Content plugin** (`site/plugins/content-plugin.ts`), at build time:
+  - renders the Markdown, with `$…$` and `$$…$$` set by KaTeX and `<sup>n</sup>` linked to the
+    reference list;
+  - places the figure (an optional `<!-- figure -->` marker) and the caption (a `### Figure caption`
+    block);
+  - numbers the figures in page order, among the sections shown;
+  - fills shared header and footer partials from the exported data;
+  - serves the classic explorer at `explorer/classic/`.
+- **Pages:** home, explorer (layout regions only, until checkpoint 5) and 404. The style page now
+  uses the same shell.
+- **Header:** wordmark, site links, theme switch. Under 760 px the links fold behind a "Menu"
+  button, which Escape closes; without JavaScript they stay open.
+- **Section navigation:** a sticky rail at 1180 px and wider; a sticky collapsible bar naming the
+  current section below that.
+- **Footer:** labelled facts, not middle-dot strings: source, analysis tag and commit, site-data
+  commit, AI-use log, offline explorer.
+- **Figures** load when they come within 600 px of the viewport, with their data (lazy).
+  - Built so far: the universal curve, the reference list (from `site.json`), and the methods
+    facts block (from `methods.json`: tag, test count, rule ratio, J2).
+  - Figures not built yet show a placeholder on the dev server only.
+
+**Hidden sections, as the author's rule requires:** `npm run build` prints "hidden in production
+(content file still has TODO)": every section except References, because only References has no
+prose to write. The deployed home page will therefore show the header, the reference list and the
+footer until the prose is written.
+
+**Small decisions:**
+1. **References and the AI-use disclosure are two sections,** not one. The reference list is
+   generated from data, so it has no TODO and can show; the disclosure is prose and stays hidden
+   until written.
+2. **When the hero is hidden,** the page keeps a visually hidden `<h1>` with the site name, for
+   accessibility and SEO.
+3. **The meta descriptions are interface text I wrote** (one line per page). The author may want to
+   rewrite them.
+
+**Checks:**
+- Base-path build: with `BASE_PATH=/oberth-efficiency-atlas/`, every page link, asset and data URL
+  carries the prefix.
+- Git Bash on Windows rewrites a leading-slash environment value into a Windows path. Locally that
+  needs `MSYS_NO_PATHCONV=1`; CI (Linux) is unaffected.
+- Playwright: 21 specs pass.
+  - Screenshots of home, explorer, 404 and style at 1440 and 390 px in both themes, with no console
+    errors and no sideways scrolling.
+  - The style-page interactions.
+  - Home: theme switch persistence, the mobile menu, section navigation with a lazily loaded
+    figure, and the classic explorer route.
+
 
