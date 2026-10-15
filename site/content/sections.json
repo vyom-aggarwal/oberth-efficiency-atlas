@@ -1,0 +1,17 @@
+{
+  "_comment": "Home-page sections in order (docs/site_plan.md §1). Each file holds the author's prose; a file that still contains the word TODO is hidden from the production build, with its navigation entry and its figure. 'figure' names the interactive figure mounted in the section.",
+  "sections": [
+    { "id": "hero", "file": "hero.md", "figure": "hero" },
+    { "id": "question", "file": "question.md" },
+    { "id": "universal-curve", "file": "universal-curve.md", "figure": "universal-curve" },
+    { "id": "regimes", "file": "regimes.md", "figure": "regimes" },
+    { "id": "atlas", "file": "atlas.md", "figure": "atlas" },
+    { "id": "timing", "file": "timing.md", "figure": "timing" },
+    { "id": "case-study", "file": "case-study.md", "figure": "case" },
+    { "id": "engines", "file": "engines.md", "figure": "engines" },
+    { "id": "limitations", "file": "limitations.md" },
+    { "id": "methods", "file": "methods.md", "figure": "methods" },
+    { "id": "references", "file": "references.md", "figure": "references" },
+    { "id": "disclosure", "file": "disclosure.md" }
+  ]
+}
