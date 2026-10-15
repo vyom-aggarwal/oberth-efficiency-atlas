@@ -42,6 +42,14 @@ export function lossRel(x: number, n = 3): string {
   return x >= 1e-3 ? `${sig(100 * x, n)} %` : sci(x, n);
 }
 
+/** A duration in the largest sensible unit (s, min, h, d), n significant figures. */
+export function duration(seconds: number, n = 3): string {
+  if (seconds < 60) return `${sig(seconds, n)} s`;
+  if (seconds < 3600) return `${sig(seconds / 60, n)} min`;
+  if (seconds < 48 * 3600) return `${sig(seconds / 3600, n)} h`;
+  return `${sig(seconds / 86400, n)} d`;
+}
+
 export function speed(mPerS: number, n = 3): string {
   return mPerS >= 1000 ? `${sig(mPerS / 1000, n)} km/s` : `${sig(mPerS, n)} m/s`;
 }

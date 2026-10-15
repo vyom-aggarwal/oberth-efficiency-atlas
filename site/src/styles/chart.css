@@ -54,3 +54,20 @@
 .tooltip .tt-source { font-size: var(--t-label); color: var(--text-2); }
 
 .summary { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin-top: var(--s2); }
+.table-note { font-size: var(--t-label); color: var(--text-2); margin: var(--s2) 0 0; }
+
+/* The hero: the canvas spans the content width; annotations sit on it as HTML (KaTeX symbols). */
+.hero .figure { max-width: none; margin: var(--s5) 0 0; }
+.hero-stage { position: relative; width: 100%; overflow: hidden; }   /* annotations never widen the page */
+.hero-canvas { display: block; width: 100%; touch-action: pan-y; }
+.hero-note { font-size: 1rem; font-family: var(--sans); color: var(--text); font-variant-numeric: tabular-nums lining-nums;
+             background: color-mix(in srgb, var(--paper) 82%, transparent); padding: 0 2px; }
+.hero-eta { font-size: 1.125rem; font-weight: 500; }
+.annot-2-html { color: var(--text-2); }
+.hero-slider { margin-top: var(--s4); max-width: 1240px; }
+.hero-legend .num { font-variant-numeric: tabular-nums lining-nums; }
+.ramp-bar { display: inline-block; width: 96px; height: 8px; border-radius: 1px;
+            background: linear-gradient(90deg, var(--burn-1), var(--burn-2), var(--burn-3), var(--burn-4), var(--burn-5), var(--burn-6), var(--burn-7)); }
+.line-key { display: inline-block; width: 24px; height: 0; border-top: 2px solid var(--ink); vertical-align: middle; }
+.line-key.dashed { border-top: 2px dashed var(--graphite); }
+.hero-facts { margin-top: var(--s4); font-size: var(--t-label); }

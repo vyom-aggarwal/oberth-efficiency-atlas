@@ -37,6 +37,12 @@ mobileNav?.addEventListener("click", (e) => {
 // ---------------------------------------------------------------- figures
 type Mount = (body: HTMLElement, figN: number) => Promise<void>;
 const FIGURES: Record<string, Mount> = {
+  hero: async (body, figN) => {
+    const [{ hero }, site, data] = await Promise.all([
+      import("../charts/hero"), loadData<SiteData>("site.json"), loadData<any>("hero.json")]);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    hero(body, data, site, { figN, reducedMotion });
+  },
   "universal-curve": async (body, figN) => {
     const [{ universalCurve }, site, curve] = await Promise.all([
       import("../charts/universal-curve"), loadData<SiteData>("site.json"), loadData<any>("curve.json")]);
