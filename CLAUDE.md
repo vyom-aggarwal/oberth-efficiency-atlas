@@ -20,6 +20,17 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
 - **Use the file-edit tools (Edit/Write), not shell heredocs or inline scripts, for multi-line
   edits** of code, docs and logs. Shell quoting has corrupted text before (backticks executed,
   escapes doubled).
+  - **Enforced by a hook** (user rule, 2026-10-15, after three slips in Phase 6): a project
+    `PreToolUse` hook in `.claude/settings.json` runs `.claude/hooks/block-heredoc-writes.mjs`
+    before every Bash and PowerShell call.
+  - It blocks any heredoc (`<<EOF`, `<<-EOF`) or PowerShell here-string (`@'…'@`) unless its
+    statement is a `git commit`. Commit messages are still allowed: `git commit -F - <<'EOF'` and
+    `git commit -m "$(cat <<'EOF' … EOF)"`.
+  - Interpreter heredocs (`python - <<'PY'`) are blocked too, because they can write files
+    unseen.
+  - A blocked call exits 2 with the reason. To run a multi-line script, write it with Write and
+    run the file.
+  - Tests: `tests/test_hooks.py` (needs node). Disable only by editing `.claude/settings.json`.
 - **Writing.** The user writes the paper prose; do not draft paper text. Keep
   `docs/paper_outline.md`, the figures and the `figures/*_numbers.json` files current.
   `scripts/check_numbers.py` flags numbers in a Markdown draft that match no numbers JSON. In
