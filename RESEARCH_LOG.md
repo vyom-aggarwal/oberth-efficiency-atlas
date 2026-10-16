@@ -2114,7 +2114,7 @@ footer until the prose is written.
   - Home: theme switch persistence, the mobile menu, section navigation with a lazily loaded
     figure, and the classic explorer route.
 
-## 2026-10-16: Author decisions after checkpoint 2; test exit statuses enforced
+## 2026-10-15: Author decisions after checkpoint 2; test exit statuses enforced
 
 **Decisions (author):**
 1. **The regimes figure plots η_W,** labelled "η_W (baseline-subtracted energy efficiency)" with a
@@ -2141,5 +2141,98 @@ footer until the prose is written.
 - Live check in this session: the hook blocked a piped pytest run, and the same command with
   `set -o pipefail;` ran.
 - Documented in CLAUDE.md.
+
+## 2026-10-15: Checkpoint 3: hero verification (layout, intro, dragging, frame time)
+
+**Date correction.** The previous entry and four related notes (CLAUDE.md, the AI-use log, the
+hook's header, the hero spec) were first dated 2026-10-16. The work was done on 2026-10-15 local
+time, as the commits show (0c3c25e, d121833), so they now read 2026-10-15.
+
+**Test setup (deviation from the plan, which ran Playwright against the dev server).**
+- This session's sandbox blocks local sockets: Playwright's web server timed out and node could not
+  connect to localhost. A request to run outside the sandbox was declined.
+- The specs therefore also run against a built site. `e2e/fixtures.ts` answers requests to
+  `http://site.test/` from the build directory named by `SITE_DIST`. Without `SITE_DIST`, the config
+  starts the Vite dev server as before; checkpoint 6 can use either in CI.
+- Test build: `SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test`. The new
+  `SITE_SHOW_TODO` flag makes the content plugin keep the TODO sections, as the dev server does.
+  Production builds are unchanged.
+- One Playwright worker, so the frame-time test does not compete with other browsers.
+
+**Clipping at 390 px (author's question).**
+- `overflow: hidden` on the hero stage is removed. `place()` now keeps every annotation wholly
+  inside the canvas, and the canvas leaves 56 px below periapsis for the Π note at every width (the
+  note overflowed the bottom at 360 px).
+- **The η annotation was dropped, not clipped, below 640 px.** Its anchor on the outgoing branch
+  lies outside the canvas there, and the code skipped the annotation. It now goes at the top centre,
+  inside the U, wherever that anchor is off screen.
+- **Π-axis labels:**
+  - the end decade labels align with the scale's ends;
+  - a narrow axis labels every second decade ("0.001" and "0.01" ran together at 390 px);
+  - a mark label breaks onto two lines when wider than the track (the SEP caveat at 360 px);
+  - labels are placed left to right, in rows 17 px apart (1.2 × the label size).
+- **The threshold labels were drawn with a dotted outline.** Their class `threshold` also matched the
+  chart's threshold-line style. Renamed to `hollow`.
+- **Test** (`e2e/hero.spec.ts`), at 360, 390, 768 and 1440 px and at Π = 0.001, 0.0326, 0.976, 1.67,
+  30, 368 and 1000:
+  - every annotation is inside the stage, and the η annotation is present;
+  - the slider labels stay inside the scale, do not overlap and are not stroked;
+  - the page does not scroll sideways.
+
+**Intro and dragging.**
+- **The intro:**
+  - it runs once (`data-intro-runs` stays 1 after scrolling away and back) and finishes within 5 s;
+  - a key press ends it within 500 ms;
+  - under prefers-reduced-motion it is skipped, and the summary is filled at once.
+- **Two bugs found by these tests:**
+  - the intro stopped on a TypeError, because drag handles were drawn before any burn point was
+    revealed;
+  - a key press did not end it, because the listeners were on the figure rather than the window.
+- **Dragging** the later end of the burn arc out along the outgoing path, and back, changes Π.
+
+**Hero data table: η was easy to misread.**
+- The rows were titled with the marked engines ("Nuclear thermal: Isp 900 s, …"). The η beside each
+  title, however, is this case's single equivalent stage (STAR 48B exhaust velocity) evaluated at
+  that engine's Π. It is not the engine's own η.
+- Measured: at the Phase 4 thresholds' Π the single stage loses 0.138 % and 1.38 % (equivalent-Δv
+  loss), where the staged stack loses 0.1 % and 1 %.
+  - This is the ratio already logged for the reference case (0.137 against 0.099 m/s, 2026-10-14
+    entry).
+  - The slider's threshold marks are labelled as the staged stack's, so they were correct.
+- The rows now read "Π of Nuclear thermal (Isp 900 s, …)", and the caption says "one equivalent
+  stage". The threshold rows show this case's η too. A Playwright test checks the labels.
+
+**Frame time while dragging (author's target: p95 under 16 ms on this laptop).**
+- **What is measured:** in the browser, from the start of the animation-frame callback to the end of
+  drawing, on frames that ran a simulation. That covers the simulation, the path with its coast
+  extension, the text and the canvas, but not the browser's style, layout and paint afterwards.
+- **The sequence:** 120 drag steps along the path, then a sweep of the whole slider (Π = 0.001 to
+  1000) in 121 steps, one change per frame; 241–242 frames per run. Each run writes
+  `runs/hero_frame_times.json`.
+- **Results** (Chrome 154.0.8037.98 on this laptop, nine runs after the final measurement code):
+
+  | runs | p50 (ms) | p95 (ms) | max (ms) | max at Π > 500 (ms) |
+  |---|---|---|---|---|
+  | hero spec alone (3) | 4.9–5.0 | 9.4–10.3 | 18.6–43.2 | 14.9–19.2 |
+  | with other specs, one worker (6) | 4.7–6.0 | 9.8–11.7 | 18.4–23.7 | 18.3–23.5 |
+
+- **p95 meets the target in every run.** Single frames exceed 16 ms in every run, so a 60 Hz display
+  drops the occasional frame. These are mostly at Π > 500, where the simulation is longest. One run
+  had a 43.2 ms frame at Π < 500, plausibly garbage collection; it did not recur.
+- Earlier, with parallel workers, the p95 was 11.0 ms and the max 32.2 ms.
+
+**`npm test` was broken since checkpoint 2.** Vitest's default pattern collected the Playwright
+specs, which fail outside Playwright.
+- `vitest.config.ts` now limits it to `src/**/*.test.ts`.
+- First unit tests, 8 in all:
+  - the format helpers;
+  - simulator smoke checks on the hero case: the requested Π is simulated, η → 1 at small Π and
+    falls monotonically, no capture or impact, recorded segments in order.
+- Agreement with the Python library remains `tests/test_explorer_js.py`'s job.
+
+**Test totals at the end of checkpoint 3:**
+- pytest 581 passed;
+- vitest 8 passed;
+- Playwright 26 passed: the 16 screenshot cases, the style and home specs, and the 5 hero specs.
 
 

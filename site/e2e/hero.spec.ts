@@ -1,6 +1,6 @@
 // The hero: layout (no clipped annotations at any width or Π), the intro (once; skipped under reduced motion),
 // dragging along the path, and browser frame time while dragging (simulation plus drawing).
-// Frame-time target (author, 2026-10-16): p95 under 16 ms on the development laptop; HERO_P95_MS overrides it.
+// Frame-time target (author, 2026-10-15): p95 under 16 ms on the development laptop; HERO_P95_MS overrides it.
 import { writeFileSync, mkdirSync } from "node:fs";
 import { expect, test, type Page } from "./fixtures";
 

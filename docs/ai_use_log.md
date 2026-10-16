@@ -309,7 +309,7 @@ added to the numbers file as values.
   multi-line edits, once to append this log (2026-10-13) and once in a TypeScript file. Both
   results were checked and found intact.
 
-**Checkpoint 1 review and checkpoints 2–3 (2026-10-15 to 2026-10-16):**
+**Checkpoint 1 review and checkpoints 2–3 (2026-10-15):**
 - **Author decided:**
   - Enforce the edit-tool rule with a pre-tool hook, then extend it to block test runs piped
     into tail, head or grep without pipefail.
@@ -339,3 +339,26 @@ added to the numbers file as values.
       for the hook's second guard, which now blocks such pipes.
   - **Temporal-dead-zone errors in the first hero draft:** variables were used before their
     declarations. Both were caught by the Playwright console-error check before any commit.
+- **Checkpoint 3 verification, assistant implemented:**
+  - The hero tests: layout at four widths and seven Π values, the intro (once; skipped under
+    reduced motion), dragging, the data-table labels, and frame time.
+  - Frame time: p95 9.4–11.7 ms over nine runs, against the author's 16 ms target; single frames
+    up to 18–24 ms, once 43 ms.
+  - Testing against a built site (`SITE_DIST`), because the sandbox blocks local sockets. A request
+    to run outside the sandbox was declined, and the assistant did not try to get around it.
+  - Vitest's configuration and its first 8 unit tests.
+- **Checkpoint 3, assistant found and fixed:**
+  - The η annotation was dropped below 640 px.
+  - The decade labels collided at 390 px.
+  - Threshold labels picked up a dotted line style.
+  - The intro's TypeError, and the intro ignoring the keyboard.
+  - The hero table titled its rows with engines whose own η it does not show: the η is the single
+    equivalent stage at that engine's Π.
+- **Checkpoint 3, assistant errors, disclosed:**
+  - **`npm test` failed from checkpoint 2 until this checkpoint.** Vitest collected the Playwright
+    specs. The checkpoint 2 report did not run it.
+  - **Wrong dates:** the 2026-10-15 decisions were first logged as 2026-10-16 in five places;
+    corrected.
+  - **An unverified browser version:** the first draft of the frame-time log entry gave a Chrome
+    version that had not been checked. It was replaced by the version the tests report
+    (154.0.8037.98) before commit.

@@ -34,7 +34,7 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
 - **Never hide a test's exit status in a pipe.** Without pipefail, a pipeline's status is the last
   command's, so `pytest | tail -1 && git commit` commits even when tests fail (this happened once
   in Phase 6).
-  - **Enforced by the same hook** (user rule, 2026-10-16): in Bash it blocks a test run (pytest,
+  - **Enforced by the same hook** (user rule, 2026-10-15): in Bash it blocks a test run (pytest,
     vitest, `playwright test`, `npm test`, `npm run test|e2e`) piped into `tail`, `head` or
     `grep`, unless a `set -o pipefail` (or `set -euo pipefail`) statement comes before it.
   - It judges the program, not words in arguments, so `grep pytest file | head` is allowed. It
@@ -149,6 +149,21 @@ unknown keys are rejected.
 - **Audit (v1.0-analysis):** a fresh-clone rebuild reproduces all 56 committed outputs. After any
   code change, regenerate every output that depends on it, then rerun `repro_audit.py`. The
   audit found outputs that had gone stale after code changes.
+
+### Phase 6 (website, `site/`; plan in `docs/site_plan.md`)
+```bash
+.venv/Scripts/python scripts/export_site_data.py      # committed outputs -> site/public/data/*.json (checked by tests/test_site_data.py)
+cd site && npm run dev                                # Vite dev server, http://localhost:5173/
+npm test                                              # vitest: unit tests in src/**/*.test.ts
+SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
+SITE_DIST=dist-test npx playwright test               # e2e against that build (no local server needed)
+```
+- Presentation only: the site reads committed outputs and never changes `src/oberth_atlas/`,
+  `results/` or the analysis scripts.
+- Production builds hide TODO sections and print the list. `SITE_SHOW_TODO=1` keeps them, as the
+  dev server does.
+- Without `SITE_DIST`, Playwright starts the dev server itself. Screenshots go to `runs/screens/`;
+  hero frame times go to `runs/hero_frame_times.json`.
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.

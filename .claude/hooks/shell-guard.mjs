@@ -7,7 +7,7 @@
 //    every heredoc is blocked unless its statement is a `git commit` (a commit message is not a file edit).
 // 2. A test run piped into tail, head or grep is blocked unless the command sets pipefail (Bash).
 //    Without pipefail a pipeline's exit status is the last command's, so `pytest | tail -1 && git commit`
-//    commits even when tests fail; that happened once in Phase 6 (author rule, 2026-10-16).
+//    commits even when tests fail; that happened once in Phase 6 (author rule, 2026-10-15).
 //
 // Input: the hook JSON on stdin ({tool_name, tool_input: {command}}). Exit 2 blocks the call and shows
 // stderr to the model; exit 0 allows it. Tests: tests/test_hooks.py.
