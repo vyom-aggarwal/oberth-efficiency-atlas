@@ -132,7 +132,9 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     svg.setAttribute("height", String(H));
     hideTip();
     const labels: Element[] = [];                  // on-plot case labels and leaders (all or none, see below)
+    const queued: (() => void)[] = [];
     let allClear = true;
+    let lineBoxes: Box[] | null = null;
 
     // Grid and axes.
     const g = s("g");
@@ -249,7 +251,9 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       hit(gr, px, py, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
       if (labelled) label(c.id, px, py, caseLabel(c, data.cases, true));
     }
-    // All or none: if any label found no clear place, the legend alone names the marks at this width.
+    // Labels go on once every mark and line is drawn, in the order queued (band, bound, samples, cases). All or
+    // none: if any label found no clear place, the legend alone names the marks at this width.
+    for (const run of queued) run();
     if (!allClear) for (const e of labels) e.remove();
 
     // Crosshair readout along the band (pointer; the data table carries the same values for keyboard users).
@@ -275,6 +279,9 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     // (labels, text, marks); otherwise at the first clear one of its mirror images or of those further out, and if
     // none is clear, where it overlaps least.
     function label(id: string, px: number, py: number, content: Node): void {
+      queued.push(() => placeLabel(id, px, py, content));
+    }
+    function placeLabel(id: string, px: number, py: number, content: Node): void {
       const pref = LABEL_AT[id] ?? { dx: 14, dy: -14, anchor: "start" as const };
       const el = h("div", { class: "annot-html" }, content);
       const taken = obstacles();
@@ -307,13 +314,22 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       position(el, lx + (at.anchor === "end" ? -3 : 3), at.dy < 0 ? ly - hh : ly + 2, at.anchor);
       labels.push(el, leader);
     }
-    /** Boxes (plot px) of what a new label must not cover: annotations, SVG text and the data marks. */
+    /** Boxes (plot px) of what a new label must not cover: annotations, SVG text, the data marks, and points every
+     *  6 px along the band's edges and the curves (SVG user units are plot px: the viewBox is the plot's size). */
     function obstacles(): Box[] {
       const o = plot.getBoundingClientRect();
+      lineBoxes ??= [...svg.querySelectorAll<SVGPathElement>("path.band-edge, path.theory-line, path.sim-line")].flatMap((p) => {
+        const n = p.getTotalLength(), out: Box[] = [];
+        for (let l = 0; l <= n; l += 6) {
+          const q = p.getPointAtLength(l);
+          out.push({ left: q.x - 1.5, top: q.y - 1.5, right: q.x + 1.5, bottom: q.y + 1.5 });
+        }
+        return out;
+      });
       return [...overlay.children, ...svg.querySelectorAll("text, .mark-sim, .mark-pub, .range-box")].map((e) => {
         const r = e.getBoundingClientRect();
         return { left: r.left - o.left, top: r.top - o.top, right: r.right - o.left, bottom: r.bottom - o.top };
-      });
+      }).concat(lineBoxes);
     }
     function hit(gr: SVGGElement, cx: number, cy: number, name: string, content: () => HTMLElement): void {
       const target = s("circle", { class: "hit", cx, cy, r: 16, tabindex: 0, role: "button", "aria-label": `${name}: details` });

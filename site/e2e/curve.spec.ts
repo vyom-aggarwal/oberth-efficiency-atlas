@@ -27,6 +27,8 @@ for (const width of [390, 600, 768, 1024, 1440]) {
             out.push(`"${name(a)}" leaves the plot`);
           for (const b of annots.slice(i + 1)) if (hit(r, b.getBoundingClientRect())) out.push(`"${name(a)}" overlaps "${name(b)}"`);
           for (const t of texts) if (hit(r, t.getBoundingClientRect())) out.push(`"${name(a)}" overlaps text "${name(t)}"`);
+          for (const k of root.querySelectorAll(".plot svg :is(.mark-sim, .mark-pub, .range-box)"))
+            if (hit(r, k.getBoundingClientRect())) out.push(`"${name(a)}" covers a mark`);
         });
         texts.forEach((a, i) => {
           for (const b of texts.slice(i + 1)) if (hit(a.getBoundingClientRect(), b.getBoundingClientRect())) out.push(`text "${name(a)}" overlaps "${name(b)}"`);
