@@ -1,6 +1,7 @@
 """Flag numbers in a Markdown draft that match no value in the project's numbers JSON files.
 
-Every numeric leaf of figures/*_numbers.json (or the files given with --json) is a candidate. A
+Every numeric leaf of figures/*_numbers.json and site/public/data/*numbers*.json (the website's quotable derived
+values, Phase 6), or of the files given with --json, is a candidate. A
 written number matches a value v if v·s rounds to the written number at its written precision
 (e.g. "0.0897" matches 0.089733). The scale s is 1, except:
 - a number followed by "%" or "pp" may also match a fraction (s = 100);
@@ -184,7 +185,8 @@ def main(argv=None) -> int:
     ap.add_argument("--strict", action="store_true", help="also check integers with |n| ≤ 10")
     ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args(argv)
-    files = a.json or sorted((ROOT / "figures").glob("*numbers*.json"))
+    files = a.json or (sorted((ROOT / "figures").glob("*numbers*.json"))
+                       + sorted((ROOT / "site" / "public" / "data").glob("*numbers*.json")))
     leaves = []
     for f in files:
         data = json.loads(Path(f).read_text(encoding="utf-8"))

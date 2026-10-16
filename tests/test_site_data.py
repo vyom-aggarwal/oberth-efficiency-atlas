@@ -171,6 +171,21 @@ def test_methods_test_count_is_current():
     assert load("methods.json")["tests_collected"] == n, "re-run scripts/export_site_data.py --only methods"
 
 
+def test_site_numbers_are_current_and_consistent():
+    """The quotable values equal a fresh computation, agree with regimes.json and curve.json, and the numbers
+    checker accepts a quote of the η–η_W divergence."""
+    fresh = json.loads(json.dumps(E.site_numbers_data(), allow_nan=False))
+    sn = load("site_numbers.json")
+    assert without_git(fresh) == without_git(sn)
+    assert sn["eta_vs_eta_W"]["max_abs_diff"] == load("regimes.json")["eta_minus_eta_W_max_abs"]
+    assert sn["band_spread"]["max_over_min"] == load("curve.json")["band"]["spread"]["max_over_min"]
+    draft = ROOT / "runs" / "check_numbers_probe.md"
+    draft.parent.mkdir(exist_ok=True)
+    draft.write_text(f"η and η_W differ by up to {sn['eta_vs_eta_W']['max_abs_diff']:.2f}.\n", encoding="utf-8")
+    out = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_numbers.py"), str(draft)], capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout + out.stderr
+
+
 def test_reference_numbers_follow_the_paper_outline():
     site = load("site.json")
     curve = load("curve.json")

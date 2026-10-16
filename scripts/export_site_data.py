@@ -21,6 +21,7 @@ Files:
 - case.json      Hibberd et al.'s burn: reference losses, thrust-margin curve          (lazy)
 - methods.json   tag, commit, test count, J2 and rule checks                           (lazy)
 - presets.json   explorer bodies, engines and the Δv→0 theory atlas                    (explorer)
+- site_numbers.json  derived values the author may quote (read by scripts/check_numbers.py)
 Run:  .venv/Scripts/python scripts/export_site_data.py [--only name ...]
 """
 
@@ -571,6 +572,43 @@ def presets_data() -> dict:
                              "eta": [round_sig(row) for row in d["atlas"]["eta"]]}}
 
 
+# ---------------------------------------------------------------- site_numbers.json (quotable derived values)
+
+def site_numbers_data() -> dict:
+    """Values the site export derives that the author may quote in prose. scripts/check_numbers.py reads this file
+    with figures/*_numbers.json, so a number quoted from it passes the numbers check."""
+    from oberth_atlas.analysis import load, reliable
+    import fig_hero as H
+    df = load(ROOT / "results" / "sweep_nd.parquet")
+    d = df[reliable(df) & (df["steering"] == "prograde") & (df["dv_over_vp"] < 0.03)].copy()   # the regimes selection
+    d["diff"] = (d["eta"] - d["eta_W"]).abs()
+    i = d["diff"].idxmax()
+    by_v = []
+    for vr, g in d.groupby("v_inf_over_vesc"):
+        j = g["diff"].idxmax()
+        by_v.append({"v_over_vesc": float(vr), "max_abs_diff": float(g.loc[j, "diff"]), "at_Pi": float(g.loc[j, "Pi"]),
+                     "median_abs_diff": float(g["diff"].median()), "n_runs": int(len(g))})
+    p = pd.read_parquet(ROOT / "results" / "phase4.parquet")
+    curves = H.profile_curves(p)
+    x = np.logspace(-3, np.log10(3000), 400)
+    Y = np.vstack([H.on_grid(c, x) for c in curves.values()])
+    ratio = np.nanmax(Y, axis=0) / np.nanmin(Y, axis=0)
+    k = int(np.nanargmax(ratio))
+    return {
+        "provenance": provenance(["results/sweep_nd.parquet", "results/phase4.parquet", "scripts/fig_regimes.py",
+                                  "scripts/fig_hero.py"]),
+        "eta_vs_eta_W": {
+            "selection": "reliable, prograde, dv_over_vp < 0.03 (the regimes figure's selection, scripts/fig_regimes.py)",
+            "n_runs": int(len(d)),
+            "max_abs_diff": float(d.loc[i, "diff"]), "at_v_over_vesc": float(d.loc[i, "v_inf_over_vesc"]),
+            "at_Pi": float(d.loc[i, "Pi"]), "median_abs_diff": float(d["diff"].median()),
+            "by_v_over_vesc": by_v,
+        },
+        "band_spread": {"max_over_min": float(ratio[k]), "at_Pi": float(x[k]), "Pi_range": [float(x[0]), float(x[-1])],
+                        "profiles": len(curves)},
+    }
+
+
 def write_bin(name: str, data: bytes) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / name).write_bytes(data)
@@ -609,6 +647,8 @@ def main() -> None:
         write("methods.json", methods_data(Numbers()))
     if want("presets"):
         write("presets.json", presets_data())
+    if want("site_numbers"):
+        write("site_numbers.json", site_numbers_data())
     if want("site"):
         export_site(refs, linked + [P4, ANIM, "figures/hero_numbers.json", "figures/phase3_numbers.json",
                                     "figures/j2_numbers.json", "figures/rule_numbers.json", "results/phase4.parquet",
