@@ -8,7 +8,7 @@ import tex from "virtual:tex";
 import { citation, sourceLink } from "../lib/cite";
 import type { Provenance, SiteData, Sourced } from "../lib/data";
 import { fillTemplate } from "../lib/data";
-import { frag, h, s } from "../lib/dom";
+import { frag, h, onFontsLoaded, s } from "../lib/dom";
 import { decade, lossRel, pow10, sig, speed } from "../lib/format";
 import { signal } from "../lib/signal";
 
@@ -52,8 +52,10 @@ const LABEL_AT: Record<string, { dx: number; dy: number; anchor: "start" | "end"
   nuclear: { dx: 18, dy: 30, anchor: "start" },
   electric: { dx: 16, dy: 44, anchor: "start" },
   band: { dx: 44, dy: 78, anchor: "start" },
+  bound: { dx: -22, dy: -26, anchor: "end" },
 };
 const BAND_LABEL_AT_PI = 3;                        // where the band's label points (layout)
+type Box = { left: number; top: number; right: number; bottom: number };
 
 export interface UniversalCurveOptions { figN: number; title: string }
 
@@ -112,12 +114,16 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
   }).observe(plot);
   shown.subscribe(() => width && redraw());
   mode.subscribe(() => width && redraw());
+  onFontsLoaded(() => width && requestAnimationFrame(redraw));      // labels are placed by their measured size
 
   function draw(W: number): void {
     if (W < 240) return;                           // not laid out yet (or hidden)
     const narrow = W < 560;
+    const labelled = W >= 640;                     // on-plot labels; a narrower plot relies on the legend below it
+    const family = mode.get() === "family";
     const H = Math.round(narrow ? W * 1.05 : Math.min(560, Math.max(360, W * 0.6)));
-    const m = { top: 34, right: narrow ? 12 : 104, bottom: 52, left: narrow ? 44 : 56 };
+    // The right margin holds the threshold labels, and in family mode the curves' v∞/v_esc labels.
+    const m = { top: 34, right: narrow ? (family ? 58 : 12) : 104, bottom: 52, left: narrow ? 44 : 56 };
     const x = scaleLog().domain(PI_DOMAIN).range([m.left, W - m.right]).clamp(true);
     const y = scaleLog().domain(LOSS_DOMAIN).range([H - m.bottom, m.top]).clamp(true);
     svg.replaceChildren();
@@ -125,6 +131,8 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
     hideTip();
+    const labels: Element[] = [];                  // on-plot case labels and leaders (all or none, see below)
+    let allClear = true;
 
     // Grid and axes.
     const g = s("g");
@@ -148,42 +156,54 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     // Thresholds (0.1 %, 1 %) and where the band crosses them.
     for (const [i, t] of data.thresholds.entries()) {
       svg.append(s("line", { class: "threshold", x1: m.left, x2: W - m.right, y1: y(t.loss_rel), y2: y(t.loss_rel) }));
-      const lx = narrow ? m.left + 4 : W - m.right + 6;
-      svg.append(s("text", { class: "annot-2", x: lx, y: y(t.loss_rel) + (narrow ? -5 : 4), "text-anchor": "start" },
+      // In the right margin, unless the plot is narrow or the margin holds the family's v∞/v_esc labels: then on the
+      // line at the left, where the curves are far below.
+      const inside = narrow || family;
+      const lx = inside ? m.left + 4 : W - m.right + 6;
+      svg.append(s("text", { class: "annot-2", x: lx, y: y(t.loss_rel) + (inside ? -5 : 4), "text-anchor": "start" },
         `${t.level.replace("%", " %")} loss`));
       svg.append(s("circle", { cx: x(t.Pi.value), cy: y(t.loss_rel), r: 3.5, class: "mark-sim" }));
       // Alternate sides so the two notes clear the bound's label and the case labels.
-      if (!narrow) svg.append(s("text", { class: "annot-2", x: x(t.Pi.value) + (i % 2 ? -8 : 8), y: y(t.loss_rel) + (i % 2 ? -7 : 17),
+      if (labelled) svg.append(s("text", { class: "annot-2", x: x(t.Pi.value) + (i % 2 ? -8 : 8), y: y(t.loss_rel) + (i % 2 ? -7 : 17),
         "text-anchor": i % 2 ? "end" : "start" }, `Π = ${sig(t.Pi.value)}`));
     }
 
     // Band (thrust-profile spread) and the leading-order bound.
     const bandPts = data.band.Pi.map((p, i) => [p, data.band.lo[i], data.band.hi[i]] as const)
       .filter(([, lo, hi]) => lo !== null && hi !== null) as [number, number, number][];
-    if (mode.get() === "band") {
+    if (!family) {
       svg.append(s("path", { class: "band", d: area<[number, number, number]>().x((d) => x(d[0])).y0((d) => y(d[1])).y1((d) => y(d[2]))(bandPts) ?? "" }));
       for (const k of [1, 2] as const) svg.append(s("path", { class: "band-edge", d: line<[number, number, number]>().x((d) => x(d[0])).y((d) => y(d[k]))(bandPts) ?? "" }));
-      if (!narrow) {
+      if (labelled) {
         const hiAt = interpLog(bandPts, BAND_LABEL_AT_PI, 2);
         label("band", x(BAND_LABEL_AT_PI), y(hiAt), document.createTextNode(bandLabel(data)));
       }
     } else {
+      const ends: { x: number; y: number; text: string }[] = [];
       data.arrival_family.curves.forEach((c, i) => {
         const pts = c.median.Pi.map((p, j) => [p, c.median.loss_rel[j]] as [number, number]);
         svg.append(s("path", { class: "sim-line", style: `stroke: var(--slate-${FAMILY_STEPS[i]})`, d: line().x((d) => x(d[0])).y((d) => y(d[1]))(pts) ?? "" }));
         const last = pts[pts.length - 1];
-        if (!narrow) svg.append(s("text", { class: "annot-2", x: x(last[0]) + 6, y: y(last[1]) + 4 }, sig(c.v_over_vesc, 2)));
+        ends.push({ x: x(last[0]), y: y(last[1]), text: sig(c.v_over_vesc, 2) });
       });
-      place(overlay, `${tex.vRatio}`, narrow ? m.left + 4 : W - m.right + 6, m.top - 4, "start", narrow ? "" : "family-key");
+      // Each curve's v∞/v_esc in the right margin, level with its end, spread to at least a line apart (the
+      // slow-arrival curves end close together), with a leader when moved; the key heads the column.
+      ends.sort((a, b) => a.y - b.y);
+      let prev = m.top - 17;
+      const at = ends.map((e) => (prev = Math.max(e.y, prev + 17)));   // 17 px: 1.2 × the 14 px label size
+      ends.forEach((e, i) => {
+        const tx = W - m.right + 12;
+        svg.append(s("path", { class: "leader", d: `M${e.x + 2},${e.y} L${tx - 2},${at[i]}` }),
+          s("text", { class: "annot-2", x: tx, y: at[i] + 4 }, e.text));
+      });
+      const key = place(overlay, `${tex.vRatio}`, W - 2, 0, "end", "family-key");
+      key.style.top = `${Math.max(0, at[0] - 8 - key.offsetHeight)}px`;
     }
     const bound = data.bound.Pi.map((p, i) => [p, data.bound.loss_rel[i]] as [number, number]);
     svg.append(s("path", { class: "theory-line", d: line().x((d) => x(d[0])).y((d) => y(d[1]))(bound) ?? "" }));
     const bAt = bound[Math.round(bound.length * 0.62)];
     const bx = x(bAt[0]), by = y(bAt[1]);
-    if (!narrow) {
-      svg.append(s("path", { class: "leader", d: `M${bx},${by} l-22,-26` }));
-      place(overlay, `${tex.bound} <span class="annot-text">leading-order bound</span>`, bx - 24, by - 46, "end");
-    }
+    if (labelled) label("bound", bx, by, frag(`${tex.bound} <span class="annot-text">leading-order bound</span>`));
 
     // Mission-sample ranges (p10–p90 in Π and in loss, median marked), drawn quietly in Graphite.
     if (shown.get().has("ranges")) {
@@ -200,7 +220,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
           s("circle", { class: "mark-sim", cx: x(pm), cy: y(lm), r: 4 }));
         svg.append(gr);
         hit(gr, x(pm), y(lm), `${r.label}: mission samples`, () => rangeTip(r, site));
-        if (!narrow) label(r.id.startsWith("electric") ? "electric" : r.id.startsWith("nuclear") ? "nuclear" : r.id,
+        if (labelled) label(r.id.startsWith("electric") ? "electric" : r.id.startsWith("nuclear") ? "nuclear" : r.id,
           x(pm), y(lm), document.createTextNode(`${r.label}, mission samples`));
       }
     }
@@ -215,7 +235,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
         svg.append(gr);
         const cx = (x(a) + x(b)) / 2, cy = (y(lo) + y(hi)) / 2;
         hit(gr, cx, cy, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
-        if (!narrow) label(c.id, x(b), y(lo), caseLabel(c, data.cases, true));
+        if (labelled) label(c.id, x(b), y(lo), caseLabel(c, data.cases, true));
         continue;
       }
       const px = x(c.Pi!.value), py = y(c.loss_rel!.value);
@@ -227,8 +247,10 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       const gr = s("g", {}, mark);
       svg.append(gr);
       hit(gr, px, py, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
-      if (!narrow) label(c.id, px, py, caseLabel(c, data.cases, true));
+      if (labelled) label(c.id, px, py, caseLabel(c, data.cases, true));
     }
+    // All or none: if any label found no clear place, the legend alone names the marks at this width.
+    if (!allClear) for (const e of labels) e.remove();
 
     // Crosshair readout along the band (pointer; the data table carries the same values for keyboard users).
     const area_ = s("rect", { class: "hit", x: m.left, y: m.top, width: W - m.left - m.right, height: H - m.top - m.bottom, "aria-hidden": "true" });
@@ -249,13 +271,49 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     });
     area_.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
 
+    // A label goes at its preferred offset from the mark (LABEL_AT) if that overlaps nothing already drawn
+    // (labels, text, marks); otherwise at the first clear one of its mirror images or of those further out, and if
+    // none is clear, where it overlaps least.
     function label(id: string, px: number, py: number, content: Node): void {
-      const at = LABEL_AT[id] ?? { dx: 14, dy: -14, anchor: "start" as const };
-      const lx = px + at.dx, ly = py + at.dy;
-      svg.append(s("path", { class: "leader", d: `M${px + Math.sign(at.dx) * 6},${py + Math.sign(at.dy) * 6} L${lx},${ly}` }));
+      const pref = LABEL_AT[id] ?? { dx: 14, dy: -14, anchor: "start" as const };
       const el = h("div", { class: "annot-html" }, content);
+      const taken = obstacles();
       overlay.append(el);
-      position(el, lx + (at.anchor === "end" ? -3 : 3), ly + (at.dy < 0 ? -18 : 2), at.anchor);
+      const w = el.offsetWidth, hh = el.offsetHeight;
+      type At = { dx: number; dy: number; anchor: "start" | "end" };
+      const box = (a: At) => {
+        const left = px + a.dx + (a.anchor === "end" ? -3 - w : 3), top = py + a.dy + (a.dy < 0 ? -hh : 2);
+        return { left, top, right: left + w, bottom: top + hh };
+      };
+      // Overlap (px²) with what is drawn, padded by 4 px across and 2 px up and down; leaving the plot counts as
+      // overlap too.
+      const cost = (b: Box) => {
+        const out = Math.max(0, -b.left) + Math.max(0, b.right - W) + Math.max(0, -b.top) + Math.max(0, b.bottom - (H - m.bottom));
+        return out * 1e4 + taken.reduce((sum, t) =>
+          sum + Math.max(0, Math.min(b.right + 4, t.right) - Math.max(b.left - 4, t.left)) *
+                Math.max(0, Math.min(b.bottom + 2, t.bottom) - Math.max(b.top - 2, t.top)), 0);
+      };
+      const flip = (a: "start" | "end") => (a === "end" ? "start" : "end");
+      const tries: At[] = [];
+      for (const k of [1, 1.6, 2.2, 3]) for (const sx of [1, 2]) for (const [fx, fy] of [[1, 1], [1, -1], [-1, 1], [-1, -1]])
+        tries.push({ dx: pref.dx * fx * sx, dy: pref.dy * fy * k, anchor: fx > 0 ? pref.anchor : flip(pref.anchor) });
+      const costs = tries.map((a) => cost(box(a)));
+      const clear = costs.findIndex((c) => c === 0);
+      if (clear < 0) allClear = false;
+      const at = tries[clear >= 0 ? clear : costs.indexOf(Math.min(...costs))];
+      const lx = px + at.dx, ly = py + at.dy;
+      const leader = s("path", { class: "leader", d: `M${px + Math.sign(at.dx) * 6},${py + Math.sign(at.dy) * 6} L${lx},${ly}` });
+      svg.append(leader);
+      position(el, lx + (at.anchor === "end" ? -3 : 3), at.dy < 0 ? ly - hh : ly + 2, at.anchor);
+      labels.push(el, leader);
+    }
+    /** Boxes (plot px) of what a new label must not cover: annotations, SVG text and the data marks. */
+    function obstacles(): Box[] {
+      const o = plot.getBoundingClientRect();
+      return [...overlay.children, ...svg.querySelectorAll("text, .mark-sim, .mark-pub, .range-box")].map((e) => {
+        const r = e.getBoundingClientRect();
+        return { left: r.left - o.left, top: r.top - o.top, right: r.right - o.left, bottom: r.bottom - o.top };
+      });
     }
     function hit(gr: SVGGElement, cx: number, cy: number, name: string, content: () => HTMLElement): void {
       const target = s("circle", { class: "hit", cx, cy, r: 16, tabindex: 0, role: "button", "aria-label": `${name}: details` });

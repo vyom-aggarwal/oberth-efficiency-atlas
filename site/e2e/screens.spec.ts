@@ -19,13 +19,27 @@ for (const path of PAGES) {
         await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
         await page.goto(path);
         await page.waitForLoadState("networkidle");
+        // Scroll down the page once so that lazily mounted figures are in the capture, then back to the top.
+        await page.evaluate(async () => {
+          for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight / 2) {
+            window.scrollTo(0, y);
+            await new Promise((r) => setTimeout(r, 50));
+          }
+          window.scrollTo(0, 0);
+        });
+        await page.waitForLoadState("networkidle");
         await page.evaluate(() => document.fonts.ready);
         await page.waitForTimeout(300);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow, "no sideways scrolling of the page body").toBeLessThanOrEqual(0);
         const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "home"}-${width}-${theme}.png`;
         await page.screenshot({ path: `${OUT}/${name}`, fullPage: true });
-        if (path === "") await page.locator("#fig-hero").screenshot({ path: `${OUT}/hero-${width}-${theme}.png` });
+        if (path === "") {
+          for (const fig of ["hero", "universal-curve"]) {
+            await expect(page.locator(`#fig-${fig} .figure-body > *`).first()).toBeVisible();
+            await page.locator(`#fig-${fig}`).screenshot({ path: `${OUT}/${fig}-${width}-${theme}.png` });
+          }
+        }
         expect(errors, "console errors").toEqual([]);
       });
     }

@@ -8,7 +8,7 @@ import { fromTargets, integrate, simulate, type SimResult } from "../sim/oberth-
 import { axisSlider, type Mark } from "../controls/axis-slider";
 import { citation, sourceLink } from "../lib/cite";
 import type { SiteData, Sourced } from "../lib/data";
-import { frag, h } from "../lib/dom";
+import { frag, h, onFontsLoaded } from "../lib/dom";
 import { duration, sig, speed } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
 
@@ -122,6 +122,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     request();
   });
   themeShown.subscribe(() => requestAnimationFrame(() => draw()));
+  onFontsLoaded(() => requestAnimationFrame(() => draw()));         // annotations are clamped by their measured size
   let width = 0;
   new ResizeObserver(([e]) => {
     const w = Math.round(e.contentRect.width);

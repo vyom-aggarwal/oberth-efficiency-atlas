@@ -1,7 +1,7 @@
 // A log-scale slider drawn as the shared Π axis (docs/site_plan.md principle 4). The native range input is the
 // control (keyboard, touch, screen readers); the SVG beneath is the scale, aligned to the thumb's travel.
 // Marks (e.g. the three engines of the engines-compared section) are drawn above the scale.
-import { h, s } from "../lib/dom";
+import { h, onFontsLoaded, s } from "../lib/dom";
 import { decade, sig } from "../lib/format";
 import { signal, type Signal } from "../lib/signal";
 
@@ -52,6 +52,7 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
     const w = Math.round(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(drawScale); }
   }).observe(track);
+  onFontsLoaded(() => width && requestAnimationFrame(drawScale));   // label widths change with the web font
 
   function drawScale(): void {
     const x = (v: number) => THUMB / 2 + ((Math.log10(v) - lmin) / (lmax - lmin)) * (width - THUMB);

@@ -34,6 +34,13 @@ function append(el: Element, children: Child[]): void {
   }
 }
 
+/** Calls `fn` each time web fonts finish loading: text measured before that used the fallback font's widths. */
+export function onFontsLoaded(fn: () => void): void {
+  if (!("fonts" in document)) return;
+  document.fonts.addEventListener("loadingdone", () => fn());
+  void document.fonts.ready.then(() => fn());
+}
+
 /** An HTML fragment from trusted, build-time markup (KaTeX output). */
 export function frag(html: string): DocumentFragment {
   const t = document.createElement("template");
