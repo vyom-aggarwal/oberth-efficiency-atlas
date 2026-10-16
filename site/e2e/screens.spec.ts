@@ -25,6 +25,7 @@ for (const path of PAGES) {
         expect(overflow, "no sideways scrolling of the page body").toBeLessThanOrEqual(0);
         const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "home"}-${width}-${theme}.png`;
         await page.screenshot({ path: `${OUT}/${name}`, fullPage: true });
+        if (path === "") await page.locator("#fig-hero").screenshot({ path: `${OUT}/hero-${width}-${theme}.png` });
         expect(errors, "console errors").toEqual([]);
       });
     }

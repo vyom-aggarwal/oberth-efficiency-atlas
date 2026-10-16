@@ -57,7 +57,7 @@
 .axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
 .axis-slider svg text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
 .axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
-.axis-slider svg text.mark-label.threshold { fill: var(--text-2); }
+.axis-slider svg text.mark-label.hollow { fill: var(--text-2); }   /* not .threshold: that class is the dotted line style */
 @media (pointer: coarse) {
   .axis-slider input[type="range"] { height: 44px; }
   .axis-slider input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12px; }

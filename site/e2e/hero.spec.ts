@@ -32,11 +32,16 @@ test("annotations and slider labels stay inside the figure at every width and Π
           if (r.left < stage.left - 0.5 || r.right > stage.right + 0.5 || r.top < stage.top - 0.5 || r.bottom > stage.bottom + 0.5)
             out.push(`annotation "${el.textContent!.trim().slice(0, 40)}" at [${Math.round(r.left - stage.left)}, ${Math.round(r.right - stage.left)}] of ${Math.round(stage.width)}`);
         }
+        if (!document.querySelector(".hero-stage .hero-eta")) out.push("η annotation missing");
         const svg = document.querySelector(".hero-slider svg")!.getBoundingClientRect();
-        for (const t of document.querySelectorAll(".hero-slider svg text")) {
-          const r = t.getBoundingClientRect();
-          if (r.left < svg.left - 0.5 || r.right > svg.right + 0.5) out.push(`slider label "${t.textContent!.trim()}"`);
-        }
+        const labels = [...document.querySelectorAll(".hero-slider svg text")].map((t) => ({ t: t.textContent!.trim(), r: t.getBoundingClientRect() }));
+        for (const { t, r } of labels) if (r.left < svg.left - 0.5 || r.right > svg.right + 0.5) out.push(`slider label "${t}" crosses the edge`);
+        for (const t of document.querySelectorAll(".hero-slider svg text"))           // e.g. a line style leaking onto text
+          if (getComputedStyle(t).stroke !== "none") out.push(`slider label "${t.textContent!.trim().slice(0, 20)}" is stroked`);
+        labels.forEach((a, i) => labels.slice(i + 1).forEach((b) => {
+          if (a.r.left < b.r.right && b.r.left < a.r.right && a.r.top < b.r.bottom && b.r.top < a.r.bottom)
+            out.push(`slider labels "${a.t.slice(0, 20)}" and "${b.t.slice(0, 20)}" overlap`);
+        }));
         if (document.documentElement.scrollWidth > document.documentElement.clientWidth) out.push("page scrolls sideways");
         return out;
       });

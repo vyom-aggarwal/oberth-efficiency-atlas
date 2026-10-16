@@ -276,17 +276,23 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     const piNote = h("div", { class: "annot-html hero-note" });
     piNote.append(frag(tex.Pi), ` = ${sig(Pi)}, `, h("span", {}, narrow ? `burn ${duration(burnS)}` : `a burn of ${duration(burnS)} centred on periapsis`));
     place(piNote, sx(peri), sy(peri) + 22, "middle");
-    // η sits inside the U, level with the outgoing branch a third of the way down, with a short leader to it.
+    // η sits inside the U, level with the outgoing branch a third of the way down, with a short leader to it. Where
+    // that point is off the canvas (narrow screens: the branches leave by the sides), it goes at the top centre,
+    // inside the U, which is empty there.
     const at = branchAt(finite.post, H * 0.34);
-    if (at && at.x < W - 8 && annotAlpha > 0) {      // only where the branch is on screen
+    const onBranch = !narrow && at !== null && at.x < W - 8;
+    const pathDrawn = reveal >= finite.post[finite.post.length - 1].t;      // the intro has finished drawing it
+    if (annotAlpha > 0 && (onBranch || pathDrawn)) {
       const etaNote = h("div", { class: "annot-html hero-note hero-eta", style: `opacity:${annotAlpha}` });
-      etaNote.append(frag(tex.eta), ` = ${sig(result.eta, 4)}`, h("span", { class: "annot-text" }, narrow ? "kept" : "of the impulsive bonus kept"));
-      place(etaNote, at.x - 22, at.y - 11, "end");
-      const ctx = canvas.getContext("2d")!;
-      ctx.globalAlpha = annotAlpha;
-      ctx.strokeStyle = cssVar("--graphite"); ctx.lineWidth = 1; ctx.setLineDash([]);
-      ctx.beginPath(); ctx.moveTo(at.x - 18, at.y); ctx.lineTo(at.x - 5, at.y); ctx.stroke();
-      ctx.globalAlpha = 1;
+      etaNote.append(frag(tex.eta), ` = ${sig(result.eta, 4)}`, h("span", { class: "annot-text" }, narrow ? "of the bonus kept" : "of the impulsive bonus kept"));
+      if (onBranch) {
+        place(etaNote, at!.x - 22, at!.y - 11, "end");
+        const ctx = canvas.getContext("2d")!;
+        ctx.globalAlpha = annotAlpha;
+        ctx.strokeStyle = cssVar("--graphite"); ctx.lineWidth = 1; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(at!.x - 18, at!.y); ctx.lineTo(at!.x - 5, at!.y); ctx.stroke();
+        ctx.globalAlpha = 1;
+      } else place(etaNote, W / 2, 10, "middle");
     }
     const sunNote = h("div", { class: "annot-html annot-2-html" }, "Sun");
     place(sunNote, sx({ x: 0, y: 0 }), sy({ x: 0, y: 0 }) - 9, "middle");
