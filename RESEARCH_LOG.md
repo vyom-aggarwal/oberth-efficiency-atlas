@@ -2114,4 +2114,32 @@ footer until the prose is written.
   - Home: theme switch persistence, the mobile menu, section navigation with a lazily loaded
     figure, and the classic explorer route.
 
+## 2026-10-16: Author decisions after checkpoint 2; test exit statuses enforced
+
+**Decisions (author):**
+1. **The regimes figure plots η_W,** labelled "η_W (baseline-subtracted energy efficiency)" with a
+   one-line link to where η is defined, consistent with the paper's Phase 2 regimes figure.
+   - The three asymptotes are derived for η_W, so η does not appear on this figure.
+   - The regimes notes now ask the author's prose to explain how η and η_W relate.
+   - The measured maximum divergence (0.21 for slow arrivals) is exported as a sourced value for
+     the author to quote.
+2. **Checkpoint 6** re-runs the fresh-clone audit, commits its report under `docs/`, and exports the
+   result so the methods section quotes it from data.
+3. **The "visual notes" slot** in the checkpoint-1 review was a template placeholder; the author's
+   visual feedback comes separately.
+
+**Process: test exit statuses can no longer be hidden.**
+- Commit 6c0938d (2026-10-15) went in with a failing test: the command piped `pytest` into `tail`,
+  so the `&&` chain saw `tail`'s exit status. The failing test was a stale provenance hash in
+  `presets.json`; the data was correct. It was fixed in d65d77b.
+- The pre-tool hook, renamed `.claude/hooks/shell-guard.mjs`, now also blocks a test run (pytest,
+  vitest, `playwright test`, `npm test`, `npm run test|e2e`) piped into `tail`, `head` or `grep`,
+  unless a `set -o pipefail` statement comes before it.
+- It identifies the test by the program, not by words in arguments, and ignores quoted strings and
+  heredoc bodies, so commit messages may still mention such pipes.
+- `tests/test_hooks.py` now has 31 cases, all passing.
+- Live check in this session: the hook blocked a piped pytest run, and the same command with
+  `set -o pipefail;` ran.
+- Documented in CLAUDE.md.
+
 

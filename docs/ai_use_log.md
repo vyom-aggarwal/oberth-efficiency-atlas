@@ -308,3 +308,34 @@ added to the numbers file as values.
 - **Edit-tool rule broken twice:** the assistant used shell heredocs or inline scripts for
   multi-line edits, once to append this log (2026-10-13) and once in a TypeScript file. Both
   results were checked and found intact.
+
+**Checkpoint 1 review and checkpoints 2–3 (2026-10-15 to 2026-10-16):**
+- **Author decided:**
+  - Enforce the edit-tool rule with a pre-tool hook, then extend it to block test runs piped
+    into tail, head or grep without pipefail.
+  - The case labels and the band spread on the universal curve.
+  - Keep the font subsets.
+  - Plot η_W (labelled as such) in the regimes figure, with the η–η_W divergence exported for the
+    author to quote.
+  - Re-run the fresh-clone audit at checkpoint 6 and commit its report.
+- **Assistant implemented:**
+  - The hook (`.claude/hooks/shell-guard.mjs`, 31 tests).
+  - The full site-data export: 12 files, with currentness and cross-check tests.
+  - The content plugin and site skeleton.
+  - The shared simulator module.
+  - The live hero.
+- **Assistant found:**
+  - The band's true maximum spread lies between the sampled values of the numbers JSON.
+  - η and η_W differ by up to 0.21 for slow arrivals, which decided the regimes figure.
+  - The v1.0 audit report had never been committed.
+- **Assistant errors, disclosed:**
+  - **A commit with a failing test (6c0938d, 2026-10-15).** The commit command piped `pytest`
+    through `tail`, which hid pytest's non-zero exit status, so the `&&` chain went on to commit.
+    - The failing test was `test_provenance_hashes_match_sources[presets.json]`: the presets file
+      recorded a stale hash of `scripts/build_explorer.py` after that script changed. The data
+      itself was correct.
+    - It was found at once and fixed in d65d77b.
+    - The same kind of slip had happened during the v1.0 audit (533227d). The author then asked
+      for the hook's second guard, which now blocks such pipes.
+  - **Temporal-dead-zone errors in the first hero draft:** variables were used before their
+    declarations. Both were caught by the Playwright console-error check before any commit.

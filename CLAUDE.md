@@ -21,8 +21,8 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
   edits** of code, docs and logs. Shell quoting has corrupted text before (backticks executed,
   escapes doubled).
   - **Enforced by a hook** (user rule, 2026-10-15, after three slips in Phase 6): a project
-    `PreToolUse` hook in `.claude/settings.json` runs `.claude/hooks/block-heredoc-writes.mjs`
-    before every Bash and PowerShell call.
+    `PreToolUse` hook in `.claude/settings.json` runs `.claude/hooks/shell-guard.mjs` before every
+    Bash and PowerShell call.
   - It blocks any heredoc (`<<EOF`, `<<-EOF`) or PowerShell here-string (`@'…'@`) unless its
     statement is a `git commit`. Commit messages are still allowed: `git commit -F - <<'EOF'` and
     `git commit -m "$(cat <<'EOF' … EOF)"`.
@@ -31,6 +31,15 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
   - A blocked call exits 2 with the reason. To run a multi-line script, write it with Write and
     run the file.
   - Tests: `tests/test_hooks.py` (needs node). Disable only by editing `.claude/settings.json`.
+- **Never hide a test's exit status in a pipe.** Without pipefail, a pipeline's status is the last
+  command's, so `pytest | tail -1 && git commit` commits even when tests fail (this happened once
+  in Phase 6).
+  - **Enforced by the same hook** (user rule, 2026-10-16): in Bash it blocks a test run (pytest,
+    vitest, `playwright test`, `npm test`, `npm run test|e2e`) piped into `tail`, `head` or
+    `grep`, unless a `set -o pipefail` (or `set -euo pipefail`) statement comes before it.
+  - It judges the program, not words in arguments, so `grep pytest file | head` is allowed. It
+    ignores quoted text and heredoc bodies.
+  - Start such commands with `set -o pipefail;`, or don't pipe the test output.
 - **Writing.** The user writes the paper prose; do not draft paper text. Keep
   `docs/paper_outline.md`, the figures and the `figures/*_numbers.json` files current.
   `scripts/check_numbers.py` flags numbers in a Markdown draft that match no numbers JSON. In
