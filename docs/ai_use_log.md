@@ -354,9 +354,17 @@ added to the numbers file as values.
   - The intro's TypeError, and the intro ignoring the keyboard.
   - The hero table titled its rows with engines whose own η it does not show: the η is the single
     equivalent stage at that engine's Π.
+  - Universal curve: colliding on-plot labels at 600–1440 px, and arrival-speed curves with no
+    labels below 560 px. Placement now searches for a clear position, all or none, with a
+    collision test at five widths.
+  - The slider, curve and hero measured text before the web fonts loaded and never re-measured;
+    they now redraw when fonts load.
 - **Checkpoint 3, assistant errors, disclosed:**
   - **`npm test` failed from checkpoint 2 until this checkpoint.** Vitest collected the Playwright
     specs. The checkpoint 2 report did not run it.
+  - **The universal curve was never in a home-page screenshot until the final checkpoint-3 run.**
+    It mounts lazily, and the full-page captures did not scroll. Its label collisions were found
+    only then.
   - **Wrong dates:** the 2026-10-15 decisions were first logged as 2026-10-16 in five places;
     corrected.
   - **An unverified browser version:** the first draft of the frame-time log entry gave a Chrome

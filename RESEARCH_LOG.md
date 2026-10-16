@@ -2230,9 +2230,72 @@ specs, which fail outside Playwright.
     falls monotonically, no capture or impact, recorded segments in order.
 - Agreement with the Python library remains `tests/test_explorer_js.py`'s job.
 
-**Test totals at the end of checkpoint 3:**
+**Test totals at this point:**
 - pytest 581 passed;
 - vitest 8 passed;
 - Playwright 26 passed: the 16 screenshot cases, the style and home specs, and the 5 hero specs.
+- Superseded by the next entry, which adds the universal-curve tests.
+
+## 2026-10-16: Checkpoint 3: universal-curve labels; text measured before the fonts loaded
+
+**What the final screenshots showed.** The universal curve is mounted lazily, so the full-page
+screenshots had never captured it on the home page. The screenshot spec now scrolls down the page
+first and saves a crop of the curve. The crops showed:
+- **At 1440 px:**
+  - the SEP-class case label overlapped "Maraqten et al.";
+  - the nuclear-thermal case label overlapped the band's label, and later Maraqten et al.'s range
+    box.
+  - Cause: the labels were placed at fixed offsets tuned before the checkpoint-1 relabelling made
+    them longer ("Hibberd et al.'s dive flown with …").
+- **At 600 px:** the bound label overlapped the axis text, and the electric samples label left the
+  plot.
+- **In "By arrival speed" mode,** the curves' v∞/v_esc labels overlapped each other and the key.
+- **Below 560 px,** the arrival-speed curves had no v∞/v_esc labels at all, so nothing identified
+  them.
+
+**Changes (layout only; no data or sourced values changed):**
+- **Placement.** Each on-plot label tries its preferred offset, then its mirror images, then
+  positions further out (32 in all). It takes the first that overlaps nothing already drawn:
+  - other labels and SVG text;
+  - the data marks;
+  - points every 6 px along the band edges, the bound and the family curves.
+- **Order.** Labels are placed after every mark and line is drawn, in a fixed priority: band, bound,
+  mission samples, cases.
+- **All or none.** If any label finds no clear place, no on-plot label is drawn and the legend
+  (always present) names the marks. The thresholds and the Π notes stay.
+  - On-plot labels need a plot at least 640 px wide.
+  - Measured on the home page (viewport → plot width):
+    - 700 → 668 px and 768 → 704 px: legend only, in both modes;
+    - 900 → 836 px: labels in band mode, legend only in family mode;
+    - 1024 → 960 px and 1440 → 932 px: labels in both modes.
+- **Family mode.**
+  - Each curve's v∞/v_esc label is drawn at every width (narrow screens get a 58 px right margin).
+  - The labels are spread 17 px apart (1.2 × the 14 px label size), with leaders, and the key heads
+    the column.
+  - The threshold labels move inside the plot on the left, where the curves are far below.
+- **Test** (`e2e/curve.spec.ts`), at 390, 600, 768, 1024 and 1440 px, in both modes: annotations
+  stay inside the plot and overlap no annotation, SVG text or mark, and SVG texts do not overlap.
+
+**Bug: text measured before the web fonts loaded.**
+- The Π-axis slider, the universal curve and the hero all measure text to place it
+  (`getComputedTextLength`, `offsetWidth`). They redrew only on resize.
+- On a fresh load the first layout can use the fallback font's widths and is never corrected. This
+  made the hero's slider-label test fail once at 360 px (two labels overlapped).
+- All three now redraw when fonts finish loading (`onFontsLoaded` in `lib/dom.ts`). Two full runs
+  since then passed.
+
+**Frame time, later runs.**
+- Four full-suite runs after midnight gave lower times than the nine runs in the previous entry:
+  p50 2.3–2.7 ms, p95 5.9–6.6 ms, max 8.9–17 ms.
+- The hero's simulation and drawing code did not change between those runs and the previous ones;
+  the only hero change was the font-load redraw, which does not run per frame.
+- The difference is therefore the laptop's state (load, power or thermal), not the code. The target
+  holds in every run.
+
+**Test totals at the end of checkpoint 3:**
+- pytest 581 passed;
+- vitest 8 passed;
+- Playwright 31 passed: the 16 screenshot cases, the style and home specs, the 5 hero specs and the
+  5 universal-curve specs.
 
 
