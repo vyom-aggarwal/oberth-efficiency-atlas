@@ -1,6 +1,6 @@
 // Home-page smoke test: the theme switch, the narrow-screen menu, the section navigation, a lazily loaded figure,
 // and the classic explorer route. Runs against the dev server (every section shown, with TODO banners).
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("theme switch pins a theme and returns to the system setting", async ({ page }) => {
   await page.goto("");

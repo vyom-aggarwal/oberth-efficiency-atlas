@@ -1,6 +1,6 @@
 // Review screenshots: every page at 1440 and 390 px wide, in both themes, with no console errors and no
 // sideways scrolling. Images are written to runs/screens/ for review (gitignored).
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // Pages to capture ("" is the home page). /style/ exists only on the dev server.
 const PAGES = (process.env.SCREEN_PAGES ?? ",explorer/,404.html,style/").split(",");

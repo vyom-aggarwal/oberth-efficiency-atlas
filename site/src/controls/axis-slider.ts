@@ -61,29 +61,43 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
     }
     for (let e = Math.ceil(lmin); e <= Math.floor(lmax); e++) {
       const t = 10 ** e;
+      // The end labels align with the scale's ends instead of centring past them.
+      const anchor = x(t) < 24 ? "start" : x(t) > width - 24 ? "end" : "middle";
+      const tx = anchor === "start" ? 0 : anchor === "end" ? width : x(t);
       svg.append(s("line", { x1: x(t), x2: x(t), y1: 0, y2: 6, stroke: "var(--graphite)" }),
-        s("text", { x: x(t), y: 19, "text-anchor": "middle", class: "tick" }, decade(t)));
+        s("text", { x: tx, y: 19, "text-anchor": anchor, class: "tick" }, decade(t)));
     }
-    // Mark labels: each goes in the first row where it does not overlap a label already placed.
-    const rows: [number, number][][] = [[], [], []];
+    // Mark labels, centred under their mark and clamped to the scale. A label may carry a line break ("\n"): it is
+    // set on one line when that fits the scale, else on two. Each label takes the first free row (or pair of rows).
+    const rows: [number, number][][] = [[], [], [], []];
+    const free = (k: number, a: number, b: number) => rows[k].every(([p, q]) => b + 10 < p || a > q + 10);
     let used = 0;
     for (const m of o.marks ?? []) {
       const mx = x(m.value);
       const hollow = m.kind === "threshold";
-      const text = s("text", { class: hollow ? "mark-label threshold" : "mark-label", x: mx, y: 0 }, m.label);
+      const parts = m.label.split("\n");
+      const text = s("text", { class: hollow ? "mark-label threshold" : "mark-label", x: 0, y: 0 }, parts.join(" "));
       const tri = s("path", { d: `M${mx},-4 l-4,-7 h8z`, fill: hollow ? "var(--paper)" : "var(--ink)",
                              stroke: hollow ? "var(--graphite)" : "none", "stroke-width": 1.2 });
-      if (m.detail) { tri.append(s("title", {}, m.detail)); text.append(s("title", {}, m.detail)); }
       svg.append(tri, text);
-      // Centred under its mark (clamped to the scale), in the first row where it overlaps nothing.
-      const w = text.getComputedTextLength();
-      const left = Math.min(Math.max(mx - w / 2, 0), width - w);
-      const row = rows.findIndex((r) => r.every(([a, b]) => left + w + 10 < a || left > b + 10));
-      const k = row < 0 ? rows.length - 1 : row;
-      rows[k].push([left, left + w]);
-      used = Math.max(used, k);
+      let w = text.getComputedTextLength();
+      let lines: SVGTSpanElement[] = [];
+      if (parts.length > 1 && w > width - 4) {
+        text.textContent = "";
+        lines = parts.map((p) => s("tspan", {}, p));
+        text.append(...lines);
+        w = Math.max(...lines.map((t) => t.getComputedTextLength()));
+      }
+      if (m.detail) { tri.append(s("title", {}, m.detail)); text.append(s("title", {}, m.detail)); }
+      const n = Math.max(1, lines.length);
+      const left = Math.max(0, Math.min(mx - w / 2, width - w));
+      let k = 0;
+      while (k + n < rows.length && !Array.from({ length: n }, (_, j) => free(k + j, left, left + w)).every(Boolean)) k++;
+      for (let j = 0; j < n; j++) rows[k + j].push([left, left + w]);
+      used = Math.max(used, k + n - 1);
       text.setAttribute("x", String(left));
       text.setAttribute("y", String(36 + 15 * k));
+      lines.forEach((t, j) => { t.setAttribute("x", String(left)); if (j) t.setAttribute("dy", "15"); });
     }
     svg.style.height = `${40 + 15 * used}px`;
   }

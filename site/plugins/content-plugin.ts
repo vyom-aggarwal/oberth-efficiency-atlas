@@ -118,7 +118,9 @@ export function contentPlugin(): Plugin {
     name: "oberth-content",
     configResolved(c) {
       config = c;
-      dev = c.command === "serve";
+      // SITE_SHOW_TODO=1 builds the unfinished sections too (with their TODO banners), for tests and review
+      // screenshots of a build; deployed builds never set it.
+      dev = c.command === "serve" || process.env.SITE_SHOW_TODO === "1";
     },
     buildStart() {
       if (dev) return;

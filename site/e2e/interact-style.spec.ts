@@ -1,6 +1,6 @@
 // Interaction smoke test for the style page's figure and controls: hover and keyboard focus show a tooltip
 // with the citation and a data-file link; a case toggle removes its mark; the slider updates its readout.
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("universal curve and controls respond", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

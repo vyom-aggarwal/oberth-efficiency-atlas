@@ -58,7 +58,8 @@
 
 /* The hero: the canvas spans the content width; annotations sit on it as HTML (KaTeX symbols). */
 .hero .figure { max-width: none; margin: var(--s5) 0 0; }
-.hero-stage { position: relative; width: 100%; overflow: hidden; }   /* annotations never widen the page */
+.hero-stage { position: relative; width: 100%; }
+.hero-stage .overlay { position: absolute; inset: 0; pointer-events: none; }   /* annotations are clamped inside it */
 .hero-canvas { display: block; width: 100%; touch-action: pan-y; }
 .hero-note { font-size: 1rem; font-family: var(--sans); color: var(--text); font-variant-numeric: tabular-nums lining-nums;
              background: color-mix(in srgb, var(--paper) 82%, transparent); padding: 0 2px; }

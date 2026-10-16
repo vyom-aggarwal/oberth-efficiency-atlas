@@ -50,7 +50,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
       // "(hypothetical at 3.2 R☉)", and leaves an identifying note (the reference) to the hover title.
       const [first, second = ""] = m.title.value.split("\n");
       const name = first.split(":")[0];
-      return { value: m.Pi.value, label: /hypothetical/.test(second) ? `${name} ${second}` : name, kind: "engine",
+      return { value: m.Pi.value, label: /hypothetical/.test(second) ? `${name}\n${second}` : name, kind: "engine",
                detail: `${first.replace(":", ",")}${second ? " " + second : ""}: Π = ${sig(m.Pi.value)} on this dive` };
     }),
     ...d.thresholds.map((t): Mark => ({ value: t.Pi.value, label: t.level.replace("%", " %"), kind: "threshold",
@@ -84,7 +84,8 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   function frame(): void {
     pending = false;
     const t0 = performance.now();
-    if (Pi !== simulatedPi) {                        // one simulation per frame at most
+    const sim = Pi !== simulatedPi;
+    if (sim) {                                       // one simulation per frame at most
       result = simulate(params(Pi));
       finite = pathFrom(result);
       simulatedPi = Pi;
@@ -94,9 +95,25 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     const dt = performance.now() - t0;
     frames++;
     frameWorst = Math.max(frameWorst, dt);
+    if (frameLog.length < 5000) frameLog.push({ ms: dt, sim, Pi });
     root.dataset.frames = String(frames);
     root.dataset.frameWorstMs = frameWorst.toFixed(2);
   }
+  // Test hooks (tests/e2e): per-frame cost, and screen positions on the path for dragging.
+  const frameLog: { ms: number; sim: boolean; Pi: number }[] = [];
+  Object.assign(root, {
+    __heroFrames: frameLog,
+    __heroProbe: {
+      arcEnds: () => (finite.burn.length ? [finite.burn[0], finite.burn[finite.burn.length - 1]].map((p) => ({ x: sx(p), y: sy(p) })) : []),
+      /** Screen point on the outgoing path at time t (nondimensional, from periapsis). */
+      pathAt: (t: number) => {
+        const pts = [...finite.burn, ...finite.post];
+        const p = pts.find((q) => q.t >= t) ?? pts[pts.length - 1];
+        return { x: sx(p), y: sy(p) };
+      },
+      tau,
+    },
+  });
 
   slider.value.subscribe((v) => {
     if (introSetting) return;                        // the intro moving the slider is not reader input
@@ -119,6 +136,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     H = Math.round(narrow ? W * 1.08 : Math.min(560, Math.max(360, W * 0.42)));
     U = narrow ? 2.9 : 7.2;
     scale = W / (2 * U);
+    wBot = 1 + 56 / scale;                           // 56 px under periapsis for the Π note, at every width
     wTop = wBot - H / scale;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(W * dpr);
@@ -215,7 +233,9 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     const arcW = narrow ? 4.5 : 6;
     const b = finite.burn.filter((p) => p.t <= reveal);
     const span = b.length > 1 ? Math.hypot(sx(b[0]) - sx(b[b.length - 1]), sy(b[0]) - sy(b[b.length - 1])) : 0;
-    if (b.length && span < arcW) {
+    if (!b.length) {
+      // Nothing of the burn revealed yet (the intro's first phase).
+    } else if (span < arcW) {
       ctx.fillStyle = rampColour(b[0].av!);
       ctx.beginPath(); ctx.arc(sx({ x: 1, y: 0 }), sy({ x: 1, y: 0 }), arcW * 0.75, 0, 2 * Math.PI); ctx.fill();
     } else {
@@ -271,11 +291,13 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     const sunNote = h("div", { class: "annot-html annot-2-html" }, "Sun");
     place(sunNote, sx({ x: 0, y: 0 }), sy({ x: 0, y: 0 }) - 9, "middle");
   }
+  /** Place an annotation at (x, y) with the given horizontal anchor, kept wholly inside the canvas. */
   function place(el: HTMLElement, x: number, y: number, anchor: "start" | "middle" | "end"): void {
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-    el.style.transform = anchor === "end" ? "translateX(-100%)" : anchor === "middle" ? "translateX(-50%)" : "";
     overlay.append(el);
+    const w = el.offsetWidth, hh = el.offsetHeight;
+    const left = anchor === "end" ? x - w : anchor === "middle" ? x - w / 2 : x;
+    el.style.left = `${Math.max(2, Math.min(W - w - 2, left))}px`;
+    el.style.top = `${Math.max(2, Math.min(H - hh - 2, y))}px`;
   }
 
   // ---------------------------------------------------------------- drag along the path (pointer)
@@ -324,15 +346,17 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     curEta.textContent = sig(result.eta, 4);
   }
   function dataTable(): HTMLDetailsElement {
+    // η here is always this case's single equivalent stage, evaluated at each mark's Π, not the marked engine's own η
+    // (that engine has its own exhaust velocity); the row names say whose Π it is.
     const rows: HTMLElement[] = [h("tr", {}, h("th", { scope: "row" }, "Current burn"), curPi, curEta)];
-    for (const m of d.marks) rows.push(h("tr", {}, h("th", { scope: "row" }, m.title.value.replace("\n", " ")),
+    for (const m of d.marks) rows.push(h("tr", {}, h("th", { scope: "row" }, `Π of ${m.title.value.replace("\n", " ").replace(": ", " (")})`),
       h("td", { class: "num" }, sig(m.Pi.value)), h("td", { class: "num" }, sig(simulate({ ...params(m.Pi.value), record: false }).eta, 4))));
-    for (const t of d.thresholds) rows.push(h("tr", {}, h("th", { scope: "row" }, `${hibberd.label}'s staged stack reaches ${t.level.replace("%", " %")} loss`),
-      h("td", { class: "num" }, sig(t.Pi.value)), h("td", { class: "num" }, "—")));
+    for (const t of d.thresholds) rows.push(h("tr", {}, h("th", { scope: "row" }, `Π at which ${hibberd.label}'s staged stack reaches ${t.level.replace("%", " %")} loss`),
+      h("td", { class: "num" }, sig(t.Pi.value)), h("td", { class: "num" }, sig(simulate({ ...params(t.Pi.value), record: false }).eta, 4))));
     return h("details", { class: "data" }, h("summary", {}, "Show data"),
       h("div", { class: "table-scroll" }, h("table", { class: "data-table" },
-        h("caption", {}, "η of this case (live simulation) at the current and the marked Π"),
-        h("thead", {}, h("tr", {}, ...["Case", "Π", "η (this case)"].map((t) => h("th", { scope: "col" }, t)))),
+        h("caption", {}, "η of this case (one equivalent stage, live simulation) at the current Π and at each marked Π"),
+        h("thead", {}, h("tr", {}, ...["Point on the Π axis", "Π", "η (this case)"].map((t) => h("th", { scope: "col" }, t)))),
         h("tbody", {}, ...rows))),
       h("p", { class: "table-note" }, "Data: ", sourceLink(site, "figures/anim_numbers.json"), ", ", sourceLink(site, "figures/phase4_numbers.json")));
   }
@@ -365,8 +389,11 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     introRunning = false;
     reveal = Infinity;
     annotAlpha = 1;
+    root.dataset.intro = "done";
   }
   function intro(): void {
+    root.dataset.intro = "running";
+    root.dataset.introRuns = String(Number(root.dataset.introRuns ?? 0) + 1);
     // Simulate the starting case once, then reveal: incoming branch, ignition and spread, exits and η.
     result = simulate(params(PI_MIN));
     finite = pathFrom(result);
@@ -401,10 +428,12 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
 
   impulsive = impulsivePath();
   size();
-  if (opt.reducedMotion) request();
+  if (opt.reducedMotion) { root.dataset.intro = "skipped"; request(); }
   else {
-    // Any reader input during the intro ends it at once.
-    for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) root.addEventListener(ev, () => introRunning && endIntro(), { once: true, passive: true });
+    // Any reader input during the intro (a key, scrolling, a pointer anywhere on the page) ends it at once.
+    for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) {
+      window.addEventListener(ev, () => { if (introRunning) { endIntro(); request(); } }, { once: true, passive: true });
+    }
     intro();
   }
 }
