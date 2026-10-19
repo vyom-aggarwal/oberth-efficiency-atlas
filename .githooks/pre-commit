@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-commit (author rule, 2026-10-18): the fast checks, scripts/check_all.py --fast (type check, vitest,
+# check_numbers on site/content, site-data tests, hook tests). Any failure blocks the commit.
+# Enable once per clone:  git config core.hooksPath .githooks
+# The checks run on the working tree, not only on what is staged.
+root=$(git rev-parse --show-toplevel) || exit 1
+if [ -x "$root/.venv/Scripts/python.exe" ]; then py="$root/.venv/Scripts/python.exe"
+elif [ -x "$root/.venv/bin/python" ]; then py="$root/.venv/bin/python"
+else
+  echo "pre-commit: no .venv found; create it as CLAUDE.md describes" >&2
+  exit 1
+fi
+"$py" "$root/scripts/check_all.py" --fast || {
+  echo "pre-commit: checks failed; commit blocked (see the summary above)" >&2
+  exit 1
+}

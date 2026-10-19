@@ -2298,4 +2298,69 @@ first and saves a crop of the curve. The crops showed:
 - Playwright 31 passed: the 16 screenshot cases, the style and home specs, the 5 hero specs and the
   5 universal-curve specs.
 
+## 2026-10-18: Checkpoint 3 approved; author's fixes; one command for every check
+
+**Author decisions:**
+1. **Hero Π axis on narrow screens:**
+   - engine labels go above the track and threshold labels below, one row each side;
+   - short names ("Solid", "Nuclear", "SEP");
+   - SEP may sit left of its mark;
+   - the layout test asserts one row per side at 360 and 390 px.
+2. **Legend-only universal curve at 640–900 px of plot:** accepted. The legend's markers must differ
+   by shape as well as colour, and the legend must sit directly under the plot.
+3. **The sticky section bar must not cover controls:** scroll padding equal to the bar's height, with
+   Playwright tests at 390 and 1440 px for tabbing to the Curves switch and for section-nav links.
+4. **Process:** one command for every check, and a git pre-commit hook for the fast subset.
+   Playwright stays in CI (checkpoint 6).
+5. **Next:** checkpoints 4 and 5 as planned, with screenshots committed at each; stop for review at
+   checkpoint 6.
+
+**Implementation:**
+- **Π axis** (156863b):
+  - below 560 px of track, engine marks and labels move to an SVG above the track;
+  - the short names are derived from the case titles' names: the first word, so "Solid stack" →
+    "Solid" and "SEP-class" → "SEP";
+  - each row is centred on its marks and pushed apart symmetrically only where neighbours would
+    come within 10 px (0.1 % and 1 % are 17 px apart at 360 px);
+  - the wide layout is unchanged.
+  - **Consequence for an earlier decision:** on a narrow track the SEP label no longer carries
+    "(hypothetical at 3.2 R☉)". The 2026-10-15 decision put the caveat in the label, the tooltip and
+    the table. At narrow widths it stays in the mark's hover title, the data table and the summary.
+    Flagged for the author.
+- **Legend** (ea46d09): no code change was needed.
+  - The legend is the plot's next element, and its eight markers already differ by shape: hollow
+    circle, diamond, filled square, hollow rectangle, dot on a bar, band, dashed line, dotted line.
+  - A test now holds this at 390, 768 and 1440 px. It compares a colour-free signature of each marker
+    (element types, geometry, dash pattern, filled or hollow) and requires all eight to differ.
+- **Sticky bar** (b727763):
+  - `scroll-padding-top` follows the bar's closed height. `home.ts` measures the bar's title, which
+    can wrap, and sets `--sticky-top`.
+  - `e2e/sticky.spec.ts` covers, at 390 and 1440 px: Tab to the Curves switch while it is under the
+    bar; Shift+Tab back to it from below; every section-nav link. Each must leave the target fully
+    visible below the bar.
+  - Against a build without the fix, the Tab and navigation tests failed at 390 px, so the tests
+    detect the defect.
+- **`scripts/check_all.py`:**
+  - type check, vitest, `check_numbers` on every `site/content/*.md` (with `--allow 96,24,12`, the
+    documented theory-constant allowance), then the full Python suite, which includes the site-data
+    and hook tests;
+  - `--fast` swaps the full suite for the site-data and hook tests;
+  - every check runs even after a failure, a crash or a missing tool counts as a failure, and the
+    exit status is 1 if anything failed.
+  - Its first run caught its own bug: importing `check_numbers` in-process failed (a dataclass needs
+    the module registered in `sys.modules`) and was reported as a failure, as designed.
+- **Pre-commit hook:** `.githooks/pre-commit` runs `check_all.py --fast` and blocks the commit on
+  failure.
+  - Enabled with `git config core.hooksPath .githooks`; `.git/hooks` held only samples.
+  - `.gitattributes` pins LF line endings for `.githooks/*`, because a CR after the shebang breaks
+    the hook on macOS and Linux.
+  - It checks the working tree, not only the staged files.
+- **Measured on this laptop**, the fast subset takes about 110 s: site-data tests 61 s (they
+  recompute every exported file), hook tests 38 s (one Node start per case), vitest 7 s, type check
+  5 s, `check_numbers` under 1 s.
+- **Gap the old guard missed:** while preparing this, a loop of
+  `check_numbers … | tail; echo "exit $?"` printed `tail`'s status. The shell guard blocks only test
+  runners, so it allowed that pipe. `check_all.py` closes the gap by judging each check by its own
+  exit status.
+
 

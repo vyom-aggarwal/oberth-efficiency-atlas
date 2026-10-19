@@ -1,2 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Git hooks are shell scripts: a CR after the shebang breaks them on macOS and Linux.
+.githooks/* text eol=lf

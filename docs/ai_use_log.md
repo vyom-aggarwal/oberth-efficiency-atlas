@@ -370,3 +370,21 @@ added to the numbers file as values.
   - **An unverified browser version:** the first draft of the frame-time log entry gave a Chrome
     version that had not been checked. It was replaced by the version the tests report
     (154.0.8037.98) before commit.
+
+**Checkpoint 3 review and checkpoints 4–6 (from 2026-10-18):**
+- **Author decided:**
+  - Approved checkpoint 3, with three fixes:
+    - the narrow Π axis split by category, with short names;
+    - the legend-only curve accepted, with shape-distinct markers directly under the plot;
+    - scroll padding for the sticky bar.
+  - Required one check command and a pre-commit hook, after three unnoticed failures.
+  - Asked for screenshots to be committed at each checkpoint.
+- **Assistant implemented:**
+  - The three fixes, each with Playwright tests; the sticky-bar tests were confirmed to fail without
+    the fix.
+  - `scripts/check_all.py`, and the `.githooks/pre-commit` hook that runs its fast subset.
+- **Assistant flagged:** the short narrow-screen "SEP" label drops the "(hypothetical at 3.2 R☉)"
+  caveat from the axis. The caveat stays in the hover title, the table and the summary.
+- **Assistant errors, disclosed:** while preparing `check_all.py`, the assistant ran a shell loop
+  that printed `tail`'s exit status instead of the checker's. The output was read directly, so
+  nothing was misreported, but it is the same kind of slip that `check_all.py` now prevents.

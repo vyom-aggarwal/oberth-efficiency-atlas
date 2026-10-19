@@ -40,6 +40,20 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
   - It judges the program, not words in arguments, so `grep pytest file | head` is allowed. It
     ignores quoted text and heredoc bodies.
   - Start such commands with `set -o pipefail;`, or don't pipe the test output.
+- **One command runs every check** (user rule, 2026-10-18). Failures went unnoticed three times in
+  Phase 6: an unchecked audit comparison, pytest piped through tail, and `npm test` broken from
+  checkpoint 2 to 3.
+  - `.venv/Scripts/python scripts/check_all.py` runs the type check, vitest, `check_numbers` on
+    every `site/content/*.md` and the full Python suite, which includes the site-data and hook tests.
+    `--fast` swaps the full suite for just the site-data and hook tests; `--only name,…` picks checks.
+  - It runs every check even after a failure, prints a summary, and exits 1 if any check failed. A
+    missing tool (node, `site/node_modules`) is a failure.
+  - **Pre-commit hook:** `.githooks/pre-commit` runs `check_all.py --fast` (about 2 min on the
+    development laptop) and blocks the commit on any failure. Enable it once per clone with
+    `git config core.hooksPath .githooks`. Never bypass it with `--no-verify`.
+  - The hook checks the working tree, not just the staged files.
+  - Run the full `check_all.py` before every checkpoint or phase report. Playwright is not in it:
+    run `SITE_DIST=dist-test npx playwright test` (below), and from checkpoint 6 in CI.
 - **Writing.** The user writes the paper prose; do not draft paper text. Keep
   `docs/paper_outline.md`, the figures and the `figures/*_numbers.json` files current.
   `scripts/check_numbers.py` flags numbers in a Markdown draft that match no numbers JSON. In
