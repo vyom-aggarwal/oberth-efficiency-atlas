@@ -2559,9 +2559,56 @@ first and saves a crop of the curve. The crops showed:
 **Amendment, before the page was built: the explorer's Π range runs to 10⁵, not 10³.**
 - The electric presets at the planets reach Π = 1.6 × 10⁴: gridded ion at Venus, Earth and Mars;
   Hall at Venus, Earth and Mars (4.3–5.1 × 10³); gridded ion at Jupiter and Saturn.
-- Clamping them to 10³ would show a different case under the preset's name. Their burns start outside
-  the body's sphere of influence, which the warning states.
+- Clamping them to 10³ would show a different case under the preset's name. At Venus, Earth and Mars
+  their burns start outside the body's sphere of influence, which the warning states.
+  - Corrected the same day, after measuring: this first said "their burns start outside" for all of
+    them.
+  - At Jupiter and Saturn the electric presets start inside, at 0.24–0.92 of r_SOI (next entry).
 - Measured in node: one simulation at Π = 10³ to 10⁵ takes 1.2–8.1 ms.
 - The decades and their labels are unchanged up to 10³; the axis just continues.
+
+## 2026-10-18: Checkpoint 5: the explorer
+
+**Built:**
+- shared flyby paths (64c4b91);
+- the URL state and presets, with unit tests (ab2a494);
+- the explorer (78a582d);
+- the screenshots (`docs/screens/checkpoint-5/`, b346143).
+
+**Measured on the presets** (`node`, the shared simulator, each preset's own body for the impact radius):
+- **Burn start relative to r_SOI** (Hall / gridded ion):
+  - Venus 12.4 / 39.5;
+  - Earth 5.98 / 18.8;
+  - Mars 8.35 / 26.6;
+  - Jupiter 0.333 / 0.916;
+  - Saturn 0.235 / 0.684.
+  - Nuclear thermal starts within 0.015 of r_SOI everywhere.
+- **Impact** under inertial steering: Jupiter and Saturn with gridded ion. Of the nuclear and
+  electric presets at the planets (the ones probed), none impacts under prograde steering. The
+  chemical presets were not probed.
+- **The Hibberd preset** (one equivalent stage) loses 0.137 m/s, the value logged for the hero's
+  approximation (Phase 4's staged stack: 0.0991 m/s).
+
+**Interface choices:**
+- **Default:** the Hibberd preset exactly as it is. The first draft set Π to the 1 % threshold, so
+  the preset note at once said "inputs changed", which contradicted the selection.
+- **URL meaning:** a URL with the case but no preset means no preset; a URL naming a preset with no
+  inputs means the preset's inputs.
+- **Edited inputs:** after an edit the body stays, and the note says it still sets the SI readouts.
+
+**Defects found by the tests and fixed:**
+- **No post-burn segment on impact.** The simulator stops recording, and `flybyPath` assumed all three
+  segments, so the page rendered nothing. It now takes whatever was recorded, with no coast added
+  past an impact.
+- **Wrong labels on impact:** η read "undefined (captured)", and "v∞ after" read "bound". They now
+  read "impact" and a dash.
+- **Π slider labels collided beyond 1000** ("1000100000"). They are now written 10⁴ and 10⁵.
+
+**Tests:**
+- `e2e/explorer.spec.ts`, 8 tests: the default; the URL both ways; the SOI warning; the impact
+  warning; zoom and pan by wheel, keys and drag, and reset; placement; layout and no sideways
+  scrolling at 390 and 1440 px.
+- Vitest: 16 tests, covering state and presets.
+- Playwright: 87 passed in the last full run.
 
 

@@ -409,3 +409,19 @@ added to the numbers file as values.
     written.
   - **A test command piped into `grep` without pipefail,** blocked by the hook and rerun with
     pipefail.
+- **Checkpoint 5, assistant implemented:**
+  - The explorer: nondimensional inputs with presets, a zoomable trajectory, readouts, warnings,
+    placement on the curve and the theory atlas, and URL state.
+  - Shared path code, now used by the hero too.
+  - Unit and Playwright tests, and the screenshots.
+  - The design was logged before building, including the dropped classic SI mode.
+- **Checkpoint 5, assistant found and fixed:** the missing post-burn segment on impact, the
+  impact labels, the URL meaning of a preset without inputs (and inputs without a preset), the
+  slider labels beyond 1000, and a default that contradicted its own note.
+- **Checkpoint 5, assistant errors, disclosed:**
+  - **An overclaim in the research log,** corrected the same day once the presets were measured. It
+    said every electric preset beyond Π = 10³ starts its burn outside the sphere of influence; at
+    Jupiter and Saturn they start inside.
+  - **Interpretive interface text** ("faster arrivals lose less at large Π") was drafted and removed
+    before commit, as prose that belongs to the author.
+  - **A scratch `sed` edit** corrupted a temporary test file. It was discarded and never committed.
