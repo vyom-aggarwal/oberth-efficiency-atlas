@@ -68,6 +68,11 @@ const FIGURES: Record<string, Mount> = {
       import("../charts/timing"), loadData<SiteData>("site.json"), loadData<any>("timing.json")]);
     timing(body, data, site, { figN, title: "When to fire: the thrust profile of a rocket burn" });
   },
+  case: async (body, figN) => {
+    const [{ caseStudy }, site, data] = await Promise.all([
+      import("../charts/case"), loadData<SiteData>("site.json"), loadData<any>("case.json")]);
+    caseStudy(body, data, site, { figN, title: "How much thrust Hibberd et al.'s burn can lose" });
+  },
   references: async (body) => {
     const site = await loadData<SiteData>("site.json");
     body.append(h("ol", { class: "references" }, ...site.references.map((r) =>
