@@ -388,3 +388,24 @@ added to the numbers file as values.
 - **Assistant errors, disclosed:** while preparing `check_all.py`, the assistant ran a shell loop
   that printed `tail`'s exit status instead of the checker's. The output was read directly, so
   nothing was misreported, but it is the same kind of slip that `check_all.py` now prevents.
+- **Checkpoint 4, assistant implemented:**
+  - Figures 3–7 (three regimes, the atlas, burn timing, the case study, engines compared) and the
+    Limitations facts.
+  - The shared figure module, with a Playwright spec per figure.
+  - The screenshots under `docs/screens/checkpoint-4/`.
+  - The design was logged before building, including the Π axes to 10⁷.
+- **Checkpoint 4, assistant found and fixed:**
+  - labels lost under the all-or-none rule (timing, case study, atlas), and a label collision in
+    regimes;
+  - the engines clock widening the page at 390 px;
+  - readouts that lines could block;
+  - the cause of an intermittent readout test.
+- **Checkpoint 4, assistant errors, disclosed:**
+  - **A temporal-dead-zone error in the atlas,** the third in Phase 6. It was caught by the
+    console-error check before any commit.
+  - **A hand-typed "(10 cases)" in the Limitations label,** removed before commit because the count
+    is not exported.
+  - **A stray `python -` with no input** hung a shell command until it was stopped. Nothing was
+    written.
+  - **A test command piped into `grep` without pipefail,** blocked by the hook and rerun with
+    pipefail.

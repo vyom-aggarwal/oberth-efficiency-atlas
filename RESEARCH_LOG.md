@@ -2444,4 +2444,67 @@ first and saves a crop of the curve. The crops showed:
 - `docs/screens/checkpoint-N/`: a crop of each new figure at 1440 and 390 px, in both themes.
 - The full-page captures (about 1 MB each) stay in `runs/screens/`.
 
+## 2026-10-18: Checkpoint 4: the remaining home figures
+
+**Built**, each with its own Playwright spec and committed on its own:
+- Figure 3, three regimes (5ed3b85);
+- Figure 5, burn timing (f4d7098);
+- Figure 6, the case study (d2c5678);
+- Figure 4, the atlas (59c777a);
+- Figure 7, engines compared, and the Limitations J2 facts (22dc64b).
+- **Shared pieces** (`site/src/charts/common.ts`, f17f6c2): log axes, HTML annotations, the all-or-none
+  label placer, a one-row label layout, the tooltip and hit targets, the data table, chips and
+  segmented controls. The universal curve was moved onto them with its tests unchanged.
+- **Screenshots:** `docs/screens/checkpoint-4/` (c865107).
+
+**Interface choices** (no data involved):
+- **Defaults:**
+  - regimes: the sweep arrival speed nearest v∞/v_esc = 0.1 (0.11);
+  - timing: Δv/c = 1;
+  - atlas: prograde, the middle Δv/V slice (0.021), theory contours on, mission samples off;
+  - engines: the final frame, still until played or scrubbed (principle 5).
+- **On-plot labels need a plot at least 640 px wide**, as in the universal curve; below that, the
+  legend names everything.
+  - The timing marks and the atlas line labels use fixed rows above the plot instead of the placer:
+    - **timing:** ½ < x̄ < x_½ for every Δv/c, so three stacked rows never cross;
+    - **atlas:** one row with leaders. The contours are 45–60 px apart at the top, closer than their
+      labels are wide.
+  - The case study's loss axis runs down to 0.01 m/s, to leave room under the curve for the reference
+    label.
+
+**Facts checked while building:**
+- The burn-start radius is monotone along all 90 rows of the six atlas slices. The 10² and 10³ r_p
+  guides are therefore exact staircases at cell resolution.
+- The Δv → 0 theory contours end at the top sweep cell's centre, not at the frame edge, so their labels
+  are joined to each contour's highest point by a leader.
+- In the inertial Δv/V = 0.40 slice a large region has small negative η (minimum −1.15). It is
+  hatched, as specified. On the paper's diverging scale the same cells are white to light blue.
+- The Phase 3 values at Δv/c = 0.1, 1 and 3 equal the exported closed-form rows exactly. The timing
+  table marks those rows.
+- `j2_numbers.json` counts its cases only as the length of an array that the site does not export, so
+  the Limitations label gives no case count rather than a typed one.
+
+**Defects found and fixed:**
+- **Regimes:** for the fastest arrival, Π_T = 0.049 put its label on the y-axis title. A second header
+  row fixed it.
+- **Timing and case study:** all on-plot labels vanished under the all-or-none rule, until the
+  layouts above.
+- **Engines:** the clock pushed the page 10 px sideways at 390 px. Below 560 px it now takes its own
+  line.
+- **Atlas: a temporal-dead-zone error.** A subscription ran before the helpers it calls were defined.
+  It was caught by the screenshot spec's console-error check, before any commit. This is the third
+  time in Phase 6, after two in the first hero draft.
+- **Regimes and case study: a dead readout.** The readout area lay beneath the lines, so a pointer on
+  a line never reached it. Now only hit targets take the pointer.
+- **Intermittent readout test.** The cause was a null bounding box, taken while a late font load was
+  redrawing the figure. The tests now re-measure and hover again until the tooltip shows; 30 of 30
+  repeated runs pass.
+
+**Open visual questions for the author:**
+- At 390 px the engines figure stacks its three panels, about 1300 px tall in all.
+- The atlas legend has ten entries.
+- The inertial slices hatch large regions of small negative η.
+
+**Test totals:** Playwright 75 passed (frame-time p95 4.2 ms on the last run); `check_all.py` (full) passed: type check, vitest 8, `check_numbers`, pytest 581.
+
 
