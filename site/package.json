@@ -19,7 +19,8 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "palette": "node tools/palette.mjs",
-    "check-age": "node tools/check-package-age.mjs"
+    "check-age": "node tools/check-package-age.mjs",
+    "lighthouse": "node tools/lighthouse.mjs"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "5.3.0",
