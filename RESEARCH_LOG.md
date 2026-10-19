@@ -2362,5 +2362,86 @@ first and saves a crop of the curve. The crops showed:
   `check_numbers … | tail; echo "exit $?"` printed `tail`'s status. The shell guard blocks only test
   runners, so it allowed that pipe. `check_all.py` closes the gap by judging each check by its own
   exit status.
+- **Later runs of the fast subset** took 80–92 s, with the site-data tests at 25–32 s.
+- **The first full run** (`check_all.py`) passed every check, pytest 581 in 170 s.
+
+## 2026-10-18: Checkpoint 4 design (logged before building)
+
+**Deviation from principle 4 ("one Π axis", 0.001–1000).**
+- The regimes figure and the atlas span Π = 10⁻³ to 10⁷:
+  - Π_T reaches 9.6 × 10⁶ for the slowest sweep arrival (`regimes.json`);
+  - atlas cells reach 1.3 × 10⁷ (the Δv/V = 0.399 slice).
+- They use the same decade ticks and labels: decimals up to 1000, powers of ten beyond
+  (`common.piTick`).
+- The hero and the universal curve keep 0.001–1000. The case study's axis is the thrust scale, not Π.
+
+**Figure 3, three regimes** (`regimes.json`):
+- **Data:** η_W sweep medians with the 10th–90th percentile band, for one v∞/v_esc at a time. A slider
+  snaps to the 15 sweep values. The other 14 families are thin Rule-grey context lines; Slate stays
+  reserved for magnitudes (the atlas).
+- **Theory (dashed), each a chip toggle:**
+  - Δv → 0 linear response;
+  - I: 1 − C₀Π²;
+  - II: (9/(2Π))^(1/3);
+  - III: the tail, drawn only where 30 Π_T falls inside the plot.
+- **Π_T:** a vertical marker.
+- **Readout:** a crosshair per bin, giving the bin's η_W percentiles and run count, and its η median
+  for comparison.
+- **Axes:** y runs from 10⁻⁵ to 2. The y-axis title is "η_W (baseline-subtracted energy efficiency)",
+  with a one-line link to `docs/theory.md` §2, where η, η_W and the exact map between them are
+  defined.
+
+**Figure 4, the atlas** (`atlas.json`, `missions.json`):
+- **Heatmap:** canvas, drawn on the sweep's curvilinear cells (corners from `Pi_edges` per v∞/v_esc
+  edge).
+- **Encoding:** η in [0, 1] on the Slate ramp. As plan pass 2 specifies (no red; status gets no
+  colour), these use Ink textures on Paper:
+  - η < 0: 45° lines;
+  - impact: 135° lines;
+  - unreliable or captured: dots.
+- **Controls:**
+  - steering (prograde, inertial);
+  - Δv/V slice (3 values);
+  - body for SOI: none, or Venus, Earth, Mars, Jupiter, Saturn, from `atlas.bodies`;
+  - layers: the Δv → 0 theory contours (η = 0.5, 0.9, 0.99), and the mission samples, filtered to
+    the selected body.
+- **Impact boundaries:** h = 0.1 R solid, h = 1 R dashed.
+- **Burn-start radius, with no body selected:** the 10² and 10³ r_p guide lines are drawn as
+  staircases along cell edges. This is not an interpolated contour: it shows where the data changes,
+  at the data's resolution.
+- **With a body selected:** cells whose burn starts outside its SOI (r_burn_start × r_p/R > r_SOI/R)
+  are washed with Paper.
+- **Readout:** the cell under the pointer. The 585-cell table is built when it is opened.
+
+**Figure 5, burn timing** (`timing.json`):
+- **Control:** a λ = Δv/c slider over the 43 exported rows.
+- **Profile:** a/(Δv/t_b) = f(x) on x ∈ [0, 1], which integrates to 1, filled with the Burn ramp by
+  value.
+- **Markers:** the time midpoint, the Δv-weighted mean x̄, and the half-Δv point.
+- **Readouts:** δ*, the half-Δv rule's δ and its share of the optimal gain, and the recovered fraction
+  for Δv → 0.
+- **Table:** includes the Phase 3 check values.
+
+**Figure 6, case study** (`case.json`):
+- **Axes:** loss in m/s against the thrust scale (× Hibberd et al.'s thrust), log–log, from the
+  Phase 4 sweep.
+- **Marks:** the reference (scale 1) with time-centred and optimal placement; the 0.1 % and 1 %
+  thresholds with their thrust divisors and Π.
+- **Table:** the arrival-orbit and staging sensitivities.
+
+**Figure 7, engines compared** (`engines.json` and `.bin`):
+- **Panels:** three top-down panels using the animation's own radial mapping, ρ = 1 + log₁₀(r/r_p),
+  with circles at 1, 3, 10 and 30 r_p.
+- **Colour:** a·v on the Burn ramp, 10² to 10⁸ W/kg, as in the animation.
+- **Control:** one play/scrub control on the animation's asinh-stretched clock, t = τ sinh s.
+- **Strip:** the energy gain on a symlog time axis (linear within ±τ), with the impulsive step.
+- **Reduced motion:** no autoplay.
+
+**Limitations:** an unnumbered facts block with the J2 results (`j2_numbers.json`, via
+`methods.json`): the largest |Δη|, and the largest relative change in the deficit.
+
+**Screenshots** (author, 2026-10-18: committed at each checkpoint):
+- `docs/screens/checkpoint-N/`: a crop of each new figure at 1440 and 390 px, in both themes.
+- The full-page captures (about 1 MB each) stay in `runs/screens/`.
 
 
