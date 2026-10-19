@@ -98,6 +98,9 @@
 .timing-mark.mark-xhalf { stroke: var(--ink); stroke-dasharray: 6 3; }
 .timing-facts { margin-top: var(--s5); font-size: var(--t-label); }
 .timing-facts dd { font-variant-numeric: tabular-nums lining-nums; }
+/* Only hit targets take the pointer: lines, marks and text drawn over a readout area must not swallow its events. */
+.plot svg :not(.hit) { pointer-events: none; }
+.plot svg .hit { pointer-events: all; }
 .hit { fill: transparent; cursor: pointer; }
 .hit:focus { outline: none; }
 .hit:focus-visible + .focus-ring, .hover .focus-ring { stroke: var(--ink); }

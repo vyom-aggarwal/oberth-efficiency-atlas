@@ -31,8 +31,14 @@ test("case study: the reference and the two threshold points are marked and expl
 
 test("case study: the readout follows the pointer along the sweep", async ({ page }) => {
   const fig = await open(page, 1440);
-  const box = (await fig.locator(".plot svg rect.hit").boundingBox())!;
-  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.3);
+  // A late font load redraws the figure and hides the tooltip: wait for the fonts, and hover again until it shows.
+  await page.evaluate(() => document.fonts.ready);
+  let nudge = 0;                                    // a repeated hover must move the pointer to fire again
+  await expect(async () => {
+    const box = (await fig.locator(".plot svg rect.hit").boundingBox())!;   // re-measured: a redraw replaces it
+    await fig.locator(".plot svg rect.hit").hover({ position: { x: box.width * 0.3 + (nudge++ % 2), y: box.height * 0.3 }, force: true });
+    await expect(fig.locator(".tooltip")).toBeVisible({ timeout: 500 });
+  }).toPass({ timeout: 8000 });
   await expect(fig.locator(".tooltip")).toContainText("loss/Δv");
 });
 
