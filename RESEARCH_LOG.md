@@ -2556,4 +2556,12 @@ first and saves a crop of the curve. The crops showed:
   `history.replaceState`. A "Copy link" button copies it.
 - `src/explorer/state.ts` parses and serializes the query; Vitest covers the round trip (plan §3).
 
+**Amendment, before the page was built: the explorer's Π range runs to 10⁵, not 10³.**
+- The electric presets at the planets reach Π = 1.6 × 10⁴: gridded ion at Venus, Earth and Mars;
+  Hall at Venus, Earth and Mars (4.3–5.1 × 10³); gridded ion at Jupiter and Saturn.
+- Clamping them to 10³ would show a different case under the preset's name. Their burns start outside
+  the body's sphere of influence, which the warning states.
+- Measured in node: one simulation at Π = 10³ to 10⁵ takes 1.2–8.1 ms.
+- The decades and their labels are unchanged up to 10³; the axis just continues.
+
 
