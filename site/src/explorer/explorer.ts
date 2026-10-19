@@ -184,7 +184,7 @@ export function explorer(root: HTMLElement, d: ExplorerData): void {
       row("closest approach", sc ? `${sig((res.r_min * sc.r_p) / sc.R, 4)} ${sc.name} radii` : `${sig(res.r_min, 4)} r_p`, "ex-rmin"),
       row("v∞ after (impulsive)", Number.isFinite(res.v_inf_out)
         ? (sc ? `${speed(res.v_inf_out * sc.V, 4)} (${speed(res.v_inf_imp * sc.V, 4)})` : `${sig(res.v_inf_out, 4)} (${sig(res.v_inf_imp, 4)})`)
-        : "bound", "ex-vout"),
+        : res.impacted ? "—" : "bound", "ex-vout"),
     ];
     if (sc) {
       const dvSI = nd.dv * sc.V;

@@ -18,6 +18,11 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `checkpoint-5/`: the explorer, as full pages.
+  - Its default state (Hibberd et al.'s preset) at 1440 and 390 px in both themes.
+  - Two warning states in the light theme, from `site/e2e/screens-explorer.spec.ts`:
+    - `soi`: Earth with a Hall thruster, whose burn starts outside the sphere of influence;
+    - `impact`: Jupiter with gridded ion under inertial steering.
 - `checkpoint-4/` (commit 9b1f4ae):
   - Figures 3–7: three regimes, the atlas, burn timing, the case study, engines compared;
   - the Limitations facts;
