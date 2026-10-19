@@ -4,7 +4,8 @@
 // same Δv at periapsis. Π is set by dragging along the path (pointer) or with the Π slider (keyboard, touch).
 // One orchestrated moment on first view; none with prefers-reduced-motion.
 import tex from "virtual:tex";
-import { fromTargets, integrate, simulate, type SimResult } from "../sim/oberth-sim.js";
+import { fromTargets, simulate, type SimResult } from "../sim/oberth-sim.js";
+import { flybyPath, impulsivePath, type Pt } from "../sim/paths";
 import { axisSlider, type Mark } from "../controls/axis-slider";
 import { citation, sourceLink } from "../lib/cite";
 import type { SiteData, Sourced } from "../lib/data";
@@ -26,7 +27,6 @@ const PI_MIN = 1e-3, PI_MAX = 1e3;                 // the slider's range: the sh
 const EXTEND = 16;                                  // coast added beyond the simulated window, in time units
 const INTRO_MS = { draw: 800, ignite: 1000, exit: 600 };
 
-type Pt = { x: number; y: number; t: number; av?: number };
 
 export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN: number; reducedMotion: boolean }): void {
   const vp = Math.sqrt(d.nd.v_inf ** 2 + 2);
@@ -150,49 +150,9 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   const sx = (p: { x: number; y: number }) => (p.y + U) * scale;
   const sy = (p: { x: number; y: number }) => (p.x - wTop) * scale;
 
-  // ---------------------------------------------------------------- paths
-  function coastRhs(_t: number, y: number[], out: number[]): void {
-    const r2 = y[0] * y[0] + y[1] * y[1];
-    const k = -1 / (r2 * Math.sqrt(r2));
-    out[0] = y[2]; out[1] = y[3]; out[2] = k * y[0]; out[3] = k * y[1]; out[4] = 0;
-  }
-  const coastOpt = { rtol: 1e-9, atol: 1e-9, maxSteps: 2e5, record: true, rImpact: 0 };
-  function hermite(ts: number[], ys: number[][], withAv?: (y: number[]) => number): Pt[] {
-    const out: Pt[] = [];
-    for (let i = 0; i + 1 < ts.length; i++) {
-      const [t0, t1] = [ts[i], ts[i + 1]], [a, b] = [ys[i], ys[i + 1]], hh = t1 - t0;
-      const n = Math.max(1, Math.min(24, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) * 40)));
-      for (let k = 0; k < n; k++) {
-        const s = k / n, s2 = s * s, s3 = s2 * s;
-        const h00 = 2 * s3 - 3 * s2 + 1, h10 = s3 - 2 * s2 + s, h01 = -2 * s3 + 3 * s2, h11 = s3 - s2;
-        const x = h00 * a[0] + h10 * hh * a[2] + h01 * b[0] + h11 * hh * b[2];
-        const y = h00 * a[1] + h10 * hh * a[3] + h01 * b[1] + h11 * hh * b[3];
-        const yi = a.map((v, j) => v + (b[j] - v) * s);
-        out.push({ x, y, t: t0 + s * hh, av: withAv ? withAv(yi) : undefined });
-      }
-    }
-    const last = ys[ys.length - 1];
-    out.push({ x: last[0], y: last[1], t: ts[ts.length - 1], av: withAv ? withAv(last) : undefined });
-    return out;
-  }
-  function pathFrom(r: SimResult): { pre: Pt[]; burn: Pt[]; post: Pt[] } {
-    const seg = (label: string) => r.segments!.find((s) => s.label === label)!;
-    const pre = seg("pre"), burn = seg("burn"), post = seg("post");
-    const back = integrate(coastRhs, pre.t[0], pre.t[0] - EXTEND, pre.y[0], coastOpt);
-    const fwd = integrate(coastRhs, post.t[post.t.length - 1], post.t[post.t.length - 1] + EXTEND, post.y[post.y.length - 1], coastOpt);
-    const a = params(Pi).a0;
-    const av = (y: number[]) => (a / y[4]) * Math.hypot(y[2], y[3]);
-    return {
-      pre: [...hermite([...back.t].reverse(), [...back.y].reverse()), ...hermite(pre.t, pre.y)],
-      burn: hermite(burn.t, burn.y, av),
-      post: [...hermite(post.t, post.y), ...hermite(fwd.t, fwd.y)],
-    };
-  }
-  function impulsivePath(): Pt[] {
-    const y0 = [1, 0, 0, vp + d.nd.dv, 1];
-    const fwd = integrate(coastRhs, 0, EXTEND + 6, y0, coastOpt);
-    return hermite(fwd.t, fwd.y);
-  }
+  // ---------------------------------------------------------------- paths (shared with the explorer: sim/paths.ts)
+  const pathFrom = (r: SimResult) => flybyPath(r, params(Pi).a0, EXTEND);
+  const impulsive_ = () => impulsivePath(vp, d.nd.dv, EXTEND + 6);
 
   // ---------------------------------------------------------------- drawing
   function rampColour(av: number): string {
@@ -434,7 +394,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   }
   const ease = (u: number) => 1 - (1 - u) ** 3;
 
-  impulsive = impulsivePath();
+  impulsive = impulsive_();
   size();
   if (opt.reducedMotion) { root.dataset.intro = "skipped"; request(); }
   else {
