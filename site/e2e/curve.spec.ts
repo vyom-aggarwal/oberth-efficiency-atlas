@@ -3,6 +3,37 @@
 // the thresholds and, in family mode, each curve's v∞/v_esc.
 import { expect, test } from "./fixtures";
 
+// Where the plot has no labels (author, 2026-10-18: accepted at 640–900 px of plot), the legend names the marks:
+// it sits directly under the plot, and its markers differ by shape (geometry, dash, filled or hollow), not only
+// by colour.
+for (const width of [390, 768, 1440]) {
+  test(`the legend sits under the plot and its markers differ by shape at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("");
+    const fig = page.locator("#fig-universal-curve");
+    await fig.scrollIntoViewIfNeeded();
+    await expect(fig.locator(".plot svg path.band")).toBeVisible();
+    const r = await fig.evaluate((root) => {
+      const plot = root.querySelector(".plot")!, legend = plot.nextElementSibling!;
+      const geometry = ["d", "r", "x", "y", "width", "height", "x1", "x2", "y1", "y2"];
+      const shape = (svg: SVGSVGElement) => [...svg.children].map((c) => {
+        const cs = getComputedStyle(c);
+        return [c.tagName, ...geometry.map((a) => c.getAttribute(a) ?? ""), cs.strokeDasharray,
+                cs.fill === "none" || cs.fill === getComputedStyle(document.body).backgroundColor ? "hollow" : "filled"].join(":");
+      }).join("|");
+      const items = [...legend.querySelectorAll("li")].map((li) => ({ name: li.textContent!.trim().slice(0, 30), shape: shape(li.querySelector("svg")!) }));
+      return { isLegend: legend.matches("ul.legend"), gap: legend.getBoundingClientRect().top - plot.getBoundingClientRect().bottom, items };
+    });
+    expect(r.isLegend, "the element after the plot is the legend").toBe(true);
+    expect(r.gap).toBeGreaterThanOrEqual(0);
+    expect(r.gap).toBeLessThanOrEqual(24);
+    expect(r.items.length, "4 cases, mission samples, band, bound, thresholds").toBe(8);
+    if (process.env.SHOW_SHAPES) console.log(JSON.stringify(r.items, null, 1));
+    const dupes = r.items.filter((a, i) => r.items.some((b, j) => j !== i && b.shape === a.shape)).map((a) => a.name);
+    expect(dupes, "legend items with the same marker shape").toEqual([]);
+  });
+}
+
 for (const width of [390, 600, 768, 1024, 1440]) {
   test(`universal-curve annotations do not collide at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
