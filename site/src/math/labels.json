@@ -11,5 +11,9 @@
   "tau": "\\tau = r_p / \\vp",
   "PiEff": "\\Pi_{\\mathrm{eff}}",
   "Rsun": "\\Rsun",
-  "leadingOrderFamily": "k(1-k)\\,\\Pi^2 / 24"
+  "leadingOrderFamily": "k(1-k)\\,\\Pi^2 / 24",
+  "etaW": "\\eta_W",
+  "PiT": "\\Pi_T",
+  "regimeI": "1 - C_0\\,\\Pi^2",
+  "regimeII": "(9 / 2\\Pi)^{1/3}"
 }

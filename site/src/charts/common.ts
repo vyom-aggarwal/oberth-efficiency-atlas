@@ -166,10 +166,10 @@ export function svgPointer(svg: SVGSVGElement, ev: PointerEvent): [number, numbe
 
 /** "Show data": a table of the plotted values. Cells in `numeric` columns are right-aligned tabular figures. */
 export function dataTable(caption: string, head: string[], rows: (string | Node)[][], numeric: number[] = [],
-                          note?: Node): HTMLDetailsElement {
+                          note?: Node, toggle = "Show data"): HTMLDetailsElement {
   const tr = (cells: (string | Node)[]) => h("tr", {}, ...cells.map((c, j) =>
     j === 0 ? h("th", { scope: "row" }, c) : h("td", numeric.includes(j) ? { class: "num" } : {}, c)));
-  return h("details", { class: "data" }, h("summary", {}, "Show data"),
+  return h("details", { class: "data" }, h("summary", {}, toggle),
     h("div", { class: "table-scroll" }, h("table", { class: "data-table" },
       h("caption", {}, caption),
       h("thead", {}, h("tr", {}, ...head.map((t) => h("th", { scope: "col" }, t)))),

@@ -35,9 +35,17 @@ for (const path of PAGES) {
         const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "home"}-${width}-${theme}.png`;
         await page.screenshot({ path: `${OUT}/${name}`, fullPage: true });
         if (path === "") {
-          for (const fig of ["hero", "universal-curve"]) {
-            await expect(page.locator(`#fig-${fig} .figure-body > *`).first()).toBeVisible();
-            await page.locator(`#fig-${fig}`).screenshot({ path: `${OUT}/${fig}-${width}-${theme}.png` });
+          // A crop of every figure on the home page (all are mounted after the scroll above).
+          const figs = await page.locator("figure[data-figure]").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.figure!));
+          // Cropped from a full-page capture, where nothing is scrolled: an element screenshot scrolls the figure to
+          // the top of the viewport, under the sticky section bar on narrow screens.
+          for (const fig of figs) {
+            if (!(await page.locator(`#fig-${fig} .figure-body > *`).count())) continue;     // not built yet
+            const box = await page.locator(`#fig-${fig}`).evaluate((e) => {
+              const r = e.getBoundingClientRect();
+              return { x: r.left + window.scrollX, y: r.top + window.scrollY, width: r.width, height: r.height };
+            });
+            await page.screenshot({ path: `${OUT}/${fig}-${width}-${theme}.png`, fullPage: true, clip: box });
           }
         }
         expect(errors, "console errors").toEqual([]);

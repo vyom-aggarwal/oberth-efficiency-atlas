@@ -36,6 +36,16 @@
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
 .legend svg { overflow: visible; flex: none; }
 .range-box { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+/* Sweep data and theory in the regimes figure; theory curves keep distinct dashes so the legend tells them apart. */
+.data-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.data-dot { fill: var(--ink); }
+.context-line { fill: none; stroke: var(--rule); stroke-width: 1; }
+.ref-line { stroke: var(--graphite); stroke-width: 1; }
+.theory-line.theory-linear { stroke-dasharray: 10 3; }
+.theory-line.theory-I { stroke-dasharray: 5 3; }
+.theory-line.theory-II { stroke-dasharray: 2 2.5; }
+.theory-line.theory-III { stroke-dasharray: 7 2 1.5 2; }
+.figure-note { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin: var(--s2) 0 0; }
 .hit { fill: transparent; cursor: pointer; }
 .hit:focus { outline: none; }
 .hit:focus-visible + .focus-ring, .hover .focus-ring { stroke: var(--ink); }
