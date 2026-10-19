@@ -2507,4 +2507,53 @@ first and saves a crop of the curve. The crops showed:
 
 **Test totals:** Playwright 75 passed (frame-time p95 4.2 ms on the last run); `check_all.py` (full) passed: type check, vitest 8, `check_numbers`, pytest 581.
 
+## 2026-10-18: Checkpoint 5 design, the explorer (logged before building)
+
+**Inputs** (plan §1):
+- **The case** is the four nondimensional targets Π, v∞/v_esc, Δv/v_p and Δv/c, plus the steering
+  law. Each is a number field paired with a log slider (`axisSlider`). The Π slider marks the 0.1 %
+  and 1 % thresholds, as every Π axis does (principle 4).
+- **A preset fills those four inputs** and keeps its body's scales, so that SI readouts and the SOI
+  warning remain:
+  - burn duration and loss in m/s;
+  - r_min in body radii;
+  - v∞,out in km/s.
+- **Deviation from the classic explorer,** which has a second, SI "mission" mode (sliders for
+  periapsis, v∞, Δv, Isp and a₀):
+  - the redesigned page drops that mode, and the presets take its place;
+  - it also drops the classic page's option to place the Δv centroid at periapsis (Figure 5
+    covers burn timing);
+  - the classic page stays linked as the fallback.
+- **Body × engine presets** (`presets.json`, from `configs/atlas/presets.yaml`), computed as the
+  classic explorer does:
+  - the geometric middle of each range (periapsis, v∞, Δv, Isp, a₀);
+  - t_b = (c/a₀)(1 − e^(−Δv/c));
+  - v_p = √(v∞² + 2GM/r_p);
+  - Π = t_b v_p / r_p.
+- **The Hibberd preset** reads `hero.json`:
+  - the same one-equivalent-stage approximation as the hero, labelled as an approximation of a
+    parabolic arrival;
+  - the Phase 4 arrival-orbit sensitivity (0.0991 against 0.0994 m/s) printed beside it.
+
+**Views:**
+- **Trajectory:** a canvas in the hero's convention (periapsis down), with the burn on the Burn ramp
+  by a·v and the impulsive exit dashed.
+  - Zoom and pan by wheel or pinch, drag, and keys (+ / − / arrows / 0); a "Reset view" button.
+  - The path-building code (Hermite interpolation, two-body coast extension) moves out of `hero.ts`
+    into a shared module, so the hero and the explorer draw paths the same way.
+- **Readouts:** η, Π, loss/Δv, r_min/r_p and v∞,out.
+- **Warnings,** each an icon plus text, never colour alone:
+  - impact;
+  - captured (η undefined; the loss is then the equivalent-Δv penalty);
+  - the burn starting outside the body's sphere of influence, for a preset with a finite SOI.
+- **Placement**, with the reader's case as an Ink ring with a crosshair in both:
+  - on the universal curve (`curve.json`: the near-parabolic band, the bound, the thresholds);
+  - on the Δv → 0 theory atlas (`presets.json` `theory_atlas`: linear response, prograde), labelled
+    as theory.
+
+**State:**
+- The URL query holds `Pi`, `v`, `dv`, `c`, `s` (steering) and `preset`, updated with
+  `history.replaceState`. A "Copy link" button copies it.
+- `src/explorer/state.ts` parses and serializes the query; Vitest covers the round trip (plan §3).
+
 
