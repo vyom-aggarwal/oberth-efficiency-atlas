@@ -27,8 +27,8 @@ export function position(el: HTMLElement, x: number, y: number, anchor: Anchor):
 /** Π tick labels: plain decimals over the shared decades (0.001 … 1000, principle 4), powers of ten beyond. */
 export const piTick = (t: number): string => (t >= 1e-3 && t <= 1e3 ? decade(t) : pow10(t));
 
-/** Gridlines, axis lines, ticks and tick labels for log axes. `everyX` labels every n-th x tick (narrow plots). */
-export function logAxes(svg: SVGSVGElement, x: Scale, y: Scale, W: number, H: number, m: Margins,
+/** Gridlines, axis lines, ticks and tick labels (log or linear scales). `everyX` labels every n-th x tick. */
+export function logAxes(svg: SVGSVGElement, x: Scale | ((v: number) => number), y: Scale | ((v: number) => number), W: number, H: number, m: Margins,
                         o: { xTicks: number[]; yTicks: number[]; xFmt: (t: number) => string; yFmt: (t: number) => string; everyX?: number }): void {
   const g = s("g");
   for (const t of o.xTicks) g.append(s("line", { class: "gridline", x1: x(t), x2: x(t), y1: m.top, y2: H - m.bottom }));

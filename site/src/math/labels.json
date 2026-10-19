@@ -15,5 +15,10 @@
   "etaW": "\\eta_W",
   "PiT": "\\Pi_T",
   "regimeI": "1 - C_0\\,\\Pi^2",
-  "regimeII": "(9 / 2\\Pi)^{1/3}"
+  "regimeII": "(9 / 2\\Pi)^{1/3}",
+  "aOverMean": "a \\,/\\, (\\Delta v / t_b)",
+  "xDef": "x = t / t_b",
+  "xBar": "\\bar{x}",
+  "xHalf": "x_{1/2}",
+  "deltaStar": "\\delta^*"
 }

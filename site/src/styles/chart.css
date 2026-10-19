@@ -46,6 +46,15 @@
 .theory-line.theory-II { stroke-dasharray: 2 2.5; }
 .theory-line.theory-III { stroke-dasharray: 7 2 1.5 2; }
 .figure-note { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin: var(--s2) 0 0; }
+/* Burn timing: the profile (Burn ramp by value) and its three time marks. */
+.profile-fill { stroke: none; }
+.profile-line { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+.timing-mark { stroke-width: 1.5; }
+.timing-mark.mark-mid { stroke: var(--graphite); stroke-dasharray: 1 3; }
+.timing-mark.mark-xbar { stroke: var(--ink); }
+.timing-mark.mark-xhalf { stroke: var(--ink); stroke-dasharray: 6 3; }
+.timing-facts { margin-top: var(--s5); font-size: var(--t-label); }
+.timing-facts dd { font-variant-numeric: tabular-nums lining-nums; }
 .hit { fill: transparent; cursor: pointer; }
 .hit:focus { outline: none; }
 .hit:focus-visible + .focus-ring, .hover .focus-ring { stroke: var(--ink); }
