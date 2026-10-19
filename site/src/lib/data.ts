@@ -37,6 +37,18 @@ export function loadData<T>(name: string): Promise<T> {
   return cache.get(name) as Promise<T>;
 }
 
+/** A binary data file (e.g. engines.bin: little-endian Float32 arrays laid out by its JSON header). */
+export function loadBinary(name: string): Promise<ArrayBuffer> {
+  if (!cache.has(name)) {
+    const url = `${import.meta.env.BASE_URL}data/${name}`;
+    cache.set(name, fetch(url).then((r) => {
+      if (!r.ok) throw new Error(`${name}: HTTP ${r.status}`);
+      return r.arrayBuffer();
+    }));
+  }
+  return cache.get(name) as Promise<ArrayBuffer>;
+}
+
 /** Fill a {template, fields} description from its sourced values. */
 export function fillTemplate(d: { template: string; fields: Record<string, Sourced<number | string>> } | Sourced<string>): string {
   if ("value" in d) return d.value;

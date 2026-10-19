@@ -45,23 +45,23 @@
 .axis-slider { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s3); align-items: center; }
 .axis-slider .slider-label { font-size: var(--t-ui); }
 .axis-slider .track { position: relative; }
-:is(.axis-slider, .snap-slider) input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0;
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0;
   background: transparent; cursor: pointer; }
-:is(.axis-slider, .snap-slider) input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
-:is(.axis-slider, .snap-slider) input[type="range"]::-moz-range-track { height: 2px; background: var(--ink); }
-:is(.axis-slider, .snap-slider) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-track { height: 2px; background: var(--ink); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
   border-radius: 50%; background: var(--ink); border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
-:is(.axis-slider, .snap-slider) input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink);
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink);
   border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
-:is(.axis-slider, .snap-slider) input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 .axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
 .axis-slider svg.marks-above { height: 0; }          /* set when drawn: engine marks on a narrow track */
 .axis-slider svg text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
 .axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
 .axis-slider svg text.mark-label.hollow { fill: var(--text-2); }   /* not .threshold: that class is the dotted line style */
 @media (pointer: coarse) {
-  :is(.axis-slider, .snap-slider) input[type="range"] { height: 44px; }
-  :is(.axis-slider, .snap-slider) input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12px; }
+  :is(.axis-slider, .snap-slider, .scrub) input[type="range"] { height: 44px; }
+  :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12px; }
 }
 
 /* Slider over a fixed list of values: label, track, the current value. */

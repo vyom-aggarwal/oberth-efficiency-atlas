@@ -1,9 +1,9 @@
 // The home page: the shell, the sticky section navigation, and the figures, each loaded when it nears the
 // viewport (data for figures below the fold is lazy-loaded with its code).
 import { initShell } from "./shell";
-import { loadData, type SiteData } from "../lib/data";
+import { loadBinary, loadData, type SiteData } from "../lib/data";
 import { h } from "../lib/dom";
-import { referenceHTML } from "../lib/cite";
+import { referenceHTML, sourceLink } from "../lib/cite";
 import { sig } from "../lib/format";
 
 initShell("home");
@@ -77,6 +77,21 @@ const FIGURES: Record<string, Mount> = {
     const [{ caseStudy }, site, data] = await Promise.all([
       import("../charts/case"), loadData<SiteData>("site.json"), loadData<any>("case.json")]);
     caseStudy(body, data, site, { figN, title: "How much thrust Hibberd et al.'s burn can lose" });
+  },
+  engines: async (body, figN) => {
+    const [{ engines }, site, data] = await Promise.all([
+      import("../charts/engines"), loadData<SiteData>("site.json"), loadData<any>("engines.json")]);
+    const buf = await loadBinary(data.binary);
+    engines(body, data, buf, site, { figN, title: "One dive, three engines" });
+  },
+  limitations: async (body) => {
+    // One figure-free number for the Limitations section (plan §1): the J2 sensitivity, from j2_numbers.json.
+    const [site, m] = await Promise.all([loadData<SiteData>("site.json"), loadData<any>("methods.json")]);
+    const row = (k: string, v: Node | string) => h("div", {}, h("dt", {}, k), h("dd", {}, v));
+    body.append(h("dl", { class: "facts" },
+      row("J2 oblateness, largest change in η", sig(m.j2_max_abs_delta_eta.value, 2)),
+      row("J2 oblateness, largest relative change in the deficit 1 − η", `${sig(100 * m.j2_max_rel_delta_deficit.value, 2)} %`),
+      row("Source", sourceLink(site, "figures/j2_numbers.json"))));
   },
   references: async (body) => {
     const site = await loadData<SiteData>("site.json");

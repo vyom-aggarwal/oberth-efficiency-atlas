@@ -9,7 +9,7 @@
     { "id": "timing", "file": "timing.md", "figure": "timing" },
     { "id": "case-study", "file": "case-study.md", "figure": "case" },
     { "id": "engines", "file": "engines.md", "figure": "engines" },
-    { "id": "limitations", "file": "limitations.md" },
+    { "id": "limitations", "file": "limitations.md", "figure": "limitations" },
     { "id": "methods", "file": "methods.md", "figure": "methods" },
     { "id": "references", "file": "references.md", "figure": "references" },
     { "id": "disclosure", "file": "disclosure.md" }

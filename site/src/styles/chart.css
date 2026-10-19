@@ -68,6 +68,27 @@
 .ramp-ends { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
 .inline-select { display: inline-flex; align-items: center; }
 
+/* Engines compared: three panels, one clock, the energy strip. */
+.engine-controls { flex-wrap: nowrap; }
+.engine-controls .scrub { flex: 1 1 auto; min-width: 120px; }
+.clock { font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; min-width: 22ch; color: var(--text-2); }
+@media (max-width: 560px) {                       /* the clock takes its own line: no sideways scrolling at 360–390 px */
+  .engine-controls { flex-wrap: wrap; }
+  .clock { flex: 1 0 100%; min-width: 0; }
+}
+.engine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--s4); }
+.engine-panel { margin: 0; min-width: 0; }
+.engine-canvas { display: block; }
+.engine-cap { display: flex; flex-direction: column; gap: 2px; font-size: var(--t-label); color: var(--text-2); margin-top: var(--s1); }
+.engine-name { color: var(--text); font-weight: 500; }
+.engine-note { color: var(--text); }
+.strip-plot { margin-top: var(--s4); }
+.strip-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.strip-line.faint { stroke: var(--rule); }
+.imp-step { fill: none; stroke: var(--graphite); stroke-width: 1.2; }
+.strip-cursor { stroke: var(--graphite); stroke-width: 1; }
+.dash-key { display: inline-flex; align-items: center; gap: 4px; margin-right: var(--s3); }
+
 /* Burn timing: the profile (Burn ramp by value) and its three time marks. */
 .profile-fill { stroke: none; }
 .profile-line { fill: none; stroke: var(--ink); stroke-width: 1.5; }
