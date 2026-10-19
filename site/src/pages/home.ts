@@ -33,6 +33,16 @@ for (const s of document.querySelectorAll<HTMLElement>("section[data-section]"))
 mobileNav?.addEventListener("click", (e) => {
   if ((e.target as HTMLElement).closest("a")) mobileNav.open = false;
 });
+// Keep scroll targets and focused controls clear of the sticky section bar (narrow screens, author 2026-10-18):
+// --sticky-top, which sets scroll-padding-top, follows the bar's closed height (its title can wrap). The summary is
+// observed rather than the bar, so an open list does not count.
+const barTitle = mobileNav?.querySelector("summary");
+if (mobileNav && barTitle) new ResizeObserver(() => {
+  const cs = getComputedStyle(mobileNav);
+  const height = cs.display === "none" ? 0
+    : barTitle.offsetHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth);
+  document.documentElement.style.setProperty("--sticky-top", `${Math.ceil(height)}px`);
+}).observe(barTitle);
 
 // ---------------------------------------------------------------- figures
 type Mount = (body: HTMLElement, figN: number) => Promise<void>;
