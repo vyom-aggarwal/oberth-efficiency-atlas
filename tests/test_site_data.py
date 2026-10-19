@@ -59,7 +59,8 @@ def test_every_number_matches_its_source(path):
 def test_provenance_hashes_match_sources(path):
     prov = json.loads(path.read_text(encoding="utf-8"))["provenance"]
     for rel, digest in prov["sources"].items():
-        assert hashlib.sha256((ROOT / rel).read_bytes()).hexdigest() == digest, rel
+        # CRLF read as LF, as export_site_data.sha256: the hash must not depend on the checkout's line endings.
+        assert hashlib.sha256((ROOT / rel).read_bytes().replace(b"\r\n", b"\n")).hexdigest() == digest, rel
 
 
 def test_curve_arrays_recompute_exactly():

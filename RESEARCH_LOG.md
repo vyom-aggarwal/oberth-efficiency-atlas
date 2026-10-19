@@ -2611,4 +2611,26 @@ first and saves a crop of the curve. The crops showed:
 - Vitest: 16 tests, covering state and presets.
 - Playwright: 87 passed in the last full run.
 
+## 2026-10-18: Checkpoint 6: the fresh-clone audit found checkout-dependent provenance hashes
+
+**Finding:** the first fresh-clone rebuild (clone of 9ed036a) stopped at its first step. 17 of
+`tests/test_site_data.py` failed there, though they pass in the repository.
+- **Cause:** the site export (Phase 6 code) hashed each source file's raw bytes.
+- With `* text=auto` and `core.autocrlf=true`, a fresh Windows checkout writes text files with CRLF.
+  Files that the assistant's tools had written in this working copy are LF; older checkouts are CRLF.
+- Measured: `docs/repro.md` is 7112 bytes here against 7245 in the clone, one byte per line for its
+  133 lines. `src/oberth_atlas/constants.py` is CRLF in both and hashed the same.
+- A Linux checkout (CI) would fail the same way in reverse, on the files that are CRLF here.
+
+**Fix:**
+- `export_site_data.sha256` and the test hash the content with CRLF read as LF, so text files hash as
+  git stores them.
+- Binary files are byte-identical in every checkout, so they keep a consistent hash under the same
+  normalization.
+- The site data is re-exported; only the provenance hashes change. `repro_audit.py` ignores
+  provenance, and no displayed value moved.
+- The audit then restarts from a fresh clone of the fixed commit.
+- The analysis code and its outputs are untouched: the v1.0 audit (2026-10-06) predates the site
+  export.
+
 

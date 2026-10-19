@@ -59,7 +59,12 @@ def git_revision() -> str:
 
 
 def sha256(rel: str) -> str:
-    return hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
+    """sha256 of the file with CRLF read as LF: a checkout's line endings (core.autocrlf) must not change the hash.
+
+    Text files then hash as git stores them; binary files are byte-identical in every checkout, so the same
+    normalization keeps their hash consistent too. Found by the fresh-clone audit of 2026-10-18.
+    """
+    return hashlib.sha256((ROOT / rel).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def provenance(sources: list[str]) -> dict:
