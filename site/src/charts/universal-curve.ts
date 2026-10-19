@@ -11,6 +11,7 @@ import { fillTemplate } from "../lib/data";
 import { frag, h, onFontsLoaded, s } from "../lib/dom";
 import { decade, lossRel, pow10, sig, speed } from "../lib/format";
 import { signal } from "../lib/signal";
+import { hitTarget, LabelPlacer, place, svgPointer, tooltip } from "./common";
 
 type Detail = Sourced<string> | { template: string; fields: Record<string, Sourced<number | string>> };
 interface Case {
@@ -55,7 +56,6 @@ const LABEL_AT: Record<string, { dx: number; dy: number; anchor: "start" | "end"
   bound: { dx: -22, dy: -26, anchor: "end" },
 };
 const BAND_LABEL_AT_PI = 3;                        // where the band's label points (layout)
-type Box = { left: number; top: number; right: number; bottom: number };
 
 export interface UniversalCurveOptions { figN: number; title: string }
 
@@ -98,8 +98,8 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
 
   const svg = s("svg", { role: "img", "aria-labelledby": `${uid}-title`, "aria-describedby": `${uid}-summary`, id: `${uid}-plot` });
   const overlay = h("div", { class: "overlay", "aria-hidden": "true" });
-  const tip = h("div", { class: "tooltip", role: "status", hidden: true });
-  const plot = h("div", { class: "plot" }, svg, overlay, tip);
+  const plot = h("div", { class: "plot" }, svg, overlay);
+  const tip = tooltip(plot);
   const summary = h("p", { class: "summary", id: `${uid}-summary` });
   const table = dataTable(data, site);
   root.append(head, controls, plot, legend(data), summary, table);
@@ -130,11 +130,12 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
-    hideTip();
-    const labels: Element[] = [];                  // on-plot case labels and leaders (all or none, see below)
-    const queued: (() => void)[] = [];
-    let allClear = true;
-    let lineBoxes: Box[] | null = null;
+    tip.hide();
+    // On-plot labels go on once every mark and line is drawn, in the order queued (band, bound, samples, cases); all
+    // or none (common.ts).
+    const placer = new LabelPlacer(svg, overlay, plot, W, H - m.bottom);
+    const label = (id: string, px: number, py: number, content: Node) =>
+      placer.add(px, py, content, LABEL_AT[id] ?? { dx: 14, dy: -14, anchor: "start" });
 
     // Grid and axes.
     const g = s("g");
@@ -251,10 +252,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       hit(gr, px, py, caseLabelText(c, data.cases), () => caseTip(c, data.cases, site));
       if (labelled) label(c.id, px, py, caseLabel(c, data.cases, true));
     }
-    // Labels go on once every mark and line is drawn, in the order queued (band, bound, samples, cases). All or
-    // none: if any label found no clear place, the legend alone names the marks at this width.
-    for (const run of queued) run();
-    if (!allClear) for (const e of labels) e.remove();
+    placer.finish();                              // if any label found no clear place, the legend alone names the marks
 
     // Crosshair readout along the band (pointer; the data table carries the same values for keyboard users).
     const area_ = s("rect", { class: "hit", x: m.left, y: m.top, width: W - m.left - m.right, height: H - m.top - m.bottom, "aria-hidden": "true" });
@@ -262,100 +260,21 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     svg.insertBefore(area_, svg.firstChild);
     svg.append(cross);
     area_.addEventListener("pointermove", (ev) => {
-      const [mx] = pointer(ev);
+      const [mx] = svgPointer(svg, ev);
       const P = x.invert(mx);
       cross.setAttribute("x1", String(mx)); cross.setAttribute("x2", String(mx));
       cross.setAttribute("visibility", "visible");
       const lo = interpLog(bandPts, P, 1), hi = interpLog(bandPts, P, 2);
-      showTip(mx + 12, y(Math.max(1e-9, hi || 1e-9)) - 10, h("div", {},
+      tip.show(mx + 12, y(Math.max(1e-9, hi || 1e-9)) - 10, h("div", {},
         h("div", { class: "tt-title" }, `Π = ${sig(P)}`),
         h("dl", {}, h("dt", {}, "Band, loss/Δv"), h("dd", {}, Number.isFinite(lo) ? `${lossRel(lo)} to ${lossRel(hi)}` : "—"),
           h("dt", {}, "Bound Π²/96"), h("dd", {}, P <= 10 ? lossRel((P * P) / 96) : "—")),
         h("div", { class: "tt-source" }, "Data: ", sourceLink(site, data.bound.data), ", ", sourceLink(site, "results/phase4.parquet"))));
     });
-    area_.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
-
-    // A label goes at its preferred offset from the mark (LABEL_AT) if that overlaps nothing already drawn
-    // (labels, text, marks); otherwise at the first clear one of its mirror images or of those further out, and if
-    // none is clear, where it overlaps least.
-    function label(id: string, px: number, py: number, content: Node): void {
-      queued.push(() => placeLabel(id, px, py, content));
-    }
-    function placeLabel(id: string, px: number, py: number, content: Node): void {
-      const pref = LABEL_AT[id] ?? { dx: 14, dy: -14, anchor: "start" as const };
-      const el = h("div", { class: "annot-html" }, content);
-      const taken = obstacles();
-      overlay.append(el);
-      const w = el.offsetWidth, hh = el.offsetHeight;
-      type At = { dx: number; dy: number; anchor: "start" | "end" };
-      const box = (a: At) => {
-        const left = px + a.dx + (a.anchor === "end" ? -3 - w : 3), top = py + a.dy + (a.dy < 0 ? -hh : 2);
-        return { left, top, right: left + w, bottom: top + hh };
-      };
-      // Overlap (px²) with what is drawn, padded by 4 px across and 2 px up and down; leaving the plot counts as
-      // overlap too.
-      const cost = (b: Box) => {
-        const out = Math.max(0, -b.left) + Math.max(0, b.right - W) + Math.max(0, -b.top) + Math.max(0, b.bottom - (H - m.bottom));
-        return out * 1e4 + taken.reduce((sum, t) =>
-          sum + Math.max(0, Math.min(b.right + 4, t.right) - Math.max(b.left - 4, t.left)) *
-                Math.max(0, Math.min(b.bottom + 2, t.bottom) - Math.max(b.top - 2, t.top)), 0);
-      };
-      const flip = (a: "start" | "end") => (a === "end" ? "start" : "end");
-      const tries: At[] = [];
-      for (const k of [1, 1.6, 2.2, 3]) for (const sx of [1, 2]) for (const [fx, fy] of [[1, 1], [1, -1], [-1, 1], [-1, -1]])
-        tries.push({ dx: pref.dx * fx * sx, dy: pref.dy * fy * k, anchor: fx > 0 ? pref.anchor : flip(pref.anchor) });
-      const costs = tries.map((a) => cost(box(a)));
-      const clear = costs.findIndex((c) => c === 0);
-      if (clear < 0) allClear = false;
-      const at = tries[clear >= 0 ? clear : costs.indexOf(Math.min(...costs))];
-      const lx = px + at.dx, ly = py + at.dy;
-      const leader = s("path", { class: "leader", d: `M${px + Math.sign(at.dx) * 6},${py + Math.sign(at.dy) * 6} L${lx},${ly}` });
-      svg.append(leader);
-      position(el, lx + (at.anchor === "end" ? -3 : 3), at.dy < 0 ? ly - hh : ly + 2, at.anchor);
-      labels.push(el, leader);
-    }
-    /** Boxes (plot px) of what a new label must not cover: annotations, SVG text, the data marks, and points every
-     *  6 px along the band's edges and the curves (SVG user units are plot px: the viewBox is the plot's size). */
-    function obstacles(): Box[] {
-      const o = plot.getBoundingClientRect();
-      lineBoxes ??= [...svg.querySelectorAll<SVGPathElement>("path.band-edge, path.theory-line, path.sim-line")].flatMap((p) => {
-        const n = p.getTotalLength(), out: Box[] = [];
-        for (let l = 0; l <= n; l += 6) {
-          const q = p.getPointAtLength(l);
-          out.push({ left: q.x - 1.5, top: q.y - 1.5, right: q.x + 1.5, bottom: q.y + 1.5 });
-        }
-        return out;
-      });
-      return [...overlay.children, ...svg.querySelectorAll("text, .mark-sim, .mark-pub, .range-box")].map((e) => {
-        const r = e.getBoundingClientRect();
-        return { left: r.left - o.left, top: r.top - o.top, right: r.right - o.left, bottom: r.bottom - o.top };
-      }).concat(lineBoxes);
-    }
+    area_.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); tip.hide(); });
     function hit(gr: SVGGElement, cx: number, cy: number, name: string, content: () => HTMLElement): void {
-      const target = s("circle", { class: "hit", cx, cy, r: 16, tabindex: 0, role: "button", "aria-label": `${name}: details` });
-      const ring = s("circle", { class: "focus-ring", cx, cy, r: 12 });
-      gr.append(target, ring);
-      const show = () => { gr.classList.add("hover"); showTip(cx + 16, cy - 8, content()); };
-      const hide = () => { gr.classList.remove("hover"); hideTip(); };
-      target.addEventListener("pointerenter", show);
-      target.addEventListener("pointerleave", hide);
-      target.addEventListener("focus", show);
-      target.addEventListener("blur", hide);
-      target.addEventListener("keydown", (e) => { if (e.key === "Escape") hide(); });
+      hitTarget(gr, cx, cy, name, tip, content);
     }
-  }
-
-  function showTip(px: number, py: number, content: HTMLElement): void {
-    tip.replaceChildren(content);
-    tip.hidden = false;
-    const W = plot.clientWidth, w = tip.offsetWidth, hgt = tip.offsetHeight;
-    tip.style.left = `${Math.max(0, Math.min(px, W - w))}px`;
-    tip.style.top = `${Math.max(0, py - hgt)}px`;
-  }
-  function hideTip(): void { tip.hidden = true; }
-  function pointer(ev: PointerEvent): [number, number] {
-    const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal;
-    return [((ev.clientX - r.left) * vb.width) / r.width, ((ev.clientY - r.top) * vb.height) / r.height];
   }
 }
 
@@ -419,20 +338,6 @@ function legend(d: CurveData): HTMLElement {
   items.push([mk([s("line", { class: "threshold", x1: -10, x2: 10, y1: 0, y2: 0 })]),
     document.createTextNode(d.thresholds.map((t) => t.level.replace("%", " %")).join(" and ") + " loss")]);
   return h("ul", { class: "legend", "aria-label": "Legend" }, ...items.map(([g, t]) => h("li", {}, g, t)));
-}
-
-function place(layer: HTMLElement, html: string, x: number, y: number, anchor: "start" | "middle" | "end", cls = ""): HTMLElement {
-  const el = h("div", { class: `annot-html ${cls}` });
-  el.append(frag(html));
-  layer.append(el);
-  position(el, x, y, anchor);
-  return el;
-}
-
-function position(el: HTMLElement, x: number, y: number, anchor: "start" | "middle" | "end"): void {
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  el.style.transform = anchor === "end" ? "translateX(-100%)" : anchor === "middle" ? "translateX(-50%)" : "";
 }
 
 function interpLog(pts: [number, number, number][], P: number, k: 1 | 2): number {
