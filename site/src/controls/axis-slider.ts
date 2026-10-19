@@ -2,7 +2,7 @@
 // control (keyboard, touch, screen readers); the SVG beneath is the scale, aligned to the thumb's travel.
 // Marks (e.g. the three engines of the engines-compared section) are drawn above the scale.
 import { h, onFontsLoaded, s } from "../lib/dom";
-import { decade, sig } from "../lib/format";
+import { decade, pow10, sig } from "../lib/format";
 import { signal, type Signal } from "../lib/signal";
 
 /** A mark on the scale: filled (an engine) or hollow (a threshold); `detail` becomes its hover title. */
@@ -72,7 +72,7 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       // The end labels align with the scale's ends instead of centring past them.
       const anchor = x(t) < 24 ? "start" : x(t) > width - 24 ? "end" : "middle";
       const tx = anchor === "start" ? 0 : anchor === "end" ? width : x(t);
-      svg.append(s("text", { x: tx, y: 19, "text-anchor": anchor, class: "tick" }, decade(t)));
+      svg.append(s("text", { x: tx, y: 19, "text-anchor": anchor, class: "tick" }, t > 1000 ? pow10(t) : decade(t)));   // 10⁴, 10⁵ beyond the shared decades
     }
     above.replaceChildren();
     above.style.height = "0px";

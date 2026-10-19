@@ -23,10 +23,12 @@ export function parseState(search: string, fallback: ExplorerState): ExplorerSta
   };
   const s = q.get("s");
   const preset = q.get("preset");
+  // serializeState leaves out preset=none, so a query that gives the case but no preset means none.
+  const givesCase = (Object.keys(RANGES) as (keyof typeof RANGES)[]).some((k) => q.has(k));
   return {
     Pi: num("Pi"), v: num("v"), dv: num("dv"), c: num("c"),
     steering: s === "prograde" || s === "inertial" ? s : fallback.steering,
-    preset: preset !== null && PRESET.test(preset) ? preset : fallback.preset,
+    preset: preset !== null && PRESET.test(preset) ? preset : givesCase ? "none" : fallback.preset,
   };
 }
 

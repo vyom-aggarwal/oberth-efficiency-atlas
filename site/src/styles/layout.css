@@ -83,7 +83,33 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 .footer-facts dt { color: var(--text-2); margin-bottom: 2px; }
 .footer-facts dd { margin: 0; }
 
-/* Explorer skeleton (built at checkpoint 5). */
+/* Explorer (checkpoint 5): case inputs, the trajectory, results, and where the case sits. */
+.region-title { font-family: var(--sans); font-size: var(--t-ui); font-weight: 500; margin: 0 0 var(--s3); }
+.field { display: flex; flex-direction: column; gap: 4px; margin: 0 0 var(--s3); }
+.field .select { max-width: 100%; }
+.explorer-controls .axis-slider { margin: var(--s2) 0 var(--s3); }
+.explorer-note { font-size: var(--t-label); color: var(--text-2); margin: var(--s1) 0 var(--s3); max-width: var(--measure); }
+.explorer-actions { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; margin-top: var(--s4); }
+.explorer-stage { position: relative; }
+.explorer-canvas { display: block; touch-action: none; cursor: grab; }
+.explorer-canvas:active { cursor: grabbing; }
+.explorer-canvas:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.explorer-toolbar { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); align-items: center; margin-top: var(--s2); }
+.explorer-toolbar .explorer-note { margin: 0; }
+.explorer-readouts-list { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.explorer-readouts-list dt { font-size: var(--t-label); color: var(--text-2); margin-top: var(--s2); }
+.explorer-readouts-list dd { margin: 0; font-size: 1.0625rem; font-variant-numeric: tabular-nums lining-nums; }
+.explorer-warnings { list-style: none; padding: 0; margin: var(--s4) 0; }
+.warning { display: flex; gap: var(--s2); align-items: flex-start; border: 1px solid var(--ink); border-radius: var(--radius);
+           padding: var(--s2) var(--s3); font-size: var(--t-label); margin-bottom: var(--s2); }
+.warn-icon { flex: none; color: var(--ink); margin-top: 1px; }
+.explorer-place-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--s5); }
+.explorer-place-fig { margin: 0; min-width: 0; }
+.explorer-place-fig figcaption { font-size: var(--t-label); color: var(--text-2); margin-bottom: var(--s2); }
+.case-ring circle { fill: none; stroke: var(--ink); stroke-width: 2; }
+.case-ring line { stroke: var(--ink); stroke-width: 1.5; }
+.case-ring.clipped circle { stroke-dasharray: 3 2; }
+.explorer-layout { display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); }
 .explorer-layout { display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1100px) {
   .explorer-layout { grid-template-columns: 300px minmax(0, 1fr) 240px;

@@ -33,18 +33,29 @@ export function hermite(ts: number[], ys: number[][], withAv?: (y: number[]) => 
   return out;
 }
 
-/** The recorded flyby with `extend` time units of coast added before and after; a₀ gives a·v = (a₀/m)|v| on the burn. */
+/**
+ * The recorded flyby with `extend` time units of coast added before and after; a₀ gives a·v = (a₀/m)|v| on the burn.
+ * An impact ends the recording early (no post-burn segment, or no burn): the path ends where it does, with no coast
+ * added after it.
+ */
 export function flybyPath(r: SimResult, a0: number, extend: number): FlybyPath {
-  const seg = (label: string) => r.segments!.find((s) => s.label === label)!;
+  const seg = (label: string) => r.segments!.find((s) => s.label === label && s.t.length > 0);
   const pre = seg("pre"), burn = seg("burn"), post = seg("post");
-  const back = integrate(coastRhs, pre.t[0], pre.t[0] - extend, pre.y[0], COAST);
-  const fwd = integrate(coastRhs, post.t[post.t.length - 1], post.t[post.t.length - 1] + extend, post.y[post.y.length - 1], COAST);
   const av = (y: number[]) => (a0 / y[4]) * Math.hypot(y[2], y[3]);
-  return {
-    pre: [...hermite([...back.t].reverse(), [...back.y].reverse()), ...hermite(pre.t, pre.y)],
-    burn: hermite(burn.t, burn.y, av),
-    post: [...hermite(post.t, post.y), ...hermite(fwd.t, fwd.y)],
-  };
+  const out: FlybyPath = { pre: [], burn: [], post: [] };
+  if (pre) {
+    const back = integrate(coastRhs, pre.t[0], pre.t[0] - extend, pre.y[0], COAST);
+    out.pre = [...hermite([...back.t].reverse(), [...back.y].reverse()), ...hermite(pre.t, pre.y)];
+  }
+  if (burn) out.burn = hermite(burn.t, burn.y, av);
+  if (post) {
+    out.post = hermite(post.t, post.y);
+    if (!r.impacted) {
+      const fwd = integrate(coastRhs, post.t[post.t.length - 1], post.t[post.t.length - 1] + extend, post.y[post.y.length - 1], COAST);
+      out.post.push(...hermite(fwd.t, fwd.y));
+    }
+  }
+  return out;
 }
 
 /** The impulsive exit: Δv added at periapsis (speed v_p), coasting for `duration` time units. */
