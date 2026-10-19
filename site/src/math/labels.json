@@ -20,5 +20,7 @@
   "xDef": "x = t / t_b",
   "xBar": "\\bar{x}",
   "xHalf": "x_{1/2}",
-  "deltaStar": "\\delta^*"
+  "deltaStar": "\\delta^*",
+  "dvOverV": "\\Delta v / V",
+  "rp": "r_p"
 }

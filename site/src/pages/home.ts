@@ -63,6 +63,11 @@ const FIGURES: Record<string, Mount> = {
       import("../charts/regimes"), loadData<SiteData>("site.json"), loadData<any>("regimes.json")]);
     regimes(body, data, site, { figN, title: "Three regimes of η_W against Π" });
   },
+  atlas: async (body, figN) => {
+    const [{ atlas }, site, data, missions] = await Promise.all([
+      import("../charts/atlas"), loadData<SiteData>("site.json"), loadData<any>("atlas.json"), loadData<any>("missions.json")]);
+    atlas(body, data, missions, site, { figN, title: "The atlas: η over Π and arrival speed" });
+  },
   timing: async (body, figN) => {
     const [{ timing }, site, data] = await Promise.all([
       import("../charts/timing"), loadData<SiteData>("site.json"), loadData<any>("timing.json")]);

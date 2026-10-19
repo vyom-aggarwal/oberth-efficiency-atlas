@@ -29,10 +29,13 @@ export const piTick = (t: number): string => (t >= 1e-3 && t <= 1e3 ? decade(t) 
 
 /** Gridlines, axis lines, ticks and tick labels (log or linear scales). `everyX` labels every n-th x tick. */
 export function logAxes(svg: SVGSVGElement, x: Scale | ((v: number) => number), y: Scale | ((v: number) => number), W: number, H: number, m: Margins,
-                        o: { xTicks: number[]; yTicks: number[]; xFmt: (t: number) => string; yFmt: (t: number) => string; everyX?: number }): void {
+                        o: { xTicks: number[]; yTicks: number[]; xFmt: (t: number) => string; yFmt: (t: number) => string; everyX?: number;
+                             grid?: boolean }): void {
   const g = s("g");
-  for (const t of o.xTicks) g.append(s("line", { class: "gridline", x1: x(t), x2: x(t), y1: m.top, y2: H - m.bottom }));
-  for (const t of o.yTicks) g.append(s("line", { class: "gridline", x1: m.left, x2: W - m.right, y1: y(t), y2: y(t) }));
+  if (o.grid !== false) {                                           // no grid over a heatmap
+    for (const t of o.xTicks) g.append(s("line", { class: "gridline", x1: x(t), x2: x(t), y1: m.top, y2: H - m.bottom }));
+    for (const t of o.yTicks) g.append(s("line", { class: "gridline", x1: m.left, x2: W - m.right, y1: y(t), y2: y(t) }));
+  }
   const ax = s("g", { class: "axis" },
     s("line", { x1: m.left, x2: W - m.right, y1: H - m.bottom, y2: H - m.bottom }),
     s("line", { x1: m.left, x2: m.left, y1: m.top, y2: H - m.bottom }));
@@ -124,6 +127,30 @@ export class LabelPlacer {
       return { left: r.left - o.left, top: r.top - o.top, right: r.right - o.left, bottom: r.bottom - o.top };
     }).concat(this.lineBoxes);
   }
+}
+
+/**
+ * One row of HTML labels at height y (plot px), each centred on its x, then pushed apart (keeping order) until
+ * neighbours are `gap` px apart, and kept within [0, W]. Returns the elements, left to right.
+ */
+export function labelRow(layer: HTMLElement, items: { x: number; content: Node; cls?: string }[], y: number, W: number, gap = 8): HTMLElement[] {
+  const placed = [...items].sort((a, b) => a.x - b.x).map((it) => {
+    const el = place(layer, it.content, 0, y, "start", it.cls ?? "");
+    const w = el.offsetWidth;
+    return { el, w, left: it.x - w / 2 };
+  });
+  for (let pass = 0; pass < 50; pass++) {
+    let moved = false;
+    for (let i = 1; i < placed.length; i++) {
+      const [a, b] = [placed[i - 1], placed[i]];
+      const overlap = a.left + a.w + gap - b.left;
+      if (overlap > 0.5) { a.left -= overlap / 2; b.left += overlap / 2; moved = true; }
+    }
+    for (const p of placed) p.left = Math.max(0, Math.min(W - p.w, p.left));
+    if (!moved) break;
+  }
+  for (const p of placed) p.el.style.left = `${p.left}px`;
+  return placed.map((p) => p.el);
 }
 
 /** The figure's tooltip (Paper, Graphite edge), positioned inside the plot. */

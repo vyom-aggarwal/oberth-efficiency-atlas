@@ -46,6 +46,28 @@
 .theory-line.theory-II { stroke-dasharray: 2 2.5; }
 .theory-line.theory-III { stroke-dasharray: 7 2 1.5 2; }
 .figure-note { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin: var(--s2) 0 0; }
+/* Atlas: cells on a canvas beneath the SVG; lines over the cells carry a Paper halo; labels sit on a Paper wash. */
+.atlas-plot .atlas-canvas { position: absolute; left: 0; top: 0; }
+.atlas-plot svg { position: relative; }
+.plot-frame { fill: none; stroke: var(--graphite); stroke-width: 1; }
+.halo { fill: none; stroke: var(--paper); stroke-width: 4; stroke-linejoin: round; opacity: 0.85; }
+.impact-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+.impact-line.alt { stroke-dasharray: 8 3 2 3; }
+.guide-line { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 1 2.5; }
+.atlas-plot .annot-html { background: color-mix(in srgb, var(--paper) 85%, transparent); padding: 0 3px; }
+.contour-label { color: var(--text-2); font-style: italic; }
+.guide-label { color: var(--text); }
+.tex-bg, .swatch { stroke: var(--graphite); stroke-width: 0; }
+.tex-bg { fill: var(--paper); }
+.tex-line { stroke: var(--ink); stroke-width: 1; }
+.tex-dot { fill: var(--ink); }
+.swatch { stroke-width: 1; }
+.mission-dot { fill: var(--ink); }
+.mission-ring { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+.pattern-defs { position: absolute; }
+.ramp-ends { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+.inline-select { display: inline-flex; align-items: center; }
+
 /* Burn timing: the profile (Burn ramp by value) and its three time marks. */
 .profile-fill { stroke: none; }
 .profile-line { fill: none; stroke: var(--ink); stroke-width: 1.5; }
