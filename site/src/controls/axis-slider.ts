@@ -6,7 +6,7 @@ import { decade, sig } from "../lib/format";
 import { signal, type Signal } from "../lib/signal";
 
 /** A mark on the scale: filled (an engine) or hollow (a threshold); `detail` becomes its hover title. */
-export interface Mark { value: number; label: string; detail?: string; kind?: "engine" | "threshold" }
+export interface Mark { value: number; label: string; short?: string; detail?: string; kind?: "engine" | "threshold" }
 export interface AxisSliderOptions {
   id: string;
   label: Node | string;
@@ -21,6 +21,7 @@ export interface AxisSliderOptions {
 
 const THUMB = 18;              // px; matches controls.css
 const ROW = 17;                // px between mark-label rows: 1.2 × the 14 px label size
+const SPLIT_BELOW = 560;       // px of track: narrower, engine marks go above the track and thresholds below
 
 export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Signal<number> } {
   const value = signal(o.value);
@@ -29,8 +30,9 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
   const range = h("input", { type: "range", id: o.id, min: lmin, max: lmax, step: 0.001, value: Math.log10(o.value) });
   const number = h("input", { class: "number", type: "text", inputmode: "decimal", "aria-label": "exact value",
     spellcheck: "false", autocomplete: "off" });
-  const svg = s("svg", { "aria-hidden": "true" });
-  const track = h("div", { class: "track" }, range, svg);
+  const above = s("svg", { class: "marks-above", "aria-hidden": "true" });   // engine marks, on a narrow track
+  const svg = s("svg", { class: "scale", "aria-hidden": "true" });
+  const track = h("div", { class: "track" }, above, range, svg);
   const el = h("div", { class: "axis-slider" }, h("label", { class: "slider-label", for: o.id }, o.label), track, number);
 
   range.addEventListener("input", () => value.set(10 ** Number(range.value)));
@@ -72,6 +74,9 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       const tx = anchor === "start" ? 0 : anchor === "end" ? width : x(t);
       svg.append(s("text", { x: tx, y: 19, "text-anchor": anchor, class: "tick" }, decade(t)));
     }
+    above.replaceChildren();
+    above.style.height = "0px";
+    if (width < SPLIT_BELOW) { drawSplitMarks(x); return; }
     // Mark labels, centred under their mark and clamped to the scale. A label may carry a line break ("\n"): it is
     // set on one line when that fits the scale, else on two. Left to right, each label takes the first free row (or
     // pair of rows).
@@ -106,6 +111,44 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       lines.forEach((t, j) => { t.setAttribute("x", String(left)); if (j) t.setAttribute("dy", String(ROW)); });
     }
     svg.style.height = `${40 + ROW * used}px`;
+  }
+
+  /** Narrow track (author, 2026-10-18): engine marks above the track and thresholds below, each in one row, with
+   *  short names; the full name stays in each mark's hover title. */
+  function drawSplitMarks(x: (v: number) => number): void {
+    const marks = o.marks ?? [];
+    const engines = marks.filter((m) => m.kind !== "threshold"), thresholds = marks.filter((m) => m.kind === "threshold");
+    if (engines.length) {
+      above.style.height = "26px";
+      oneRow(above, engines, x, 14, (mx) => `M${mx},25 l-4,-7 h8z`);
+    }
+    oneRow(svg, thresholds, x, 36, (mx) => `M${mx},-4 l-4,-7 h8z`);
+    svg.style.height = "40px";
+  }
+  /** One row of labels at baseline y: centred on their marks, then pushed apart (keeping order) until 10 px separate
+   *  neighbours, and kept on the scale. */
+  function oneRow(into: SVGSVGElement, marks: Mark[], x: (v: number) => number, y: number, tri: (mx: number) => string): void {
+    const items = [...marks].sort((a, b) => a.value - b.value).map((m) => {
+      const hollow = m.kind === "threshold";
+      const text = s("text", { class: hollow ? "mark-label hollow" : "mark-label", y }, (m.short ?? m.label).replace("\n", " "));
+      const path = s("path", { d: tri(x(m.value)), fill: hollow ? "var(--paper)" : "var(--ink)",
+                               stroke: hollow ? "var(--graphite)" : "none", "stroke-width": 1.2 });
+      if (m.detail) { path.append(s("title", {}, m.detail)); text.append(s("title", {}, m.detail)); }
+      into.append(path, text);
+      const w = text.getComputedTextLength();
+      return { text, w, left: x(m.value) - w / 2, want: x(m.value) - w / 2 };
+    });
+    for (let pass = 0; pass < 50; pass++) {
+      let moved = false;
+      for (let i = 1; i < items.length; i++) {
+        const [a, b] = [items[i - 1], items[i]];
+        const overlap = a.left + a.w + 10 - b.left;
+        if (overlap > 0.5) { a.left -= overlap / 2; b.left += overlap / 2; moved = true; }
+      }
+      for (const it of items) it.left = Math.max(0, Math.min(width - it.w, it.left));
+      if (!moved) break;
+    }
+    for (const it of items) it.text.setAttribute("x", String(it.left));
   }
   return { el, value };
 }

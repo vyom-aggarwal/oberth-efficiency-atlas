@@ -51,6 +51,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
       const [first, second = ""] = m.title.value.split("\n");
       const name = first.split(":")[0];
       return { value: m.Pi.value, label: /hypothetical/.test(second) ? `${name}\n${second}` : name, kind: "engine",
+               short: name.split(/[\s-]/)[0],          // "Solid stack" → "Solid", "SEP-class" → "SEP" (narrow track)
                detail: `${first.replace(":", ",")}${second ? " " + second : ""}: Π = ${sig(m.Pi.value)} on this dive` };
     }),
     ...d.thresholds.map((t): Mark => ({ value: t.Pi.value, label: t.level.replace("%", " %"), kind: "threshold",

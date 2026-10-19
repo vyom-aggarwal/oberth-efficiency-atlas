@@ -24,7 +24,7 @@ test("annotations and slider labels stay inside the figure at every width and Π
     for (const Pi of [0.001, 0.0326, 0.976, 1.67, 30, 368, 1000]) {
       await setPi(page, Pi);
       await page.waitForTimeout(80);
-      const problems = await page.evaluate(() => {
+      const problems = await page.evaluate((narrow) => {
         const out: string[] = [];
         const stage = document.querySelector(".hero-stage")!.getBoundingClientRect();
         for (const el of document.querySelectorAll(".hero-stage .annot-html")) {
@@ -33,9 +33,17 @@ test("annotations and slider labels stay inside the figure at every width and Π
             out.push(`annotation "${el.textContent!.trim().slice(0, 40)}" at [${Math.round(r.left - stage.left)}, ${Math.round(r.right - stage.left)}] of ${Math.round(stage.width)}`);
         }
         if (!document.querySelector(".hero-stage .hero-eta")) out.push("η annotation missing");
-        const svg = document.querySelector(".hero-slider svg")!.getBoundingClientRect();
+        const track = document.querySelector(".hero-slider .track")!.getBoundingClientRect();
         const labels = [...document.querySelectorAll(".hero-slider svg text")].map((t) => ({ t: t.textContent!.trim(), r: t.getBoundingClientRect() }));
-        for (const { t, r } of labels) if (r.left < svg.left - 0.5 || r.right > svg.right + 0.5) out.push(`slider label "${t}" crosses the edge`);
+        for (const { t, r } of labels) if (r.left < track.left - 0.5 || r.right > track.right + 0.5) out.push(`slider label "${t}" crosses the edge`);
+        // Narrow screens (author, 2026-10-18): engine labels above the track, thresholds below, one row each side.
+        if (narrow) {
+          const rowsOf = (sel: string) => new Set([...document.querySelectorAll(sel)].map((t) => Math.round(t.getBoundingClientRect().top))).size;
+          const up = rowsOf(".hero-slider svg.marks-above text.mark-label"), down = rowsOf(".hero-slider svg.scale text.mark-label");
+          if (up !== 1) out.push(`${up} label rows above the track`);
+          if (down !== 1) out.push(`${down} label rows below the track`);
+          if (document.querySelector(".hero-slider svg.scale text.mark-label:not(.hollow)")) out.push("an engine label below the track");
+        }
         for (const t of document.querySelectorAll(".hero-slider svg text"))           // e.g. a line style leaking onto text
           if (getComputedStyle(t).stroke !== "none") out.push(`slider label "${t.textContent!.trim().slice(0, 20)}" is stroked`);
         labels.forEach((a, i) => labels.slice(i + 1).forEach((b) => {
@@ -44,7 +52,7 @@ test("annotations and slider labels stay inside the figure at every width and Π
         }));
         if (document.documentElement.scrollWidth > document.documentElement.clientWidth) out.push("page scrolls sideways");
         return out;
-      });
+      }, width <= 390);
       expect(problems, `${width}px, Π = ${Pi}`).toEqual([]);
     }
   }
