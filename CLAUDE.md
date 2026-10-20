@@ -48,12 +48,21 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
     `--fast` swaps the full suite for just the site-data and hook tests; `--only name,…` picks checks.
   - It runs every check even after a failure, prints a summary, and exits 1 if any check failed. A
     missing tool (node, `site/node_modules`) is a failure.
-  - **Pre-commit hook:** `.githooks/pre-commit` runs `check_all.py --fast` (about 2 min on the
-    development laptop) and blocks the commit on any failure. Enable it once per clone with
-    `git config core.hooksPath .githooks`. Never bypass it with `--no-verify`.
+  - **Pre-commit hook** (user rule, 2026-10-19): `.githooks/pre-commit` runs
+    `check_all.py --staged`, only the checks the staged files can affect
+    (`check_all.select_checks`). It blocks the commit on any failure.
+    - Content only: `check_numbers`.
+    - Site code: the type check and vitest.
+    - The exporter, the site data, any of its provenance sources, or `tests/`: the site-data tests.
+    - Hook scripts: the hook tests.
+    - Logs: nothing.
+    - Enable it once per clone with `git config core.hooksPath .githooks`. Never bypass it with
+      `--no-verify`.
+  - `--paths P … --dry-run` prints what a change would run.
   - The hook checks the working tree, not just the staged files.
-  - Run the full `check_all.py` before every checkpoint or phase report. Playwright is not in it:
-    run `SITE_DIST=dist-test npx playwright test` (below), and from checkpoint 6 in CI.
+  - **The full `check_all.py` (no flag) is the gate before pushing** and before every checkpoint or
+    phase report; CI runs it on every push. Playwright is not in it: run
+    `SITE_DIST=dist-test npx playwright test` (below); CI runs it too.
 - **Writing.** The user writes the paper prose; do not draft paper text. Keep
   `docs/paper_outline.md`, the figures and the `figures/*_numbers.json` files current.
   `scripts/check_numbers.py` flags numbers in a Markdown draft that match no numbers JSON. In

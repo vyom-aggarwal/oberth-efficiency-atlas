@@ -1,6 +1,8 @@
 #!/bin/sh
-# Pre-commit (author rule, 2026-10-18): the fast checks, scripts/check_all.py --fast (type check, vitest,
-# check_numbers on site/content, site-data tests, hook tests). Any failure blocks the commit.
+# Pre-commit (author rules, 2026-10-18 and 2026-10-19): the checks that the staged files can affect,
+# scripts/check_all.py --staged (content: check_numbers; site code: type check and vitest; the exporter, the site
+# data or their sources: site-data tests; hook scripts: hook tests). Any failure blocks the commit.
+# The full check_all.py (no flag) stays the gate before pushing, and runs in CI.
 # Enable once per clone:  git config core.hooksPath .githooks
 # The checks run on the working tree, not only on what is staged.
 root=$(git rev-parse --show-toplevel) || exit 1
@@ -10,7 +12,7 @@ else
   echo "pre-commit: no .venv found; create it as CLAUDE.md describes" >&2
   exit 1
 fi
-"$py" "$root/scripts/check_all.py" --fast || {
+"$py" "$root/scripts/check_all.py" --staged || {
   echo "pre-commit: checks failed; commit blocked (see the summary above)" >&2
   exit 1
 }

@@ -14,16 +14,21 @@ Checks, in order:
   hooks       pytest tests/test_hooks.py                         (--fast only)
   pytest      the full Python suite, which includes the site-data and hook tests (default only)
 
---fast is the pre-commit subset (.githooks/pre-commit): the full Python suite is replaced by the site-data and
-hook tests. Playwright is not run here: it runs in CI and locally with `npx playwright test` (see CLAUDE.md).
+  check-all   pytest tests/test_check_all.py (this script's own selection rules)   (--staged only)
 
-Run:  .venv/Scripts/python scripts/check_all.py [--fast] [--only name,name]
+--fast runs the full set without the full Python suite: the site-data and hook tests replace it.
+--staged is the pre-commit hook (.githooks/pre-commit, author rule 2026-10-19): only the checks that the staged
+files can affect (see select_checks), so a prose commit costs seconds, not minutes. The full run (no flag) stays
+the gate before pushing and in CI. Playwright is not run here: it runs in CI and with `npx playwright test`.
+
+Run:  .venv/Scripts/python scripts/check_all.py [--fast | --staged | --paths P ...] [--dry-run] [--only name,name]
 """
 
 from __future__ import annotations
 
 import argparse
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -73,21 +78,85 @@ CHECKS = {
     "numbers": numbers,
     "site-data": lambda: pytest("tests/test_site_data.py"),
     "hooks": lambda: pytest("tests/test_hooks.py"),
+    "check-all": lambda: pytest("tests/test_check_all.py"),
     "pytest": lambda: pytest(),
 }
 FAST = ["typecheck", "vitest", "numbers", "site-data", "hooks"]
 FULL = ["typecheck", "vitest", "numbers", "pytest"]
 
 
+def data_sources() -> set[str]:
+    """Every source file that the exported site data records in its provenance (their hashes are tested)."""
+    out: set[str] = set()
+    for f in (SITE / "public" / "data").glob("*.json"):
+        try:
+            out |= set(json.loads(f.read_text(encoding="utf-8")).get("provenance", {}).get("sources", {}))
+        except (ValueError, OSError):
+            pass
+    return out
+
+
+def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str]:
+    """The checks that changes to `paths` (repository-relative, / separators) can affect, in CHECKS order.
+
+    - site/content/*           → numbers (the author's prose and notes)
+    - site/public/data/*       → site-data; other site/public files (images, fonts) → nothing
+    - other site/ files        → typecheck and vitest (code, styles, pages, plugins, e2e specs, configs)
+    - the exporter, check_numbers.py, tests/ (methods.json records the test count), or any provenance source of
+      the site data           → site-data
+    - scripts/check_numbers.py → numbers too
+    - .claude/hooks/, .claude/settings.json, tests/test_hooks.py → hooks
+    - scripts/check_all.py, .githooks/, tests/test_check_all.py   → check-all
+    Anything else (logs, docs that feed nothing) needs no check here; the full run covers everything.
+    """
+    sources = data_sources() if sources is None else sources
+    want: set[str] = set()
+    for p in (q.replace("\\", "/") for q in paths):
+        if p.startswith("site/content/"):
+            want.add("numbers")
+        elif p.startswith("site/public/data/"):
+            want.add("site-data")
+        elif p.startswith("site/public/"):
+            pass
+        elif p.startswith("site/"):
+            want |= {"typecheck", "vitest"}
+        if p in ("scripts/export_site_data.py", "scripts/check_numbers.py") or p.startswith("tests/") or p in sources:
+            want.add("site-data")
+        if p == "scripts/check_numbers.py":
+            want.add("numbers")
+        if p.startswith(".claude/hooks/") or p in (".claude/settings.json", "tests/test_hooks.py"):
+            want.add("hooks")
+        if p in ("scripts/check_all.py", "tests/test_check_all.py") or p.startswith(".githooks/"):
+            want.add("check-all")
+    return [n for n in CHECKS if n in want]
+
+
+def staged_paths() -> list[str]:
+    out = subprocess.run(["git", "diff", "--cached", "--name-only", "--diff-filter=ACMRD"], cwd=ROOT,
+                         capture_output=True, text=True, check=True).stdout
+    return [line for line in out.splitlines() if line.strip()]
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--fast", action="store_true", help="the pre-commit subset (no full Python suite)")
+    mode = ap.add_mutually_exclusive_group()
+    mode.add_argument("--fast", action="store_true", help="every check except the full Python suite")
+    mode.add_argument("--staged", action="store_true", help="only the checks the staged files can affect (pre-commit)")
+    mode.add_argument("--paths", nargs="+", help="only the checks these paths can affect")
     ap.add_argument("--only", default="", help=f"comma-separated subset of: {', '.join(CHECKS)}")
+    ap.add_argument("--dry-run", action="store_true", help="print the checks that would run, and run none")
     a = ap.parse_args(argv)
-    names = [n.strip() for n in a.only.split(",") if n.strip()] or (FAST if a.fast else FULL)
+    if a.staged or a.paths:
+        paths = staged_paths() if a.staged else a.paths
+        names = select_checks(paths)
+        print(f"{len(paths)} changed path(s) -> checks: {', '.join(names) or 'none needed'}", flush=True)
+    else:
+        names = [n.strip() for n in a.only.split(",") if n.strip()] or (FAST if a.fast else FULL)
     unknown = [n for n in names if n not in CHECKS]
     if unknown:
         ap.error(f"unknown check(s): {', '.join(unknown)}")
+    if a.dry_run or not names:
+        return 0
 
     results = []
     for name in names:
