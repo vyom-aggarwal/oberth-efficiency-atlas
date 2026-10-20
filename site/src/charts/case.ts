@@ -54,7 +54,7 @@ export function caseStudy(root: HTMLElement, d: CaseData, site: SiteData, opt: {
   root.append(head, plot, legend(), facts, summary, tables());
 
   let width = 0;
-  const redraw = () => draw(width);
+  const redraw = () => tip.redraw(() => draw(width));          // an open tooltip survives (common.tooltip)
   new ResizeObserver(([e]) => {
     const w = Math.round(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(redraw); }
@@ -73,7 +73,6 @@ export function caseStudy(root: HTMLElement, d: CaseData, site: SiteData, opt: {
     overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
-    tip.hide();
     logAxes(svg, x, y, W, H, m, { xTicks: F_TICKS, yTicks: L_TICKS, xFmt: fScale, yFmt: (t) => (t >= 1 ? String(t) : sig(t, 1)) });
     place(overlay, "loss, m/s", 0, 4, "start");
     place(overlay, h("span", {}, "thrust scale (× the stack's thrust)"), (m.left + W - m.right) / 2, H - 22, "middle");

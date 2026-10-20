@@ -63,7 +63,7 @@ export function regimes(root: HTMLElement, data: RegimesData, site: SiteData, op
   root.append(head, controls, plot, legend(), note, summary, tables);
 
   let width = 0;
-  const redraw = () => draw(width);
+  const redraw = () => tip.redraw(() => draw(width));          // an open tooltip survives (common.tooltip)
   new ResizeObserver(([e]) => {
     const w = Math.round(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(redraw); }
@@ -98,7 +98,6 @@ export function regimes(root: HTMLElement, data: RegimesData, site: SiteData, op
     overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
-    tip.hide();
     logAxes(svg, x, y, W, H, m, { xTicks: PI_TICKS, yTicks: ETA_TICKS, xFmt: piTick, yFmt: pow10, everyX: narrow ? 2 : 1 });
     const yTitle = h("span", {});
     yTitle.append(frag(tex.etaW), h("span", { class: "annot-text" }, narrow ? "" : "(baseline-subtracted energy efficiency)"));

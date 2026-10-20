@@ -107,7 +107,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
 
   // ---------------------------------------------------------------- drawing
   let width = 0;
-  const redraw = () => draw(width);
+  const redraw = () => tip.redraw(() => draw(width));          // an open tooltip survives (common.tooltip)
   new ResizeObserver(([entry]) => {
     const w = Math.round(entry.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(redraw); }   // never resize inside the observer
@@ -130,7 +130,6 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
     overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
-    tip.hide();
     // On-plot labels go on once every mark and line is drawn, in the order queued (band, bound, samples, cases); all
     // or none (common.ts).
     const placer = new LabelPlacer(svg, overlay, plot, W, H - m.bottom);

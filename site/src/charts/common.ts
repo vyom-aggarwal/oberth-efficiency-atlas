@@ -153,10 +153,28 @@ export function labelRow(layer: HTMLElement, items: { x: number; content: Node; 
   return placed.map((p) => p.el);
 }
 
-/** The figure's tooltip (Paper, Graphite edge), positioned inside the plot. */
-export function tooltip(plot: HTMLElement): { el: HTMLElement; show: (px: number, py: number, content: Node) => void; hide: () => void } {
+export interface Tooltip {
+  el: HTMLElement;
+  show: (px: number, py: number, content: Node) => void;
+  hide: () => void;
+  /** Redraw the figure without dismissing an open tooltip (see tooltip()). */
+  redraw: (draw: () => void) => void;
+}
+
+/**
+ * The figure's tooltip (Paper, Graphite edge), positioned inside the plot.
+ *
+ * Figures redraw on resize, on a theme change and when web fonts finish loading, and a redraw replaces the hit
+ * targets. redraw(draw) keeps an open tooltip open across that: it notes what opened it (keyboard focus on a hit
+ * target, or the pointer over the plot), draws, then gives focus back to the matching new target (by its
+ * aria-label) or replays the pointer at the same place, so the figure's own handler rebuilds the tooltip.
+ */
+export function tooltip(plot: HTMLElement): Tooltip {
   const el = h("div", { class: "tooltip", role: "status", hidden: true });
   plot.append(el);
+  let pointer: { x: number; y: number } | null = null;           // last pointer position over the plot (client px)
+  plot.addEventListener("pointermove", (e) => { pointer = { x: e.clientX, y: e.clientY }; });
+  plot.addEventListener("pointerleave", () => { pointer = null; });
   return {
     el,
     show(px, py, content) {
@@ -167,11 +185,32 @@ export function tooltip(plot: HTMLElement): { el: HTMLElement; show: (px: number
       el.style.top = `${Math.max(0, py - hgt)}px`;
     },
     hide() { el.hidden = true; },
+    redraw(draw) {
+      const open = !el.hidden;
+      const active = document.activeElement;
+      const focusKey = open && active && plot.contains(active) ? active.getAttribute("aria-label") : null;
+      const at = open ? pointer : null;
+      el.hidden = true;
+      draw();
+      if (!open) return;
+      if (focusKey !== null) {
+        const target = [...plot.querySelectorAll<HTMLElement>("[aria-label]")].find((e) => e.getAttribute("aria-label") === focusKey);
+        if (target) { target.focus({ preventScroll: true }); return; }      // its focus handler shows the tooltip
+      }
+      if (at) {
+        const target = document.elementFromPoint(at.x, at.y);
+        if (target && plot.contains(target)) {
+          const init = { clientX: at.x, clientY: at.y, pointerType: "mouse" };
+          target.dispatchEvent(new PointerEvent("pointerenter", init));      // mark targets show on enter
+          target.dispatchEvent(new PointerEvent("pointermove", { ...init, bubbles: true }));   // readouts on move
+        }
+      }
+    },
   };
 }
 
 /** A focusable hit target over a mark: hover or focus shows `content` in the tooltip; Escape hides it. */
-export function hitTarget(gr: SVGGElement, cx: number, cy: number, name: string, tip: ReturnType<typeof tooltip>,
+export function hitTarget(gr: SVGGElement, cx: number, cy: number, name: string, tip: Tooltip,
                           content: () => Node): void {
   const target = s("circle", { class: "hit", cx, cy, r: 16, tabindex: 0, role: "button", "aria-label": `${name}: details` });
   const ring = s("circle", { class: "focus-ring", cx, cy, r: 12 });

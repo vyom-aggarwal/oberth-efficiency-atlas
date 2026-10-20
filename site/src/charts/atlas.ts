@@ -74,7 +74,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
   root.append(head, controls, plot, legend(), summary, table);
 
   let width = 0;
-  const redraw = () => draw(width);
+  const redraw = () => tip.redraw(() => draw(width));          // an open tooltip survives (common.tooltip)
   new ResizeObserver(([e]) => {
     const w = Math.round(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(redraw); }
@@ -147,7 +147,6 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
     overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.setAttribute("height", String(H));
-    tip.hide();
 
     // Cells on the canvas.
     const dpr = Math.min(window.devicePixelRatio || 1, 2);

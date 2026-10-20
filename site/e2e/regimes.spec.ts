@@ -60,14 +60,7 @@ test("regimes: theory layers toggle, and the legend names every line", async ({ 
 
 test("regimes: the readout gives the nearest bin's η_W and η", async ({ page }) => {
   const fig = await open(page, 1440);
-  // A late font load redraws the figure and hides the tooltip: wait for the fonts, and hover again until it shows.
-  await page.evaluate(() => document.fonts.ready);
-  let nudge = 0;                                    // a repeated hover must move the pointer to fire again
-  await expect(async () => {
-    const box = (await fig.locator(".plot svg rect.hit").boundingBox())!;   // re-measured: a redraw replaces it
-    await fig.locator(".plot svg rect.hit").hover({ position: { x: box.width * 0.45 + (nudge++ % 2), y: box.height * 0.5 }, force: true });
-    await expect(fig.locator(".tooltip")).toBeVisible({ timeout: 500 });
-  }).toPass({ timeout: 8000 });
+  await fig.locator(".plot svg rect.hit").hover();
   const tip = fig.locator(".tooltip");
   await expect(tip).toBeVisible();
   await expect(tip).toContainText("η_W, median");
