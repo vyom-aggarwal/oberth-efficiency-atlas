@@ -20,7 +20,8 @@
     "e2e": "playwright test",
     "palette": "node tools/palette.mjs",
     "check-age": "node tools/check-package-age.mjs",
-    "lighthouse": "node tools/lighthouse.mjs"
+    "lighthouse": "node tools/lighthouse.mjs",
+    "og-image": "node tools/og-image.mjs"
   },
   "dependencies": {
     "@fontsource-variable/source-serif-4": "5.3.0",

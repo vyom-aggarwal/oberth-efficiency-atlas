@@ -111,6 +111,27 @@ function partial(name: string, base: string): string {
   return readFileSync(PARTIALS + name, "utf8").replace(/\{\{(\w+)\}\}/g, (_m, k: string) => esc(fill[k] ?? ""));
 }
 
+/**
+ * Open Graph and Twitter-card tags for a page, from its own <title> and description (nothing to keep in step).
+ * og:image and og:url must be absolute: SITE_URL (the deployed root, set by the Pages workflow from
+ * actions/configure-pages) is used when present, else the base path. The 404 page gets none (noindex).
+ * The image, public/og-image.png (1200 × 630), is made from the hero by tools/og-image.mjs.
+ */
+function socialMeta(html: string, file: string, base: string): string {
+  if (/404\.html$/.test(file)) return "";
+  const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? "Oberth Efficiency Atlas";
+  const desc = /<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? "";
+  const root = (process.env.SITE_URL ?? base).replace(/\/?$/, "/");
+  const path = /[\\/]explorer[\\/]index\.html$/.test(file) ? "explorer/" : "";
+  const tag = (attr: string, k: string, v: string) => `    <meta ${attr}="${k}" content="${v}" />\n`;
+  return "\n" + tag("property", "og:type", "website") + tag("property", "og:site_name", "Oberth Efficiency Atlas") +
+    tag("property", "og:title", title) + tag("property", "og:description", desc) + tag("property", "og:url", root + path) +
+    tag("property", "og:image", `${root}og-image.png`) + tag("property", "og:image:width", "1200") +
+    tag("property", "og:image:height", "630") +
+    tag("property", "og:image:alt", "A flyby trajectory bending around the Sun, with the burn arc coloured by the rate of energy gain") +
+    tag("name", "twitter:card", "summary_large_image");
+}
+
 export function contentPlugin(): Plugin {
   let config: ResolvedConfig;
   let dev = false;
@@ -131,10 +152,11 @@ export function contentPlugin(): Plugin {
     },
     transformIndexHtml: {
       order: "pre",
-      handler(html) {
+      handler(html, ctx) {
         const base = config.base;
         let out = html.replace("<!--#header-->", partial("header.html", base)).replace("<!--#footer-->", partial("footer.html", base))
           .replace(/\{\{base\}\}/g, base);             // page links honour the deployed base path
+        out = out.replace("</head>", `${socialMeta(out, ctx.filename, base)}</head>`);
         if (!out.includes("<!--#sections-->")) return out;
         const kept = keptSections(loadSections(), dev);
         const hero = kept.find((s) => s.id === "hero");
