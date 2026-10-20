@@ -1,0 +1,141 @@
+# The website: checks, Playwright, Lighthouse and the production build on every push; deployment to GitHub Pages
+# only when run by hand (Actions → Site → Run workflow), while the home page's sections are still TODO
+# (author decision, 2026-10-19). docs/site.md has the details.
+#
+# Every action is pinned to a full commit SHA (the tag in the comment): the newest release published at least
+# 14 days before 2026-10-19, the project's age rule for dependencies. tests/test_workflow.py checks the pinning.
+name: Site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  check:
+    name: Checks and Playwright
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0          # tags and history: methods.json records the analysis tag's commit
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-lock.txt
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Python environment (the audited versions)
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -e ".[dev]" -c requirements-lock.txt
+      - name: Site dependencies
+        working-directory: site
+        run: npm ci
+      - name: Every check (type check, vitest, check_numbers, the full Python suite)
+        run: .venv/bin/python scripts/check_all.py
+      - name: Package age (14-day rule)
+        working-directory: site
+        run: npm run check-age
+      - name: Playwright, against a build that keeps the unfinished sections
+        working-directory: site
+        env:
+          HERO_P95_MS: "50"       # the 16 ms target is for the development laptop; shared runners only catch regressions
+        run: |
+          SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
+          SITE_DIST=dist-test npx playwright test
+      - name: Screenshots and frame times
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: screenshots
+          path: |
+            runs/screens/
+            runs/hero_frame_times.json
+          if-no-files-found: ignore
+
+  lighthouse:
+    name: Lighthouse (gate ≥ 90 for accessibility, best practices and SEO)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Site dependencies
+        working-directory: site
+        run: npm ci
+      - name: Lighthouse 13.5.0, home and explorer, mobile and desktop (performance reported, not enforced)
+        working-directory: site
+        run: npm run lighthouse
+      - name: Reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lighthouse
+          path: runs/lighthouse/
+          if-no-files-found: ignore
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Pages settings (deploy runs only)
+        id: pages
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Site dependencies
+        working-directory: site
+        run: npm ci
+      - name: Build (unfinished sections hidden; the list is printed)
+        working-directory: site
+        env:
+          # From the Pages settings on a deploy; otherwise the project-site address the repository name implies.
+          BASE_PATH: ${{ steps.pages.outputs.base_path && format('{0}/', steps.pages.outputs.base_path) || format('/{0}/', github.event.repository.name) }}
+          SITE_URL: ${{ steps.pages.outputs.base_url && format('{0}/', steps.pages.outputs.base_url) || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+        run: npm run build
+      - name: Pages artifact (deploy runs only)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'workflow_dispatch'
+    needs: [check, lighthouse, build]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
