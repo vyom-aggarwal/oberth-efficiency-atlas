@@ -176,6 +176,7 @@ unknown keys are rejected.
 ### Phase 6 (website, `site/`; plan in `docs/site_plan.md`)
 ```bash
 .venv/Scripts/python scripts/export_site_data.py      # committed outputs -> site/public/data/*.json (checked by tests/test_site_data.py)
+.venv/Scripts/python scripts/audit_record.py CLONE --log REBUILD_LOG   # fresh-clone audit -> docs/audit/<date>_<commit>/ (docs/repro.md)
 cd site && npm run dev                                # Vite dev server, http://localhost:5173/
 npm test                                              # vitest: unit tests in src/**/*.test.ts
 SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir

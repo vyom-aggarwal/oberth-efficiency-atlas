@@ -156,5 +156,7 @@ now `github.event_name == 'workflow_dispatch'`, and update `tests/test_workflow.
 - `scripts/rebuild_all.py` regenerates every analysis output and then the site data.
 - `scripts/repro_audit.py` compares a rebuild with the committed outputs, including
   `site/public/data`, and ignores provenance stamps.
-- The fresh-clone audits and their results are in `docs/repro.md` and `docs/audit/`. The latest
-  result is exported to `methods.json` for the methods section.
+- `scripts/audit_record.py` records a fresh-clone audit under `docs/audit/<date>_<commit>/`. The
+  audit and its results are described in `docs/repro.md`.
+- The summary named by `AUDIT` in `scripts/export_site_data.py` is exported to `methods.json` for
+  the methods section.
