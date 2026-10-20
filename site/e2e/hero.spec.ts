@@ -98,6 +98,8 @@ test("the data table says η is this case's, at each marked Π", async ({ page }
   await expect(table.locator("caption")).toContainText("one equivalent stage");
   await expect(table).toContainText("Π of Nuclear thermal (Isp 900 s");
   await expect(table).toContainText("(hypothetical at 3.2 R☉)");
+  // The current burn's η is written after the first simulation; the marked rows are built with the table.
+  await expect(table.locator("tbody tr:first-child td:last-child")).not.toBeEmpty();
   const eta = await table.locator("tbody tr td:last-child").allTextContents();
   expect(eta.length).toBe(6);                                // current burn, three engines, two thresholds
   for (const v of eta) expect(Number(v)).toBeGreaterThan(0);
