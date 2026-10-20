@@ -3,13 +3,17 @@
 // full pages with every figure. Reports go to ../runs/lighthouse/; the scores are printed and, in GitHub Actions,
 // written to the job summary.
 //
+// Gate (author, 2026-10-19; CI is the record): accessibility, best practices and SEO must each be at least 0.90 on
+// both pages, mobile and desktop, or the run exits 1. Performance is reported, not enforced: shared CI runners make
+// it noisy (LH_MIN_PERFORMANCE=0.9 enforces it too, for a run on a quiet machine).
+// Writes runs/lighthouse/summary.json (scores, Lighthouse and Chrome versions, date), the file to send back.
+//
 // Needs local sockets (the preview server and Chrome's debugging port), so it cannot run where loopback is blocked
 // (as in the assistant's sandbox, 2026-10-18); run it from a normal shell or in CI.
 // Run (in site/):  npm run lighthouse
-//   LH_MIN_PERFORMANCE=0.9  fail if any performance score is below 0.9 (the author's font-revisit threshold)
 // Dependencies are resolved as of package.json config.npmBefore (the 14-day rule), through npm_config_before.
 import { execFileSync } from "node:child_process";
-import { appendFileSync, mkdirSync, readFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { build, preview } from "vite";
 
@@ -19,6 +23,8 @@ const PORT = 4174;
 const PAGES = [["home", ""], ["explorer", "explorer/"]];
 const FACTORS = ["mobile", "desktop"];
 const CATS = ["performance", "accessibility", "best-practices", "seo"];
+const GATED = ["accessibility", "best-practices", "seo"];          // each ≥ 0.90 on every page and form factor
+const FLOOR = 0.9;
 
 mkdirSync(OUT, { recursive: true });
 process.env.SITE_SHOW_TODO = "1";
@@ -35,7 +41,8 @@ try {
       execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", args, {
         stdio: "inherit", shell: process.platform === "win32", env: { ...process.env, npm_config_before: pkg.config.npmBefore } });
       const report = JSON.parse(readFileSync(`${out}.report.json`, "utf8"));
-      rows.push({ page: name, form: ff, ...Object.fromEntries(CATS.map((c) => [c, report.categories[c]?.score ?? null])) });
+      rows.push({ page: name, form: ff, lighthouse: report.lighthouseVersion, chrome: report.environment?.hostUserAgent ?? "",
+        ...Object.fromEntries(CATS.map((c) => [c, report.categories[c]?.score ?? null])) });
     }
   }
 } finally {
@@ -48,9 +55,16 @@ const table = ["| page | form | " + CATS.join(" | ") + " |", "|---|---|" + CATS.
 console.log(`\nLighthouse 13.5.0 scores (reports in runs/lighthouse/):\n${table}\n`);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Lighthouse\n\n${table}\n`);
 
-const floor = Number(process.env.LH_MIN_PERFORMANCE ?? NaN);
-const low = rows.filter((r) => Number.isFinite(floor) && r.performance !== null && r.performance < floor);
-if (low.length) {
-  console.error(`Performance below ${floor}: ${low.map((r) => `${r.page} (${r.form})`).join(", ")}`);
+const perfFloor = Number(process.env.LH_MIN_PERFORMANCE ?? NaN);
+const failures = rows.flatMap((r) => [
+  ...GATED.filter((c) => r[c] === null || r[c] < FLOOR).map((c) => `${r.page} (${r.form}): ${c} ${pct(r[c])} < ${100 * FLOOR}`),
+  ...(Number.isFinite(perfFloor) && (r.performance === null || r.performance < perfFloor)
+    ? [`${r.page} (${r.form}): performance ${pct(r.performance)} < ${100 * perfFloor}`] : []),
+]);
+writeFileSync(`${OUT}summary.json`, JSON.stringify({ date: new Date().toISOString(), gate: { categories: GATED, floor: FLOOR },
+  performance_enforced: Number.isFinite(perfFloor) ? perfFloor : false, pass: failures.length === 0, failures, rows }, null, 1));
+console.log(`Summary: runs/lighthouse/summary.json`);
+if (failures.length) {
+  console.error(`Lighthouse gate failed:\n  ${failures.join("\n  ")}`);
   process.exit(1);
 }
