@@ -456,6 +456,10 @@ added to the numbers file as values.
   - **Broken source links in a rebuilt checkout:** the exporter linked files changed in the working
     tree to a `<sha>-dirty` ref, which does not exist. It now compares committed files and links only
     to real refs, with a test.
+  - **A race in the hero's data-table test,** seen once in the final full run: it read the table
+    before the first simulation filled one cell. It now waits for that cell.
+- **Checkpoint 6, results:** the audit of the final code (f185234) reproduced 69 of 69 outputs. In
+  the final checks, `check_all.py` passed (pytest 601) and Playwright passed 101.
 - **Checkpoint 6, assistant errors, disclosed:**
   - **Pre-commit staging.** The first attempt at the hash fix could not be committed code-first: the
     hook rejected code that no longer matched the data. Code and data were committed together, with

@@ -2775,4 +2775,19 @@ the tag.
 summary. The site data, `docs/repro.md` (the audit section) and the screenshots follow. None of
 these is code that the audit's outputs depend on, except the methods data, which quotes the audit.
 
+## 2026-10-19: Checkpoint 6: final checks
+
+- **`check_all.py` (full):** passed. Type check, vitest 16, `check_numbers`, pytest 601.
+- **Playwright,** against the final build (`SITE_SHOW_TODO=1`, `dist-test`):
+  - The first full run: 100 passed, 1 failed. The hero's data-table test read the table before
+    the first simulation had written the current burn's η: an empty cell, read as 0.
+  - The test now waits for that cell (097b803) and passed 8 of 8 repeats. It is a race in the
+    test; the page fills the cell once its first simulation ends.
+  - Rerun: **101 passed**. Hero frame time while dragging: p95 6.3 ms (target 16).
+- **Screenshots:** `docs/screens/checkpoint-6/`, from the same build.
+- **Not run here:**
+  - CI: the workflow is committed but has not run, because nothing is pushed yet.
+  - Lighthouse: the sandbox blocks local sockets. CI is the record, with the author's local run for
+    performance.
+
 
