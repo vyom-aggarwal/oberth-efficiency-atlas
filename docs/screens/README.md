@@ -18,6 +18,17 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `checkpoint-6/`: the author's checkpoint-6 changes, from the final build.
+  - Default crops of the hero, the atlas, engines compared and the methods facts, at 1440 and
+    390 px in both themes:
+    - the hero at 390 px shows "SEP*" and its note;
+    - engines at 390 px shows the engine switch;
+    - the methods facts show the fresh-clone audit row.
+  - Two states in the light theme, from `site/e2e/screens-states.spec.ts`:
+    - `atlas-states`: the atlas legend with inertial steering, Venus and the mission samples on
+      (all four groups);
+    - `engines-nuclear-390`: the narrow engines figure with the second engine chosen.
+  - `og-image.png`: the Open Graph preview image (`site/public/og-image.png`, 1200 × 630).
 - `checkpoint-5/`: the explorer, as full pages.
   - Its default state (Hibberd et al.'s preset) at 1440 and 390 px in both themes.
   - Two warning states in the light theme, from `site/e2e/screens-explorer.spec.ts`:
