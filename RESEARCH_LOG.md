@@ -2750,4 +2750,29 @@ equal the tag.
   is still recorded where it belongs, in `provenance.git`.
 - Expected effect on the committed site data: none beyond the stamps. Re-exported to confirm.
 
+**Confirmed:** the re-export at 25396ec changed only the commit stamps. One source link, for
+`docs/ai_use_log.md`, moved from the old export commit to the new one. Every other link still names
+the tag.
+
+## 2026-10-19: Checkpoint 6: the audit of the final code (f185234): 69 of 69 identical
+
+**Procedure:** as for 6cd1e6e, with the procedure fix above.
+- A fresh clone of f185234 from this working copy. f185234 holds the comparison rule, the exporter
+  fix and the audit export.
+- `git remote set-url origin` to this repository's GitHub URL.
+- A venv from the lock: the 24 packages match.
+- `rebuild_all.py`: all 27 steps succeeded in 21.5 min (indicative); its test step passed 600, none
+  skipped.
+
+**Result** (`docs/audit/2026-10-19_f185234/`): **69 of 69 outputs identical.**
+- 48 are equal with nothing ignored.
+- 13 JSON files are equal after removing wall-clock keys and stamps.
+- 6 parquet files are equal without `runtime_s`.
+- The MP4 and the GIF are equal frame by frame.
+- Every source hash outside the rebuilt outputs matched, and so did `repo.url`.
+
+**After the audit:** only `AUDIT` in `scripts/export_site_data.py` changes, to point at this
+summary. The site data, `docs/repro.md` (the audit section) and the screenshots follow. None of
+these is code that the audit's outputs depend on, except the methods data, which quotes the audit.
+
 

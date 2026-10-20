@@ -16,8 +16,8 @@ On macOS/Linux, use `.venv/bin/python`.
   - `--only STEP ...` runs only the named steps;
   - `--list` prints the steps.
 - It sets `SOURCE_DATE_EPOCH`, so PDF creation dates are fixed.
-- **Time:** about 43–79 min on the machine below (see Runtimes). The sweep, the Phase 3 campaign
-  with its follow-ups, and the animation take most of it.
+- **Time:** 22–79 min across four runs on the machine below (see Runtimes). The sweep, the Phase 3
+  campaign with its follow-ups, and the animation take most of it.
 
 ## Setup from a fresh clone
 
@@ -41,6 +41,12 @@ python -m venv .venv
 - **Not rebuilt:** `figures/confraria_fig434_digitized.csv`. `scripts/digitize_confraria.py` needs an
   image of Fig. 4.34 from Confraria's thesis, which is not in the repository. The CSV is an input
   (digitized literature data), not a result.
+- **Cloning from a local copy** (for example, to audit commits not yet pushed): give the clone the
+  repository's origin URL before rebuilding, as a clone from GitHub would have.
+  `site/public/data/site.json` records it for the website's source links.
+  ```bash
+  git remote set-url origin https://github.com/vyom-aggarwal/oberth-efficiency-atlas.git
+  ```
 
 ## Checking a rebuild against the committed outputs
 
@@ -48,15 +54,36 @@ python -m venv .venv
 .venv/Scripts/python scripts/repro_audit.py REFERENCE_DIR REBUILT_DIR [--json audit.json]
 ```
 
-`repro_audit.py` compares every file under `figures/` and `results/`, plus the explorer. It
-ignores provenance stamps and wall-clock fields:
+`repro_audit.py` compares every file under `figures/`, `results/` and `site/public/data/` (the
+website's data, from Phase 6), plus the explorer. It ignores provenance stamps and wall-clock fields:
 - **PNG:** decoded pixels. The script path and git commit in the text metadata are ignored.
 - **PDF:** bytes, without the creation date, modification date and producer, and without the
   `startxref` offset, which shifts with the length of the date.
-- **JSON:** parsed values, without keys containing "runtime".
+- **JSON:** parsed values, without keys containing "runtime". In the site data, these stamps are
+  also ignored:
+  - the commit stamp (`provenance.git`);
+  - the hashes in `provenance.sources` of files that are themselves audited outputs. Those files
+    are compared by content here, and their bytes carry stamps. The hashes of all other sources are
+    compared;
+  - the commit in a `source_links` ref. Whether a file links to the tag or to a commit is compared.
 - **Parquet:** the table, without its key-value metadata (provenance) and the `runtime_s` column.
 - **MP4 and GIF:** decoded frames.
 - **CSV, HTML and other text:** bytes.
+
+To record an audit for the website, run, in the repository, after `rebuild_all.py` has finished in
+the clone:
+
+```bash
+.venv/Scripts/python scripts/audit_record.py CLONE_DIR --log REBUILD_LOG
+```
+
+- `REBUILD_LOG` is the saved output of `rebuild_all.py` in the clone.
+- It writes `docs/audit/<date>_<audited commit>/`:
+  - `comparison.json`, one entry per output;
+  - the clone's `rebuild_timings.json`;
+  - `summary.json`, whose counts are computed from those two files and the clone's packages.
+- `scripts/export_site_data.py` (constant `AUDIT`) quotes one summary in `methods.json`. The
+  website's methods section shows it.
 
 ## Audit of v1.0-analysis (2026-10-06)
 
@@ -97,6 +124,32 @@ passed) and the animation were rerun there. Result: **56/56 outputs identical**,
 provenance stamps and wall-clock fields. One of the 56, `confraria_fig434_digitized.csv`, is not
 regenerated (see above).
 
+## Audits with the website data (Phase 6, checkpoint 6)
+
+From Phase 6, the audit also covers `site/public/data/`. `rebuild_all.py` ends with
+`export_site_data.py`. The records are in `docs/audit/<date>_<audited commit>/`, and the research log
+of 2026-10-18 and 2026-10-19 has the details.
+
+1. **9ed036a (2026-10-18): the rebuild stopped at its test step.** The site export hashed raw bytes,
+   so files checked out with CRLF hashed differently. The export now hashes text as git stores it.
+2. **6cd1e6e (2026-10-19): 62 of 69 identical; 68 of 69 with the corrected comparison.** All
+   differences were stamps, in seven site-data files:
+   - the hashes of rebuilt parquet files, whose bytes carry stamps;
+   - the commit in source links;
+   - the clone's origin URL.
+
+   It also exposed an exporter bug: in a rebuilt checkout, source links pointed at a `<sha>-dirty`
+   ref, which does not exist.
+   - The comparison rule above and the exporter were corrected.
+   - Cloning from a local copy now sets the origin URL (setup, above).
+   - Record: `docs/audit/2026-10-19_6cd1e6e/`, with the corrected comparison.
+3. **f185234 (2026-10-19), the final code: 69 of 69 identical.**
+   - The packages match the lock (24).
+   - The test step passed 600 tests.
+   - All 27 steps succeeded in 21.5 min.
+   - Record: `docs/audit/2026-10-19_f185234/`. Its summary is the one the website's methods
+     section quotes.
+
 ## Runtimes and hardware
 
 **Hardware:**
@@ -131,3 +184,13 @@ regenerated (see above).
 \* **The sweep time is an estimate.** The machine slept during this step: the recorded 561 min
 include a 9.1-h gap in the progress log. Excluding the gap, the step took about 17 min.
 Independently, the per-run compute times of the committed sweep sum to 17.4 min per worker.
+
+**The checkpoint-6 audits** (2026-10-19, same machine, the site export included):
+- Both full rebuilds took 22.0 and 21.5 min.
+- The longest steps in the second were:
+  - run_phase3_followups, 6.8 min;
+  - run_phase3, 4.3 min;
+  - the sweep, 3.5 min;
+  - anim_engines, 2.7 min.
+- The per-step times are in each record's `rebuild_timings.json`. They are much shorter than in the
+  v1.0 audit; the cause is not identified. They are indicative.

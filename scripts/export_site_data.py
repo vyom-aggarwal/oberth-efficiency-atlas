@@ -553,7 +553,7 @@ def case_data(num: Numbers, refs: list[dict]) -> dict:
 
 # ---------------------------------------------------------------- methods.json
 
-AUDIT = "docs/audit/2026-10-19_6cd1e6e/summary.json"      # the latest fresh-clone audit (scripts/audit_record.py)
+AUDIT = "docs/audit/2026-10-19_f185234/summary.json"      # the latest fresh-clone audit (scripts/audit_record.py)
 
 
 def methods_data(num: Numbers) -> dict:
