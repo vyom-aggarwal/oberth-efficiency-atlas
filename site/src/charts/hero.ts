@@ -50,8 +50,11 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
       // "(hypothetical at 3.2 R☉)", and leaves an identifying note (the reference) to the hover title.
       const [first, second = ""] = m.title.value.split("\n");
       const name = first.split(":")[0];
-      return { value: m.Pi.value, label: /hypothetical/.test(second) ? `${name}\n${second}` : name, kind: "engine",
-               short: name.split(/[\s-]/)[0],          // "Solid stack" → "Solid", "SEP-class" → "SEP" (narrow track)
+      const caveat = /hypothetical/.test(second) ? second.replace(/^\(|\)$/g, "") : "";   // "hypothetical at 3.2 R☉"
+      return { value: m.Pi.value, label: caveat ? `${name}\n${second}` : name, kind: "engine",
+               // Narrow track: "Solid stack" → "Solid", "SEP-class" → "SEP*", the asterisk explained under the
+               // slider from the same caveat string (author, 2026-10-19: the caveat stays visible).
+               short: name.split(/[\s-]/)[0] + (caveat ? "*" : ""), note: caveat ? `* ${caveat}` : undefined,
                detail: `${first.replace(":", ",")}${second ? " " + second : ""}: Π = ${sig(m.Pi.value)} on this dive` };
     }),
     ...d.thresholds.map((t): Mark => ({ value: t.Pi.value, label: t.level.replace("%", " %"), kind: "threshold",

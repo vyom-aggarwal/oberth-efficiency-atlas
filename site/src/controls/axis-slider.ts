@@ -6,7 +6,9 @@ import { decade, pow10, sig } from "../lib/format";
 import { signal, type Signal } from "../lib/signal";
 
 /** A mark on the scale: filled (an engine) or hollow (a threshold); `detail` becomes its hover title. */
-export interface Mark { value: number; label: string; short?: string; detail?: string; kind?: "engine" | "threshold" }
+/** A mark on the scale. `short` replaces the label on a narrow track; `note` (e.g. "* hypothetical …") is then shown
+ *  under the slider, so a caveat carried by the full label stays visible. */
+export interface Mark { value: number; label: string; short?: string; note?: string; detail?: string; kind?: "engine" | "threshold" }
 export interface AxisSliderOptions {
   id: string;
   label: Node | string;
@@ -33,7 +35,8 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
   const above = s("svg", { class: "marks-above", "aria-hidden": "true" });   // engine marks, on a narrow track
   const svg = s("svg", { class: "scale", "aria-hidden": "true" });
   const track = h("div", { class: "track" }, above, range, svg);
-  const el = h("div", { class: "axis-slider" }, h("label", { class: "slider-label", for: o.id }, o.label), track, number);
+  const notes = h("p", { class: "axis-note", hidden: true });   // notes of short labels on a narrow track
+  const el = h("div", { class: "axis-slider" }, h("label", { class: "slider-label", for: o.id }, o.label), track, number, notes);
 
   range.addEventListener("input", () => value.set(10 ** Number(range.value)));
   number.addEventListener("change", () => {
@@ -76,7 +79,11 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
     }
     above.replaceChildren();
     above.style.height = "0px";
-    if (width < SPLIT_BELOW) { drawSplitMarks(x); return; }
+    const split = width < SPLIT_BELOW;
+    const shortNotes = split ? [...new Set((o.marks ?? []).filter((m) => m.short && m.note).map((m) => m.note!))] : [];
+    notes.textContent = shortNotes.join("; ");
+    notes.hidden = shortNotes.length === 0;
+    if (split) { drawSplitMarks(x); return; }
     // Mark labels, centred under their mark and clamped to the scale. A label may carry a line break ("\n"): it is
     // set on one line when that fits the scale, else on two. Left to right, each label takes the first free row (or
     // pair of rows).

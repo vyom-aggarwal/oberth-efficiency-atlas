@@ -43,7 +43,14 @@ test("annotations and slider labels stay inside the figure at every width and Π
           if (up !== 1) out.push(`${up} label rows above the track`);
           if (down !== 1) out.push(`${down} label rows below the track`);
           if (document.querySelector(".hero-slider svg.scale text.mark-label:not(.hollow)")) out.push("an engine label below the track");
-        }
+          // A short label with an asterisk keeps its caveat visible in a note under the slider (author, 2026-10-19).
+          const starred = [...document.querySelectorAll(".hero-slider svg.marks-above text.mark-label")]
+            .filter((t) => (t.childNodes[0]?.textContent ?? "").trim().endsWith("*"));
+          const note = document.querySelector<HTMLElement>(".hero-slider .axis-note");
+          if (!starred.length) out.push("no starred short label (SEP*)");
+          else if (!note || note.hidden || note.getBoundingClientRect().height === 0) out.push("the asterisk's note is not visible");
+          else if (!/^\* hypothetical at 3\.2 R☉$/.test(note.textContent!.trim())) out.push(`note reads "${note.textContent}"`);
+        } else if (!document.querySelector<HTMLElement>(".hero-slider .axis-note")!.hidden) out.push("a note shows with the full labels");
         for (const t of document.querySelectorAll(".hero-slider svg text"))           // e.g. a line style leaking onto text
           if (getComputedStyle(t).stroke !== "none") out.push(`slider label "${t.textContent!.trim().slice(0, 20)}" is stroked`);
         labels.forEach((a, i) => labels.slice(i + 1).forEach((b) => {

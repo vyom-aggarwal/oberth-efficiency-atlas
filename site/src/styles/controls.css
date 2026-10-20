@@ -56,6 +56,7 @@
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 .axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
 .axis-slider svg.marks-above { height: 0; }          /* set when drawn: engine marks on a narrow track */
+.axis-slider .axis-note { grid-column: 1 / -1; margin: 0; font-size: var(--t-label); color: var(--text-2); }
 .axis-slider svg text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
 .axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
 .axis-slider svg text.mark-label.hollow { fill: var(--text-2); }   /* not .threshold: that class is the dotted line style */
