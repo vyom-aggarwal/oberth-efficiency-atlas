@@ -79,6 +79,7 @@ CHECKS = {
     "site-data": lambda: pytest("tests/test_site_data.py"),
     "hooks": lambda: pytest("tests/test_hooks.py"),
     "check-all": lambda: pytest("tests/test_check_all.py"),
+    "workflow": lambda: pytest("tests/test_workflow.py"),
     "pytest": lambda: pytest(),
 }
 FAST = ["typecheck", "vitest", "numbers", "site-data", "hooks"]
@@ -107,6 +108,7 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
     - scripts/check_numbers.py → numbers too
     - .claude/hooks/, .claude/settings.json, tests/test_hooks.py → hooks
     - scripts/check_all.py, .githooks/, tests/test_check_all.py   → check-all
+    - .github/, tests/test_workflow.py                            → workflow (actions pinned to commit SHAs)
     Anything else (logs, docs that feed nothing) needs no check here; the full run covers everything.
     """
     sources = data_sources() if sources is None else sources
@@ -128,6 +130,8 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
             want.add("hooks")
         if p in ("scripts/check_all.py", "tests/test_check_all.py") or p.startswith(".githooks/"):
             want.add("check-all")
+        if p.startswith(".github/") or p == "tests/test_workflow.py":
+            want.add("workflow")
     return [n for n in CHECKS if n in want]
 
 

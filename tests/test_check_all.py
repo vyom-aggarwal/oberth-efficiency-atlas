@@ -32,6 +32,10 @@ def test_hook_scripts_run_the_hook_tests():
     assert C.select_checks(["tests/test_hooks.py"], SOURCES) == ["site-data", "hooks"]   # tests/ also: methods.json
 
 
+def test_workflow_changes_run_the_workflow_tests():
+    assert C.select_checks([".github/workflows/site.yml"], SOURCES) == ["workflow"]
+
+
 def test_logs_and_unrelated_files_need_no_check_and_assets_none():
     assert C.select_checks(["RESEARCH_LOG.md", "docs/ai_use_log.md", "site/public/og-image.png"], SOURCES) == []
 
