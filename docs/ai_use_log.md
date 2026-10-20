@@ -448,9 +448,20 @@ added to the numbers file as values.
     hook was ever used.
   - **A version-selection error:** picking actions "newest by date" chose actions/checkout v2.8.0,
     a maintenance release. The selection now goes by version number.
+  - **Seven site-data files reported as different** by the audit of 6cd1e6e, traced to stamps:
+    - the hashes of rebuilt parquet files, which the comparison still checked;
+    - the clone's origin URL;
+    - the commit in some source links.
+    The comparison rule and the audit procedure were corrected, each logged before the change.
+  - **Broken source links in a rebuilt checkout:** the exporter linked files changed in the working
+    tree to a `<sha>-dirty` ref, which does not exist. It now compares committed files and links only
+    to real refs, with a test.
 - **Checkpoint 6, assistant errors, disclosed:**
   - **Pre-commit staging.** The first attempt at the hash fix could not be committed code-first: the
     hook rejected code that no longer matched the data. Code and data were committed together, with
     a `-dirty` stamp, then re-exported with a clean stamp.
-  - **Two blocked pipes:** test commands piped into `tail` or `grep` without pipefail were blocked by
-    the hook and rerun with pipefail.
+  - **Four blocked pipes:** test commands piped into `tail` or `grep` without pipefail were blocked
+    by the hook and rerun with pipefail.
+  - **The audit comparison's site-data rule** was the assistant's own design (2026-10-15). It kept
+    the source hashes for every source, including files the rebuild regenerates. The audit of
+    6cd1e6e exposed this.
