@@ -6,7 +6,9 @@ explorer/explorer_data.json, is compared by content, ignoring provenance stamps 
 - PDF: bytes with /CreationDate, /ModDate and /Producer removed, and the startxref byte offset
   (it shifts with the length of the date string);
 - JSON: parsed values, exactly, without wall-clock entries (keys containing "runtime") and without the site
-  data's commit stamp (key "git" inside "provenance"; the source-file hashes beside it are still compared);
+  data's stamps: the commit stamp (key "git" inside "provenance"), the hashes in "provenance"/"sources" of
+  files that are themselves audited outputs (compared by content here; their bytes carry stamps), and the
+  commit in a "source_links" ref (read as "a commit"; the tag stays). Every other source hash is compared;
 - CSV, HTML, other text: bytes;
 - Parquet: the table, exactly, without its key-value metadata and without wall-clock columns
   (runtime_s); on a difference, the columns and the largest absolute difference are reported;
@@ -28,6 +30,8 @@ import pandas as pd
 from PIL import Image
 
 WALL_CLOCK = {"runtime_s"}
+OUTPUT_DIRS = ("figures/", "results/", "explorer/", "site/public/data/")   # the outputs this audit compares
+COMMIT = re.compile(r"^[0-9a-f]{7,40}(-dirty)?$")
 
 
 def png_equal(a: Path, b: Path):
@@ -81,11 +85,20 @@ def video_frames_hash(p: Path) -> str:
     return h.hexdigest()
 
 
-def drop_wall_clock(x, parent: str = ""):
-    """Remove wall-clock entries (any key containing 'runtime') and provenance commit stamps from parsed JSON."""
+def drop_wall_clock(x, path: tuple = ()):
+    """Remove wall-clock entries (any key containing 'runtime') and the site data's stamps from parsed JSON (see the
+    module docstring; RESEARCH_LOG 2026-10-19 for why output hashes and source-link commits are stamps)."""
     if isinstance(x, dict):
-        return {k: drop_wall_clock(v, str(k)) for k, v in x.items()
-                if "runtime" not in str(k) and not (parent == "provenance" and k == "git")}
+        parent = path[-1] if path else ""
+        out = {}
+        for k, v in x.items():
+            k = str(k)
+            if "runtime" in k or (parent == "provenance" and k == "git") \
+                    or (path[-2:] == ("provenance", "sources") and k.startswith(OUTPUT_DIRS)):
+                continue
+            out[k] = "<commit>" if parent == "source_links" and isinstance(v, str) and COMMIT.match(v) \
+                else drop_wall_clock(v, path + (k,))
+        return out
     if isinstance(x, list):
         return [drop_wall_clock(v) for v in x]
     return x
@@ -102,7 +115,7 @@ def compare(a: Path, b: Path):
     if s == ".json":
         x, y = (json.loads(p.read_text(encoding="utf-8")) for p in (a, b))
         same = drop_wall_clock(x) == drop_wall_clock(y)
-        return same, "(wall-clock keys ignored)" if same and x != y else ""
+        return same, "(wall-clock keys and stamps ignored)" if same and x != y else ""
     if s == ".parquet":
         return parquet_equal(a, b)
     if s in (".mp4", ".gif"):

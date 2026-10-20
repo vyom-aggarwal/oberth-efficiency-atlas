@@ -187,6 +187,16 @@ def test_site_numbers_are_current_and_consistent():
     assert out.returncode == 0, out.stdout + out.stderr
 
 
+def test_source_links_name_real_refs():
+    # The tag, or a commit that exists here (a '-dirty' stamp is not a ref; RESEARCH_LOG 2026-10-19).
+    site = load("site.json")
+    for rel, ref in site["source_links"].items():
+        assert (ROOT / rel).exists(), rel
+        if ref != site["repo"]["tag"]:
+            assert re.fullmatch(r"[0-9a-f]{7,40}", ref), (rel, ref)
+            assert subprocess.run(["git", "cat-file", "-e", f"{ref}:{rel}"], cwd=ROOT).returncode == 0, (rel, ref)
+
+
 def test_reference_numbers_follow_the_paper_outline():
     site = load("site.json")
     curve = load("curve.json")

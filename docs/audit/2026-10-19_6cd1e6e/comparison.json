@@ -1,0 +1,347 @@
+[
+ {
+  "file": "explorer/explorer_data.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "explorer/oberth_explorer.html",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/anim_engines.gif",
+  "identical": true,
+  "note": "decoded frames"
+ },
+ {
+  "file": "figures/anim_engines.mp4",
+  "identical": true,
+  "note": "decoded frames"
+ },
+ {
+  "file": "figures/anim_engines_final.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/anim_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/atlas_eta.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/collapse_metrics.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/collapse_secondary.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/collapse_small_pi.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/confraria_fig434_digitized.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/eta_vs_a0.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/eta_vs_a0.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/eta_vs_pi_all.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/hero_loss_vs_pi.pdf",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/hero_loss_vs_pi.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/hero_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/j2_cases.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/j2_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/literature_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/loss_vinf_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/loss_vs_pi_vinf.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/mission_table.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/missions_regions.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase2_numbers.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "figures/phase3_baselines.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_fraction.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_mission_table.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_missions.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_pitch.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_recoverable.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_reversal.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase3_timing.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase4_loss_vs_pi.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase4_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/phase4_reference.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/prefactor_check.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/regimes.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/regimes_half_point.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/robbins_comparison.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/robbins_comparison.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/rule_check.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/rule_numbers.json",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/trajectory_earth_hydrolox.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/trajectory_earth_pitch_example.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/trajectory_jupiter_hall.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "figures/trajectory_jupiter_nuclear_thermal.png",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "results/missions.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "results/opt_missions.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "results/opt_phase3.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "results/opt_phase3_crosscheck.csv",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "results/opt_phase3_piecewise.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "results/opt_phase3_rules.parquet",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "results/phase4.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "results/sweep_nd.parquet",
+  "identical": true,
+  "note": "(ignored ['runtime_s'])"
+ },
+ {
+  "file": "site/public/data/atlas.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/case.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/curve.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/engines.bin",
+  "identical": true,
+  "note": ""
+ },
+ {
+  "file": "site/public/data/engines.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/hero.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/methods.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/missions.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/presets.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/regimes.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/site.json",
+  "identical": false,
+  "note": ""
+ },
+ {
+  "file": "site/public/data/site_numbers.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ },
+ {
+  "file": "site/public/data/timing.json",
+  "identical": true,
+  "note": "(wall-clock keys and stamps ignored)"
+ }
+]

@@ -1,0 +1,18 @@
+{
+ "date": "2026-10-19",
+ "audited_commit": "6cd1e6e",
+ "reference_commit": "0d212e1",
+ "outputs": 69,
+ "identical": 68,
+ "different": [
+  "site/public/data/site.json"
+ ],
+ "tests_passed": 592,
+ "tests_skipped": 0,
+ "rebuild_steps": 27,
+ "rebuild_all_ok": true,
+ "packages_locked": 24,
+ "packages_match_lock": true,
+ "python": "3.13.14",
+ "comparison": "comparison.json"
+}

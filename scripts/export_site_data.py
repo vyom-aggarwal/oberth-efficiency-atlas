@@ -166,9 +166,15 @@ def repo_info() -> dict:
 
 
 def source_ref(rel: str) -> str:
-    """Link target for a source file: the tag if the file is unchanged since it, else the current commit."""
-    same = subprocess.run(["git", "diff", "--quiet", TAG, "--", rel], cwd=ROOT).returncode == 0
-    return TAG if same else git_revision()
+    """Link target for a source file: the tag if the committed file is unchanged since it, else HEAD's commit.
+
+    Committed files are compared, not the working tree: a link names a git object, and a rebuilt checkout's
+    regenerated outputs differ from the tag only in their stamps. Never '-dirty', which is not a ref
+    (RESEARCH_LOG 2026-10-19)."""
+    same = subprocess.run(["git", "diff", "--quiet", TAG, "HEAD", "--", rel], cwd=ROOT).returncode == 0
+    head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True,
+                          cwd=ROOT).stdout.strip()
+    return TAG if same else head
 
 
 def write(name: str, payload: dict) -> None:
@@ -547,19 +553,24 @@ def case_data(num: Numbers, refs: list[dict]) -> dict:
 
 # ---------------------------------------------------------------- methods.json
 
+AUDIT = "docs/audit/2026-10-19_6cd1e6e/summary.json"      # the latest fresh-clone audit (scripts/audit_record.py)
+
+
 def methods_data(num: Numbers) -> dict:
-    """Facts for the methods section: the tag and its commit, the collected test count, and two checks."""
+    """Facts for the methods section: the tag and its commit, the collected test count, two checks, and the latest
+    fresh-clone audit (its summary is computed by scripts/audit_record.py from the full comparison)."""
     run = lambda *a: subprocess.run(list(a), capture_output=True, text=True, check=True, cwd=ROOT).stdout
     collected = run(sys.executable, "-m", "pytest", "--collect-only", "-q")
     n_tests = int(re.search(r"(\d+) tests? collected", collected).group(1))
     j2, rule = "figures/j2_numbers.json", "figures/rule_numbers.json"
     return {
-        "provenance": provenance([j2, rule, "docs/repro.md"]),
+        "provenance": provenance([j2, rule, "docs/repro.md", AUDIT]),
         "tag": TAG, "tag_commit": run("git", "rev-list", "-n", "1", TAG).strip()[:7],
         "tests_collected": n_tests,
         "j2_max_abs_delta_eta": num(j2, "max_abs_delta_eta"),
         "j2_max_rel_delta_deficit": num(j2, "max_rel_delta_deficit"),
         "rule_max_ratio_Pi_le_1": num(rule, "sweep_prograde_Pi_le_1", "max_R_over_bound"),
+        "audit": {k: num(AUDIT, k) for k in ("date", "audited_commit", "outputs", "identical", "tests_passed", "packages_match_lock")},
         "repro_doc": "docs/repro.md",
     }
 

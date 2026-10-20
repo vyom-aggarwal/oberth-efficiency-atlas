@@ -2688,4 +2688,66 @@ on its own with its tests.
 **Test totals before the audit:** Playwright 98 passed (frame-time p95 6.9 ms); `check_all.py`
 passed, pytest 592.
 
+## 2026-10-19: Checkpoint 6: the audit of 6cd1e6e, and two stamps the comparison still compared
+
+**Procedure:**
+- A clone of 6cd1e6e, made from this working copy: the author pushes, so HEAD need not be on GitHub.
+- A venv from `requirements-lock.txt`: the 24 packages match the lock.
+- `rebuild_all.py`: all 27 steps succeeded in 22.0 min (indicative); its test step passed 592.
+
+**Result:** `repro_audit.py` (as of 6cd1e6e) found 62 of 69 outputs identical. The 7 that differ are
+all site data: atlas, case, curve, missions, regimes, site and site_numbers.
+
+**Cause, measured** (a scratch diff of each file with `provenance` dropped, then of the hashes):
+- Six files differ only inside `provenance`. There, only the `sources` hashes of
+  `results/sweep_nd.parquet`, `results/phase4.parquet` and `results/missions.parquet` differ.
+- The same audit finds those three parquet files identical: it compares the table exactly,
+  without the key-value metadata and the `runtime_s` column. Their bytes carry those stamps, so their
+  hash cannot reproduce in a rebuild.
+- `site.json`:
+  - `repo.url` is the clone's origin, the local path it was cloned from;
+  - the `source_links` refs of files changed since the tag are `6cd1e6e-dirty` in the clone against
+    `c0f7fb8` here. These are commit stamps: the export's own commit, and the clone's tree is dirty
+    after the rebuild rewrites its outputs.
+
+**My error:** when I added `site/public/data` to the audit (9de04dc, 2026-10-15), I kept the source
+hashes in the comparison. That is right for sources that git stores (it found the CRLF bug,
+2026-10-18) and wrong for sources that the rebuild itself regenerates.
+
+**Deviation** (the comparison rule, in tooling; no analysis code or output changes):
+- `provenance.sources` hashes of files that are themselves audited outputs (under `figures/`,
+  `results/`, `explorer/` or `site/public/data/`) are ignored. Those files are compared by content in
+  the same audit. Hashes of every other source (configs, content, docs, code) are still compared.
+- In `source_links`, a commit stamp is read as "a commit"; the tag stays as it is. Whether a file links
+  to the tag or to a commit is still compared.
+- `repo.url` stays compared. The procedure is fixed instead: the audit clone gets this repository's
+  origin URL (`git remote set-url origin`), as a clone from GitHub would have.
+- `audit_record.py` names each record `docs/audit/<date>_<audited commit>/`, since two audits fall on
+  this date.
+
+**Next:**
+- Record the comparison of the existing clone with the refined rule, as it comes out.
+- Then audit a second fresh clone, of the commit that holds this change and the audit export, with the
+  origin set, so that the audit covers the final code.
+
+**The refined comparison of the same clone** (`docs/audit/2026-10-19_6cd1e6e/`): 68 of 69 identical.
+`site.json` still differs, in `repo.url` (expected, above) and in three source links:
+`results/{missions,phase4,sweep_nd}.parquet` link to the tag here and to a commit in the clone.
+
+**A second exporter bug, found by this:** `source_ref` (Phase 6 code) asks whether a file changed
+since the tag by diffing the *working tree*. Two consequences:
+- In a rebuilt checkout, the regenerated parquet files differ from the tag in their stamps, so their
+  links move to the commit.
+- When the tree is dirty, that commit is written as `<sha>-dirty`. No such ref exists on GitHub, so
+  the link would be broken.
+The committed `site.json` is not affected: it was exported on a clean tree, where the parquet files
+equal the tag.
+
+**Fix** (exporter only; logged before the change):
+- `source_ref` compares the committed file at HEAD with the tag (`git diff --quiet TAG HEAD -- file`).
+- It links to the tag if the file is unchanged, else to HEAD's commit, never with `-dirty`.
+- A link names a git object, so the comparison should be between git objects. The working-tree state
+  is still recorded where it belongs, in `provenance.git`.
+- Expected effect on the committed site data: none beyond the stamps. Re-exported to confirm.
+
 

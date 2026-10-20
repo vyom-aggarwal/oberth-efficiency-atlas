@@ -1,4 +1,4 @@
-"""Record a fresh-clone audit under docs/audit/<date>/ (Phase 6, checkpoint 6).
+"""Record a fresh-clone audit under docs/audit/<date>_<audited commit>/ (Phase 6, checkpoint 6).
 
 Given the reference checkout (this repository) and a fresh clone in which scripts/rebuild_all.py has run, this
 runs scripts/repro_audit.py's comparison and writes:
@@ -41,7 +41,8 @@ def main(argv=None) -> int:
     ap.add_argument("--log", type=Path, required=True, help="the rebuild_all.py output of the clone")
     ap.add_argument("--date", default=dt.date.today().isoformat())
     a = ap.parse_args(argv)
-    out = ROOT / "docs" / "audit" / a.date
+    audited = git(a.clone, "rev-parse", "--short", "HEAD")
+    out = ROOT / "docs" / "audit" / f"{a.date}_{audited}"
     out.mkdir(parents=True, exist_ok=True)
 
     comparison = out / "comparison.json"
@@ -62,7 +63,7 @@ def main(argv=None) -> int:
 
     summary = {
         "date": a.date,
-        "audited_commit": git(a.clone, "rev-parse", "--short", "HEAD"),
+        "audited_commit": audited,
         "reference_commit": git(ROOT, "rev-parse", "--short", "HEAD"),
         "outputs": len(entries),
         "identical": sum(e["identical"] for e in entries),

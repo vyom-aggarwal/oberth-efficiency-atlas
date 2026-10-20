@@ -106,6 +106,9 @@ const FIGURES: Record<string, Mount> = {
       row("Tests in the suite", String(m.tests_collected)),
       row("Π²/96 rule, largest ratio for Π ≤ 1", sig(m.rule_max_ratio_Pi_le_1.value, 4)),
       row("J2 oblateness, largest change in η", sig(m.j2_max_abs_delta_eta.value, 2)),
+      // The latest fresh-clone audit (docs/audit/<date>/summary.json, via methods.json).
+      row("Fresh-clone audit", `${m.audit.identical.value} of ${m.audit.outputs.value} outputs reproduced identically ` +
+        `(commit ${m.audit.audited_commit.value}, ${m.audit.date.value}; ${m.audit.tests_passed.value} tests passed in the clone)`),
       row("Rebuild and audit", h("a", { href: `${site.repo.url}/blob/main/${m.repro_doc}`, rel: "noopener" }, m.repro_doc))));
   },
 };
