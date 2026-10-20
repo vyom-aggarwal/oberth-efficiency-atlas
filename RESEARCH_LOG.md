@@ -2633,4 +2633,59 @@ first and saves a crop of the curve. The crops showed:
 - The analysis code and its outputs are untouched: the v1.0 audit (2026-10-06) predates the site
   export.
 
+## 2026-10-19: Checkpoint 6: the author's eight changes, made before the audit
+
+The author asked for these changes first, so that the audit covers the final code. Each was committed
+on its own with its tests.
+
+1. **Lighthouse** (649f98b): CI is the record.
+   - `tools/lighthouse.mjs` exits 1 unless accessibility, best practices and SEO are each at least
+     0.90 on the home page and the explorer, mobile and desktop.
+   - Performance is reported and not enforced. `LH_MIN_PERFORMANCE` can enforce it on a quiet
+     machine.
+   - `runs/lighthouse/summary.json` records the scores, the versions and the date.
+   - Not run here: the sandbox blocks local sockets. CI and the author's own run are the record.
+2. **Deployment** (86fca82): `.github/workflows/site.yml`.
+   - check, lighthouse and build run on every push and pull request.
+   - deploy runs only on `workflow_dispatch`, after all three. How to trigger it is in `docs/site.md`.
+3. **Engines on narrow screens** (1ac8006): below 560 px, one panel at a time with an engine switch
+   beside the shared clock and scrub control. The energy strip keeps all three engines. A test
+   checks that switching keeps the clock position.
+4. **Atlas legend** (27c7380): grouped (colour scale, fills, lines, marks), showing only what is
+   drawn.
+   - The rule is presence in the current drawing, which meets the author's rule: impact fills and
+     boundaries appear only with inertial steering, the only slices that have impact cells and
+     contours.
+   - The SOI wash appears only with a body; the burn-start guides only without one.
+5. **SEP caveat on narrow screens** (ca8f32d): "SEP*" on the axis, with the note "* hypothetical at
+   3.2 R☉" under the slider. Both are built from the case title's caveat string. The layout test
+   checks the note at 360 and 390 px.
+6. **Pre-commit by staged files** (5cbccfe, c0f7fb8): `check_all.py --staged` runs only the checks
+   the staged files can affect.
+   - Content: `check_numbers`. Site code: the type check and vitest.
+   - The exporter, the site data, any provenance source of it, or `tests/` (`methods.json`
+     records the test count): the site-data tests.
+   - Hook scripts: the hook tests. `.github/`: the workflow tests.
+   - Measured: commits now take 8–10 s, against 80–110 s with `--fast`.
+   - An end-to-end dry run shows that a content-only change selects only `check_numbers`. That test
+     also caught a crash: the summary arrow could not be encoded on a cp1252 console.
+7. **Tooltips across redraws** (7d0ec43), fixed at the source.
+   - `common.tooltip().redraw()` notes what opened the tooltip (focus on a hit target, or the
+     pointer), redraws, then refocuses the matching target or replays the pointer.
+   - The new tests fire the browser's own fonts `loadingdone` event. All five failed on a build
+     without the fix and pass with it. The readout tests' retry loops are gone.
+8. **Open Graph** (fd53cfc): tags from each page's own title and description.
+   - `og:image` and `og:url` are absolute from `SITE_URL`, which the workflow sets.
+   - `public/og-image.png` (1200 × 630) is the hero's drawing, made by `tools/og-image.mjs`.
+
+**Action pinning:**
+- Each action is pinned to the highest vX.Y.Z released on or before 2026-10-05, the project's
+  14-day rule, resolved to a commit SHA with `gh`.
+- The inputs and outputs used were checked against each pinned `action.yml`.
+- Choosing by version number matters: on 2026-07-20 actions/checkout published maintenance releases
+  for every major line, so "the newest by date" was v2.8.0.
+
+**Test totals before the audit:** Playwright 98 passed (frame-time p95 6.9 ms); `check_all.py`
+passed, pytest 592.
+
 
