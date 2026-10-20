@@ -9,7 +9,7 @@ import type { Provenance, SiteData, Sourced } from "../lib/data";
 import { frag, h, onFontsLoaded, s } from "../lib/dom";
 import { duration, lossRel, sig } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
-import { dataTable } from "./common";
+import { dataTable, segmented } from "./common";
 
 interface ArrayRef { name: string; offset: number; length: number }
 interface EngineCase {
@@ -56,7 +56,16 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
   const scrub = h("input", { type: "range", id: `${uid}-t`, min: -sMax, max: sMax, step: (2 * sMax) / 1000, value: sMax,
     "aria-label": "time from perihelion" });
   const clock = h("output", { class: "clock", for: `${uid}-t` });
-  const controls = h("div", { class: "controls engine-controls" }, play, h("div", { class: "scrub" }, scrub), clock);
+  // Below 560 px (author, 2026-10-19): one panel at a time, chosen here; the clock, the scrub control and the
+  // three-engine strip are shared, so switching keeps the time and the comparison.
+  let one = 0, single = false;
+  const pick = segmented(`${uid}-engine`, "Engine", cases.map((k, i) => [String(i), k.name.split(":")[0]] as [string, string]), "0", (v) => {
+    one = Number(v);
+    layout();
+    requestAnimationFrame(frame);
+  });
+  const engineSwitch = h("div", { class: "engine-switch", hidden: true }, h("span", { class: "control-label" }, "Engine"), pick);
+  const controls = h("div", { class: "controls engine-controls" }, engineSwitch, play, h("div", { class: "scrub" }, scrub), clock);
   const panels = cases.map((k) => {
     const canvas = h("canvas", { class: "engine-canvas", "aria-hidden": "true" });
     const [short, rest = ""] = k.name.split(": ");
@@ -107,8 +116,14 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
 
   // ---------------------------------------------------------------- drawing
   let side = 0, W = 0;
+  function layout(): void {
+    single = grid.clientWidth < 560;
+    engineSwitch.hidden = !single;
+    panels.forEach((p, i) => { p.el.hidden = single && i !== one; });
+    side = Math.round(panels.find((p) => !p.el.hidden)!.el.clientWidth);
+  }
   new ResizeObserver(() => {
-    side = Math.round(panels[0].canvas.parentElement!.clientWidth);
+    layout();
     W = Math.round(stripWrap.clientWidth);
     requestAnimationFrame(frame);
   }).observe(grid);
@@ -121,7 +136,7 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
     const hours = (tNow() * time_s) / 3600;
     clock.textContent = `t = ${hours >= 0 ? "+" : "−"}${sig(Math.abs(hours), 3)} h from perihelion`;
     scrub.setAttribute("aria-valuetext", clock.textContent);
-    panels.forEach((p, i) => drawPanel(p.canvas, cases[i], k));
+    panels.forEach((p, i) => { if (!p.el.hidden) drawPanel(p.canvas, cases[i], k); });
     drawStrip(k);
   }
 

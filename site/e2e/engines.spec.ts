@@ -59,6 +59,33 @@ test("engines: captions carry Π, burn and loss; the SEP caveat stays in its cap
   for (let i = 0; i < 3; i++) await expect(fig.locator(".engine-cap").nth(i)).toContainText("Π =");
 });
 
+test("engines below 560 px: one panel at a time; switching engine keeps the clock, and the strip keeps all three", async ({ page }) => {
+  const fig = await open(page, 390);
+  await expect(fig.locator(".engine-switch")).toBeVisible();
+  await expect(fig.locator(".engine-panel:visible")).toHaveCount(1);
+  await expect(fig.locator(".engine-panel:visible .engine-name")).toHaveText(/Solid stack/);
+  await page.evaluate(() => {                                         // part way through the dive
+    const r = document.querySelector<HTMLInputElement>("#fig-engines .scrub input")!;
+    r.value = String(Number(r.min) * 0.3);
+    r.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const clock = await fig.locator(".clock").textContent();
+  expect(clock).toMatch(/^t = −/);
+  await fig.locator(".engine-switch label", { hasText: "Nuclear thermal" }).click();
+  await expect(fig.locator(".engine-panel:visible .engine-name")).toHaveText(/Nuclear thermal/);
+  await expect(fig.locator(".clock")).toHaveText(clock!);
+  await fig.locator(".engine-switch label", { hasText: "SEP-class" }).click();
+  await expect(fig.locator(".engine-panel:visible .engine-note")).toContainText("hypothetical at 3.2 R☉");
+  await expect(fig.locator(".clock")).toHaveText(clock!);
+  await expect(fig.locator(".energy-strip path.strip-line:not(.faint)")).toHaveCount(3);
+});
+
+test("engines at 1440 px: three panels side by side, no switch", async ({ page }) => {
+  const fig = await open(page, 1440);
+  await expect(fig.locator(".engine-switch")).toBeHidden();
+  await expect(fig.locator(".engine-panel:visible")).toHaveCount(3);
+});
+
 test("limitations: the J2 facts, with their source", async ({ page }) => {
   await page.goto("");
   const box = page.locator("#fig-limitations");

@@ -70,6 +70,8 @@
 
 /* Engines compared: three panels, one clock, the energy strip. */
 .engine-controls { flex-wrap: nowrap; }
+.engine-switch { display: inline-flex; align-items: center; flex: 1 0 100%; }
+.engine-switch[hidden] { display: none; }
 .engine-controls .scrub { flex: 1 1 auto; min-width: 120px; }
 .clock { font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; min-width: 22ch; color: var(--text-2); }
 @media (max-width: 560px) {                       /* the clock takes its own line: no sideways scrolling at 360–390 px */
