@@ -34,6 +34,10 @@
 .legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; padding: 0; margin: var(--s3) 0 0;
           font-size: var(--t-label); color: var(--text-2); max-width: var(--figure); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
+/* A grouped legend (the atlas): a small title over each group's row of entries. */
+.legend-group-list { display: grid; gap: var(--s2); margin-top: var(--s3); max-width: var(--figure); }
+.legend-group .legend { margin-top: 2px; }
+.legend-group-title { margin: 0; font-size: var(--t-label); font-weight: 500; color: var(--text-2); }
 .legend svg { overflow: visible; flex: none; }
 .range-box { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 /* Sweep data and theory in the regimes figure; theory curves keep distinct dashes so the legend tells them apart. */

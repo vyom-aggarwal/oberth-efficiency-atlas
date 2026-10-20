@@ -71,6 +71,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
   const tableBody = h("div", {});                         // filled when opened (585 rows)
   const table = h("details", { class: "data" }, h("summary", {}, "Show data: every cell of this slice"), tableBody);
   table.addEventListener("toggle", () => table.open && fillTable());
+  const legendGroups = h("div", { class: "legend-group-list" });   // refilled by update() for what is shown
   root.append(head, controls, plot, legend(), summary, table);
 
   let width = 0;
@@ -114,6 +115,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
       `(the path dips below the surface, with periapsis at ${sig(d.mask_r_p_over_R, 2)} body radii) and ${counts.unreliable} have no reliable η.` +
       (b ? ` With ${cap(b.id)}'s sphere of influence, ${out} cells start their burn outside it.` : "");
     plot.dataset.cells = String(n);
+    fillLegend(sl, counts);
     if (table.open) fillTable();
   }
 
@@ -278,6 +280,44 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
   }
 
   // ---------------------------------------------------------------- legend
+  /** Legend entries for what the figure currently shows, grouped (author, 2026-10-19): impact fills and boundaries
+   *  only where the slice has them (inertial steering), washing only with a body, layers only when on. */
+  function fillLegend(sl: Slice, counts: Record<Status, number>): void {
+    const id = (k: string) => `${uid}-${k}`;
+    const sw = (fill: string) => s("svg", { width: 22, height: 14, viewBox: "0 0 22 14", "aria-hidden": "true" },
+      s("rect", { x: 0.5, y: 0.5, width: 21, height: 13, fill, class: "swatch" }));
+    const line = (cls: string) => s("svg", { width: 22, height: 14, viewBox: "-11 -7 22 14", "aria-hidden": "true" },
+      s("line", { class: cls, x1: -10, x2: 10, y1: 0, y2: 0 }));
+    const dot = (filled: boolean) => s("svg", { width: 22, height: 14, viewBox: "-11 -7 22 14", "aria-hidden": "true" },
+      s("circle", { r: 2.2, class: filled ? "mission-dot" : "mission-ring" }));
+    const etaLab = (t: string) => { const e = h("span", {}); e.append(frag(tex.eta), t); return e; };
+    const body = soi(), on = layers.get();
+    const guides = !body && sl.r_burn_start.some((row) => row.some((r) => r >= GUIDES[0]));
+    const contours = (k: string) => (sl.impact_contours[k] ?? []).length > 0;
+    const bar = h("span", { class: "atlas-ramp" }, s("svg", { width: 96, height: 10, "aria-hidden": "true" },
+      s("rect", { width: 96, height: 10, fill: `url(#${id("ramp")})` })));
+    const groups: [string, [Node, Node][]][] = [
+      ["Colour scale", [[h("span", { class: "ramp-ends" }, "0 ", bar, " 1"), etaLab(" (simulation, per sweep cell)")]]],
+      ["Fills", [
+        ...(counts.negative ? [[sw(`url(#${id("neg")})`), etaLab(" < 0")] as [Node, Node]] : []),
+        ...(counts.impact ? [[sw(`url(#${id("imp")})`), document.createTextNode(`Impact: the path dips below the surface (periapsis at ${sig(d.mask_r_p_over_R, 2)} body radii)`)] as [Node, Node]] : []),
+        ...(counts.unreliable ? [[sw(`url(#${id("unr")})`), document.createTextNode("No reliable η (captured, or outside the sweep's reliability checks)")] as [Node, Node]] : []),
+        ...(body ? [[sw("var(--paper)"), document.createTextNode(`Washed: burn starts outside ${cap(body.id)}'s sphere of influence`)] as [Node, Node]] : []),
+      ]],
+      ["Lines", [
+        ...(contours("h=0.1R") ? [[line("impact-line"), document.createTextNode(`Impact boundary for a periapsis altitude of ${sig(d.mask_r_p_over_R - 1, 1)} R`)] as [Node, Node]] : []),
+        ...(contours("h=1R") ? [[line("impact-line alt"), document.createTextNode(`Impact boundary for a periapsis altitude of ${sig(d.alt_r_p_over_R - 1, 1)} R`)] as [Node, Node]] : []),
+        ...(guides ? [[line("guide-line"), h("span", {}, "Burn starts 100 or 1000 ", frag(tex.rp), " out (labelled above the plot)")] as [Node, Node]] : []),
+        ...(on.has("theory") ? [[line("theory-line"), h("span", {}, "Contours of ", frag(tex.eta), " for Δv → 0, labelled above the plot by their level (theory)")] as [Node, Node]] : []),
+      ]],
+      ["Marks", on.has("missions") ? [[h("span", {}, dot(true), dot(false)),
+        document.createTextNode(`Mission samples${body ? ` at ${cap(body.id)}` : ""}, burn starting inside or outside the SOI`)]] : []],
+    ];
+    legendGroups.replaceChildren(...groups.filter(([, items]) => items.length).map(([title, items]) =>
+      h("div", { class: "legend-group" }, h("p", { class: "legend-group-title" }, title),
+        h("ul", { class: "legend", "aria-label": title }, ...items.map(([g, t]) => h("li", {}, g, t))))));
+  }
+
   function legend(): HTMLElement {
     const id = (k: string) => `${uid}-${k}`;
     const defs = s("svg", { width: 0, height: 0, class: "pattern-defs", "aria-hidden": "true" }, s("defs", {},
@@ -288,28 +328,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
       s("pattern", { id: id("unr"), width: 6, height: 6, patternUnits: "userSpaceOnUse" },
         s("rect", { width: 6, height: 6, class: "tex-bg" }), s("circle", { cx: 3, cy: 3, r: 0.9, class: "tex-dot" })),
       s("linearGradient", { id: id("ramp") }, ...[1, 2, 3, 4, 5, 6, 7].map((k, j) => s("stop", { offset: j / 6, style: `stop-color: var(--slate-${k})` })))));
-    const sw = (fill: string) => s("svg", { width: 22, height: 14, viewBox: "0 0 22 14", "aria-hidden": "true" },
-      s("rect", { x: 0.5, y: 0.5, width: 21, height: 13, fill, class: "swatch" }));
-    const line = (cls: string) => s("svg", { width: 22, height: 14, viewBox: "-11 -7 22 14", "aria-hidden": "true" },
-      s("line", { class: cls, x1: -10, x2: 10, y1: 0, y2: 0 }));
-    const dot = (filled: boolean) => s("svg", { width: 22, height: 14, viewBox: "-11 -7 22 14", "aria-hidden": "true" },
-      s("circle", { r: 2.2, class: filled ? "mission-dot" : "mission-ring" }));
-    const bar = h("span", { class: "atlas-ramp" }, s("svg", { width: 96, height: 10, "aria-hidden": "true" },
-      s("rect", { width: 96, height: 10, fill: `url(#${id("ramp")})` })));
-    const etaLab = (t: string) => { const e = h("span", {}); e.append(frag(tex.eta), t); return e; };
-    const items: [Node, Node][] = [
-      [h("span", { class: "ramp-ends" }, "0 ", bar, " 1"), etaLab(" (simulation, per sweep cell)")],
-      [sw(`url(#${id("neg")})`), etaLab(" < 0")],
-      [sw(`url(#${id("imp")})`), document.createTextNode(`Impact: the path dips below the surface (periapsis at ${sig(d.mask_r_p_over_R, 2)} body radii)`)],
-      [sw(`url(#${id("unr")})`), document.createTextNode("No reliable η (captured, or outside the sweep's reliability checks)")],
-      [line("impact-line"), document.createTextNode(`Impact boundary for a periapsis altitude of ${sig(d.mask_r_p_over_R - 1, 1)} R`)],
-      [line("impact-line alt"), document.createTextNode(`Impact boundary for a periapsis altitude of ${sig(d.alt_r_p_over_R - 1, 1)} R`)],
-      [line("guide-line"), h("span", {}, "Burn starts 100 or 1000 ", frag(tex.rp), " out (no body chosen; labelled above the plot)")],
-      [sw("var(--paper)"), document.createTextNode("Washed: burn starts outside the chosen body's sphere of influence")],
-      [line("theory-line"), h("span", {}, "Contours of ", frag(tex.eta), " for Δv → 0, labelled above the plot by their level (theory, layer)")],
-      [h("span", {}, dot(true), dot(false)), document.createTextNode("Mission samples, burn starting inside or outside the SOI (layer)")],
-    ];
-    return h("div", {}, defs, h("ul", { class: "legend", "aria-label": "Legend" }, ...items.map(([g, t]) => h("li", {}, g, t))));
+    return h("div", { class: "legend-groups", role: "group", "aria-label": "Legend" }, defs, legendGroups);   // filled by update()
   }
 }
 

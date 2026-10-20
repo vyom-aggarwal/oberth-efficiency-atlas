@@ -72,6 +72,32 @@ test("atlas: the readout names the cell under the pointer", async ({ page }) => 
   await expect(tip).toContainText("burn starts at");
 });
 
+test("atlas: the legend shows only what is drawn, grouped (author, 2026-10-19)", async ({ page }) => {
+  const fig = await open(page, 1440);
+  const groups = () => fig.locator(".legend-group-title").allTextContents();
+  const legend = fig.locator(".legend-group-list");
+  // Prograde, no body, theory contours on: no impact, no washing, no mission samples.
+  expect(await groups()).toEqual(["Colour scale", "Lines"]);
+  await expect(legend).not.toContainText("Impact");
+  await expect(legend).not.toContainText("Washed");
+  await expect(legend).toContainText("Burn starts 100 or 1000");
+  // Inertial steering: impact fills and boundaries appear.
+  await choose(fig, "steer", "inertial");
+  await expect(legend).toContainText("Impact: the path dips below the surface");
+  await expect(legend).toContainText("Impact boundary");
+  expect(await groups()).toEqual(["Colour scale", "Fills", "Lines"]);
+  // A body: washing appears and the burn-start guides go.
+  await fig.locator("select").selectOption("venus");
+  await expect(legend).toContainText("outside Venus's sphere of influence");
+  await expect(legend).not.toContainText("Burn starts 100 or 1000");
+  // Layers: mission samples on, theory contours off.
+  await fig.locator(".chips label", { hasText: "Mission samples" }).click();
+  await fig.locator(".chips label", { hasText: "Δv → 0 theory contours" }).click();
+  await expect(legend).toContainText("Mission samples at Venus");
+  await expect(legend).not.toContainText("Contours of");
+  expect(await groups()).toEqual(["Colour scale", "Fills", "Lines", "Marks"]);
+});
+
 test("atlas: the table lists every cell of the slice when opened", async ({ page }) => {
   const fig = await open(page, 1440);
   await fig.locator("details.data summary").click();
