@@ -425,3 +425,32 @@ added to the numbers file as values.
   - **Interpretive interface text** ("faster arrivals lose less at large Π") was drafted and removed
     before commit, as prose that belongs to the author.
   - **A scratch `sed` edit** corrupted a temporary test file. It was discarded and never committed.
+- **Checkpoint 6, author decided** (2026-10-19):
+  - Lighthouse in CI is the record: a ≥ 90 gate for accessibility, best practices and SEO;
+    performance reported only.
+  - Deploy only by hand while the sections are TODO.
+  - On narrow screens: one engines panel at a time with a switch, and "SEP*" with a visible note.
+  - A grouped, state-dependent atlas legend.
+  - A staged-file pre-commit.
+  - A tooltip fix at the source.
+  - Open Graph metadata.
+  - Actions pinned to commit SHAs.
+  - The audit rerun after all of these.
+- **Checkpoint 6, assistant implemented:**
+  - The eight changes, each with tests.
+  - The CI workflow, with SHA pins resolved from GitHub and checked against each action's inputs.
+  - `docs/site.md`.
+  - `scripts/audit_record.py`, and the audit itself.
+- **Checkpoint 6, assistant found and fixed:**
+  - **Checkout-dependent provenance hashes** in the site export, found by the first fresh-clone
+    attempt.
+  - **A cp1252 crash** in the new hook's summary line, found by its own end-to-end test before the
+    hook was ever used.
+  - **A version-selection error:** picking actions "newest by date" chose actions/checkout v2.8.0,
+    a maintenance release. The selection now goes by version number.
+- **Checkpoint 6, assistant errors, disclosed:**
+  - **Pre-commit staging.** The first attempt at the hash fix could not be committed code-first: the
+    hook rejected code that no longer matched the data. Code and data were committed together, with
+    a `-dirty` stamp, then re-exported with a clean stamp.
+  - **Two blocked pipes:** test commands piped into `tail` or `grep` without pipefail were blocked by
+    the hook and rerun with pipefail.
