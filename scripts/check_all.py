@@ -15,6 +15,7 @@ Checks, in order:
   pytest      the full Python suite, which includes the site-data and hook tests (default only)
 
   check-all   pytest tests/test_check_all.py (this script's own selection rules)   (--staged only)
+  own-tests   pytest on the test files the changed files name (see own_tests)       (--staged only)
 
 --fast runs the full set without the full Python suite: the site-data and hook tests replace it.
 --staged is the pre-commit hook (.githooks/pre-commit, author rule 2026-10-19): only the checks that the staged
@@ -29,6 +30,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -72,6 +74,13 @@ def numbers() -> int:
     return status
 
 
+def run_own_tests(files: list[str]) -> int:
+    if not files:                                                 # never a silent pass
+        print("own-tests: no test files given (they come from --staged or --paths)", flush=True)
+        return 1
+    return pytest(*files)
+
+
 CHECKS = {
     "typecheck": lambda: npx("tsc", "--noEmit"),
     "vitest": lambda: npx("vitest", "run"),
@@ -80,8 +89,11 @@ CHECKS = {
     "hooks": lambda: pytest("tests/test_hooks.py"),
     "check-all": lambda: pytest("tests/test_check_all.py"),
     "workflow": lambda: pytest("tests/test_workflow.py"),
+    "own-tests": lambda: run_own_tests([]),                       # main() passes the selected files
     "pytest": lambda: pytest(),
 }
+# Test files that a named check already runs; own-tests leaves them to it.
+RUN_BY_CHECK = {"tests/test_site_data.py", "tests/test_hooks.py", "tests/test_check_all.py", "tests/test_workflow.py"}
 FAST = ["typecheck", "vitest", "numbers", "site-data", "hooks"]
 FULL = ["typecheck", "vitest", "numbers", "pytest"]
 
@@ -97,6 +109,23 @@ def data_sources() -> set[str]:
     return out
 
 
+def own_tests(paths: list[str]) -> list[str]:
+    """The test files that changes to `paths` name (author, 2026-10-20): a changed tests/test_*.py runs itself, and a
+    changed scripts/<name>.py runs tests/test_<name>.py when that file exists. Deleted files and files that a named
+    check already runs (RUN_BY_CHECK) are left out."""
+    out: set[str] = set()
+    for p in (q.replace("\\", "/") for q in paths):
+        if re.fullmatch(r"tests/test_\w+\.py", p):
+            t = p
+        elif m := re.fullmatch(r"scripts/(\w+)\.py", p):
+            t = f"tests/test_{m.group(1)}.py"
+        else:
+            continue
+        if t not in RUN_BY_CHECK and (ROOT / t).is_file():
+            out.add(t)
+    return sorted(out)
+
+
 def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str]:
     """The checks that changes to `paths` (repository-relative, / separators) can affect, in CHECKS order.
 
@@ -109,6 +138,7 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
     - .claude/hooks/, .claude/settings.json, tests/test_hooks.py → hooks
     - scripts/check_all.py, .githooks/, tests/test_check_all.py   → check-all
     - .github/, tests/test_workflow.py                            → workflow (actions pinned to commit SHAs)
+    - a test file, or a script with its own test file (own_tests) → own-tests
     Anything else (logs, docs that feed nothing) needs no check here; the full run covers everything.
     """
     sources = data_sources() if sources is None else sources
@@ -132,6 +162,8 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
             want.add("check-all")
         if p.startswith(".github/") or p == "tests/test_workflow.py":
             want.add("workflow")
+    if own_tests(paths):
+        want.add("own-tests")
     return [n for n in CHECKS if n in want]
 
 
@@ -150,10 +182,14 @@ def main(argv=None) -> int:
     ap.add_argument("--only", default="", help=f"comma-separated subset of: {', '.join(CHECKS)}")
     ap.add_argument("--dry-run", action="store_true", help="print the checks that would run, and run none")
     a = ap.parse_args(argv)
+    checks = dict(CHECKS)
     if a.staged or a.paths:
         paths = staged_paths() if a.staged else a.paths
         names = select_checks(paths)
-        print(f"{len(paths)} changed path(s) -> checks: {', '.join(names) or 'none needed'}", flush=True)
+        files = own_tests(paths)
+        checks["own-tests"] = lambda: run_own_tests(files)
+        shown = [f"{n} ({', '.join(files)})" if n == "own-tests" else n for n in names]
+        print(f"{len(paths)} changed path(s) -> checks: {', '.join(shown) or 'none needed'}", flush=True)
     else:
         names = [n.strip() for n in a.only.split(",") if n.strip()] or (FAST if a.fast else FULL)
     unknown = [n for n in names if n not in CHECKS]
@@ -167,7 +203,7 @@ def main(argv=None) -> int:
         print(f"\n=== {name} ===", flush=True)
         t0 = time.perf_counter()
         try:
-            status = CHECKS[name]()
+            status = checks[name]()
         except Exception as e:                                    # a crash in a check is a failure, never a pass
             print(f"{name} raised {type(e).__name__}: {e}", flush=True)
             status = 1

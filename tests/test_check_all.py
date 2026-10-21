@@ -22,9 +22,44 @@ def test_site_code_runs_the_type_check_and_vitest():
 
 
 def test_exporter_data_tests_and_provenance_sources_run_the_site_data_tests():
-    for p in ("scripts/export_site_data.py", "site/public/data/atlas.json", "tests/test_anim.py",
+    for p in ("scripts/export_site_data.py", "site/public/data/atlas.json", "tests/conftest.py",
               "configs/phase4/hibberd_som.yaml", "docs/paper_outline.md", "src/oberth_atlas/theory.py"):
         assert C.select_checks([p], SOURCES) == ["site-data"], p
+
+
+def test_a_changed_test_file_runs_itself():
+    # Author, 2026-10-20. tests/ also runs the site-data tests: methods.json records the test count.
+    assert C.select_checks(["tests/test_repro_audit.py"], SOURCES) == ["site-data", "own-tests"]
+    assert C.own_tests(["tests/test_repro_audit.py", "tests/test_anim.py"]) == ["tests/test_anim.py", "tests/test_repro_audit.py"]
+
+
+def test_a_changed_script_runs_its_own_test_file():
+    assert C.select_checks(["scripts/repro_audit.py"], SOURCES) == ["own-tests"]
+    assert C.own_tests(["scripts/repro_audit.py"]) == ["tests/test_repro_audit.py"]
+    assert C.own_tests(["scripts/audit_record.py"]) == ["tests/test_audit_record.py"]
+    assert C.own_tests(["scripts\\check_numbers.py"]) == ["tests/test_check_numbers.py"]
+
+
+def test_own_tests_skips_scripts_without_tests_deleted_files_and_files_a_named_check_runs():
+    assert not (ROOT / "tests" / "test_fig_atlas.py").exists()
+    assert C.select_checks(["scripts/fig_atlas.py"], SOURCES) == []
+    assert C.own_tests(["tests/test_no_such_file.py"]) == []                 # deleted in the commit
+    assert C.own_tests(["tests/test_hooks.py", "tests/test_site_data.py", "scripts/check_all.py"]) == []
+    assert C.select_checks(["scripts/check_all.py"], SOURCES) == ["check-all"]
+
+
+def test_own_tests_never_passes_without_files():
+    assert C.run_own_tests([]) == 1
+
+
+def test_a_changed_script_runs_its_test_file_end_to_end():
+    """The command the hook runs, for a change to scripts/repro_audit.py: its own tests run, and nothing else."""
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_all.py"), "--paths", "scripts/repro_audit.py"],
+                       capture_output=True, text=True, cwd=ROOT)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert "checks: own-tests (tests/test_repro_audit.py)" in r.stdout
+    assert "tests/test_repro_audit.py" in r.stdout and " passed" in r.stdout
+    assert "1 of 1 checks passed" in r.stdout
 
 
 def test_hook_scripts_run_the_hook_tests():
