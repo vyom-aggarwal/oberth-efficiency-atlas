@@ -10,6 +10,7 @@ import { axisSlider, type Mark } from "../controls/axis-slider";
 import { citation, sourceLink } from "../lib/cite";
 import type { SiteData, Sourced } from "../lib/data";
 import { frag, h, onFontsLoaded } from "../lib/dom";
+import { engineLabel } from "../lib/engine-label";
 import { duration, sig, speed } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
 
@@ -46,16 +47,14 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   const stage = h("div", { class: "hero-stage" }, canvas, overlay);
   const marks: Mark[] = [
     ...d.marks.map((m): Mark => {
-      // The animation's case title: "Name: details\n(note)". The label keeps a caveat note, e.g.
-      // "(hypothetical at 3.2 R☉)", and leaves an identifying note (the reference) to the hover title.
-      const [first, second = ""] = m.title.value.split("\n");
-      const name = first.split(":")[0];
-      const caveat = /hypothetical/.test(second) ? second.replace(/^\(|\)$/g, "") : "";   // "hypothetical at 3.2 R☉"
-      return { value: m.Pi.value, label: caveat ? `${name}\n${second}` : name, kind: "engine",
+      // The label keeps a caveat note, e.g. "(hypothetical at 3.2 R☉)", and leaves an identifying note (the
+      // reference) to the hover title.
+      const e = engineLabel(m.title.value);
+      return { value: m.Pi.value, label: e.caveat ? `${e.name}\n${e.note}` : e.name, kind: "engine",
                // Narrow track: "Solid stack" → "Solid", "SEP-class" → "SEP*", the asterisk explained under the
                // slider from the same caveat string (author, 2026-10-19: the caveat stays visible).
-               short: name.split(/[\s-]/)[0] + (caveat ? "*" : ""), note: caveat ? `* ${caveat}` : undefined,
-               detail: `${first.replace(":", ",")}${second ? " " + second : ""}: Π = ${sig(m.Pi.value)} on this dive` };
+               short: e.short, note: e.starNote || undefined,
+               detail: `${e.head.replace(":", ",")}${e.note ? " " + e.note : ""}: Π = ${sig(m.Pi.value)} on this dive` };
     }),
     ...d.thresholds.map((t): Mark => ({ value: t.Pi.value, label: t.level.replace("%", " %"), kind: "threshold",
       detail: `Hibberd et al.'s staged stack reaches ${t.level.replace("%", " %")} loss at Π = ${sig(t.Pi.value)}` })),

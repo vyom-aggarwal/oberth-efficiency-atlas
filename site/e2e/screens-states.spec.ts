@@ -31,13 +31,15 @@ for (const width of [1440, 390]) {
   });
 }
 
-test("engines at 390px with the nuclear thermal engine chosen", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-  await page.goto("");
-  const fig = page.locator("#fig-engines");
-  await fig.scrollIntoViewIfNeeded();
-  await expect(fig.locator(".engine-switch")).toBeVisible();
-  await fig.locator(".engine-switch label", { hasText: "Nuclear thermal" }).click();
-  await crop(page, "fig-engines", "engines-nuclear-390-light.png");
-});
+for (const [engine, file] of [["Nuclear", "nuclear"], ["SEP*", "sep"]]) {
+  test(`engines at 390px with ${engine} chosen`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    await page.goto("");
+    const fig = page.locator("#fig-engines");
+    await fig.scrollIntoViewIfNeeded();
+    await expect(fig.locator(".engine-switch")).toBeVisible();
+    await fig.locator(".engine-switch label", { hasText: engine }).click();
+    await crop(page, "fig-engines", `engines-${file}-390-light.png`);
+  });
+}

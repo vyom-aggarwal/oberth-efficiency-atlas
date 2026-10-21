@@ -71,19 +71,39 @@ test("engines below 560 px: one panel at a time; switching engine keeps the cloc
   });
   const clock = await fig.locator(".clock").textContent();
   expect(clock).toMatch(/^t = −/);
-  await fig.locator(".engine-switch label", { hasText: "Nuclear thermal" }).click();
+  await fig.locator(".engine-switch label", { hasText: "Nuclear" }).click();
   await expect(fig.locator(".engine-panel:visible .engine-name")).toHaveText(/Nuclear thermal/);
   await expect(fig.locator(".clock")).toHaveText(clock!);
-  await fig.locator(".engine-switch label", { hasText: "SEP-class" }).click();
+  await fig.locator(".engine-switch label", { hasText: "SEP*" }).click();
   await expect(fig.locator(".engine-panel:visible .engine-note")).toContainText("hypothetical at 3.2 R☉");
   await expect(fig.locator(".clock")).toHaveText(clock!);
   await expect(fig.locator(".energy-strip path.strip-line:not(.faint)")).toHaveCount(3);
 });
 
-test("engines at 1440 px: three panels side by side, no switch", async ({ page }) => {
+test("engines below 560 px: the switch uses the hero's short names; the SEP panel explains the star (author, 2026-10-20)", async ({ page }) => {
+  const fig = await open(page, 390);
+  const labels = fig.locator(".engine-switch label");
+  await expect(labels).toHaveText(["Solid", "Nuclear", "SEP*"]);
+  // The radios keep the full names for assistive technology.
+  await expect(fig.getByRole("radio", { name: "SEP-class" })).toHaveCount(1);
+  await expect(fig.getByRole("radio", { name: "Solid stack" })).toBeChecked();
+  // The star's note sits on the SEP panel itself, visible when that panel is shown; one row each label.
+  await labels.filter({ hasText: "SEP*" }).click();
+  await expect(fig.locator(".engine-panel:visible .engine-note")).toHaveText("* hypothetical at 3.2 R☉");
+  await expect(fig.locator(".engine-panel:visible .engine-note")).toBeVisible();
+  const heights = await labels.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  expect(Math.max(...heights) - Math.min(...heights), "every switch label on one line").toBeLessThan(2);
+  for (const width of [360, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await layoutProblems(fig), `${width}px`).toEqual([]);
+  }
+});
+
+test("engines at 1440 px: three panels side by side, no switch; the SEP caveat in its own words", async ({ page }) => {
   const fig = await open(page, 1440);
   await expect(fig.locator(".engine-switch")).toBeHidden();
   await expect(fig.locator(".engine-panel:visible")).toHaveCount(3);
+  await expect(fig.locator(".engine-cap").nth(2).locator(".engine-note")).toHaveText("(hypothetical at 3.2 R☉)");
 });
 
 test("limitations: the J2 facts, with their source", async ({ page }) => {

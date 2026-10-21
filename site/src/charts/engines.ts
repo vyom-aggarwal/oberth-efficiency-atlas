@@ -7,6 +7,7 @@ import tex from "virtual:tex";
 import { sourceLink } from "../lib/cite";
 import type { Provenance, SiteData, Sourced } from "../lib/data";
 import { frag, h, onFontsLoaded, s } from "../lib/dom";
+import { engineLabel } from "../lib/engine-label";
 import { duration, lossRel, sig } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
 import { dataTable, segmented } from "./common";
@@ -41,8 +42,7 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
       const r = Math.hypot(x[i], y[i]), rho = 1 + Math.log10(r);
       X[i] = (rho * x[i]) / r; Y[i] = (rho * y[i]) / r;
     }
-    const [name, note = ""] = c.title.value.split("\n");
-    return { c, X, Y, av, frac, name, note };
+    return { c, X, Y, av, frac, label: engineLabel(c.title.value) };
   });
   const { tau, window_tau, time_s, av_W_per_kg } = d.units;
   const sMax = Math.asinh(window_tau);
@@ -57,9 +57,10 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
     "aria-label": "time from perihelion" });
   const clock = h("output", { class: "clock", for: `${uid}-t` });
   // Below 560 px (author, 2026-10-19): one panel at a time, chosen here; the clock, the scrub control and the
-  // three-engine strip are shared, so switching keeps the time and the comparison.
+  // three-engine strip are shared, so switching keeps the time and the comparison. The switch uses the hero's short
+  // names (author, 2026-10-20), with the full names for assistive technology.
   let one = 0, single = false;
-  const pick = segmented(`${uid}-engine`, "Engine", cases.map((k, i) => [String(i), k.name.split(":")[0]] as [string, string]), "0", (v) => {
+  const pick = segmented(`${uid}-engine`, "Engine", cases.map((k, i) => [String(i), k.label.short, k.label.name] as [string, string, string]), "0", (v) => {
     one = Number(v);
     layout();
     requestAnimationFrame(frame);
@@ -68,11 +69,13 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
   const controls = h("div", { class: "controls engine-controls" }, engineSwitch, play, h("div", { class: "scrub" }, scrub), clock);
   const panels = cases.map((k) => {
     const canvas = h("canvas", { class: "engine-canvas", "aria-hidden": "true" });
-    const [short, rest = ""] = k.name.split(": ");
+    const { name, details, note } = k.label;
+    // The note; with the switch shown, a caveat reads "* hypothetical at 3.2 R☉", explaining the switch's "SEP*".
+    const noteEl = note ? h("span", { class: "engine-note" }, note) : null;
     const cap = h("figcaption", { class: "engine-cap" },
-      h("span", {}, h("span", { class: "engine-name" }, short), rest ? ` ${rest}` : ""), k.note ? h("span", { class: "engine-note" }, k.note) : null,
+      h("span", {}, h("span", { class: "engine-name" }, name), details ? ` ${details}` : ""), noteEl,
       h("span", { class: "engine-facts" }, `burn ${duration(k.c.burn_s.value)}, Π = ${sig(k.c.Pi.value)}, loss ${lossRel(k.c.loss_rel.value)} of Δv`));
-    return { canvas, el: h("figure", { class: "engine-panel" }, canvas, cap) };
+    return { canvas, noteEl, el: h("figure", { class: "engine-panel" }, canvas, cap) };
   });
   const grid = h("div", { class: "engine-grid", role: "img", "aria-labelledby": `${uid}-title`, "aria-describedby": `${uid}-summary` },
     ...panels.map((p) => p.el));
@@ -82,11 +85,11 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
   avLabel.append(frag(tex.av), ` at the engine, W/kg: ${sig(AV_RANGE[0], 1)}`);
   const legend = h("ul", { class: "legend", "aria-label": "Legend" },
     h("li", {}, avLabel, h("span", { class: "ramp-bar", "aria-hidden": "true" }), "10⁸ (log scale)"),
-    h("li", {}, ...DASH.map((dash, i) => h("span", { class: "dash-key" }, dashGlyph(dash), cases[i].name.split(":")[0]))),
+    h("li", {}, ...DASH.map((dash, i) => h("span", { class: "dash-key" }, dashGlyph(dash), cases[i].label.name))),
     h("li", {}, dashGlyph([], "imp"), "impulsive burn at perihelion"));
   const summary = h("p", { class: "summary", id: `${uid}-summary` });
   summary.textContent = `Hibberd et al.'s solar dive flown with three engines of the same Δv. ` + cases.map((k) =>
-    `${k.name.split(":")[0]}: burn ${duration(k.c.burn_s.value)}, Π = ${sig(k.c.Pi.value)}, ` +
+    `${k.label.name}: burn ${duration(k.c.burn_s.value)}, Π = ${sig(k.c.Pi.value)}, ` +
     `${lossRel(k.c.loss_rel.value)} of Δv lost, energy gain ${sig(k.frac[k.frac.length - 1], 3)} of the impulsive gain`).join("; ") + ".";
   root.append(head, controls, grid, stripWrap, legend, summary, table());
 
@@ -119,7 +122,11 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
   function layout(): void {
     single = grid.clientWidth < 560;
     engineSwitch.hidden = !single;
-    panels.forEach((p, i) => { p.el.hidden = single && i !== one; });
+    panels.forEach((p, i) => {
+      p.el.hidden = single && i !== one;
+      const { note, starNote } = cases[i].label;
+      if (p.noteEl) p.noteEl.textContent = single && starNote ? starNote : note;
+    });
     side = Math.round(panels.find((p) => !p.el.hidden)!.el.clientWidth);
   }
   new ResizeObserver(() => {

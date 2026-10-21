@@ -260,11 +260,13 @@ export function chips(legend: string, items: [string, Node | string][], checked:
 }
 
 /** Radio buttons drawn as a segmented control. */
-export function segmented<T extends string>(name: string, legend: string, items: [T, string][], value: T,
-                                            onChange: (v: T) => void): HTMLFieldSetElement {
+// Each item is [value, visible text] or [value, visible text, accessible name] (a short label keeps the full name for
+// assistive technology, e.g. "SEP*" read as "SEP-class").
+export function segmented<T extends string>(name: string, legend: string, items: ([T, string] | [T, string, string])[],
+                                            value: T, onChange: (v: T) => void): HTMLFieldSetElement {
   const fs = h("fieldset", { class: "segmented" }, h("legend", {}, legend));
-  for (const [val, text] of items) {
-    const input = h("input", { type: "radio", name, value: val, checked: val === value });
+  for (const [val, text, full] of items) {
+    const input = h("input", { type: "radio", name, value: val, checked: val === value, ...(full ? { "aria-label": full } : {}) });
     input.addEventListener("change", () => input.checked && onChange(val));
     fs.append(h("label", {}, input, text));
   }
