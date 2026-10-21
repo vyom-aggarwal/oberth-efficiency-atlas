@@ -2790,4 +2790,30 @@ these is code that the audit's outputs depend on, except the methods data, which
   - Lighthouse: the sandbox blocks local sockets. CI is the record, with the author's local run for
     performance.
 
+## 2026-10-20: Checkpoint 6 approved; Phase 6 complete; author decisions before the first push
+
+The author approved checkpoint 6 and closed Phase 6. Decisions, logged before the changes:
+1. **The audit comparison rule** (2026-10-19) is approved. The skipped hash check is redundant with
+   the content comparison.
+2. **Pre-commit selection, two additions:**
+   - a changed `tests/test_*.py` runs itself;
+   - a changed `scripts/<name>.py` runs its own test file, `tests/test_<name>.py`, when one exists.
+   Implementation: a check `own-tests` that receives the selected files. A file that a named check
+   already runs (site-data, hooks, check-all, workflow) is left to that check, so nothing runs
+   twice. Tested in `tests/test_check_all.py`, including one real run.
+3. **The engines switch below 560 px** uses the hero's short names: Solid, Nuclear, SEP*.
+   - The SEP panel keeps its caveat, shown below 560 px as "* hypothetical at 3.2 R☉". It comes from
+     the same string as the star.
+   - One helper (`site/src/lib/engine-label.ts`, unit-tested) now derives the names, the star and the
+     note for both figures.
+   - The radio buttons keep the full engine names as their accessible names.
+4. **Deploys** stay manual until the author says otherwise.
+5. **Hero frame time in CI is report-only:**
+   - The 16 ms p95 target was set on the development laptop; shared runners will likely miss it.
+   - The workflow sets `HERO_FRAME_TIME=report`. The test then logs p50, p95 and the maximum to the
+     job summary, and asserts only that enough frames were measured.
+   - Locally the target stays enforced, with `HERO_P95_MS` as before.
+   - The CI-only threshold `HERO_P95_MS=50` is removed.
+   - Documented in `docs/site.md`; `tests/test_workflow.py` checks the setting.
+
 
