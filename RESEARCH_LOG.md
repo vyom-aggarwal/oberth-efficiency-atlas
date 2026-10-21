@@ -2886,4 +2886,26 @@ checkpoint 6).
 - **Fix:** Lighthouse runs as an awaited asynchronous child process, so the server keeps serving.
   This cannot be verified here (local sockets are blocked); the next CI run is the check.
 
+**Result** (2026-10-21; the author asked for both fixes to be pushed and the site deployed):
+- **Run 39538777360** (`workflow_dispatch`, 36ca4bd): all four jobs passed, the deploy included.
+  - Checks and Playwright passed. The currentness tests passed on Linux within the new tolerances,
+    the float32 binary included.
+  - The hero frame time was reported, not enforced.
+- **Lighthouse** now takes about a minute:
+
+  | page | form | performance | accessibility | best practices | SEO |
+  |---|---|---|---|---|---|
+  | home | mobile | 75 | 95 | 100 | 91 |
+  | home | desktop | 89 | 95 | 100 | 91 |
+  | explorer | mobile | 69 | 95 | 100 | 91 |
+  | explorer | desktop | 76 | 95 | 100 | 91 |
+
+  The gate (≥ 90 for accessibility, best practices and SEO) passes. Performance is reported only.
+- **Live site:** https://vyom-aggarwal.github.io/oberth-efficiency-atlas/
+  - Checked after the deploy: the pages, the data, `og:url` and `og:image`, a 404 for a missing
+    page, and the asset paths under the base path.
+  - In a browser, there are no console errors. The explorer simulates (Hibberd preset, η = 0.999991).
+  - As documented, the production build hides every TODO section. The home page therefore shows only
+    the shell and the references until the author's prose is in.
+
 
