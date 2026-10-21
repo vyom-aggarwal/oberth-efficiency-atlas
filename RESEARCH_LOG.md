@@ -2908,4 +2908,21 @@ checkpoint 6).
   - As documented, the production build hides every TODO section. The home page therefore shows only
     the shell and the references until the author's prose is in.
 
+## 2026-10-21: Phase 7 begins: a landing page and a references page (plan awaiting approval)
+
+**The brief** (author): a site-only change under the analysis freeze.
+- `/` becomes a landing page, led by a three-engine dive hero, with small live findings and the
+  reproducibility facts.
+- The article moves to `/research/`.
+- The references get their own page, `/references/`.
+- The author's prose lives in TODO slots that stay hidden in production.
+
+**The plan:** `docs/landing_plan.md`, which covers:
+- the layout, with wireframes at 1440 and 390 px;
+- the components it reuses;
+- the hero sequence;
+- a pass-2 check against the Phase 6 generic defaults.
+
+It awaits the author's approval before any code. Its proposals A–G are open questions for the author.
+
 
