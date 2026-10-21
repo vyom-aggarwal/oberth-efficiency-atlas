@@ -2867,4 +2867,23 @@ with the committed JSON *exactly*. The committed files come from Windows; CI run
   - The failure message reports the largest difference found. The first passing CI run will be
     checked against this bound, and the result logged.
 
+**Second finding: the Lighthouse job could never pass** (my bug in `site/tools/lighthouse.mjs`,
+checkpoint 6).
+- **Symptom:** both runs failed with "Protocol error (Page.navigate): Target closed" on the first page
+  (home, mobile).
+- **Duration:** each failed after the same 10 min 43 s of silence, so a timeout, not chance.
+- **Cause:**
+  - The script starts `vite preview` inside its own Node process, then runs Lighthouse with
+    `execFileSync`.
+  - A synchronous child call blocks Node's event loop, so the preview server cannot answer a single
+    request. Chrome's navigation waits until it times out.
+  - It was never run before CI: the sandbox here blocks local sockets.
+- **Ruled out first:** the page itself. Under Lighthouse's mobile emulation (412 × 823, DPR 1.75,
+  touch, 4× CPU slowdown) and its desktop preset, with a throwaway Playwright check (not committed):
+  - both pages loaded in under 0.6 s;
+  - they answered within 0.2 s after 8 s of running and after a full scroll;
+  - no long tasks, no errors.
+- **Fix:** Lighthouse runs as an awaited asynchronous child process, so the server keeps serving.
+  This cannot be verified here (local sockets are blocked); the next CI run is the check.
+
 

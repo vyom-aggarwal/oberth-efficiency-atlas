@@ -12,7 +12,7 @@
 // (as in the assistant's sandbox, 2026-10-18); run it from a normal shell or in CI.
 // Run (in site/):  npm run lighthouse
 // Dependencies are resolved as of package.json config.npmBefore (the 14-day rule), through npm_config_before.
-import { execFileSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { build, preview } from "vite";
@@ -26,6 +26,21 @@ const CATS = ["performance", "accessibility", "best-practices", "seo"];
 const GATED = ["accessibility", "best-practices", "seo"];          // each ≥ 0.90 on every page and form factor
 const FLOOR = 0.9;
 
+// Lighthouse runs as an awaited child process, never a synchronous one: the preview server lives in this process,
+// and a synchronous call would block its event loop, so Chrome's navigation would wait until it timed out (the first
+// CI runs, 2026-10-21: "Target closed" after 10 min 43 s).
+// On Windows npx.cmd needs a shell, which would split an argument at its spaces (--chrome-flags), so those are quoted.
+function run(cmd, args, env) {
+  const win = process.platform === "win32";
+  const argv = win ? args.map((a) => (/\s/.test(a) ? `"${a}"` : a)) : args;
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, argv, { stdio: "inherit", shell: win, env });
+    child.on("error", reject);
+    child.on("exit", (code, signal) => (code === 0 ? resolve()
+      : reject(new Error(`${cmd} ${args.slice(0, 3).join(" ")} … exited with ${code ?? signal}`))));
+  });
+}
+
 mkdirSync(OUT, { recursive: true });
 process.env.SITE_SHOW_TODO = "1";
 await build({ logLevel: "warn", build: { outDir: "dist-lh", emptyOutDir: true } });
@@ -38,8 +53,7 @@ try {
       const out = `${OUT}${name}-${ff}`;
       const args = ["--yes", "lighthouse@13.5.0", `http://localhost:${PORT}/${path}`, "--output=json", "--output=html",
         `--output-path=${out}`, "--quiet", "--chrome-flags=--headless=new --no-sandbox", ...(ff === "desktop" ? ["--preset=desktop"] : [])];
-      execFileSync(process.platform === "win32" ? "npx.cmd" : "npx", args, {
-        stdio: "inherit", shell: process.platform === "win32", env: { ...process.env, npm_config_before: pkg.config.npmBefore } });
+      await run(process.platform === "win32" ? "npx.cmd" : "npx", args, { ...process.env, npm_config_before: pkg.config.npmBefore });
       const report = JSON.parse(readFileSync(`${out}.report.json`, "utf8"));
       rows.push({ page: name, form: ff, lighthouse: report.lighthouseVersion, chrome: report.environment?.hostUserAgent ?? "",
         ...Object.fromEntries(CATS.map((c) => [c, report.categories[c]?.score ?? null])) });
