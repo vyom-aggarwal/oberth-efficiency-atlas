@@ -268,7 +268,7 @@ added to the numbers file as values.
 - **Audit wall times are indicative.** The machine slept during the clone's sweep, and step times
   varied by up to 4× between runs.
 
-## Phase 6: project website (2026-10-13, in progress)
+## Phase 6: project website (2026-10-13 to 2026-10-20; the home-page prose is the author's, still to come)
 
 **Author decided:**
 - The brief: a GitHub Pages site, presentation only under the feature freeze.
@@ -469,3 +469,24 @@ added to the numbers file as values.
   - **The audit comparison's site-data rule** was the assistant's own design (2026-10-15). It kept
     the source hashes for every source, including files the rebuild regenerates. The audit of
     6cd1e6e exposed this.
+- **Checkpoint 6 review, author decided** (2026-10-20):
+  - Approved the checkpoint and the audit comparison rule, and closed Phase 6.
+  - Pre-commit: a changed test file runs itself, and a changed script runs its own test file.
+  - The engines switch uses the hero's short names, and the SEP panel keeps its caveat.
+  - Deploys stay manual.
+  - Before the first push: the hero frame time is report-only in CI and enforced locally.
+- **Checkpoint 6 review, assistant implemented:**
+  - the `own-tests` pre-commit check, with tests that include a real run;
+  - a shared engine-label helper, unit-tested against the exported titles, now used by the hero and
+    the engines figure;
+  - full names for assistive technology on the short switch labels;
+  - the report-only frame-time mode with a job-summary table, verified in both modes;
+  - the documentation of all of these.
+- **Checkpoint 6 review, assistant errors, disclosed:**
+  - **A fifth blocked pipe:** vitest piped into `tail`, rerun with pipefail.
+  - **A commit blocked by the pre-commit hook,** working as intended. New tests changed the test
+    count that `methods.json` records. It was re-exported and committed with them.
+- **Phase 6 results:**
+  - **Website:** the site, the explorer, CI with SHA-pinned actions, and deployment by hand.
+  - **Audit:** the final code reproduced 69 of 69 outputs.
+  - **Final checks before the push:** listed in the phase-end commit.

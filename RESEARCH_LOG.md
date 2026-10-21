@@ -2816,4 +2816,16 @@ The author approved checkpoint 6 and closed Phase 6. Decisions, logged before th
    - The CI-only threshold `HERO_P95_MS=50` is removed.
    - Documented in `docs/site.md`; `tests/test_workflow.py` checks the setting.
 
+**Done** (6cce557, edb9535, 2fab4ca):
+- The frame-time modes were checked by running the test:
+  - report-only with a 1 ms target passed and wrote the summary table;
+  - enforced with 1 ms failed;
+  - the default 16 ms target passed (p95 6.5 ms).
+- **Phase-end checks:**
+  - `check_all.py --fast` passed, 5 of 5;
+  - `check_all.py` passed, with pytest 607;
+  - Playwright passed, 103 tests (hero p95 6.7 ms).
+- After-review screenshots of the engines figure are in `docs/screens/checkpoint-6/after-review/`.
+- **Not yet run:** CI. The author pushes next, then enables Pages.
+
 

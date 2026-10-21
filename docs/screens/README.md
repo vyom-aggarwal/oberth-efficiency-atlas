@@ -29,6 +29,10 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
       (all four groups);
     - `engines-nuclear-390`: the narrow engines figure with the second engine chosen.
   - `og-image.png`: the Open Graph preview image (`site/public/og-image.png`, 1200 × 630).
+  - `after-review/` (2026-10-20): engines compared at 390 px after the author's review, with the
+    switch's short names (Solid, Nuclear, SEP*):
+    - the default panel, in both themes;
+    - the Nuclear panel, and the SEP panel with "* hypothetical at 3.2 R☉" (light theme).
 - `checkpoint-5/`: the explorer, as full pages.
   - Its default state (Hibberd et al.'s preset) at 1440 and 390 px in both themes.
   - Two warning states in the light theme, from `site/e2e/screens-explorer.spec.ts`:
