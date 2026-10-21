@@ -8,6 +8,7 @@
 
 import hashlib
 import json
+import math
 import re
 import subprocess
 import sys
@@ -109,6 +110,59 @@ def without_git(d: dict) -> dict:
     return {**d, "provenance": {k: v for k, v in d["provenance"].items() if k != "git"}}
 
 
+# A fresh export on another platform differs from the committed one in the last digits: measured on Linux CI
+# against the Windows export, up to 5.5e-10 relative and 4.7e-12 absolute, and two Linux runs differ from each other
+# (RESEARCH_LOG 2026-10-21). Numbers agree within REL (ABS near zero); everything else must be equal.
+REL, ABS = 1e-8, 1e-15
+
+
+def mismatches(a, b, path: str = "", out: list | None = None) -> list[str]:
+    """Where two parsed JSON values differ beyond cross-platform floating-point noise (at most 8 places listed)."""
+    out = [] if out is None else out
+    if len(out) >= 8:
+        return out
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool)
+    if isinstance(a, dict) and isinstance(b, dict):
+        if a.keys() != b.keys():
+            out.append(f"{path}: keys differ: {sorted(a.keys() ^ b.keys())}")
+        for k in sorted(a.keys() & b.keys()):
+            mismatches(a[k], b[k], f"{path}/{k}", out)
+    elif isinstance(a, list) and isinstance(b, list):
+        if len(a) != len(b):
+            out.append(f"{path}: length {len(a)} vs {len(b)}")
+        else:
+            for i, (x, y) in enumerate(zip(a, b)):
+                mismatches(x, y, f"{path}/{i}", out)
+    elif num(a) and num(b) and (isinstance(a, float) or isinstance(b, float)):
+        if not math.isclose(a, b, rel_tol=REL, abs_tol=ABS):
+            out.append(f"{path}: {a!r} vs {b!r}")
+    elif type(a) is not type(b) or a != b:
+        out.append(f"{path}: {a!r} vs {b!r}")
+    return out
+
+
+def test_mismatches_allows_last_digit_noise_only():
+    committed = {"x": [0.7500046011416792, 3000.0000000000014, 0.0], "n": 3, "s": "a", "f": True}
+    assert mismatches(committed, {"x": [0.7500046011463929, 3000.000000000001, 1e-17], "n": 3, "s": "a", "f": True}) == []
+    assert mismatches(committed, {**committed, "x": [0.75001, 3000.0000000000014, 0.0]}) == ["/x/0: 0.7500046011416792 vs 0.75001"]
+    assert mismatches(committed, {**committed, "n": 4}) and mismatches(committed, {**committed, "s": "b"})
+    assert mismatches(committed, {**committed, "x": [0.75]}) and mismatches(committed, {**committed, "f": 1})
+
+
+def float32_mismatches(fresh: bytes, committed: bytes, layout: list[dict]) -> list[str]:
+    """Arrays of the engines binary that differ by more than 2 float32 ulps (rtol 2.4e-7), with 1e-9 of the array's
+    largest magnitude allowed for elements near zero (RESEARCH_LOG 2026-10-21)."""
+    if len(fresh) != len(committed):
+        return [f"length {len(fresh)} vs {len(committed)} bytes"]
+    out = []
+    for e in layout:
+        a, b = (np.frombuffer(buf, dtype="<f4", count=e["length"], offset=e["offset"]).astype(float) for buf in (fresh, committed))
+        scale = float(np.max(np.abs(b))) if b.size else 0.0
+        if not np.allclose(a, b, rtol=2.4e-7, atol=1e-9 * scale):
+            out.append(f"{e['name']}: largest difference {np.max(np.abs(a - b)):.3g} (array scale {scale:.3g})")
+    return out
+
+
 @pytest.mark.parametrize("name, make", [
     ("hero.json", lambda: E.hero_data(E.Numbers())),
     ("regimes.json", lambda: E.regimes_data(E.Numbers())),
@@ -119,15 +173,18 @@ def without_git(d: dict) -> dict:
     ("presets.json", E.presets_data),
 ])
 def test_exported_file_is_current(name, make):
-    """Each derived file equals a fresh export from the committed sources (so the site never shows stale data)."""
+    """Each derived file equals a fresh export from the committed sources (so the site never shows stale data), up to
+    cross-platform floating-point noise."""
     fresh = json.loads(json.dumps(make(), ensure_ascii=False, allow_nan=False))
-    assert without_git(fresh) == without_git(load(name))
+    assert mismatches(without_git(fresh), without_git(load(name))) == []
 
 
 def test_engines_binary_is_current_and_matches_the_animation_numbers():
     header, blob = E.engines_data(E.Numbers())
-    assert without_git(json.loads(json.dumps(header))) == without_git(load("engines.json"))
-    assert blob == (DATA / "engines.bin").read_bytes()
+    committed = load("engines.json")
+    assert mismatches(without_git(json.loads(json.dumps(header))), without_git(committed)) == []
+    layout = [committed["time"]] + [a for c in committed["cases"] for a in c["arrays"]]
+    assert float32_mismatches(blob, (DATA / "engines.bin").read_bytes(), layout) == []
     for c in load("engines.json")["cases"]:
         assert c["sim_Pi"] == pytest.approx(c["Pi"]["value"], rel=1e-12)
         # The animation integrates longer coasts than scripts/anim_numbers.py; measured loss differences
@@ -177,7 +234,7 @@ def test_site_numbers_are_current_and_consistent():
     checker accepts a quote of the η–η_W divergence."""
     fresh = json.loads(json.dumps(E.site_numbers_data(), allow_nan=False))
     sn = load("site_numbers.json")
-    assert without_git(fresh) == without_git(sn)
+    assert mismatches(without_git(fresh), without_git(sn)) == []
     assert sn["eta_vs_eta_W"]["max_abs_diff"] == load("regimes.json")["eta_minus_eta_W_max_abs"]
     assert sn["band_spread"]["max_over_min"] == load("curve.json")["band"]["spread"]["max_over_min"]
     draft = ROOT / "runs" / "check_numbers_probe.md"

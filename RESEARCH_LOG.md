@@ -2828,4 +2828,43 @@ The author approved checkpoint 6 and closed Phase 6. Decisions, logged before th
 - After-review screenshots of the engines figure are in `docs/screens/checkpoint-6/after-review/`.
 - **Not yet run:** CI. The author pushes next, then enables Pages.
 
+## 2026-10-21: First CI runs: site-data currentness differs in the last digits on Linux
+
+The author pushed, and Pages was enabled with GitHub Actions as its source. Both CI runs (6d6bb6d and
+129939e) failed in the checks job, so the manual deploy, which needs every job, could not run.
+
+**Finding:** the currentness tests in `tests/test_site_data.py` recompute the export and compare it
+with the committed JSON *exactly*. The committed files come from Windows; CI runs on Linux.
+- Measured from pytest's diffs in the two CI logs (each committed value against the fresh Linux
+  value):
+
+  | test | numbers that differ | max relative | max absolute |
+  |---|---|---|---|
+  | `timing.json` | 80 and 77 | 6.3e-12 (`recovered_fraction_dv0`) | 4.7e-12 (`half_rule_capture`) |
+  | engines header | 4 and 2 | 5.5e-10, solid stack `sim_loss_rel` (1.2e-5: a difference of near-equal quantities) | 2.6e-14 |
+  | `site_numbers.json` (first run only) | 1 | 1.5e-16 (`Pi_range`, 3000.0000000000014 against …001) | 4.6e-13 |
+
+- The two Linux runs also differ from each other: the set of differing numbers changed between them.
+  Exact equality therefore cannot hold across machines. It held so far only because every check ran
+  on the development laptop.
+- These are floating-point differences (libm, BLAS, quadrature paths), not stale data. The committed
+  analysis outputs are unchanged and were already audited.
+
+**Change** (test tolerance; logged before it is made):
+- **JSON currentness:** numbers equal within `rel 1e-8`, with an absolute floor of 1e-15 for values
+  near zero. Strings, keys, list lengths and integers stay exact.
+  - The margin over the measured 5.5e-10 floor is 18×.
+  - The site shows at most six significant figures, so a difference below 1e-8 cannot change a
+    displayed digit, except across a rounding boundary.
+  - It applies to every currentness test (the seven exported files, the engines header and
+    `site_numbers.json`), by one helper.
+- **The engines binary (float32):**
+  - Compared per array, within 2 float32 ulps (rtol 2.4e-7), plus 1e-9 of the array's largest
+    magnitude for elements near zero.
+  - There is no measured floor yet: CI never reached this comparison. The bound comes from the
+    storage format. A float64 difference of the measured size moves a float32 value by at most one ulp
+    when its rounding flips.
+  - The failure message reports the largest difference found. The first passing CI run will be
+    checked against this bound, and the result logged.
+
 
