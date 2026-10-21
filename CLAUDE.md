@@ -190,6 +190,10 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
   dev server does.
 - Without `SITE_DIST`, Playwright starts the dev server itself. Screenshots go to `runs/screens/`;
   hero frame times go to `runs/hero_frame_times.json`.
+- **Hero frame time:**
+  - Enforced locally: p95 under 16 ms; `HERO_P95_MS` overrides.
+  - Report-only in CI: the workflow sets `HERO_FRAME_TIME=report`, and the numbers go to the job
+    summary (author, 2026-10-20; `docs/site.md`).
 
 ## Units
 - **Public API and constants: SI** (m, s, kg, m/s, m^3/s^2). Angles are radians inside the code.

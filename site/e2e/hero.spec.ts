@@ -1,10 +1,14 @@
 // The hero: layout (no clipped annotations at any width or Π), the intro (once; skipped under reduced motion),
 // dragging along the path, and browser frame time while dragging (simulation plus drawing).
 // Frame-time target (author, 2026-10-15): p95 under 16 ms on the development laptop; HERO_P95_MS overrides it.
-import { writeFileSync, mkdirSync } from "node:fs";
+// In CI the measurement is report-only (author, 2026-10-20): the workflow sets HERO_FRAME_TIME=report, shared runners
+// being slower and noisier than the laptop the target was set on. p50, p95 and the maximum then go to the job
+// summary, and only the frame count is asserted.
+import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { expect, test, type Page } from "./fixtures";
 
 const P95_TARGET = Number(process.env.HERO_P95_MS ?? 16);
+const REPORT_ONLY = process.env.HERO_FRAME_TIME === "report";
 
 async function setPi(page: Page, Pi: number): Promise<void> {
   await page.evaluate((v) => {
@@ -151,10 +155,18 @@ test("dragging along the path sets Π; frame time while dragging", async ({ page
   const q = (p: number) => sim[Math.min(sim.length - 1, Math.floor(p * sim.length))];
   const atTop = frames.filter((f) => f.sim && f.Pi > 500).map((f) => f.ms);
   const stats = { frames_with_simulation: sim.length, p50_ms: q(0.5), p95_ms: q(0.95), max_ms: sim[sim.length - 1],
-                  max_ms_at_Pi_above_500: Math.max(...atTop), target_p95_ms: P95_TARGET };
+                  max_ms_at_Pi_above_500: Math.max(...atTop), target_p95_ms: P95_TARGET, enforced: !REPORT_ONLY };
   console.log("hero frame time (simulation + drawing):", JSON.stringify(stats));
   mkdirSync("../runs", { recursive: true });
   writeFileSync("../runs/hero_frame_times.json", JSON.stringify(stats, null, 1));
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    const ms = (v: number) => `${v.toFixed(1)} ms`;
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, "## Hero frame time while dragging (simulation + drawing)\n\n" +
+      "| frames | p50 | p95 | max | max at Π > 500 |\n|---:|---:|---:|---:|---:|\n" +
+      `| ${sim.length} | ${ms(stats.p50_ms)} | ${ms(stats.p95_ms)} | ${ms(stats.max_ms)} | ${ms(stats.max_ms_at_Pi_above_500)} |\n\n` +
+      (REPORT_ONLY ? `Report only here; the p95 < ${P95_TARGET} ms target is enforced on the development laptop.\n`
+                   : `Enforced: p95 < ${P95_TARGET} ms.\n`));
+  }
   expect(sim.length).toBeGreaterThan(60);
-  expect(stats.p95_ms).toBeLessThan(P95_TARGET);
+  if (!REPORT_ONLY) expect(stats.p95_ms).toBeLessThan(P95_TARGET);
 });

@@ -51,7 +51,7 @@ jobs:
       - name: Playwright, against a build that keeps the unfinished sections
         working-directory: site
         env:
-          HERO_P95_MS: "50"       # the 16 ms target is for the development laptop; shared runners only catch regressions
+          HERO_FRAME_TIME: report   # p50/p95/max to the job summary; the 16 ms p95 target is enforced on the development laptop
         run: |
           SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
           SITE_DIST=dist-test npx playwright test

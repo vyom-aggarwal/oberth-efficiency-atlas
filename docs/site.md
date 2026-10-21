@@ -93,8 +93,18 @@ npm run lighthouse                       # Lighthouse: see below
 - **`scripts/check_all.py`** (repository root) is the gate before pushing: the type check,
   vitest, `check_numbers` and the full Python suite.
 - **The pre-commit hook** (`.githooks/pre-commit`) runs `check_all.py --staged`, only the checks
-  the staged files can affect. Enable it once per clone with `git config core.hooksPath .githooks`.
+  the staged files can affect. A changed test file runs itself, and a changed script runs its own
+  test file. Enable it once per clone with `git config core.hooksPath .githooks`.
 - **Playwright** is not in `check_all.py`. Run it as above; CI runs it on every push.
+- **Hero frame time** (`e2e/hero.spec.ts`, while dragging; simulation plus drawing):
+
+  | where | what happens |
+  |---|---|
+  | locally | **enforced:** p95 under 16 ms, the target set on the development laptop. `HERO_P95_MS` overrides it. |
+  | in CI | **report-only:** the workflow sets `HERO_FRAME_TIME=report`, because shared runners are slower and noisier than that laptop. p50, p95 and the maximum go to the job summary. |
+
+  - In both places the test still fails if too few frames were measured.
+  - `runs/hero_frame_times.json` records the numbers, and whether the target was enforced.
 
 ## Lighthouse
 CI is the record (author, 2026-10-19).
@@ -122,7 +132,8 @@ performance.
 
 **Every push to `main`, and every pull request**, runs three jobs:
 1. **check:** the full `check_all.py`, the package-age check, and Playwright against a test build.
-   Screenshots and frame times are uploaded as the artifact `screenshots`.
+   - The hero frame time is reported in the job summary, not enforced (see Checks).
+   - Screenshots and frame times are uploaded as the artifact `screenshots`.
 2. **lighthouse:** the gated run above. Reports are uploaded as `lighthouse`.
 3. **build:** the production build.
 

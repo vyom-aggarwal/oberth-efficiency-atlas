@@ -36,3 +36,12 @@ def test_tests_build_and_lighthouse_run_on_every_push():
     steps = "\n".join(str(s.get("run", "")) for s in jobs["check"]["steps"])
     assert "scripts/check_all.py" in steps and "playwright test" in steps
     assert any("npm run lighthouse" in str(s.get("run", "")) for s in jobs["lighthouse"]["steps"])
+
+
+def test_hero_frame_time_is_report_only_in_ci():
+    # Author, 2026-10-20: the 16 ms p95 target holds on the development laptop, not on shared runners.
+    (step,) = [s for s in load()["jobs"]["check"]["steps"] if "playwright test" in str(s.get("run", ""))]
+    assert step["env"]["HERO_FRAME_TIME"] == "report"
+    assert "HERO_P95_MS" not in step["env"]
+    spec = (ROOT / "site" / "e2e" / "hero.spec.ts").read_text(encoding="utf-8")
+    assert 'process.env.HERO_FRAME_TIME === "report"' in spec and "GITHUB_STEP_SUMMARY" in spec
