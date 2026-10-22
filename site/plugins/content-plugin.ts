@@ -178,7 +178,7 @@ export function pagePath(file: string, root: string): string {
  * Open Graph and Twitter-card tags for a page, from its own <title> and description (nothing to keep in step).
  * og:image and og:url must be absolute: SITE_URL (the deployed root, set by the Pages workflow from
  * actions/configure-pages) is used when present, else the base path. The 404 page gets none (noindex).
- * The image, public/og-image.png (1200 × 630), is made from the hero by tools/og-image.mjs.
+ * The image, public/og-image.png (1200 × 630), is made from the landing page's hero by tools/og-image.mjs.
  */
 function socialMeta(html: string, path: string, base: string): string {
   if (/404\.html$/.test(path)) return "";
@@ -190,7 +190,7 @@ function socialMeta(html: string, path: string, base: string): string {
     tag("property", "og:title", title) + tag("property", "og:description", desc) + tag("property", "og:url", root + path) +
     tag("property", "og:image", `${root}og-image.png`) + tag("property", "og:image:width", "1200") +
     tag("property", "og:image:height", "630") +
-    tag("property", "og:image:alt", "A flyby trajectory bending around the Sun, with the burn arc coloured by the rate of energy gain") +
+    tag("property", "og:image:alt", "Three engines flying the same dive around the Sun, each burn drawn beside its path and coloured by the rate of energy gain") +
     tag("name", "twitter:card", "summary_large_image");
 }
 

@@ -125,10 +125,12 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     const lane = narrow ? 4 : 5;                              // px between lanes
     // Room around the paths: the lanes and their labels (the solid stack's label on the left, the SEP label above).
     const pad = { left: narrow ? 58 : 70, right: 8, top: narrow ? 26 : 34, bottom: narrow ? 12 : 18 };
-    const cap = narrow ? 214 : 360;                          // the hero's height cap (above the fold: author, 2026-10-21)
+    // The hero's height cap (above the fold: author, 2026-10-21); data-height-cap overrides it for tools/og-image.mjs.
+    const cap = Number(root.dataset.heightCap) || (narrow ? 214 : 360);
     const sc = Math.min((W - pad.left - pad.right) / (xMax - xMin), (cap - pad.top - pad.bottom) / (yMax - yMin));
     const H = Math.round((yMax - yMin) * sc + pad.top + pad.bottom);
-    const ox = pad.left + xMax * sc, oy = pad.top - yMin * sc;   // the Sun's centre
+    // The Sun's centre; the drawing is centred across the view when the view is wider than it needs.
+    const ox = pad.left + xMax * sc + Math.max(0, (W - pad.left - pad.right - (xMax - xMin) * sc) / 2), oy = pad.top - yMin * sc;
     const P = (e: DiveCase, i: number): [number, number] => [ox - e.X[i] * sc, oy + e.Y[i] * sc];
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
