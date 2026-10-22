@@ -186,10 +186,20 @@ def write(name: str, payload: dict) -> None:
 
 # ---------------------------------------------------------------- site.json
 
+def citation_info() -> dict:
+    """The project's citation, from CITATION.cff (its single source, author 2026-10-21), for the site footer."""
+    import yaml
+    c = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    return {"title": c["title"], "authors": [{"given": a["given-names"], "family": a["family-names"]} for a in c["authors"]],
+            "version": c.get("version"), "date_released": str(c["date-released"]) if c.get("date-released") else None,
+            "repository": c["repository-code"], "url": c.get("url"), "license": c.get("license")}
+
+
 def export_site(refs: list[dict], linked: list[str]) -> None:
     write("site.json", {
-        "provenance": provenance(["docs/paper_outline.md"]),
+        "provenance": provenance(["docs/paper_outline.md", "CITATION.cff"]),
         "repo": repo_info(),
+        "citation": citation_info(),
         "references": refs,
         "source_links": {rel: source_ref(rel) for rel in sorted(set(linked))},
     })
@@ -557,14 +567,22 @@ AUDIT = "docs/audit/2026-10-19_f185234/summary.json"      # the latest fresh-clo
 
 
 def methods_data(num: Numbers) -> dict:
-    """Facts for the methods section: the tag and its commit, the collected test count, two checks, and the latest
-    fresh-clone audit (its summary is computed by scripts/audit_record.py from the full comparison)."""
+    """Facts for the methods section and the landing page's reproducibility and scope block: the tag and its commit,
+    the collected test count, two checks, the latest fresh-clone audit (its summary is computed by
+    scripts/audit_record.py from the full comparison), and the scope (Phase 7): the mission engines and bodies of the
+    atlas, and the sweep's size."""
     run = lambda *a: subprocess.run(list(a), capture_output=True, text=True, check=True, cwd=ROOT).stdout
     collected = run(sys.executable, "-m", "pytest", "--collect-only", "-q")
     n_tests = int(re.search(r"(\d+) tests? collected", collected).group(1))
     j2, rule = "figures/j2_numbers.json", "figures/rule_numbers.json"
+    presets, p2 = "configs/atlas/presets.yaml", "figures/phase2_numbers.json"
     return {
-        "provenance": provenance([j2, rule, "docs/repro.md", AUDIT]),
+        "provenance": provenance([j2, rule, "docs/repro.md", AUDIT, presets, p2]),
+        "scope": {
+            "engines": [num(presets, "engines", k, "label") for k in load_source(presets)["engines"]],
+            "bodies": num(presets, "bodies"),
+            "sweep_rows": num(p2, "sweep", "rows"),
+        },
         "tag": TAG, "tag_commit": run("git", "rev-list", "-n", "1", TAG).strip()[:7],
         "tests_collected": n_tests,
         "j2_max_abs_delta_eta": num(j2, "max_abs_delta_eta"),

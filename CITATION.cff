@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software or its results, please cite it using these metadata."
+title: "Oberth Efficiency Atlas"
+type: software
+authors:
+  - given-names: Vyom
+    family-names: Aggarwal
+version: v1.0-analysis
+date-released: 2026-10-06
+repository-code: "https://github.com/vyom-aggarwal/oberth-efficiency-atlas"
+url: "https://vyom-aggarwal.github.io/oberth-efficiency-atlas/"
+license:
+  - MIT
+  - CC-BY-4.0

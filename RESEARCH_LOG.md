@@ -2962,4 +2962,36 @@ It awaits the author's approval before any code. Its proposals A–G are open qu
 go. Stop for review with screenshots at 1440 and 390 px in both themes, with the prose slots both
 empty and filled with placeholders.
 
+## 2026-10-21: Phase 7 build decisions (logged as made)
+
+**Step 1, routes** (c6eed9c):
+- **Test infrastructure:** besides the test build, Playwright gains a "production" project
+  (`e2e/prod.spec.ts`). It runs against a production build served under `/oberth-efficiency-atlas/`.
+  - Its expectation for the Research link follows the content files, so it stays correct when the
+    author publishes a section.
+  - CI builds both sites.
+- **Removed:** `content/references.md`, which held no prose; the list is built into `/references/`
+  from `site.json`.
+
+**The hero's orientation:** sideways at every width (deviation from the plan, which drew it upright
+below 768 px).
+- **Measured** (scratch script on `engines.bin`): in ρ units, the three paths span 3.62 along the
+  periapsis axis and 2.88 across it.
+- Upright, they would be taller than wide at both widths and take more of the 390 px height budget
+  that the above-the-fold rule caps.
+- **Mapping:** the Sun is on the left, the incoming leg on top, the exit below. This is Figure 7's
+  view rotated by 90°, not mirrored, so the sense of the orbit is unchanged.
+
+**Citation and licences** (answer G). My interpretations, for the author to confirm:
+- `CITATION.cff` takes `version: v1.0-analysis` and `date-released: 2026-10-06` from the analysis
+  tag, so the footer's citation has a year.
+- **MIT** (`LICENSE`, the standard text so that GitHub detects it) covers the code.
+- **CC BY 4.0** (`LICENSE-content.md`) covers the text and figures, and also the generated data files
+  (`results/`, the numbers JSON and CSV files, `site/public/data/`). The brief named only text and
+  figures, so the data needed a home.
+- **Third-party material keeps its original terms** and is listed by file:
+  - Confraria's digitized figure;
+  - the Northrop Grumman motor specifications and Hibberd et al.'s inputs in the Phase 4 config;
+  - the quoted literature values.
+
 

@@ -254,6 +254,24 @@ def test_source_links_name_real_refs():
             assert subprocess.run(["git", "cat-file", "-e", f"{ref}:{rel}"], cwd=ROOT).returncode == 0, (rel, ref)
 
 
+def test_citation_is_current_and_cff_is_complete():
+    # The footer's citation comes from CITATION.cff, its single source (author, 2026-10-21).
+    import yaml
+    cff = yaml.safe_load((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+    for key in ("cff-version", "message", "title", "authors"):
+        assert cff.get(key), key
+    assert all(a.get("given-names") and a.get("family-names") for a in cff["authors"])
+    assert load("site.json")["citation"] == json.loads(json.dumps(E.citation_info()))
+
+
+def test_scope_lists_the_atlas_engines_and_bodies():
+    import yaml
+    presets = yaml.safe_load((ROOT / "configs" / "atlas" / "presets.yaml").read_text(encoding="utf-8"))
+    scope = load("methods.json")["scope"]
+    assert [e["value"] for e in scope["engines"]] == [v["label"] for v in presets["engines"].values()]
+    assert list(scope["bodies"]["value"]) == list(presets["bodies"])
+
+
 def test_reference_numbers_follow_the_paper_outline():
     site = load("site.json")
     curve = load("curve.json")
