@@ -18,6 +18,15 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-7/`: the landing page and the references page (Phase 7, for the author's review), as full
+  pages at 1440 and 390 px in both themes.
+  - `landing-<width>-<theme>-empty.png`: the production build (`dist-empty`), every prose slot
+    hidden, as deployed today.
+  - `landing-<width>-<theme>-filled.png`: a development build with `SITE_PLACEHOLDERS=1`
+    (`dist-ph`), every slot filled with bracketed placeholder text, and the article shown.
+  - `references-<width>-<theme>.png`: the references page (production build).
+  - `og-image.png`: the new Open Graph image, from the landing hero.
+  - Made with `bash site/tools/landing-builds.sh`, then `e2e/screens.spec.ts` with `SCREEN_TAG`.
 - `checkpoint-6/`: the author's checkpoint-6 changes, from the final build.
   - Default crops of the hero, the atlas, engines compared and the methods facts, at 1440 and
     390 px in both themes:

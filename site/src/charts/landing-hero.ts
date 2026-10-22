@@ -57,7 +57,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   avLabel.append(frag(tex.av), ` at the engine, W/kg: ${sig(AV_RANGE[0], 1)}`);
   const legend = h("ul", { class: "legend lh-legend", "aria-label": "Legend" },
     h("li", {}, avLabel, h("span", { class: "ramp-bar", "aria-hidden": "true" }), h("span", {}, "10⁸", h("span", { class: "lh-wide" }, " (log scale)"))),
-    h("li", {}, "Burns drawn beside their paths", h("span", { class: "lh-wide" }, ": Solid nearest, then Nuclear, then SEP")),
+    h("li", {}, h("span", {}, "Burns drawn beside their paths", h("span", { class: "lh-wide" }, ": Solid nearest, then Nuclear, then SEP"))),
     h("li", { class: "lh-wide" }, dashGlyph([], "imp"), "impulsive burn at perihelion"));
   const caveat = cases.map((e) => e.label.starNote).find(Boolean);
   const note = caveat ? h("p", { class: "lh-note" }, caveat) : null;
