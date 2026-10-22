@@ -9,7 +9,7 @@ import { expect, test } from "./fixtures";
 for (const width of [390, 768, 1440]) {
   test(`the legend sits under the plot and its markers differ by shape at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("");
+    await page.goto("research/");
     const fig = page.locator("#fig-universal-curve");
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".plot svg path.band")).toBeVisible();
@@ -38,7 +38,7 @@ for (const width of [390, 600, 768, 1024, 1440]) {
   test(`universal-curve annotations do not collide at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("");
+    await page.goto("research/");
     const fig = page.locator("#fig-universal-curve");
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".plot svg path.band")).toBeVisible();

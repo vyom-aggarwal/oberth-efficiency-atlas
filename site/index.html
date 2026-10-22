@@ -5,26 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Oberth Efficiency Atlas</title>
-    <meta name="description" content="How much of the impulsive Oberth bonus a finite burn keeps: simulation data, theory and an interactive explorer." />
+    <meta name="description" content="How much of the impulsive Oberth bonus real engines keep: simulation data, theory and an interactive explorer." />
     <script>
+      // Links to the reference list made before Phase 7 (/#ref-n) go to the references page (author, 2026-10-21).
+      if (/^#ref-\d+$/.test(location.hash)) location.replace("{{base}}references/" + location.hash);
       try { var t = localStorage.getItem("oberth-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
     </script>
-    <script type="module" src="/src/pages/home.ts"></script>
+    <script type="module" src="/src/pages/landing.ts"></script>
   </head>
-  <body class="page-home">
+  <body class="page-landing">
     <!--#header-->
-    <main id="main">
-      <!--#hero-->
-      <div class="home-grid">
-        <nav class="section-nav" aria-label="Sections"><ul><!--#section-nav--></ul></nav>
-        <details class="section-nav-mobile">
-          <summary><span class="label">Section</span> <span data-current-section></span></summary>
-          <nav aria-label="Sections"><ul><!--#section-nav--></ul></nav>
-        </details>
-        <div class="home-content">
-          <!--#sections-->
-        </div>
-      </div>
+    <main id="main" class="landing">
+      <section class="landing-intro" aria-labelledby="landing-title">
+        <h1 id="landing-title" class="landing-title">Oberth Efficiency Atlas</h1>
+        <nav class="entry-links" aria-label="Start here">
+          <ul>
+            <li><!--#research-link: data-entry="research"|Read the research--></li>
+            <li><a href="{{base}}explorer/" data-entry="explorer">Open the explorer</a></li>
+            <li><a href="{{repo}}" rel="noopener" data-entry="source">View the source on GitHub</a></li>
+          </ul>
+        </nav>
+      </section>
     </main>
     <!--#footer-->
   </body>

@@ -1,16 +1,21 @@
 // Build-time page assembly (no client-side Markdown or KaTeX):
-// - home sections from content/sections.json + content/*.md (front matter `title:`; prose; `<!-- figure -->`
-//   marker; `### Figure caption` block). Math ($…$, $$…$$) is rendered by KaTeX; <sup>n</sup> citations link to
-//   the reference list.
+// - article sections (/research/) from content/sections.json + content/*.md (front matter `title:`; prose;
+//   `<!-- figure -->` marker; `### Figure caption` block). Math ($…$, $$…$$) is rendered by KaTeX; <sup>n</sup>
+//   citations link to the references page (/references/#ref-n, Phase 7).
 // - A file that still contains "TODO" is omitted from the production build with its navigation entry and its
 //   figure (author rule, 2026-10-14); the build prints the hidden sections. The dev server shows such a section
 //   with a visible TODO banner.
+// - While every article section is TODO, /research/ is left out of the production build and the Research link is
+//   not rendered anywhere (author, 2026-10-21: no link to an empty page); see researchIncluded().
+// - The reference list, built into /references/ from site.json (always published: it holds no prose).
 // - Shared header and footer partials (partials/*.html), filled from the exported data.
 // - The classic offline explorer (../explorer/oberth_explorer.html) is served at explorer/classic/.
 import { existsSync, readFileSync } from "node:fs";
+import { relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import MarkdownIt from "markdown-it";
 import type { Plugin, ResolvedConfig } from "vite";
+import { referenceHref, referenceListHTML } from "../src/lib/references";
 import { renderTex } from "./tex-plugin";
 
 const dir = (p: string) => fileURLToPath(new URL(p, import.meta.url));
@@ -41,18 +46,18 @@ function frontMatter(src: string): { meta: Record<string, string>; body: string 
   return { meta, body: src.slice(m[0].length) };
 }
 
-/** Markdown with KaTeX math and linked citations. */
-export function renderMarkdown(src: string): string {
+/** Markdown with KaTeX math, and citations linked to the references page under `base`. */
+export function renderMarkdown(src: string, base = "/"): string {
   const math: string[] = [];
   const keep = (html: string) => `@@MATH${math.push(html) - 1}@@`;
   let s = src.replace(/\$\$([\s\S]+?)\$\$/g, (_m, t: string) => keep(renderTex(t.trim(), true)));
   s = s.replace(/(^|[^\\$])\$([^\s$](?:[^$\n]*?[^\s$])?)\$/g, (_m, pre: string, t: string) => pre + keep(renderTex(t, false)));
   return md.render(s)
     .replace(/@@MATH(\d+)@@/g, (_m, i: string) => math[Number(i)])
-    .replace(/<sup>(\d+)<\/sup>/g, '<sup><a href="#ref-$1" aria-label="reference $1">$1</a></sup>');
+    .replace(/<sup>(\d+)<\/sup>/g, (_m, n: string) => `<sup><a href="${referenceHref(base, n)}" aria-label="reference ${n}">${n}</a></sup>`);
 }
 
-export function loadSections(): Section[] {
+export function loadSections(base = "/"): Section[] {
   const reg: { sections: Entry[] } = JSON.parse(readFileSync(CONTENT + "sections.json", "utf8"));
   return reg.sections.map((e) => {
     const raw = readFileSync(CONTENT + e.file, "utf8");
@@ -61,10 +66,20 @@ export function loadSections(): Section[] {
     const [before, after = ""] = prose.split(/^\s*<!--\s*figure\s*-->\s*$/m);
     return {
       id: e.id, title: meta.title ?? e.id, todo: TODO.test(raw), figure: e.figure,
-      before: renderMarkdown(before), after: renderMarkdown(after), caption: renderMarkdown(caption.trim()),
-      notes: renderMarkdown(prose),                // the caption's notes show in the figure's caption
+      before: renderMarkdown(before, base), after: renderMarkdown(after, base), caption: renderMarkdown(caption.trim(), base),
+      notes: renderMarkdown(prose, base),          // the caption's notes show in the figure's caption
     };
   });
+}
+
+/** The dev server and SITE_SHOW_TODO=1 builds show unfinished content, with its TODO notes. */
+export function showTodo(command: string): boolean {
+  return command === "serve" || process.env.SITE_SHOW_TODO === "1";
+}
+
+/** The article (/research/) is built, and linked, when unfinished content is shown or a section is published. */
+export function researchIncluded(command: string): boolean {
+  return showTodo(command) || loadSections().some((s) => !s.todo);
 }
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -111,18 +126,22 @@ function partial(name: string, base: string): string {
   return readFileSync(PARTIALS + name, "utf8").replace(/\{\{(\w+)\}\}/g, (_m, k: string) => esc(fill[k] ?? ""));
 }
 
+/** A page's path under the site root, from its HTML file: "research/index.html" → "research/", "index.html" → "". */
+export function pagePath(file: string, root: string): string {
+  return relative(root, file).replace(/\\/g, "/").replace(/(^|\/)index\.html$/, "$1");
+}
+
 /**
  * Open Graph and Twitter-card tags for a page, from its own <title> and description (nothing to keep in step).
  * og:image and og:url must be absolute: SITE_URL (the deployed root, set by the Pages workflow from
  * actions/configure-pages) is used when present, else the base path. The 404 page gets none (noindex).
  * The image, public/og-image.png (1200 × 630), is made from the hero by tools/og-image.mjs.
  */
-function socialMeta(html: string, file: string, base: string): string {
-  if (/404\.html$/.test(file)) return "";
+function socialMeta(html: string, path: string, base: string): string {
+  if (/404\.html$/.test(path)) return "";
   const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? "Oberth Efficiency Atlas";
   const desc = /<meta name="description" content="([^"]*)"/.exec(html)?.[1] ?? "";
   const root = (process.env.SITE_URL ?? base).replace(/\/?$/, "/");
-  const path = /[\\/]explorer[\\/]index\.html$/.test(file) ? "explorer/" : "";
   const tag = (attr: string, k: string, v: string) => `    <meta ${attr}="${k}" content="${v}" />\n`;
   return "\n" + tag("property", "og:type", "website") + tag("property", "og:site_name", "Oberth Efficiency Atlas") +
     tag("property", "og:title", title) + tag("property", "og:description", desc) + tag("property", "og:url", root + path) +
@@ -141,7 +160,7 @@ export function contentPlugin(): Plugin {
       config = c;
       // SITE_SHOW_TODO=1 builds the unfinished sections too (with their TODO banners), for tests and review
       // screenshots of a build; deployed builds never set it.
-      dev = c.command === "serve" || process.env.SITE_SHOW_TODO === "1";
+      dev = showTodo(c.command);
     },
     buildStart() {
       if (dev) return;
@@ -149,21 +168,33 @@ export function contentPlugin(): Plugin {
       config.logger.info(hidden.length
         ? `\n[content] hidden in production (content file still has TODO): ${hidden.join(", ")}\n`
         : "\n[content] all sections shown\n");
+      if (!researchIncluded(config.command)) config.logger.info("[content] every article section is TODO: /research/ is not built and not linked\n");
     },
     transformIndexHtml: {
       order: "pre",
       handler(html, ctx) {
         const base = config.base;
+        const research = researchIncluded(config.command);
         let out = html.replace("<!--#header-->", partial("header.html", base)).replace("<!--#footer-->", partial("footer.html", base))
-          .replace(/\{\{base\}\}/g, base);             // page links honour the deployed base path
-        out = out.replace("</head>", `${socialMeta(out, ctx.filename, base)}</head>`);
+          // The Research link, wherever a page or partial asks for it (<!--#research-link: attrs|label-->), only when
+          // the article is built; otherwise nothing at all.
+          .replace(/<!--#research-link:([^|>]*?)(?:\|([^>]*?))?-->/g, (_m, attrs: string, label?: string) =>
+            research ? `<a href="{{base}}research/"${attrs.trimEnd()}>${label?.trim() || "Research"}</a>` : "")
+          .replace(/<li>\s*<\/li>\s*/g, "")             // a list item left empty by a link not rendered
+          .replace(/\{\{base\}\}/g, base)               // page links honour the deployed base path
+          .replace(/\{\{repo\}\}/g, esc(readData("site.json")?.repo.url ?? "#"));
+        out = out.replace("</head>", `${socialMeta(out, pagePath(ctx.filename, config.root), base)}</head>`);
+        if (out.includes("<!--#references-->")) {
+          const site = readData("site.json");
+          out = out.replace("<!--#references-->", referenceListHTML(site?.references ?? []));
+        }
         if (!out.includes("<!--#sections-->")) return out;
-        const kept = keptSections(loadSections(), dev);
+        const kept = keptSections(loadSections(base), dev);
         const hero = kept.find((s) => s.id === "hero");
         const rest = kept.filter((s) => s.id !== "hero");
         const nav = rest.map((s) => `<li><a href="#${s.id}" data-nav="${s.id}">${esc(s.title)}</a></li>`).join("");
         return out
-          .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Oberth Efficiency Atlas</h1>`)
+          .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Research</h1>`)
           .replace("<!--#sections-->", rest.map((s) => sectionHTML(s, dev)).join("\n"))
           .replace(/<!--#section-nav-->/g, nav);
       },

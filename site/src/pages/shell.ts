@@ -10,7 +10,7 @@ import "../styles/layout.css";
 import { segmented } from "../controls/segmented";
 import { themePref, type ThemePref } from "../lib/theme";
 
-export function initShell(page: "home" | "explorer" | "notfound" | "style"): void {
+export function initShell(page: "landing" | "research" | "references" | "explorer" | "notfound" | "style"): void {
   const sw = document.querySelector<HTMLElement>("[data-theme-switch]");
   sw?.append(segmented<ThemePref>("theme", "Theme", [["system", "System"], ["light", "Light"], ["dark", "Dark"]], themePref));
 

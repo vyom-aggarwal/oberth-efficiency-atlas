@@ -24,7 +24,7 @@ for (const width of [390, 1440]) {
     test.beforeEach(async ({ page }) => {
       await page.setViewportSize({ width, height: width > 600 ? 900 : 844 });
       await page.emulateMedia({ reducedMotion: "reduce" });
-      await page.goto("");
+      await page.goto("research/");
       await page.locator("#fig-universal-curve").scrollIntoViewIfNeeded();
       await expect(page.locator("#fig-universal-curve .segmented")).toBeVisible();
       await expect(page.locator("#fig-universal-curve .plot svg .hit[tabindex]").first()).toBeAttached();   // drawn

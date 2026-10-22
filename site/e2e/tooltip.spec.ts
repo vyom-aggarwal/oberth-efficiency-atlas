@@ -6,7 +6,7 @@ import { expect, test, type Page } from "./fixtures";
 
 async function open(page: Page, id: string) {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("");
+  await page.goto("research/");
   const fig = page.locator(`#${id}`);
   await fig.scrollIntoViewIfNeeded();
   await expect(fig.locator(".plot svg .hit").first()).toBeAttached();

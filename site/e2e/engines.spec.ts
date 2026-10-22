@@ -6,7 +6,7 @@ import { layoutProblems } from "./layout";
 async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 900 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("");
+  await page.goto("research/");
   const fig = page.locator("#fig-engines");
   await fig.scrollIntoViewIfNeeded();
   await expect(fig.locator("canvas.engine-canvas")).toHaveCount(3);
@@ -107,7 +107,7 @@ test("engines at 1440 px: three panels side by side, no switch; the SEP caveat i
 });
 
 test("limitations: the J2 facts, with their source", async ({ page }) => {
-  await page.goto("");
+  await page.goto("research/");
   const box = page.locator("#fig-limitations");
   await box.scrollIntoViewIfNeeded();
   await expect(box.locator("dl.facts")).toContainText("J2 oblateness");

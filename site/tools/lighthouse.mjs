@@ -1,10 +1,10 @@
-// Lighthouse 13.5.0 (docs/site_plan.md §3) on the built site served by `vite preview`: the home page and the
-// explorer, mobile and desktop. The build keeps the unfinished sections (SITE_SHOW_TODO=1), so the audit sees the
-// full pages with every figure. Reports go to ../runs/lighthouse/; the scores are printed and, in GitHub Actions,
-// written to the job summary.
+// Lighthouse 13.5.0 (docs/site_plan.md §3) on the built site served by `vite preview`: the landing page, the
+// research article, the explorer and the references page (Phase 7 added / and /references/), mobile and desktop.
+// The build keeps the unfinished sections (SITE_SHOW_TODO=1), so the audit sees the full pages with every figure.
+// Reports go to ../runs/lighthouse/; the scores are printed and, in GitHub Actions, written to the job summary.
 //
 // Gate (author, 2026-10-19; CI is the record): accessibility, best practices and SEO must each be at least 0.90 on
-// both pages, mobile and desktop, or the run exits 1. Performance is reported, not enforced: shared CI runners make
+// every page, mobile and desktop, or the run exits 1. Performance is reported, not enforced: shared CI runners make
 // it noisy (LH_MIN_PERFORMANCE=0.9 enforces it too, for a run on a quiet machine).
 // Writes runs/lighthouse/summary.json (scores, Lighthouse and Chrome versions, date), the file to send back.
 //
@@ -20,7 +20,7 @@ import { build, preview } from "vite";
 const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const OUT = fileURLToPath(new URL("../../runs/lighthouse/", import.meta.url));
 const PORT = 4174;
-const PAGES = [["home", ""], ["explorer", "explorer/"]];
+const PAGES = [["landing", ""], ["research", "research/"], ["explorer", "explorer/"], ["references", "references/"]];
 const FACTORS = ["mobile", "desktop"];
 const CATS = ["performance", "accessibility", "best-practices", "seo"];
 const GATED = ["accessibility", "best-practices", "seo"];          // each ≥ 0.90 on every page and form factor

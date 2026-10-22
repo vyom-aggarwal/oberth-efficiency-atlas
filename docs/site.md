@@ -5,9 +5,21 @@ The site presents the analysis. It reads committed outputs and never changes the
 it are in `docs/site_plan.md` and `RESEARCH_LOG.md` (Phase 6).
 
 ## Pages
-- **`/`** is the long-form explanation. It has the live hero flyby, Figures 2–7 (the universal
-  curve, three regimes, the atlas, burn timing, the case study, engines compared), the J2 facts,
-  methods, references and the AI-use disclosure.
+Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references page:
+- **`/`** is the landing page.
+- **`/research/`** is the long-form explanation (moved from `/`). It has:
+  - the live hero flyby;
+  - Figures 2–7: the universal curve, three regimes, the atlas, burn timing, the case study,
+    engines compared;
+  - the J2 facts, methods, and the AI-use disclosure.
+
+  It is built only while at least one of its sections is published, or when unfinished content is
+  shown. The Research links (navigation, landing entry) appear only then, so no page links to an
+  empty article.
+- **`/references/`** is the numbered reference list, with anchors `#ref-1`, `#ref-2`, …. It is
+  always published.
+  - Citations anywhere on the site link there.
+  - An old link to `/#ref-n` is redirected there.
 - **`/explorer/`** simulates one flyby live. It has presets, warnings, and placement on the
   universal curve and the theory atlas, and keeps its state in the URL.
 - **`/explorer/classic/`** is the single-file offline explorer, copied unchanged.
@@ -80,11 +92,22 @@ npm run dev                              # dev server, http://localhost:5173/
 npm test                                 # vitest (unit tests in src/**/*.test.ts)
 npm run typecheck
 SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
-SITE_DIST=dist-test npx playwright test  # every e2e spec, against that build (no server needed)
+BASE_PATH=/oberth-efficiency-atlas/ npx vite build --outDir dist-prod --emptyOutDir
+SITE_DIST=dist-test SITE_DIST_PROD=dist-prod npx playwright test  # every e2e spec (no server needed)
 npm run build                            # the production build (TODO sections hidden) -> site/dist
 npm run og-image                         # the preview image, from a dist-test build
 npm run lighthouse                       # Lighthouse: see below
 ```
+- **Two Playwright projects:**
+  - `site`: every spec but one, against the test build;
+  - `production`: `e2e/prod.spec.ts`, against the production build served under the base path, as
+    on GitHub Pages. It checks:
+    - that the Research link and `/research/` exist exactly when a section is published;
+    - that every on-site link of the landing page resolves;
+    - that there are no console errors.
+
+    It runs only when `SITE_DIST_PROD` is set; CI sets it. In Git Bash, prefix the `BASE_PATH`
+    build with `MSYS_NO_PATHCONV=1`.
 - **Screenshots:** the screenshot specs write to `runs/screens/`. Checkpoint screenshots are kept
   in `docs/screens/` (`docs/screens/README.md`).
 - **Without `SITE_DIST`,** Playwright starts the dev server itself.
@@ -108,11 +131,11 @@ npm run lighthouse                       # Lighthouse: see below
 
 ## Lighthouse
 CI is the record (author, 2026-10-19).
-- **Gate:** accessibility, best practices and SEO must each be at least 90 on the home page and
-  the explorer, on mobile and desktop.
+- **Gate:** accessibility, best practices and SEO must each be at least 90 on `/`, `/research/`,
+  `/explorer/` and `/references/` (Phase 7 added the first and the last), on mobile and desktop.
 - **Performance** is reported, not enforced, because shared runners make it noisy.
 - **The run:** `npm run lighthouse` builds the site with every section, serves it with
-  `vite preview`, and runs Lighthouse 13.5.0 four times.
+  `vite preview`, and runs Lighthouse 13.5.0 eight times.
 - **Output:**
   - full reports: `runs/lighthouse/<page>-<form>.report.{html,json}`;
   - a summary: `runs/lighthouse/summary.json`, with every score, the versions and the date.

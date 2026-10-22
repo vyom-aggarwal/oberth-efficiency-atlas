@@ -23,7 +23,7 @@ test("annotations and slider labels stay inside the figure at every width and Π
   for (const width of [360, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("");
+    await page.goto("research/");
     await page.waitForSelector(".hero-canvas");
     for (const Pi of [0.001, 0.0326, 0.976, 1.67, 30, 368, 1000]) {
       await setPi(page, Pi);
@@ -72,7 +72,7 @@ test("annotations and slider labels stay inside the figure at every width and Π
 test("the intro runs once and ends at the reader's first input", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("");
+  await page.goto("research/");
   const hero = page.locator("#fig-hero .figure-body");
   await expect(hero).toHaveAttribute("data-intro", "running");
   await expect(hero).toHaveAttribute("data-intro", "done", { timeout: 5000 });
@@ -89,7 +89,7 @@ test("the intro runs once and ends at the reader's first input", async ({ page }
 
 test("the intro is skipped under prefers-reduced-motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("");
+  await page.goto("research/");
   const hero = page.locator("#fig-hero .figure-body");
   await expect(hero).toHaveAttribute("data-intro", "skipped");
   await expect(page.locator("#hero-summary")).toContainText("keeps η =");
@@ -97,7 +97,7 @@ test("the intro is skipped under prefers-reduced-motion", async ({ page }) => {
 });
 
 test("the data table says η is this case's, at each marked Π", async ({ page }) => {
-  await page.goto("");
+  await page.goto("research/");
   const table = page.locator("#fig-hero .data-table");
   await expect(table.locator("caption")).toContainText("one equivalent stage");
   await expect(table).toContainText("Π of Nuclear thermal (Isp 900 s");
@@ -113,7 +113,7 @@ test("dragging along the path sets Π; frame time while dragging", async ({ page
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("");
+  await page.goto("research/");
   await page.waitForSelector(".hero-canvas");
   await page.locator(".hero-canvas").scrollIntoViewIfNeeded();       // pointer events need it on screen
   await page.waitForTimeout(100);

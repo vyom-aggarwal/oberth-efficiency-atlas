@@ -2,8 +2,9 @@
 // sideways scrolling. Images are written to runs/screens/ for review (gitignored).
 import { expect, test } from "./fixtures";
 
-// Pages to capture ("" is the home page). /style/ exists only on the dev server.
-const PAGES = (process.env.SCREEN_PAGES ?? ",explorer/,404.html,style/").split(",");
+// Pages to capture ("" is the landing page). /style/ exists only in development builds, /research/ only when it has
+// a published section or unfinished content is shown.
+const PAGES = (process.env.SCREEN_PAGES ?? ",research/,explorer/,references/,404.html,style/").split(",");
 const WIDTHS = [1440, 390];
 const THEMES = ["light", "dark"] as const;
 const OUT = "../runs/screens";
@@ -32,10 +33,10 @@ for (const path of PAGES) {
         await page.waitForTimeout(300);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow, "no sideways scrolling of the page body").toBeLessThanOrEqual(0);
-        const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "home"}-${width}-${theme}.png`;
+        const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "landing"}-${width}-${theme}.png`;
         await page.screenshot({ path: `${OUT}/${name}`, fullPage: true });
-        if (path === "") {
-          // A crop of every figure on the home page (all are mounted after the scroll above).
+        if (path === "research/") {
+          // A crop of every figure in the article (all are mounted after the scroll above).
           const figs = await page.locator("figure[data-figure]").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.figure!));
           // Cropped from a full-page capture, where nothing is scrolled: an element screenshot scrolls the figure to
           // the top of the viewport, under the sticky section bar on narrow screens.

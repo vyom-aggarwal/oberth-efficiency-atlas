@@ -25,3 +25,6 @@ site/test-results/
 site/playwright-report/
 .claude/launch.json
 site/dist-test/
+site/dist-prod/
+site/dist-ph/
+site/dist-lh/

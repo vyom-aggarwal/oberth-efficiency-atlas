@@ -6,7 +6,7 @@ import { layoutProblems } from "./layout";
 async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 900 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("");
+  await page.goto("research/");
   const fig = page.locator("#fig-regimes");
   await fig.scrollIntoViewIfNeeded();
   await expect(fig.locator(".plot svg path.data-line")).toBeVisible();

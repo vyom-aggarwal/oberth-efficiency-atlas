@@ -19,7 +19,7 @@ for (const width of [1440, 390]) {
   test(`atlas legend, inertial, Venus, mission samples, at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width > 600 ? 900 : 844 });
     await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-    await page.goto("");
+    await page.goto("research/");
     const fig = page.locator("#fig-atlas");
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".plot svg rect.plot-frame")).toBeVisible();
@@ -35,7 +35,7 @@ for (const [engine, file] of [["Nuclear", "nuclear"], ["SEP*", "sep"]]) {
   test(`engines at 390px with ${engine} chosen`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
-    await page.goto("");
+    await page.goto("research/");
     const fig = page.locator("#fig-engines");
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".engine-switch")).toBeVisible();

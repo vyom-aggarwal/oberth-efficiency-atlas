@@ -4,7 +4,7 @@ import { layoutProblems } from "./layout";
 
 async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 900 });
-  await page.goto("");
+  await page.goto("research/");
   const fig = page.locator("#fig-timing");
   await fig.scrollIntoViewIfNeeded();
   await expect(fig.locator(".plot svg path.profile-line")).toBeVisible();

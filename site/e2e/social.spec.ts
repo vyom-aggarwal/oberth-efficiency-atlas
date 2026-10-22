@@ -1,8 +1,8 @@
-// Open Graph and Twitter-card metadata (author item 8, 2026-10-19): the home page and the explorer carry their own
-// title and description, a 1200 × 630 preview image that is served, and a large-image card; the 404 page none.
+// Open Graph and Twitter-card metadata (author item 8, 2026-10-19): every page carries its own title, description and
+// URL, a 1200 × 630 preview image that is served, and a large-image card; the 404 page none.
 import { expect, test } from "./fixtures";
 
-for (const [name, path] of [["home", ""], ["explorer", "explorer/"]]) {
+for (const [name, path] of [["landing", ""], ["research", "research/"], ["explorer", "explorer/"], ["references", "references/"]]) {
   test(`${name}: Open Graph tags from the page's own title and description, and the image is served`, async ({ page }) => {
     await page.goto(path);
     const meta = (k: string) => page.locator(`meta[property="${k}"], meta[name="${k}"]`).getAttribute("content");

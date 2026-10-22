@@ -1,11 +1,11 @@
 # Site prose
 
-One Markdown file per home-page section; the order is in `sections.json`.
+One Markdown file per section of the research article (`/research/`); the order is in `sections.json`.
 
 - **Front matter:** `title:` (the section heading; working titles until renamed).
 - **Body:** the section's prose. Inline math as `$\Pi = t_b/\tau$`, display math as `$$…$$`, both
   rendered by KaTeX at build time. Citations as superscripts, `<sup>1</sup>`, numbered as in
-  `docs/paper_outline.md`; the site links them to the reference list.
+  `docs/paper_outline.md`; the site links them to the references page (`/references/#ref-n`).
 - **Figure position:** a line `<!-- figure -->` places the section's figure; without it, the figure
   follows the prose.
 - **Caption:** everything under a `### Figure caption` heading becomes the figure's caption.

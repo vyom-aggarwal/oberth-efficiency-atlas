@@ -1,12 +1,13 @@
-// The home page: the shell, the sticky section navigation, and the figures, each loaded when it nears the
-// viewport (data for figures below the fold is lazy-loaded with its code).
+// The research article (/research/, moved from / in Phase 7): the shell, the sticky section navigation, and the
+// figures, each loaded when it nears the viewport (data for figures below the fold is lazy-loaded with its code).
+// The reference list has its own page, /references/.
 import { initShell } from "./shell";
 import { loadBinary, loadData, type SiteData } from "../lib/data";
 import { h } from "../lib/dom";
-import { referenceHTML, sourceLink } from "../lib/cite";
+import { sourceLink } from "../lib/cite";
 import { sig } from "../lib/format";
 
-initShell("home");
+initShell("research");
 
 // ---------------------------------------------------------------- section navigation
 const links = new Map<string, HTMLAnchorElement[]>();
@@ -92,11 +93,6 @@ const FIGURES: Record<string, Mount> = {
       row("J2 oblateness, largest change in η", sig(m.j2_max_abs_delta_eta.value, 2)),
       row("J2 oblateness, largest relative change in the deficit 1 − η", `${sig(100 * m.j2_max_rel_delta_deficit.value, 2)} %`),
       row("Source", sourceLink(site, "figures/j2_numbers.json"))));
-  },
-  references: async (body) => {
-    const site = await loadData<SiteData>("site.json");
-    body.append(h("ol", { class: "references" }, ...site.references.map((r) =>
-      h("li", { id: `ref-${r.n}`, value: r.n, html: referenceHTML(r.text) }))));
   },
   methods: async (body) => {
     const [site, m] = await Promise.all([loadData<SiteData>("site.json"), loadData<any>("methods.json")]);
