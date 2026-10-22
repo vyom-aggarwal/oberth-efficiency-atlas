@@ -2925,4 +2925,41 @@ checkpoint 6).
 
 It awaits the author's approval before any code. Its proposals A–G are open questions for the author.
 
+## 2026-10-21: Phase 7 plan approved, with two design changes (author)
+
+**Design changes:**
+1. **Above the fold, with every prose slot empty:** the hero's height is capped so the title, a
+   short hero figure title and the entry links are visible without scrolling. This must hold at
+   1440 × 900 and 390 × 844.
+   - The hero figure title is interface text, to be renamed by the author.
+   - A Playwright check covers both sizes.
+2. **Three findings:**
+   1. loss against Π, with the 1 % line and the three hero engines placed on it;
+   2. where real missions sit (the atlas with the mission samples, lazily loaded);
+   3. the Hibberd et al. check: the case-study thrust-margin curve, with the reference burn and the
+      1 % threshold marked.
+
+   "Energy kept by each engine" folds into the hero as its energy-gain strip, the cursor following
+   the hero clock as in Figure 7. "Three regimes" stays in the article only. Each finding keeps a
+   caption slot and one link: to its article section once published, otherwise to the matching
+   explorer state.
+
+**Answers to the plan's proposals:**
+- **A.** `/research/` stays out of the production build while every section is TODO.
+- **B.** Minimal: only a client-side redirect on `/` from `#ref-n` to `references/#ref-n`.
+- **C, D.** As proposed.
+- **E.** The hero sequence plays once per browser session (`sessionStorage`).
+- **F.** Three findings, as above.
+- **G.** Footer and licences:
+  - `CITATION.cff` names the author "Vyom Aggarwal", and the footer reads from it.
+  - Licences: MIT for the code (`LICENSE`); CC BY 4.0 for the text and figures (a short
+    `LICENSE-content.md`).
+  - The licence files state that third-party material keeps its original terms, and list those
+    files: the data digitized from Confraria's thesis figure, the Northrop Grumman motor
+    specifications, and values quoted from the cited papers.
+
+**Build order:** the references page and the route move first, then the landing page. Commit as I
+go. Stop for review with screenshots at 1440 and 390 px in both themes, with the prose slots both
+empty and filled with placeholders.
+
 

@@ -1,5 +1,21 @@
 # Phase 7 plan: a landing page and a references page
 
+> **Approved 2026-10-21, with changes** (RESEARCH_LOG 2026-10-21). Where they differ, these govern
+> the text below:
+> - **Above the fold:** with every prose slot empty, the title, a short hero figure title and the
+>   entry links fit above the fold at 1440 × 900 and 390 × 844. The hero's height is capped to
+>   allow this, and Playwright checks it.
+> - **Three findings:**
+>   - loss against Π, with the 1 % line and the hero engines;
+>   - where real missions sit;
+>   - the Hibberd et al. check (the thrust-margin curve, the reference burn and the 1 % threshold).
+>
+>   "Energy kept" becomes the hero's energy-gain strip, and "Three regimes" stays in the article.
+> - **A, C, D and E** as proposed. **B** is minimal: only `#ref-n` → `references/#ref-n`.
+> - **G:** `CITATION.cff` (Vyom Aggarwal) feeds the footer. MIT applies to the code (`LICENSE`)
+>   and CC BY 4.0 to the text and figures (`LICENSE-content.md`). Third-party material keeps its
+>   original terms, and those files are listed.
+
 Brief: the author, 2026-10-21. The analysis freeze holds, and this is a site-only change. It works
 inside the Phase 6 design system (`docs/site_plan.md` §5):
 - the six colours, with Burn reserved for a·v;
