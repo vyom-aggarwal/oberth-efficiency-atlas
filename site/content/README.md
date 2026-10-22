@@ -19,8 +19,8 @@ One Markdown file per section of the research article (`/research/`); the order 
 
 | file | where it appears |
 |---|---|
-| `headline.md` | under the title: one sentence |
-| `summary.md` | under the headline: two or three sentences |
+| `headline.md` | under the title: one sentence, at most 100 characters (the build warns above that: a longer headline can push the entry links below the fold on a phone) |
+| `summary.md` | under the entry links: two or three sentences |
 | `finding-loss.md` | caption of "Loss against Π, with the 1 % line" |
 | `finding-missions.md` | caption of "Where real missions sit" |
 | `finding-hibberd.md` | caption of "The Hibberd et al. check" |

@@ -55,7 +55,8 @@ jobs:
         run: |
           SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
           BASE_PATH=/oberth-efficiency-atlas/ npx vite build --outDir dist-prod --emptyOutDir
-          SITE_DIST=dist-test SITE_DIST_PROD=dist-prod npx playwright test
+          SITE_SHOW_TODO=1 SITE_PLACEHOLDERS=1 npx vite build --mode development --outDir dist-ph --emptyOutDir
+          SITE_DIST=dist-test SITE_DIST_PROD=dist-prod SITE_DIST_PH=dist-ph npx playwright test
       - name: Screenshots and frame times
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

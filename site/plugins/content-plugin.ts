@@ -79,13 +79,33 @@ export function loadSections(base = "/"): Section[] {
 // review screenshots of the finished state).
 const LANDING = dir("../content/landing/");
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+// The headline is about 80 characters and the summary two sentences (author, 2026-10-21): the fold test on the
+// placeholder build (e2e/fold.spec.ts) checks that a headline of that length keeps the entry links above the fold.
 export const PLACEHOLDERS: Record<string, string> = {
-  headline: "[Placeholder headline, about twelve words] Lorem ipsum dolor sit amet, consectetur adipiscing.",
-  summary: `[Placeholder summary, about fifty words] ${LOREM} Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.`,
+  headline: "[Placeholder headline] Lorem ipsum dolor sit amet, consectetur adipiscing elit sed.",
+  summary: `[Placeholder summary, two sentences] ${LOREM} Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.`,
   "finding-loss": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-missions": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-hibberd": `[Placeholder caption, one or two sentences] ${LOREM}`,
 };
+
+/**
+ * The headline's length budget, in characters of plain text (author, 2026-10-21). A longer headline can push the entry
+ * links below the fold on a phone. e2e/fold.spec.ts measures the longest headline that keeps them above the fold at
+ * 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build reports a written headline over it.
+ * Measured 2026-10-21: 114 characters at 390 × 844 (three lines; the binding size) and 365 at 1440 × 900. The budget
+ * keeps about one long word in hand, since where a headline wraps depends on its words.
+ */
+export const HEADLINE_BUDGET = 100;
+
+/** The build's report on the written headline: null within the budget, else a message. */
+export function headlineReport(markdown: string, budget = HEADLINE_BUDGET): string | null {
+  if (TODO.test(markdown)) return null;
+  const text = md.render(frontMatter(markdown).body).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  return text.length > budget
+    ? `[content] the landing headline is ${text.length} characters, over its budget of ${budget}: on a 390 × 844 screen it can push the entry links below the fold (e2e/fold.spec.ts)`
+    : null;
+}
 
 export function slotHTML(name: string, mode: { dev: boolean; placeholders: boolean }, base = "/"): string {
   const raw = readFileSync(LANDING + name + ".md", "utf8");
@@ -208,6 +228,8 @@ export function contentPlugin(): Plugin {
       if (placeholders && c.mode !== "development") throw new Error("SITE_PLACEHOLDERS=1 is for development builds only (--mode development)");
     },
     buildStart() {
+      const report = headlineReport(readFileSync(LANDING + "headline.md", "utf8"));
+      if (report) config.logger.warn(`\n${report}\n`);
       if (dev) return;
       const hidden = loadSections().filter((s) => s.todo).map((s) => s.id);
       config.logger.info(hidden.length

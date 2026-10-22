@@ -9,13 +9,22 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
 - **`/`** is the landing page:
   - the hero, Hibberd et al.'s dive flown by the three engines in one view, with each burn in its
     lane on the a·v ramp, the energy-gain strip, and a scrub control;
-  - the title, the author's headline and summary, and the entry links;
+  - the title, the author's headline, the entry links, then the author's summary (in that order, so a
+    written headline keeps the links above the fold);
   - three findings, each a small live figure with the author's caption and one link;
   - reproducibility and scope;
-  - the footer, with the citation from `CITATION.cff` and the licences.
+  - the footer, with the citation from `CITATION.cff` (with a Copy button where the clipboard API
+    exists, that is, on https and localhost) and the licences.
 
-  With every prose slot empty, the hero's figure title, the page title and the entry links fit
-  above the fold at 1440 × 900 and at 390 × 844. `e2e/prod.spec.ts` checks this.
+  **The fold:** at 1440 × 900 and 390 × 844, the hero's figure title, the page title, the headline
+  and the entry links fit above the fold. `e2e/fold.spec.ts` checks this in two states:
+  - with every slot empty (the production build);
+  - with an ≈80-character headline and a two-sentence summary (the placeholder build).
+
+  **The headline budget:** `HEADLINE_BUDGET` in `plugins/content-plugin.ts`, 100 characters.
+  - `e2e/headline-budget.spec.ts` measures the longest headline that still fits (114 characters at
+    390 × 844, 365 at 1440 × 900) and fails if the budget exceeds it.
+  - The build prints a warning when the written headline is over the budget.
 - **`/research/`** is the long-form explanation (moved from `/`). It has:
   - the live hero flyby;
   - Figures 2–7: the universal curve, three regimes, the atlas, burn timing, the case study,
@@ -113,22 +122,30 @@ npm test                                 # vitest (unit tests in src/**/*.test.t
 npm run typecheck
 SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
 BASE_PATH=/oberth-efficiency-atlas/ npx vite build --outDir dist-prod --emptyOutDir
-SITE_DIST=dist-test SITE_DIST_PROD=dist-prod npx playwright test  # every e2e spec (no server needed)
+SITE_DIST=dist-test SITE_DIST_PROD=dist-prod SITE_DIST_PH=dist-ph npx playwright test  # every e2e spec (no server needed)
 npm run build                            # the production build (TODO sections hidden) -> site/dist
 npm run og-image                         # the preview image (the landing hero), from a dist-test build
 bash tools/landing-builds.sh             # dist-test, dist-prod, dist-empty (production, base /), dist-ph (placeholders)
 npm run lighthouse                       # Lighthouse: see below
 ```
-- **Two Playwright projects:**
-  - `site`: every spec but one, against the test build;
-  - `production`: `e2e/prod.spec.ts`, against the production build served under the base path, as
-    on GitHub Pages. It checks:
+- **Three Playwright projects:**
+  - `site`: every other spec, against the test build.
+  - `production`: `e2e/prod.spec.ts` and `e2e/fold.spec.ts`, against the production build served
+    under the base path, as on GitHub Pages. It checks:
     - that the Research link and `/research/` exist exactly when a section is published;
     - that every on-site link of the landing page resolves;
-    - that there are no console errors.
+    - that there are no console errors;
+    - the fold with the slots empty.
+  - `placeholders`: `e2e/fold.spec.ts` and `e2e/headline-budget.spec.ts`, against the
+    `SITE_PLACEHOLDERS=1` build. It checks the fold with a written headline, and the headline
+    budget.
 
-    It runs only when `SITE_DIST_PROD` is set; CI sets it. In Git Bash, prefix the `BASE_PATH`
-    build with `MSYS_NO_PATHCONV=1`.
+  The last two run only when `SITE_DIST_PROD` and `SITE_DIST_PH` are set; CI sets both. In Git
+  Bash, prefix the `BASE_PATH` build with `MSYS_NO_PATHCONV=1`.
+- **Explorer fallbacks:** `e2e/landing.spec.ts` opens every finding's fallback explorer state, read
+  from `index.html`, and requires no warning.
+- **The Copy button:** tested on `http://localhost`, a secure context that the route handler
+  serves, with clipboard permissions.
 - **Screenshots:** the screenshot specs write to `runs/screens/`. Checkpoint screenshots are kept
   in `docs/screens/` (`docs/screens/README.md`).
 - **Without `SITE_DIST`,** Playwright starts the dev server itself.

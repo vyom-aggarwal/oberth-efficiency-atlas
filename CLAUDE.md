@@ -201,7 +201,15 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
   - Article e2e specs go to `research/`.
   - `bash tools/landing-builds.sh` makes the four builds: test, production under the base path,
     empty and placeholders.
-  - `SITE_DIST_PROD=dist-prod` adds the Playwright project `production` (`e2e/prod.spec.ts`).
+  - Playwright projects:
+    - `SITE_DIST_PROD=dist-prod` adds `production` (`e2e/prod.spec.ts`, `e2e/fold.spec.ts`);
+    - `SITE_DIST_PH=dist-ph` adds `placeholders` (`e2e/fold.spec.ts`,
+      `e2e/headline-budget.spec.ts`).
+
+    Run all three: `SITE_DIST=dist-test SITE_DIST_PROD=dist-prod SITE_DIST_PH=dist-ph npx playwright test`.
+  - **Landing fold** (author, 2026-10-21): the title, headline and entry links stay above the fold
+    at 1440 × 900 and 390 × 844. The headline budget is `HEADLINE_BUDGET` (100 characters,
+    measured), and the build warns when a headline exceeds it.
 - **Hero frame time:**
   - Enforced locally: p95 under 16 ms; `HERO_P95_MS` overrides.
   - Report-only in CI: the workflow sets `HERO_FRAME_TIME=report`, and the numbers go to the job

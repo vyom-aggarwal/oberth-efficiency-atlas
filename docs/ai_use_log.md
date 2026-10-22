@@ -531,3 +531,19 @@ added to the numbers file as values.
 - **A CSS specificity slip** showed one legend item twice at narrow widths; now tested.
 - **Two blocked pipes:** test commands piped into `tail` or `grep` without pipefail were blocked by
   the hook and rerun with pipefail.
+- **Phase 7 review, author decided** (2026-10-21):
+  - Approved the phase, the citation interpretation and the data licence.
+  - Asked for:
+    - the fold to hold with prose written (reorder, a placeholder-build test, a headline budget);
+    - a valid explorer fallback for the missions finding, with a test;
+    - a Copy-button test on a secure origin.
+- **Phase 7 review, assistant implemented:**
+  - The reorder and a measured compaction of the narrow hero.
+  - The fold tests on two builds, and the headline-budget probe and build warning.
+  - The `jupiter.hall` fallback, a test of every fallback with a control case, and the localhost
+    clipboard test.
+- **Phase 7 review, assistant found:**
+  - **A race in its own fold test:** it could measure before the hero's first draw. The tests now
+    wait for the drawn hero.
+  - **An over-claim it did not make:** the empty-slot fold check passing said nothing about the
+    written state. The author caught that, not the assistant.

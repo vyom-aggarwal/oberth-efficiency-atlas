@@ -13,6 +13,9 @@ const DIST = process.env.SITE_DIST;
 // on GitHub Pages) and without unfinished content; e2e/prod.spec.ts runs against it, the other specs against SITE_DIST.
 const PROD = process.env.SITE_DIST_PROD;
 const PROD_BASE = process.env.SITE_BASE ?? "/oberth-efficiency-atlas/";
+// The placeholder build (author, 2026-10-21): SITE_DIST_PH=<dir>, built with SITE_PLACEHOLDERS=1; e2e/fold.spec.ts runs
+// against it as well as against the production build, so the fold holds with the prose written.
+const PH = process.env.SITE_DIST_PH;
 export default defineConfig<SiteOptions>({
   testDir: "e2e",
   timeout: 60_000,
@@ -21,9 +24,10 @@ export default defineConfig<SiteOptions>({
   reporter: [["list"]],
   use: { baseURL: DIST ? "http://site.test/" : `http://localhost:${PORT}/`, channel: "chrome", browserName: "chromium" },
   projects: [
-    { name: "site", testIgnore: /prod\.spec\.ts$/ },
-    ...(PROD ? [{ name: "production", testMatch: /prod\.spec\.ts$/,
+    { name: "site", testIgnore: /(prod|fold|headline-budget)\.spec\.ts$/ },
+    ...(PROD ? [{ name: "production", testMatch: /(prod|fold)\.spec\.ts$/,
                   use: { siteDist: PROD, siteBase: PROD_BASE, baseURL: `http://site.test${PROD_BASE}` } }] : []),
+    ...(PH ? [{ name: "placeholders", testMatch: /(fold|headline-budget)\.spec\.ts$/, use: { siteDist: PH, baseURL: "http://site.test/" } }] : []),
   ],
   webServer: DIST ? undefined : {
     command: process.env.SITE_SERVER ?? "npm run dev",

@@ -121,6 +121,30 @@ test("the findings: titles, live figures with readouts, and one link each", asyn
   await expect(page.locator("#finding-hibberd .finding-legend")).toContainText("Reference stack of Hibberd et al.");
 });
 
+// Every finding's explorer fallback (the link while its article section is unpublished) opens on a valid case: the
+// preset is recognised and the explorer shows no warning (impact, capture, or a burn starting outside the sphere of
+// influence). Read from the page source, so the check holds whichever link a build renders (author, 2026-10-21).
+const FALLBACKS = [...readFileSync(new URL("../index.html", import.meta.url), "utf8").matchAll(/<!--#finding-link:([\w-]+)\|([^>]*?)-->/g)]
+  .map((m) => ({ section: m[1], query: m[2] }));
+
+test("there is one explorer fallback per finding", () => {
+  expect(FALLBACKS.map((f) => f.section)).toEqual(["universal-curve", "atlas", "case-study"]);
+});
+
+for (const { section, query } of FALLBACKS) {
+  test(`the explorer fallback for ${section} (?${query}) loads with no warning`, async ({ page }) => {
+    await page.goto(`explorer/?${query}`);
+    await expect(page.locator("[aria-label^='Trajectory of the flyby']")).toBeAttached();
+    await expect(page.locator("#ex-preset")).toHaveValue(new URLSearchParams(query).get("preset")!);
+    await expect(page.locator(".warning")).toHaveCount(0);
+  });
+}
+
+test("the check catches a bad fallback: earth.hall starts its burn outside Earth's sphere of influence", async ({ page }) => {
+  await page.goto("explorer/?preset=earth.hall");
+  await expect(page.locator(".warning-soi")).toBeVisible();
+});
+
 test("reproducibility and scope: labelled pairs from methods.json", async ({ page }) => {
   await open(page, 1440);
   const m = data("methods.json");
@@ -129,6 +153,25 @@ test("reproducibility and scope: labelled pairs from methods.json", async ({ pag
   await expect(repro.locator("dl.facts")).toContainText(`${m.audit.identical.value} of ${m.audit.outputs.value} outputs reproduced identically`);
   await expect(repro.locator("dl.facts")).toContainText(`${m.tests_collected} in the suite`);
   await expect(repro.locator("dl.facts")).toContainText(m.scope.engines.map((e: { value: string }) => e.value).join(", "));
+});
+
+// The Copy button needs the clipboard API, which browsers give only to secure contexts: localhost is one (author,
+// 2026-10-21). The build is served there by the route handler, with clipboard permissions granted.
+test.describe("on a secure origin", () => {
+  test.use({ siteOrigin: "http://localhost:4317", baseURL: "http://localhost:4317/", permissions: ["clipboard-read", "clipboard-write"] });
+
+  test("the Copy button appears and copies the citation text", async ({ page }) => {
+    await page.goto("");
+    expect(await page.evaluate(() => window.isSecureContext)).toBe(true);
+    const button = page.locator(".copy-button");
+    await expect(button).toBeVisible();
+    const citation = (await page.locator(".citation-text").textContent())!.trim();
+    expect(citation.length).toBeGreaterThan(20);
+    await button.click();
+    await expect(button).toHaveText("Copied");
+    await expect(page.locator(".site-footer [aria-live]")).toHaveText("Citation copied");
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(citation);
+  });
 });
 
 test("the footer cites the project from CITATION.cff, with the licences", async ({ page }) => {

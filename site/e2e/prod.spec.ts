@@ -35,27 +35,7 @@ test("every link on the landing page that stays on the site resolves under the b
   }
 });
 
-// Above the fold with every prose slot empty (author, 2026-10-21): the hero's figure title, the page title and the
-// entry links are on screen at load, without scrolling.
-for (const [width, height] of [[1440, 900], [390, 844]]) {
-  test(`above the fold at ${width}×${height}: the hero's title, the page title and the entry links`, async ({ page }) => {
-    await page.setViewportSize({ width, height });
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("");
-    await expect(page.locator(".lh-dive")).toBeVisible();
-    await page.evaluate(() => document.fonts.ready);
-    await expect(page.locator("[data-slot]")).toHaveCount(0);                            // the slots are empty here
-    let lowest = 0;
-    for (const sel of ["#hero-figure-title", "#landing-title", ".entry-links a"]) {
-      for (const box of await page.locator(sel).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()))) {
-        expect(box.bottom, `${sel} bottom at ${width}×${height}`).toBeLessThanOrEqual(height);
-        expect(box.top, sel).toBeGreaterThanOrEqual(0);
-        lowest = Math.max(lowest, box.bottom);
-      }
-    }
-    console.log(`above the fold at ${width}×${height}: the lowest of them ends at ${Math.round(lowest)} px`);
-  });
-}
+// Above the fold: e2e/fold.spec.ts, which runs on this build (slots empty) and on the placeholder build.
 
 for (const path of ["", "references/", "explorer/", "404.html"]) {
   test(`no console errors: ${path || "landing"}`, async ({ page }) => {

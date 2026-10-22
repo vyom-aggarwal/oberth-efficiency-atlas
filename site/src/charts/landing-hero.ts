@@ -65,7 +65,10 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   summary.textContent = `Hibberd et al.'s solar dive flown with three engines of the same Δv, drawn in one view. ` + cases.map((e) =>
     `${e.label.name}: burn ${duration(e.c.burn_s.value)}, Π = ${sig(e.c.Pi.value)}, ${lossRel(e.c.loss_rel.value)} of Δv lost, ` +
     `energy gain ${sig(e.frac[e.frac.length - 1], 3)} of the impulsive gain`).join("; ") + ".";
-  const side = h("div", { class: "lh-side" }, controls, stripTitle, stripWrap, key, keyCompact, legend, note ?? "", summary, table());
+  // The caveat and the data table share a row (the table takes the full width when opened): the hero stays short
+  // enough for the title, headline and entry links to fit above the fold on a phone (author, 2026-10-21).
+  const foot = h("div", { class: "lh-foot" }, note ?? "", table());
+  const side = h("div", { class: "lh-side" }, controls, stripTitle, stripWrap, key, keyCompact, legend, foot, summary);
   body.append(view, side);
 
   // ---------------------------------------------------------------- time and the sequence
@@ -116,7 +119,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     clock.textContent = clockText(dv, s_);
     scrub.setAttribute("aria-valuetext", clock.textContent);
     drawView(k);
-    drawEnergyStrip(strip, dv, k, SW, SW < 480 ? 88 : 124, "hero-clip");
+    drawEnergyStrip(strip, dv, k, SW, SW < 480 ? 80 : 124, "hero-clip");
     root.dataset.cursor = strip.dataset.cursor ?? "";
   }
 
@@ -126,7 +129,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     // Room around the paths: the lanes and their labels (the solid stack's label on the left, the SEP label above).
     const pad = { left: narrow ? 58 : 70, right: 8, top: narrow ? 26 : 34, bottom: narrow ? 12 : 18 };
     // The hero's height cap (above the fold: author, 2026-10-21); data-height-cap overrides it for tools/og-image.mjs.
-    const cap = Number(root.dataset.heightCap) || (narrow ? 214 : 360);
+    const cap = Number(root.dataset.heightCap) || (narrow ? 196 : 360);
     const sc = Math.min((W - pad.left - pad.right) / (xMax - xMin), (cap - pad.top - pad.bottom) / (yMax - yMin));
     const H = Math.round((yMax - yMin) * sc + pad.top + pad.bottom);
     // The Sun's centre; the drawing is centred across the view when the view is wider than it needs.

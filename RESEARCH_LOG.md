@@ -3056,4 +3056,45 @@ To fit 390 × 844:
    route handler), with clipboard permissions granted. It checks that the button appears and copies
    the citation text.
 
+**Done, measured:**
+- **The reorder** is in place. The placeholder headline is 83 characters and the summary two
+  sentences.
+- **First measurement at 390 × 844,** with that headline: the entry links ended at 895 px, 51 px
+  below the fold. The headline took three lines and the links two rows. To free about 70 px below
+  600 px wide, without dropping anything:
+  - the caveat and "Show data" share a row (the table takes the full width when opened);
+  - the hero's view cap went from 214 to 196 px, and the strip from 88 to 80 px;
+  - the entry-link rows went from 32 to 28 px;
+  - the intro and the hero title margins were tightened.
+- **The fold now** (`e2e/fold.spec.ts`; the lowest of the hero's figure title, the page title, the
+  headline and the entry links):
+
+  | state | 1440 × 900 | 390 × 844 |
+  |---|---|---|
+  | slots empty (production) | 623 px | 740 px |
+  | placeholders | 691 px | 826 px |
+
+- **A test race, found while measuring:** before its first draw, the hero's canvas has the default
+  300 × 150 size. A fold check could then measure a page shorter than it is. The fold tests now wait
+  for the drawn hero (`data-k`).
+- **The headline budget** (`e2e/headline-budget.spec.ts`, placeholder build): the headline grows a
+  word at a time until it or an entry link leaves the screen. The longest headline that fits is:
+  - **114 characters at 390 × 844** (three lines; the binding size);
+  - **365 characters at 1440 × 900**.
+
+  `HEADLINE_BUDGET` is 100, about one long word in hand, since where a headline wraps depends on its
+  words. The test fails if the budget exceeds the measured maximum.
+- **The build's report:** a trial 130-character headline (restored straight after) made the build
+  print a warning.
+- **Fallbacks:**
+  - `jupiter.hall` loads with no warning, and so do both `hibberd` fallbacks.
+  - The test reads the fallbacks from `index.html` and requires no warning of any kind: impact,
+    capture or SOI.
+  - A control case, `earth.hall`, still shows the SOI warning, so the check can fail.
+- **The Copy button,** on `http://localhost` with clipboard permissions: it appears, reads "Copied",
+  announces "Citation copied", and the clipboard holds the citation text.
+- **Test layout:** the budget test has its own spec, matched only by the placeholders project, so
+  no test is skipped. CI builds the placeholder site and runs all three projects; `test_workflow.py`
+  checks this.
+
 

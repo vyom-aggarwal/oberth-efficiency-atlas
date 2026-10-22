@@ -38,6 +38,15 @@ def test_tests_build_and_lighthouse_run_on_every_push():
     assert any("npm run lighthouse" in str(s.get("run", "")) for s in jobs["lighthouse"]["steps"])
 
 
+def test_playwright_runs_against_the_test_production_and_placeholder_builds():
+    # Phase 7 (author, 2026-10-21): the production build checks links under the base path and the fold with the slots
+    # empty; the placeholder build checks the fold with a written headline and the headline budget.
+    (step,) = [s for s in load()["jobs"]["check"]["steps"] if "playwright test" in str(s.get("run", ""))]
+    run = step["run"]
+    assert "--outDir dist-prod" in run and "--outDir dist-ph" in run and "SITE_PLACEHOLDERS=1" in run
+    assert "SITE_DIST=dist-test SITE_DIST_PROD=dist-prod SITE_DIST_PH=dist-ph npx playwright test" in run
+
+
 def test_hero_frame_time_is_report_only_in_ci():
     # Author, 2026-10-20: the 16 ms p95 target holds on the development laptop, not on shared runners.
     (step,) = [s for s in load()["jobs"]["check"]["steps"] if "playwright test" in str(s.get("run", ""))]

@@ -24,7 +24,7 @@
       <section class="landing-intro" aria-labelledby="landing-title">
         <h1 id="landing-title" class="landing-title">Oberth Efficiency Atlas</h1>
         <!--#slot:headline-->
-        <!--#slot:summary-->
+        <!-- The entry links come before the summary, so a written headline keeps them above the fold (author, 2026-10-21). -->
         <nav class="entry-links" aria-label="Start here">
           <ul>
             <li><!--#research-link: data-entry="research"|Read the research--></li>
@@ -32,6 +32,7 @@
             <li><a href="{{repo}}" rel="noopener" data-entry="source">View the source on GitHub</a></li>
           </ul>
         </nav>
+        <!--#slot:summary-->
       </section>
 
       <section class="landing-findings" aria-labelledby="findings-title">
@@ -50,7 +51,7 @@
             <div class="finding-body"></div>
             <figcaption class="finding-caption">
               <!--#slot:finding-missions-->
-              <!--#finding-link:atlas|preset=earth.hall-->
+              <!--#finding-link:atlas|preset=jupiter.hall-->
             </figcaption>
           </figure>
           <figure class="finding" id="finding-hibberd" data-finding="hibberd" aria-labelledby="finding-hibberd-title">

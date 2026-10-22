@@ -14,16 +14,19 @@ const TYPES: Record<string, string> = {
   ".png": "image/png",
 };
 
-export interface SiteOptions { siteDist: string | undefined; siteBase: string }
+// siteOrigin is where the build is served: http://site.test by default; a test that needs a secure context (the
+// clipboard API) serves it at http://localhost instead, still answered by the route handler, with no server.
+export interface SiteOptions { siteDist: string | undefined; siteBase: string; siteOrigin: string }
 
 export const test = base.extend<SiteOptions>({
   siteDist: [process.env.SITE_DIST, { option: true }],
   siteBase: ["/", { option: true }],
-  page: async ({ page, siteDist, siteBase }, use) => {
+  siteOrigin: ["http://site.test", { option: true }],
+  page: async ({ page, siteDist, siteBase, siteOrigin }, use) => {
     if (siteDist) {
       const dist = resolve(siteDist);
       const notFound = () => ({ status: 404, contentType: TYPES[".html"], body: readFileSync(join(dist, "404.html")) });
-      await page.route("http://site.test/**", async (route) => {
+      await page.route(`${siteOrigin}/**`, async (route) => {
         const full = decodeURIComponent(new URL(route.request().url()).pathname);
         if (!full.startsWith(siteBase)) return route.fulfill(notFound());
         const path = "/" + full.slice(siteBase.length);
