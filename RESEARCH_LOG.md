@@ -2994,4 +2994,43 @@ below 768 px).
   - the Northrop Grumman motor specifications and Hibberd et al.'s inputs in the Phase 4 config;
   - the quoted literature values.
 
+## 2026-10-21: Phase 7: the landing page, results (for the author's review)
+
+**Built:**
+- **The hero:** `charts/landing-hero.ts`, on Figure 7's data and code. That code now lives in
+  `charts/dive-view.ts`; Figure 7 is pixel-identical before and after, checked on two captures.
+- **The findings:** `charts/findings.ts`, which reuses the atlas's cell classification and textures.
+- **The prose slots** (`content/landing/`), the finding links, the footer citation and licences, and
+  the Open Graph image (`tools/og-image.mjs`).
+
+**Measured above the fold**, production build, every slot empty: the lowest of the hero's figure
+title, the page title and the entry links ends at:
+- **650 px** of 900 at 1440 × 900;
+- **809 px** of 844 at 390 × 844.
+
+To fit 390 × 844:
+- the hero's height cap is 214 px below 560 px wide (360 px above);
+- below 600 px the side column is compact: one line of line styles and short names, the clock
+  beside the scrub control, and shorter legend lines;
+- every engine fact remains in the hero's data table and its accessible summary.
+
+**Hero details:**
+- **The burn lanes:** 5 px apart, 4 px below 560 px wide.
+- **The SEP label** hangs from the lane at t = −80 τ. At −10 τ it was cut off at the top of the view
+  at 390 px.
+- **A clipping check:** the hero records `data-labels-clipped`, and `landing.spec.ts` requires 0 at
+  360, 390, 768 and 1440 px.
+- **The mission samples** in the atlas thumbnail: thousands of 1.5 px dots hid the cells beneath. They
+  are now 0.9 px filled and 1.3 px open, at 55 % opacity.
+
+**Found and fixed before commit:**
+- a temporal-dead-zone error in the hero (the drawing ran before its widths were declared), caught
+  by the console-error check;
+- the narrow legend showed "impulsive" twice (a CSS specificity slip), now tested.
+
+**Tests:**
+- Playwright: 138 passed, across the `site` and `production` projects.
+- vitest: 23 passed.
+- The site-data tests passed (45).
+
 

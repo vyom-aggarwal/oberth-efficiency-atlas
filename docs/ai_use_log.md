@@ -490,3 +490,44 @@ added to the numbers file as values.
   - **Website:** the site, the explorer, CI with SHA-pinned actions, and deployment by hand.
   - **Audit:** the final code reproduced 69 of 69 outputs.
   - **Final checks before the push:** listed in the phase-end commit.
+- **After Phase 6, first CI runs and deploy** (2026-10-21):
+  - The assistant found and fixed two CI-only failures, both its own:
+    - exact cross-platform comparisons in the site-data tests, now within a measured tolerance;
+    - a Lighthouse runner that blocked its own preview server.
+  - It pushed the fixes with the author's OK and deployed by hand.
+
+## Phase 7: landing page and references page (2026-10-21, in review)
+
+**Author decided:**
+- The brief: a landing page at `/`, the article moved to `/research/`, the references on their own
+  page.
+- Prose slots that stay hidden until written.
+- The plan's approval, with two changes:
+  - the title and entry links above the fold;
+  - three findings, with "energy kept" folded into the hero.
+- Answers A–G: no empty `/research/`; only the `#ref-n` redirect; replay once per session; the
+  name "Vyom Aggarwal" in `CITATION.cff`; MIT for code and CC BY 4.0 for text and figures, with
+  third-party material listed.
+
+**Assistant proposed and implemented:**
+- The plan (`docs/landing_plan.md`), with wireframes and a pass-2 check against the generic
+  defaults.
+- The route move:
+  - conditional Research links;
+  - the references page with stable anchors and cross-page citations;
+  - a production-build Playwright project under the base path.
+- The shared dive view, the landing hero and its sequence, the three findings, the prose slots with
+  the placeholder mode, the footer citation and licences, and the Open Graph image.
+- Tests at four widths, plus above-the-fold checks.
+
+**Assistant interpretations, for the author to confirm:**
+- `CITATION.cff` takes its version and date from the analysis tag.
+- CC BY 4.0 also covers the generated data.
+
+**Assistant errors, disclosed:**
+- **Another temporal-dead-zone error,** caught by the console-error check before commit.
+- **The SEP lane label clipped at 390 px.** Found in a screenshot; now tested by the hero's own
+  clipping count.
+- **A CSS specificity slip** showed one legend item twice at narrow widths; now tested.
+- **Two blocked pipes:** test commands piped into `tail` or `grep` without pipefail were blocked by
+  the hook and rerun with pipefail.

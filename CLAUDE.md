@@ -190,6 +190,14 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
   dev server does.
 - Without `SITE_DIST`, Playwright starts the dev server itself. Screenshots go to `runs/screens/`;
   hero frame times go to `runs/hero_frame_times.json`.
+- **Phase 7 routes** (`docs/landing_plan.md`):
+  - `/` is the landing page and `/references/` the reference list.
+  - The article is at `/research/`. It is built only once a section is published, or with
+    `SITE_SHOW_TODO=1`.
+  - Article e2e specs go to `research/`.
+  - `bash tools/landing-builds.sh` makes the four builds: test, production under the base path,
+    empty and placeholders.
+  - `SITE_DIST_PROD=dist-prod` adds the Playwright project `production` (`e2e/prod.spec.ts`).
 - **Hero frame time:**
   - Enforced locally: p95 under 16 ms; `HERO_P95_MS` overrides.
   - Report-only in CI: the workflow sets `HERO_FRAME_TIME=report`, and the numbers go to the job

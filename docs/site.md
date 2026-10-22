@@ -6,7 +6,16 @@ it are in `docs/site_plan.md` and `RESEARCH_LOG.md` (Phase 6).
 
 ## Pages
 Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references page:
-- **`/`** is the landing page.
+- **`/`** is the landing page:
+  - the hero, Hibberd et al.'s dive flown by the three engines in one view, with each burn in its
+    lane on the a·v ramp, the energy-gain strip, and a scrub control;
+  - the title, the author's headline and summary, and the entry links;
+  - three findings, each a small live figure with the author's caption and one link;
+  - reproducibility and scope;
+  - the footer, with the citation from `CITATION.cff` and the licences.
+
+  With every prose slot empty, the hero's figure title, the page title and the entry links fit
+  above the fold at 1440 × 900 and at 390 × 844. `e2e/prod.spec.ts` checks this.
 - **`/research/`** is the long-form explanation (moved from `/`). It has:
   - the live hero flyby;
   - Figures 2–7: the universal curve, three regimes, the atlas, burn timing, the case study,
@@ -47,7 +56,7 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
 
 | path | what |
 |---|---|
-| `content/` | the author's prose, one Markdown file per home section (`content/README.md`) |
+| `content/` | the author's prose: one Markdown file per article section, and the landing page's slots in `content/landing/` (`content/README.md`) |
 | `partials/` | header and footer |
 | `src/charts/` | one module per figure, plus `common.ts` (axes, labels, tooltips, tables) |
 | `src/explorer/` | the explorer: state (URL), presets, view, placement |
@@ -78,10 +87,21 @@ results, numbers JSONs and configs.
   Commit code first, then export, so the stamp is clean.
 
 ## Writing the prose
-- Edit `site/content/<section>.md`.
-- A section is hidden from the production build while its file contains the word `TODO`: its
-  navigation entry and its figure go with it. `npm run build` prints the hidden sections.
-- The dev server and test builds (`SITE_SHOW_TODO=1`) show every section, with a TODO banner.
+- **The article:** edit `site/content/<section>.md`.
+  - A section is hidden from the production build while its file contains the word `TODO`: its
+    navigation entry and its figure go with it. `npm run build` prints the hidden sections.
+  - While every section is TODO, `/research/` is not built at all, and no Research link appears.
+  - Once a section is published, its landing-page finding links to it instead of the explorer.
+- **The landing page:** edit `site/content/landing/`:
+  - `headline.md` and `summary.md`, under the title;
+  - `finding-loss.md`, `finding-missions.md` and `finding-hibberd.md`, the captions of the three
+    findings.
+
+  A slot is left out of the production build while its file contains `TODO`; the page closes up.
+- The dev server and test builds (`SITE_SHOW_TODO=1`) show every section and slot, with its TODO
+  notes.
+- **`SITE_PLACEHOLDERS=1`** (development builds only) fills the unwritten landing slots with
+  bracketed placeholder text of their target length, to review the finished layout.
 - Numbers in the prose must match a numbers JSON (`scripts/check_numbers.py`). The pre-commit hook
   runs that check for content commits.
 
@@ -95,7 +115,8 @@ SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOut
 BASE_PATH=/oberth-efficiency-atlas/ npx vite build --outDir dist-prod --emptyOutDir
 SITE_DIST=dist-test SITE_DIST_PROD=dist-prod npx playwright test  # every e2e spec (no server needed)
 npm run build                            # the production build (TODO sections hidden) -> site/dist
-npm run og-image                         # the preview image, from a dist-test build
+npm run og-image                         # the preview image (the landing hero), from a dist-test build
+bash tools/landing-builds.sh             # dist-test, dist-prod, dist-empty (production, base /), dist-ph (placeholders)
 npm run lighthouse                       # Lighthouse: see below
 ```
 - **Two Playwright projects:**
