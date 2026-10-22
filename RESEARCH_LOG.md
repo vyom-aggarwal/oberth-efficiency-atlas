@@ -3033,4 +3033,27 @@ To fit 390 × 844:
 - vitest: 23 passed.
 - The site-data tests passed (45).
 
+## 2026-10-21: Phase 7 approved; author's confirmations and three fixes (logged before the changes)
+
+**Confirmed:**
+- `CITATION.cff` takes its version and date from `v1.0-analysis`. Both must be updated with every
+  new release tag (now in CLAUDE.md).
+- CC BY 4.0 covers the generated data.
+
+**Fixes:**
+1. **The fold with prose written.** The fold check passed only with the slots empty, with 35 px to
+   spare at 390 × 844. A headline would push the entry links below the fold.
+   - The landing block is reordered: title, headline, entry links, summary.
+   - A fold test runs on the placeholder build, with a headline of about 80 characters and a
+     two-sentence summary, at 1440 × 900 and 390 × 844. The title, the hero's figure title, the
+     headline and the entry links must all be above the fold.
+   - A headline length budget, derived from that test, is reported by the build when exceeded.
+2. **The explorer fallback for "Where real missions sit"** was `earth.hall`, whose burn starts outside
+   Earth's sphere of influence, so the link opened on a warning.
+   - It becomes `jupiter.hall`.
+   - A test loads every finding's fallback preset and requires no impact or SOI warning.
+3. **The Copy button:** a Playwright test on a secure origin (localhost, served by the test's own
+   route handler), with clipboard permissions granted. It checks that the button appears and copies
+   the citation text.
+
 

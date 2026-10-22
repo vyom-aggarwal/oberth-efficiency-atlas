@@ -171,6 +171,10 @@ unknown keys are rejected.
 - **Feature freeze:** only Robbins (1966) follow-ups when the paper arrives.
 - **Exact environment:** `requirements-lock.txt` pins the audited package versions. See
   `docs/repro.md`.
+- **Release tags and the citation** (author, 2026-10-21): `CITATION.cff` takes `version` and
+  `date-released` from the latest release tag (now `v1.0-analysis`, 2026-10-06).
+  - Update both with every new release tag.
+  - Then re-export the site data, since the footer's citation comes from it.
 - **Audit (v1.0-analysis):** a fresh-clone rebuild reproduces all 56 committed outputs. After any
   code change, regenerate every output that depends on it, then rerun `repro_audit.py`. The
   audit found outputs that had gone stale after code changes.
