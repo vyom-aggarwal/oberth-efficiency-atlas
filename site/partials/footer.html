@@ -1,5 +1,8 @@
 <footer class="site-footer">
   <dl class="footer-facts">
+    <div><dt>Author</dt><dd>{{author}}</dd></div>
+    <div><dt>Cite this project</dt><dd><span class="citation-text" id="citation-text">{{citation}}</span> <button class="button copy-button" type="button" data-copy="#citation-text" hidden>Copy</button></dd></div>
+    <div><dt>Licence</dt><dd>MIT for the code (<a href="{{licence_code}}" rel="noopener">LICENSE</a>); CC BY 4.0 for the text, figures and data (<a href="{{licence_content}}" rel="noopener">LICENSE-content.md</a>), which also lists the third-party material that keeps its own terms</dd></div>
     <div><dt>Source code</dt><dd><a href="{{repo}}" rel="noopener">GitHub repository</a></dd></div>
     <div><dt>Analysis</dt><dd><a href="{{tag_url}}" rel="noopener">{{tag}}</a> (commit {{tag_commit}})</dd></div>
     <div><dt>Site data</dt><dd>exported by scripts/export_site_data.py at commit {{data_git}}</dd></div>

@@ -72,6 +72,36 @@ export function loadSections(base = "/"): Section[] {
   });
 }
 
+// ---------------------------------------------------------------- landing-page slots (Phase 7)
+// The author's prose on the landing page: content/landing/<name>.md, each a TODO note until written. A written slot
+// is rendered; an unwritten one is left out of production (the page closes up), shown as its TODO notes in dev, and
+// filled with bracketed placeholder text of its target length with SITE_PLACEHOLDERS=1 (development builds only, for
+// review screenshots of the finished state).
+const LANDING = dir("../content/landing/");
+const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+export const PLACEHOLDERS: Record<string, string> = {
+  headline: "[Placeholder headline, about twelve words] Lorem ipsum dolor sit amet, consectetur adipiscing.",
+  summary: `[Placeholder summary, about fifty words] ${LOREM} Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.`,
+  "finding-loss": `[Placeholder caption, one or two sentences] ${LOREM}`,
+  "finding-missions": `[Placeholder caption, one or two sentences] ${LOREM}`,
+  "finding-hibberd": `[Placeholder caption, one or two sentences] ${LOREM}`,
+};
+
+export function slotHTML(name: string, mode: { dev: boolean; placeholders: boolean }, base = "/"): string {
+  const raw = readFileSync(LANDING + name + ".md", "utf8");
+  const todo = TODO.test(raw);
+  const open = (cls: string, extra = "") => `<div class="slot slot-${name}${cls}" data-slot="${name}"${extra}>`;
+  if (!todo) return `${open("")}${renderMarkdown(frontMatter(raw).body, base)}</div>`;
+  if (mode.placeholders) return `${open(" slot-placeholder")}${md.render(PLACEHOLDERS[name] ?? "[Placeholder]")}</div>`;
+  if (mode.dev) return `${open(" slot-todo todo-notes", " data-todo")}${renderMarkdown(raw, base)}</div>`;
+  return "";
+}
+
+/** Is the article section `id` shown in this build (and so a valid link target)? */
+export function sectionShown(id: string, command: string): boolean {
+  return showTodo(command) || loadSections().some((s) => s.id === id && !s.todo);
+}
+
 /** The dev server and SITE_SHOW_TODO=1 builds show unfinished content, with its TODO notes. */
 export function showTodo(command: string): boolean {
   return command === "serve" || process.env.SITE_SHOW_TODO === "1";
@@ -115,13 +145,26 @@ function readData(name: string): any {
   return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null;
 }
 
+/** The project citation for the footer, from site.json's copy of CITATION.cff: "Aggarwal, V. (2026). Title (version)
+ * [Software]. URL". */
+export function citationText(c: { title: string; authors: { given: string; family: string }[]; version?: string | null;
+                                  date_released?: string | null; repository: string } | undefined): string {
+  if (!c) return "";
+  const names = c.authors.map((a) => `${a.family}, ${a.given.split(/\s+/).map((g) => `${g[0]}.`).join(" ")}`).join(", ");
+  const year = c.date_released ? ` (${c.date_released.slice(0, 4)})` : "";
+  return `${names}${year}. ${c.title}${c.version ? ` (${c.version})` : ""} [Software]. ${c.repository}`;
+}
+
 function partial(name: string, base: string): string {
   const site = readData("site.json");
   const methods = readData("methods.json");
+  const blob = (f: string) => (site ? `${site.repo.url}/blob/main/${f}` : "#");
   const fill: Record<string, string> = {
     base, repo: site?.repo.url ?? "#", tag: methods?.tag ?? "", tag_commit: methods?.tag_commit ?? "",
     data_git: site?.provenance.git ?? "", tag_url: site ? `${site.repo.url}/tree/${site.repo.tag}` : "#",
-    ai_log: site ? `${site.repo.url}/blob/main/docs/ai_use_log.md` : "#",
+    ai_log: blob("docs/ai_use_log.md"),
+    author: site?.citation?.authors.map((a: { given: string; family: string }) => `${a.given} ${a.family}`).join(", ") ?? "",
+    citation: citationText(site?.citation), licence_code: blob("LICENSE"), licence_content: blob("LICENSE-content.md"),
   };
   return readFileSync(PARTIALS + name, "utf8").replace(/\{\{(\w+)\}\}/g, (_m, k: string) => esc(fill[k] ?? ""));
 }
@@ -153,7 +196,7 @@ function socialMeta(html: string, path: string, base: string): string {
 
 export function contentPlugin(): Plugin {
   let config: ResolvedConfig;
-  let dev = false;
+  let dev = false, placeholders = false;
   return {
     name: "oberth-content",
     configResolved(c) {
@@ -161,6 +204,8 @@ export function contentPlugin(): Plugin {
       // SITE_SHOW_TODO=1 builds the unfinished sections too (with their TODO banners), for tests and review
       // screenshots of a build; deployed builds never set it.
       dev = showTodo(c.command);
+      placeholders = process.env.SITE_PLACEHOLDERS === "1";
+      if (placeholders && c.mode !== "development") throw new Error("SITE_PLACEHOLDERS=1 is for development builds only (--mode development)");
     },
     buildStart() {
       if (dev) return;
@@ -184,6 +229,12 @@ export function contentPlugin(): Plugin {
           .replace(/\{\{base\}\}/g, base)               // page links honour the deployed base path
           .replace(/\{\{repo\}\}/g, esc(readData("site.json")?.repo.url ?? "#"));
         out = out.replace("</head>", `${socialMeta(out, pagePath(ctx.filename, config.root), base)}</head>`);
+        // Landing page: the author's prose slots, and each finding's link (its article section when shown, else the
+        // matching explorer state: <!--#finding-link:section-id|explorer query-->).
+        out = out.replace(/<!--#slot:([\w-]+)-->/g, (_m, name: string) => slotHTML(name, { dev, placeholders }, base))
+          .replace(/<!--#finding-link:([\w-]+)\|([^>]*?)-->/g, (_m, id: string, query: string) => sectionShown(id, config.command)
+            ? `<a class="finding-link" href="${base}research/#${id}">In the research</a>`
+            : `<a class="finding-link" href="${base}explorer/?${query}">Open in the explorer</a>`);
         if (out.includes("<!--#references-->")) {
           const site = readData("site.json");
           out = out.replace("<!--#references-->", referenceListHTML(site?.references ?? []));

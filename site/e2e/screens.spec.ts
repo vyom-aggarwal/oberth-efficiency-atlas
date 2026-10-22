@@ -33,7 +33,8 @@ for (const path of PAGES) {
         await page.waitForTimeout(300);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow, "no sideways scrolling of the page body").toBeLessThanOrEqual(0);
-        const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "landing"}-${width}-${theme}.png`;
+        // SCREEN_TAG tells builds apart, e.g. "-empty" (production: prose slots hidden) and "-filled" (placeholders).
+        const name = `${path.replace(/\/$/, "").replace(/\//g, "_") || "landing"}-${width}-${theme}${process.env.SCREEN_TAG ?? ""}.png`;
         await page.screenshot({ path: `${OUT}/${name}`, fullPage: true });
         if (path === "research/") {
           // A crop of every figure in the article (all are mounted after the scroll above).

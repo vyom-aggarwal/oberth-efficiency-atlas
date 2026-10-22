@@ -82,6 +82,11 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
                 gap: var(--s4) var(--s6); font-size: var(--t-label); }
 .footer-facts dt { color: var(--text-2); margin-bottom: 2px; }
 .footer-facts dd { margin: 0; }
+/* The citation (from CITATION.cff) spans two columns where it can; its Copy button appears with the clipboard API. */
+.footer-facts > div:has(.citation-text) { grid-column: span 2; }
+@media (max-width: 600px) { .footer-facts > div:has(.citation-text) { grid-column: auto; } }
+.citation-text { overflow-wrap: anywhere; }
+.copy-button { margin-left: var(--s2); min-height: 28px; font-size: var(--t-label); }
 
 /* Explorer (checkpoint 5): case inputs, the trajectory, results, and where the case sits. */
 .region-title { font-family: var(--sans); font-size: var(--t-ui); font-weight: 500; margin: 0 0 var(--s3); }

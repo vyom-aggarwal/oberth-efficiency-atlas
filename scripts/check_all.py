@@ -68,7 +68,7 @@ def numbers() -> int:
     sys.modules[spec.name] = mod                                  # its dataclasses look the module up there
     spec.loader.exec_module(mod)
     status = 0
-    for md in sorted((SITE / "content").glob("*.md")):
+    for md in sorted((SITE / "content").rglob("*.md")):              # the article sections and the landing slots
         print(f"$ check_numbers {md.relative_to(ROOT)} --allow {ALLOW}", flush=True)
         status |= mod.main([str(md), "--allow", ALLOW])
     return status

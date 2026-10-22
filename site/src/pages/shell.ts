@@ -16,6 +16,27 @@ export function initShell(page: "landing" | "research" | "references" | "explore
 
   document.querySelector(`.site-nav a[data-page="${page}"]`)?.setAttribute("aria-current", "page");
 
+  // Copy buttons (the footer's citation): shown only where the clipboard API exists; the result is announced.
+  for (const b of document.querySelectorAll<HTMLButtonElement>("button[data-copy]")) {
+    const from = document.querySelector(b.dataset.copy!);
+    if (!from || !navigator.clipboard) continue;
+    const status = document.createElement("span");
+    status.className = "visually-hidden";
+    status.setAttribute("aria-live", "polite");
+    b.after(status);
+    b.hidden = false;
+    b.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(from.textContent?.trim() ?? "");
+        status.textContent = "Citation copied";
+        b.textContent = "Copied";
+      } catch {
+        status.textContent = "Copying failed";
+      }
+      setTimeout(() => { b.textContent = "Copy"; status.textContent = ""; }, 2000);
+    });
+  }
+
   // Narrow screens: the menu folds behind a button (without JavaScript it simply stays open).
   const button = document.querySelector<HTMLButtonElement>(".menu-button");
   const menu = document.getElementById("site-menu");

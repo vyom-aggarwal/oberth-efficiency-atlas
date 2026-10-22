@@ -16,8 +16,15 @@
   <body class="page-landing">
     <!--#header-->
     <main id="main" class="landing">
+      <figure class="landing-hero" id="landing-hero" data-intro="pending">
+        <figcaption class="hero-figure-title" id="hero-figure-title">One solar dive, three engines</figcaption>
+        <div class="landing-hero-body"></div>
+      </figure>
+
       <section class="landing-intro" aria-labelledby="landing-title">
         <h1 id="landing-title" class="landing-title">Oberth Efficiency Atlas</h1>
+        <!--#slot:headline-->
+        <!--#slot:summary-->
         <nav class="entry-links" aria-label="Start here">
           <ul>
             <li><!--#research-link: data-entry="research"|Read the research--></li>
@@ -25,6 +32,41 @@
             <li><a href="{{repo}}" rel="noopener" data-entry="source">View the source on GitHub</a></li>
           </ul>
         </nav>
+      </section>
+
+      <section class="landing-findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">Findings</h2>
+        <div class="findings-grid">
+          <figure class="finding" id="finding-loss" data-finding="loss" aria-labelledby="finding-loss-title">
+            <h3 class="finding-title" id="finding-loss-title">Loss against Π, with the 1 % line</h3>
+            <div class="finding-body"></div>
+            <figcaption class="finding-caption">
+              <!--#slot:finding-loss-->
+              <!--#finding-link:universal-curve|preset=hibberd-->
+            </figcaption>
+          </figure>
+          <figure class="finding" id="finding-missions" data-finding="missions" aria-labelledby="finding-missions-title">
+            <h3 class="finding-title" id="finding-missions-title">Where real missions sit</h3>
+            <div class="finding-body"></div>
+            <figcaption class="finding-caption">
+              <!--#slot:finding-missions-->
+              <!--#finding-link:atlas|preset=earth.hall-->
+            </figcaption>
+          </figure>
+          <figure class="finding" id="finding-hibberd" data-finding="hibberd" aria-labelledby="finding-hibberd-title">
+            <h3 class="finding-title" id="finding-hibberd-title">The Hibberd et al. check</h3>
+            <div class="finding-body"></div>
+            <figcaption class="finding-caption">
+              <!--#slot:finding-hibberd-->
+              <!--#finding-link:case-study|preset=hibberd-->
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="landing-repro" aria-labelledby="repro-title">
+        <h2 id="repro-title">Reproducibility and scope</h2>
+        <div class="repro-body"></div>
       </section>
     </main>
     <!--#footer-->

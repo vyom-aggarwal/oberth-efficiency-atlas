@@ -13,7 +13,7 @@ import { signal } from "../lib/signal";
 import { cssVar, themeShown } from "../lib/theme";
 import { chips, dataTable, labelRow, logAxes, piTick, place, segmented, svgPointer, tooltip } from "./common";
 
-interface Slice {
+export interface Slice {
   dv_over_V: number; c_over_V: number; steering: "prograde" | "inertial";
   Pi_edges: number[][]; v_over_vesc_edges: number[];
   eta: (number | null)[][]; impact: number[][]; unreliable: number[][]; r_burn_start: number[][];
@@ -34,7 +34,10 @@ const V_TICKS = [0.01, 0.1, 1];
 const GUIDES = [100, 1000];                                // burn-start radius guides, in r_p (as scripts/fig_atlas.py)
 const BODY_NAMES: Record<string, string> = { venus: "Venus", earth: "Earth", mars: "Mars", jupiter: "Jupiter", saturn: "Saturn", sun: "Sun" };
 const cap = (id: string) => BODY_NAMES[id] ?? id;
-type Status = "eta" | "negative" | "impact" | "unreliable";
+export type Status = "eta" | "negative" | "impact" | "unreliable";
+/** A cell's state: impact, no reliable η, η < 0, or η (shared with the landing page's atlas thumbnail). */
+export const cellStatus = (sl: Slice, i: number, k: number): Status =>
+  sl.impact[i][k] ? "impact" : sl.eta[i][k] === null ? "unreliable" : (sl.eta[i][k] as number) < 0 ? "negative" : "eta";
 
 export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: SiteData, opt: { figN: number; title: string }): void {
   const uid = `at${opt.figN}`;
@@ -81,8 +84,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
     if (w !== width) { width = w; requestAnimationFrame(redraw); }
   }).observe(plot);
   // ---------------------------------------------------------------- cells
-  const status = (sl: Slice, i: number, k: number): Status =>
-    sl.impact[i][k] ? "impact" : sl.eta[i][k] === null ? "unreliable" : (sl.eta[i][k] as number) < 0 ? "negative" : "eta";
+  const status = cellStatus;
   const soi = () => d.bodies.find((b) => b.id === body.get());
   /** Burn starts outside the chosen body's SOI: r_burn_start (r_p) × r_p/R beyond r_SOI/R. */
   const outside = (sl: Slice, i: number, k: number) => {
@@ -333,7 +335,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
 }
 
 /** Ink textures on Paper (8 px tiles): 45° lines (η < 0), 135° lines (impact), dots (no reliable value). */
-function textures(ctx: CanvasRenderingContext2D, ink: string, paper: string): Record<"negative" | "impact" | "unreliable", CanvasPattern> {
+export function textures(ctx: CanvasRenderingContext2D, ink: string, paper: string): Record<"negative" | "impact" | "unreliable", CanvasPattern> {
   const tile = (draw: (c: CanvasRenderingContext2D) => void) => {
     const c = document.createElement("canvas");
     c.width = c.height = 8;

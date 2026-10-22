@@ -27,4 +27,5 @@ site/playwright-report/
 site/dist-test/
 site/dist-prod/
 site/dist-ph/
+site/dist-empty/
 site/dist-lh/
