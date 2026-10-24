@@ -1,4 +1,4 @@
-// Segmented choice: a native radio group styled as joined segments.
+// Segmented choice: a native radio group styled as pills (the classic explorer's), the radio dot visible.
 import { h } from "../lib/dom";
 import type { Signal } from "../lib/signal";
 

@@ -162,7 +162,7 @@ export interface Tooltip {
 }
 
 /**
- * The figure's tooltip (Paper, Graphite edge), positioned inside the plot.
+ * The figure's tooltip (the raised surface, an Axis edge), positioned inside the plot.
  *
  * Figures redraw on resize, on a theme change and when web fonts finish loading, and a redraw replaces the hit
  * targets. redraw(draw) keeps an open tooltip open across that: it notes what opened it (keyboard focus on a hit

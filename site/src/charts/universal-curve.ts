@@ -192,14 +192,16 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       // slow-arrival curves end close together), with a leader when moved; the key heads the column.
       ends.sort((a, b) => a.y - b.y);
       let prev = m.top - 17;
-      const at = ends.map((e) => (prev = Math.max(e.y, prev + 17)));   // 17 px: 1.2 × the 14 px label size
-      ends.forEach((e, i) => {
+      const at = ends.map((e) => (prev = Math.max(e.y, prev + 17)));   // 17 px: 1.3 × the 13 px label size
+      const texts = ends.map((e, i) => {
         const tx = W - m.right + 12;
-        svg.append(s("path", { class: "leader", d: `M${e.x + 2},${e.y} L${tx - 2},${at[i]}` }),
-          s("text", { class: "annot-2", x: tx, y: at[i] + 4 }, e.text));
+        const t = s("text", { class: "annot-2", x: tx, y: at[i] + 4 }, e.text);
+        svg.append(s("path", { class: "leader", d: `M${e.x + 2},${e.y} L${tx - 2},${at[i]}` }), t);
+        return t;
       });
+      // The key sits 3 px above the top label's measured box (its height depends on the font).
       const key = place(overlay, `${tex.vRatio}`, W - 2, 0, "end", "family-key");
-      key.style.top = `${Math.max(0, at[0] - 8 - key.offsetHeight)}px`;
+      key.style.top = `${Math.max(0, texts[0].getBBox().y - 3 - key.offsetHeight)}px`;
     }
     const bound = data.bound.Pi.map((p, i) => [p, data.bound.loss_rel[i]] as [number, number]);
     svg.append(s("path", { class: "theory-line", d: line().x((d) => x(d[0])).y((d) => y(d[1]))(bound) ?? "" }));

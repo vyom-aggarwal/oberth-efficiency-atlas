@@ -3246,4 +3246,47 @@ plan left open:
   step.
 - **The measure** is 72 ch, the classic's lede.
 
+## 2026-10-23: Phase 8 step 2, pass 2 (components): choices made while applying the plan
+
+- **Panels** (the classic's: `--panel`, 8 px radius, 10 px padding, flat) hold the whole of each
+  article figure, landing finding, landing hero, the explorer's trajectory and its two placement
+  figures. This is what the approved step 1 preview showed: title, controls, plot, legend, data and
+  caption together.
+- **One surface per panel.**
+  - `--surface` names the surface under an element (`--bg` on the page, `--panel` in a panel);
+    marker rings, halos and texture backgrounds use it.
+  - `--raised` is the other one. Controls and tooltips use it, so they stand apart from what they
+    sit on.
+  - **Deviation from plan §3:** tooltips inside a figure are on `--bg`, not `--panel`, since every
+    figure is now a panel. A panel-coloured tooltip would vanish into it.
+- **Choices** (segmented controls, checkbox chips) are the classic's pills with the native radio or
+  check visible in the accent colour (`accent-color`).
+  - The checked pill also gets an accent edge and Ink text.
+  - The dot is a shape cue, so the state does not rest on colour alone.
+  - The theme switch uses the same control.
+- **Sliders:** the track in `--muted`, the thumb in the accent on a ring of the surface colour.
+- **Readouts** (explorer) are the classic's tiles: a 2 px top rule, the accent rule on η (the key
+  tile, 24 px), values in IBM Plex Mono 18 px.
+  - **Deviation from the classic:** long values wrap instead of being cut with an ellipsis, which
+    would hide data in the 240 px column.
+- **Warnings:**
+  - icon, text and outline in `--critical` (the classic's "bad" chip, at 6 px radius for multi-line
+    text);
+  - the text passes 4.5:1 on both surfaces (palette check).
+- **Navigation links** stay Ink (the site menu) and Ink 2 (the section rail). Only links in running
+  text take `--link`. The section rail's current-item bar is the accent.
+- **Focus:** a 2 px accent outline on every control. One exception: the chart hit targets keep their
+  dashed Ink focus ring, since an accent ring would vanish on the blue η cells and family curves.
+- **Region titles** (explorer) are the classic's eyebrows: Barlow Semi Condensed 600, 13 px,
+  uppercase, tracked 0.08em, in Ink 2 (Muted is short of 4.5:1 for small text).
+- **Found by the tests and fixed:**
+  - at 360 px the hero's clock, now in Plex Mono, overflowed by 0.8 px, so below 600 px it is 12 px;
+  - in the universal curve's family mode the v∞/v_esc key touched the top value label at 390 and
+    600 px, so the key is now placed 3 px above that label's measured box.
+- **Fold** (re-measured after this pass), the lowest of title, headline and entry links:
+  - production: 603 px at 1440 × 900 and 702 px at 390 × 844 (Phase 7: 623 and 740);
+  - placeholders: 673 and 803.
+- **Headline:** the longest headline that fits is 444 characters at 1440 × 900 and 124 at 390 × 844
+  (Phase 7: 365 and 114). The budget stays 100 for now and is re-measured after pass 3.
+
 

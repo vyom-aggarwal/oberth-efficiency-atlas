@@ -33,6 +33,8 @@
   --r-pill: 999px;           /* segmented choices, chips */
 
   /* Roles. */
+  --surface: var(--bg);              /* the surface under an element; panels set it to --panel (chart.css) */
+  --raised: var(--panel);            /* controls and tooltips: the other surface, so they stand out from the one they sit on */
   --text: var(--ink);
   --text-2: var(--ink-2);            /* small secondary text: --muted is short of 4.5:1 in light (restyle plan §4) */
   --control-edge: var(--muted);      /* WCAG 1.4.11: control boundaries need >= 3:1, which --axis does not give */
