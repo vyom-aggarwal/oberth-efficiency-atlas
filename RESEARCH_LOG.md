@@ -3140,4 +3140,42 @@ byte-identical. Where the Phase 6 design plan conflicts, the author's preference
 - **Open decisions** (plan §11): the a·v ramp colour, Greek fallbacks, the derivations, and the
   contrast fixes.
 
+## 2026-10-23: Phase 8 step 1 approved; decisions and fixes for step 2 (logged before the changes)
+
+**Decisions** (author):
+1. **a·v is blue**, as the classic explorer and the paper.
+2. **Greek is self-hosted** (a change from my recommendation). CI runs on Linux with other fallback
+   fonts, and the label-placement, fold and headline-budget tests all measure text.
+   - A `unicode-range` subset covering the Greek and the other symbols the site uses becomes the first
+     fallback in each stack: sans, condensed and mono.
+   - Each comes from a family verified with fontTools to have those glyphs, chosen to match Barlow,
+     Barlow Semi Condensed and IBM Plex Mono as closely as possible.
+   - The three classic families are self-hosted from the pinned packages. The classic explorer stays
+     byte-identical.
+3. **The derivations are approved:**
+   - 18 px Barlow prose;
+   - smaller headings, with a 34 px landing title;
+   - patterned special atlas cells;
+   - the findings in panels.
+
+   Condition: negative-η and impact cells keep their hatching, and the new red passes the
+   colour-vision check against the blue ramp.
+4. **The four contrast fixes are approved.**
+
+**Fixes from the preview screenshots:**
+1. **Annotation weight:** on-plot labels in regular or medium weight; bold only for figure titles
+   and engine names.
+2. **Overflow:** at 390 px the hero strip's axis title runs to the panel edge. The layout tests are
+   extended to axis titles and every text element in a figure panel, at 360 and 390 px.
+3. **Notation:** literal underscores (`r_p/v_p`) become real subscripts everywhere: KaTeX or
+   `<sub>` in HTML, `tspan` subscripts in SVG, drawn subscripts or the typeset form in canvas text.
+   A test checks that no displayed text contains "_" outside code and URLs; file names become code.
+4. **Nested surfaces:** the hero and every canvas figure draw on the panel colour, one background
+   per panel.
+5. **KaTeX axis-title overlays** become transparent; the light box showed behind v∞/v_esc on the
+   grey panel.
+6. **The faintest a·v stroke** (the SEP lane in light) is measured against the surface it is drawn
+   on, in both themes. The ramp's light end moves only if it is below the 2:1 stroke minimum of
+   Phase 6. The values are reported.
+
 
