@@ -16,5 +16,5 @@ export function citation(label: string, ref: number | null): HTMLElement {
 /** Link to a source file in the repository (GitHub blob at the recorded ref). */
 export function sourceLink(site: SiteData, rel: string): HTMLAnchorElement {
   const ref = site.source_links[rel] ?? site.repo.tag;
-  return h("a", { href: `${site.repo.url}/blob/${ref}/${rel}`, rel: "noopener" }, rel.split("/").pop() ?? rel);
+  return h("a", { href: `${site.repo.url}/blob/${ref}/${rel}`, rel: "noopener" }, h("code", {}, rel.split("/").pop() ?? rel));   // file names as code
 }

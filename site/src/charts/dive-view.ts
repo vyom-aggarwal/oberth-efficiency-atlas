@@ -73,22 +73,25 @@ export function burnColour(av: number, avScale: number): string | null {
 }
 
 /**
- * The r/r_p rings (dashed Rule, Graphite labels) and the Sun, centred at (cx, cy), sc pixels per ρ unit. Each ring's
- * label sits at (cx + fx·ρ + 2, cy + fy·ρ), fx and fy from `at` (Figure 7: 0.72, 0.72, lower right).
+ * The r/r_p rings and the Sun, centred at (cx, cy), sc pixels per ρ unit, as the classic explorer draws them: the r_p
+ * ring dashed (4, 4) in Axis, the others solid in Grid, labels in IBM Plex Mono 11 px (Ink 2: Muted is short of 4.5:1
+ * for text), the Sun filled in --sun. Each ring's label sits at (cx + fx·ρ + 2, cy + fy·ρ), fx and fy from `at`
+ * (Figure 7: 0.72, 0.72, lower right).
  */
 export function drawRingsAndSun(ctx: CanvasRenderingContext2D, cx: number, cy: number, sc: number, rhoSun: number,
                                 rings = RINGS, at: [number, number] = [0.72, 0.72]): void {
-  const rule = cssVar("--grid"), graphite = cssVar("--ink-2");
-  ctx.strokeStyle = rule; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
-  ctx.font = `11px ${cssVar("--sans-cond") || "sans-serif"}`; ctx.fillStyle = graphite;
+  const grid = cssVar("--grid"), axis = cssVar("--axis");
+  ctx.lineWidth = 1;
+  ctx.font = `11px ${cssVar("--mono") || "monospace"}`; ctx.fillStyle = cssVar("--ink-2");
   for (const r of rings) {
     const rho = (1 + Math.log10(r)) * sc;
+    ctx.strokeStyle = r === 1 ? axis : grid; ctx.setLineDash(r === 1 ? [4, 4] : []);
     ctx.beginPath(); ctx.arc(cx, cy, rho, 0, 2 * Math.PI); ctx.stroke();
     ctx.fillText(r === 1 ? "rₚ" : `${r} rₚ`, cx + rho * at[0] + 2, cy + rho * at[1]);
   }
   ctx.setLineDash([]);
-  ctx.fillStyle = rule; ctx.strokeStyle = graphite;
-  ctx.beginPath(); ctx.arc(cx, cy, rhoSun * sc, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = cssVar("--sun");
+  ctx.beginPath(); ctx.arc(cx, cy, rhoSun * sc, 0, 2 * Math.PI); ctx.fill();
 }
 
 /**
@@ -114,7 +117,9 @@ export function drawEnergyStrip(strip: SVGSVGElement, dv: Dive, k: number, W: nu
   }
   for (const f of [0, 0.5, 1]) ax.append(s("line", { x1: m.left - 4, x2: m.left, y1: y(f), y2: y(f) }),
     s("text", { x: m.left - 7, y: y(f) + 4, "text-anchor": "end" }, String(f)));
-  ax.append(s("text", { x: (m.left + W - m.right) / 2, y: H - 3, "text-anchor": "middle" }, `time from perihelion (τ = r_p/v_p = ${duration(tau * timeS)})`));
+  // The axis title in Barlow 12 px (not the ticks' mono), its subscripts typeset (dom.ts).
+  ax.append(s("text", { class: "axis-title", x: (m.left + W - m.right) / 2, y: H - 3, "text-anchor": "middle" },
+    `time from perihelion (τ = r_p/v_p = ${duration(tau * timeS)})`));
   strip.append(ax);
   // The impulsive step at perihelion.
   strip.append(s("path", { class: "imp-step", d: `M${x(-windowTau * tau)},${y(0)}H${x(0)}V${y(1)}H${x(windowTau * tau)}` }));

@@ -140,12 +140,13 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--bg"); ctx.fillRect(0, 0, W, H);
+    const surface = cssVar("--surface", canvas);                         // the panel's colour: one surface
+    ctx.fillStyle = surface; ctx.fillRect(0, 0, W, H);
     ctx.save();
     ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
     drawRingsAndSun(ctx, ox, oy, sc, dv.rhoSun, RINGS, [1, 0.04]);
     ctx.restore();
-    const rule = cssVar("--grid"), ink = cssVar("--ink"), paper = cssVar("--bg");
+    const rule = cssVar("--grid"), ink = cssVar("--ink");
 
     // The outward normal (away from the Sun) at sample i of a path, for its lane.
     const normal = (e: DiveCase, i: number): [number, number] => {
@@ -190,21 +191,21 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     // Where each engine is now.
     if (k > 0) for (const e of cases) {
       const [px, py] = P(e, Math.min(k, e.X.length) - 1);
-      ctx.fillStyle = ink; ctx.strokeStyle = paper; ctx.lineWidth = 2;
+      ctx.fillStyle = ink; ctx.strokeStyle = surface; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(px, py, 3.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
     }
     // Lane labels, outside the lanes: "Solid", "Nuclear", "SEP*" (short names, as on the hero's narrow Π axis).
     let clipped = 0;
     if (labels) {
       const size = narrow ? 12 : 13;
-      ctx.font = `${size}px ${cssVar("--sans-cond") || "sans-serif"}`;
+      ctx.font = `600 ${size}px ${cssVar("--sans-cond") || "sans-serif"}`;                // engine names: bold (author, 2026-10-23)
       cases.forEach((e, j) => {
         const i = labelAt[j], [nx, ny] = normal(e, i), [px, py] = P(e, i);
         const r = 3 * lane + 8, lx = px + nx * r, ly = py + ny * r;
         const align = nx < -0.35 ? "right" : nx > 0.35 ? "left" : "center";
         const base = ny < -0.35 ? "bottom" : ny > 0.35 ? "top" : "middle";
         ctx.textAlign = align; ctx.textBaseline = base;
-        ctx.lineWidth = 3; ctx.strokeStyle = paper; ctx.strokeText(e.label.short, lx, ly);
+        ctx.lineWidth = 3; ctx.strokeStyle = surface; ctx.strokeText(e.label.short, lx, ly);
         ctx.fillStyle = ink; ctx.fillText(e.label.short, lx, ly);
         // Whether the label fits inside the view (checked by the layout tests: data-labels-clipped = 0).
         const w = ctx.measureText(e.label.short).width;

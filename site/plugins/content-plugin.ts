@@ -144,11 +144,11 @@ export function keptSections(all: Section[], dev: boolean): Section[] {
 
 function sectionHTML(s: Section, dev: boolean): string {
   const banner = dev && s.todo
-    ? `<div class="todo-banner" role="note"><strong>TODO: prose not written yet.</strong> This section is hidden from the production build until its content file (site/content/${esc(s.id)}.md) has no TODO marker. The notes below are the author's checklist.</div>`
+    ? `<div class="todo-banner" role="note"><strong>TODO: prose not written yet.</strong> This section is hidden from the production build until its content file (<code>site/content/${esc(s.id)}.md</code>) has no TODO marker. The notes below are the author's checklist.</div>`
     : "";
   const fig = s.figure
     ? `<figure class="figure" id="fig-${s.figure}" data-figure="${s.figure}"${s.figN ? ` data-fig-n="${s.figN}"` : ""}>` +
-      `<div class="figure-body"></div>${s.caption ? `<figcaption class="caption">${s.caption}</figcaption>` : ""}</figure>`
+      `<div class="figure-body"></div>${s.caption ? `<figcaption class="caption${dev && s.todo ? " todo-notes" : ""}">${s.caption}</figcaption>` : ""}</figure>`
     : "";
   const before = dev && s.todo ? `<div class="prose todo-notes">${s.notes}</div>` : s.before ? `<div class="prose">${s.before}</div>` : "";
   const after = !(dev && s.todo) && s.after.trim() ? `<div class="prose">${s.after}</div>` : "";

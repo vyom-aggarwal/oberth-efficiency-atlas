@@ -174,16 +174,17 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     if (!W) size();
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--bg");
+    const surface = cssVar("--surface", canvas);                         // the panel's colour: one surface
+    ctx.fillStyle = surface;
     ctx.fillRect(0, 0, W, H);
-    const ink = cssVar("--ink"), graphite = cssVar("--ink-2"), rule = cssVar("--grid");
+    const ink = cssVar("--ink"), graphite = cssVar("--ink-2");
     const origin = { x: 0, y: 0 };
-    // Periapsis distance (dotted) and the Sun (radius r_p / (r_p/R☉)).
-    ctx.setLineDash([2, 4]); ctx.strokeStyle = rule; ctx.lineWidth = 1;
+    // Periapsis distance (dashed Axis, as the classic) and the Sun (radius r_p / (r_p/R☉)) in --sun.
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = cssVar("--axis"); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.arc(sx(origin), sy(origin), scale, 0, 2 * Math.PI); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = rule; ctx.strokeStyle = graphite;
-    ctx.beginPath(); ctx.arc(sx(origin), sy(origin), scale / d.geometry.r_p_over_R_sun.value, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = cssVar("--sun");
+    ctx.beginPath(); ctx.arc(sx(origin), sy(origin), scale / d.geometry.r_p_over_R_sun.value, 0, 2 * Math.PI); ctx.fill();
     // Impulsive exit (dashed) and the finite path (solid Ink).
     ctx.lineCap = "round"; ctx.lineJoin = "round";
     ctx.strokeStyle = graphite; ctx.lineWidth = 1.5; ctx.setLineDash([7, 5]);
@@ -210,7 +211,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
       }
       // Drag handles at the arc's ends (pointer devices).
       if (!narrow) for (const p of [b[0], b[b.length - 1]]) {
-        ctx.fillStyle = ink; ctx.strokeStyle = cssVar("--bg"); ctx.lineWidth = 2;
+        ctx.fillStyle = ink; ctx.strokeStyle = surface; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(sx(p), sy(p), 4.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
       }
     }

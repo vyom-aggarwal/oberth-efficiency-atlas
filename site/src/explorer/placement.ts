@@ -1,7 +1,8 @@
-// Placement of the reader's case, as an Ink ring with a crosshair (the same marker in both): on the universal curve
-// (curve.json: the near-parabolic band, the Π²/96 bound, the 0.1 % and 1 % thresholds) and on the Δv → 0 theory
-// atlas (presets.json: linear-response η, prograde). A case beyond a plot's range sits on its edge, and the
-// summary says so.
+// Placement of the reader's case on the universal curve (curve.json: the near-parabolic band, the Π²/96 bound, the
+// 0.1 % and 1 % thresholds) and on the Δv → 0 theory atlas (presets.json: linear-response η, prograde). The markers are
+// the classic explorer's: on the curve, which has no blue, an accent dot on a ring of the panel colour; on the blue
+// atlas, where the accent would vanish, an Ink ring on a halo. A case beyond a plot's range sits on its edge, dashed and
+// in Critical, and the summary says so.
 import { scaleLinear, scaleLog } from "d3-scale";
 import { area, line } from "d3-shape";
 import tex from "virtual:tex";
@@ -17,11 +18,10 @@ export interface CurveLite {
 }
 export interface TheoryAtlas { Pi: number[]; v_over_vesc: number[]; eta: number[][] }
 
-function ring(svg: SVGSVGElement, x: number, y: number, clipped: boolean): void {
-  svg.append(s("g", { class: clipped ? "case-ring clipped" : "case-ring" },
-    s("circle", { cx: x, cy: y, r: 8 }),
-    s("line", { x1: x - 13, x2: x - 4, y1: y, y2: y }), s("line", { x1: x + 4, x2: x + 13, y1: y, y2: y }),
-    s("line", { x1: x, x2: x, y1: y - 13, y2: y - 4 }), s("line", { x1: x, x2: x, y1: y + 4, y2: y + 13 })));
+function ring(svg: SVGSVGElement, x: number, y: number, clipped: boolean, kind: "dot" | "circle"): void {
+  svg.append(s("g", { class: `case-ring case-${kind}${clipped ? " clipped" : ""}` },
+    kind === "dot" ? s("circle", { class: "case-mark", cx: x, cy: y, r: 6 })
+      : s("g", {}, s("circle", { class: "case-halo", cx: x, cy: y, r: 8 }), s("circle", { class: "case-mark", cx: x, cy: y, r: 8 }))));
 }
 
 /** One small log–log plot box: returns the SVG, the overlay and the plot element, sized to the container. */
@@ -56,7 +56,7 @@ export function curvePlacement(container: HTMLElement, d: CurveLite): (Pi: numbe
     const [Pi, loss] = last;
     if (loss === null || !(loss > 0)) return "Not on the universal curve: the loss is undefined for this case (captured or impact).";
     const clipped = Pi < DOM[0] || Pi > DOM[1] || loss < LDOM[0] || loss > LDOM[1];
-    ring(svg, x(Pi), y(loss), clipped);
+    ring(svg, x(Pi), y(loss), clipped, "dot");
     return `On the universal curve: Π = ${sig(Pi)}, loss ${lossRel(loss)} of Δv${clipped ? " (beyond the plot; shown on its edge)" : ""}. ` +
       `The band is for near-parabolic arrivals (Hibberd et al.'s dive).`;
   }
@@ -93,7 +93,7 @@ export function atlasPlacement(container: HTMLElement, a: TheoryAtlas): (Pi: num
     place(overlay, tex.Pi, (m.left + W - m.right) / 2, H - 20, "middle");
     const [Pi, v] = last;
     const clipped = Pi < xe[0] || Pi > xe[xe.length - 1] || v < ye[0] || v > ye[ye.length - 1];
-    ring(svg, x(Pi), y(Math.max(v, ye[0])), clipped);
+    ring(svg, x(Pi), y(Math.max(v, ye[0])), clipped, "circle");
     return `On the Δv → 0 theory atlas: Π = ${sig(Pi)}, v∞/v_esc = ${sig(v, 3)}${clipped ? " (beyond the atlas; shown on its edge)" : ""}.`;
   }
   themeShown.subscribe(() => requestAnimationFrame(draw));

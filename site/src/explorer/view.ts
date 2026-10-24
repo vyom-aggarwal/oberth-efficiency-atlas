@@ -1,4 +1,4 @@
-// The explorer's trajectory view: a canvas in the hero's convention (periapsis down), the burn on the Burn ramp by
+// The explorer's trajectory view: a canvas in the hero's convention (periapsis down), the burn on the a·v ramp by
 // a·v, the impulsive exit dashed. Zoom and pan by wheel or pinch, drag, and keys (+ − arrows, 0 resets).
 import type { FlybyPath, Pt } from "../sim/paths";
 import { cssVar, themeShown } from "../lib/theme";
@@ -6,8 +6,9 @@ import { cssVar, themeShown } from "../lib/theme";
 export interface Scene {
   path: FlybyPath;
   impulsive: Pt[];
-  /** Body radius in r_p (drawn when it is a real body), or null. */
+  /** Body radius in r_p (drawn when it is a real body), or null; the Sun is drawn in --sun, other bodies in --muted. */
   bodyRadius: number | null;
+  sun?: boolean;
   /** log₁₀ a·v (simulator units) at the two ends of the colour ramp. */
   avLog: [number, number];
   label: string;
@@ -56,17 +57,17 @@ export function trajectoryView(canvas: HTMLCanvasElement): { setScene: (sc: Scen
     canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--bg"); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = cssVar("--surface", canvas); ctx.fillRect(0, 0, W, H);          // the panel's colour: one surface
     if (!scene) return;
     canvas.setAttribute("aria-label", scene.label);
-    const ink = cssVar("--ink"), graphite = cssVar("--ink-2"), rule = cssVar("--grid");
+    const ink = cssVar("--ink"), graphite = cssVar("--ink-2");
     const [ox, oy] = toScreen({ x: 0, y: 0 });
-    ctx.setLineDash([2, 4]); ctx.strokeStyle = rule; ctx.lineWidth = 1;          // periapsis distance
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = cssVar("--axis"); ctx.lineWidth = 1;   // periapsis distance, as the classic
     ctx.beginPath(); ctx.arc(ox, oy, scale, 0, 2 * Math.PI); ctx.stroke();
     ctx.setLineDash([]);
     if (scene.bodyRadius && scene.bodyRadius * scale > 1) {
-      ctx.fillStyle = rule; ctx.strokeStyle = graphite;
-      ctx.beginPath(); ctx.arc(ox, oy, scene.bodyRadius * scale, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = cssVar(scene.sun ? "--sun" : "--muted");
+      ctx.beginPath(); ctx.arc(ox, oy, scene.bodyRadius * scale, 0, 2 * Math.PI); ctx.fill();
     }
     const stroke = (pts: Pt[]) => {
       ctx.beginPath();

@@ -39,7 +39,7 @@ themePref.subscribe((p) => {
 });
 media.addEventListener("change", () => themeShown.set(resolve(themePref.get())));
 
-/** Current value of a CSS custom property (for canvas drawing). */
-export function cssVar(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+/** Current value of a CSS custom property (for canvas drawing), read on `el`: a canvas reads --surface from its panel. */
+export function cssVar(name: string, el: Element = document.documentElement): string {
+  return getComputedStyle(el).getPropertyValue(name).trim();
 }

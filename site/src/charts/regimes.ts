@@ -8,7 +8,7 @@ import tex from "virtual:tex";
 import { snapSlider } from "../controls/snap-slider";
 import { sourceLink } from "../lib/cite";
 import type { Provenance, SiteData } from "../lib/data";
-import { frag, h, onFontsLoaded, s } from "../lib/dom";
+import { frag, h, onFontsLoaded, s, setText } from "../lib/dom";
 import { pow10, sig } from "../lib/format";
 import { signal } from "../lib/signal";
 import { chips, dataTable, LabelPlacer, logAxes, piTick, place, svgPointer, tooltip, type LabelAt } from "./common";
@@ -76,10 +76,10 @@ export function regimes(root: HTMLElement, data: RegimesData, site: SiteData, op
     const f = fams[slider.index.get()];
     const inRange = f.Pi_T <= PI_DOMAIN[1];
     const selection = data.selection.replace("dv_over_vp", "Δv/v_p");
-    summary.textContent = `Sweep medians of η_W against Π for v∞/v_esc = ${sig(f.v_over_vesc, 2)} (${f.n_runs} runs: ${selection}), ` +
+    setText(summary, `Sweep medians of η_W against Π for v∞/v_esc = ${sig(f.v_over_vesc, 2)} (${f.n_runs} runs: ${selection}), ` +
       `with the 10th to 90th percentile band, the Δv → 0 response and the three asymptotes. ` +
       `The crossover Π_T = ${sig(f.Pi_T, 2)}${inRange ? "" : ", beyond the plotted range"}; C₀ = ${sig(f.c0)}. ` +
-      `Across the selection, η and η_W differ by up to ${sig(data.eta_minus_eta_W_max_abs, 2)}.`;
+      `Across the selection, η and η_W differ by up to ${sig(data.eta_minus_eta_W_max_abs, 2)}.`);
     tables.replaceChildren(binsTable(f), familiesTable());
   }
 

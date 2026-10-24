@@ -64,13 +64,16 @@
 .impact-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
 .impact-line.alt { stroke-dasharray: 8 3 2 3; }
 .guide-line { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 1 2.5; }
-.atlas-plot .annot-html { background: color-mix(in srgb, var(--bg) 85%, transparent); padding: 0 3px; }
+/* Labels on the cells sit on a wash of the panel colour; axis titles, off the cells, stay transparent (author's fix 5). */
+.atlas-plot :is(.contour-label, .guide-label) { background: color-mix(in srgb, var(--surface) 85%, transparent); padding: 0 3px; }
 .contour-label { color: var(--text-2); font-style: italic; }
 .guide-label { color: var(--text); }
 .tex-bg, .swatch { stroke: var(--ink-2); stroke-width: 0; }
 .tex-bg { fill: var(--surface); }
 .tex-line { stroke: var(--ink); stroke-width: 1; }
-.tex-dot { fill: var(--ink); }
+pattern[id$="-neg"] .tex-line { stroke: var(--critical); }   /* as the canvas textures (atlas.ts) */
+pattern[id$="-imp"] .tex-line { stroke: var(--ink-2); }
+.tex-dot { fill: var(--muted); }
 .swatch { stroke-width: 1; }
 .mission-dot { fill: var(--ink); }
 .mission-ring { fill: var(--surface); stroke: var(--ink); stroke-width: 1; }
@@ -140,7 +143,7 @@
 .hero-stage .overlay { position: absolute; inset: 0; pointer-events: none; }   /* annotations are clamped inside it */
 .hero-canvas { display: block; width: 100%; touch-action: pan-y; }
 .hero-note { font-size: 1rem; font-family: var(--sans); color: var(--text); font-variant-numeric: tabular-nums lining-nums;
-             background: color-mix(in srgb, var(--bg) 82%, transparent); padding: 0 2px; }
+             background: color-mix(in srgb, var(--surface) 82%, transparent); padding: 0 2px; }
 .hero-eta { font-size: 1.125rem; font-weight: 500; }
 .annot-2-html { color: var(--text-2); }
 .hero-slider { margin-top: var(--s4); max-width: 1240px; }

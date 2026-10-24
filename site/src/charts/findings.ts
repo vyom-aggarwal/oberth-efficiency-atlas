@@ -141,8 +141,8 @@ export function missionsFinding(body: HTMLElement, a: AtlasData, ms: MissionsDat
     ctx.beginPath(); ctx.rect(m.left, m.top, W - m.left - m.right, H - m.top - m.bottom); ctx.clip();
     const steps = [0, 1, 2, 3, 4, 5, 6].map((k) => cssVar(`--ramp-${k}`));
     const ramp = scaleLinear<string>().domain(steps.map((_, k) => k / 6)).range(steps).clamp(true);
-    const ink = cssVar("--ink"), paper = cssVar("--bg");
-    const pattern = textures(ctx, ink, paper);
+    const ink = cssVar("--ink"), paper = cssVar("--surface", cv ?? undefined);
+    const pattern = textures(ctx, paper);
     const X = sl.Pi_edges;
     sl.eta.forEach((row, i) => row.forEach((e, k) => {
       const st = cellStatus(sl, i, k);

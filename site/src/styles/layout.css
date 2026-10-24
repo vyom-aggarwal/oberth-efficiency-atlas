@@ -120,9 +120,13 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 .explorer-place-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--s5); }
 .explorer-place-fig { margin: 0; min-width: 0; }
 .explorer-place-fig figcaption { font-size: var(--t-label); color: var(--text-2); margin-bottom: var(--s2); }
-.case-ring circle { fill: none; stroke: var(--ink); stroke-width: 2; }
-.case-ring line { stroke: var(--ink); stroke-width: 1.5; }
-.case-ring.clipped circle { stroke-dasharray: 3 2; }
+/* The reader's case (placement.ts): an accent dot on a ring of the surface colour; on the blue atlas, an Ink ring on a
+   halo (the classic's). Beyond a plot's range: Critical, the ring dashed. */
+.case-dot .case-mark { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.case-dot.clipped .case-mark { fill: var(--critical); }
+.case-circle .case-halo { fill: none; stroke: var(--surface); stroke-width: 4.5; }
+.case-circle .case-mark { fill: none; stroke: var(--ink); stroke-width: 2; }
+.case-circle.clipped .case-mark { stroke: var(--critical); stroke-dasharray: 3 2; }
 .explorer-layout { display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); }
 .explorer-layout { display: grid; gap: var(--s5); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 1100px) {

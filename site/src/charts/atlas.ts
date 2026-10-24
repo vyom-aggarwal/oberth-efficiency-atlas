@@ -1,13 +1,13 @@
 // The atlas: η over (Π, v∞/v_esc) on the sweep's own cells (scripts/fig_atlas.py), for one steering law and one
-// Δv/V slice. η in [0, 1] on the Slate ramp; η < 0, impact and cells without a reliable value as Ink textures (no
-// red: plan pass 2). Impact boundaries; burn-start radius guides, or SOI washing for a chosen body; Δv → 0 theory
+// Δv/V slice. η in [0, 1] on the η ramp; η < 0, impact and cells without a reliable value as textures (Critical, Ink 2,
+// Muted: Phase 8). Impact boundaries; burn-start radius guides, or SOI washing for a chosen body; Δv → 0 theory
 // contours and mission samples as layers. Every value comes from atlas.json and missions.json
 // (scripts/export_site_data.py). Design: RESEARCH_LOG 2026-10-18 (checkpoint 4 design).
 import { scaleLinear, scaleLog } from "d3-scale";
 import tex from "virtual:tex";
 import { sourceLink } from "../lib/cite";
 import type { Provenance, SiteData } from "../lib/data";
-import { frag, h, onFontsLoaded, s } from "../lib/dom";
+import { frag, h, onFontsLoaded, s, setText } from "../lib/dom";
 import { sig } from "../lib/format";
 import { signal } from "../lib/signal";
 import { cssVar, themeShown } from "../lib/theme";
@@ -112,10 +112,10 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
     }));
     const n = sl.eta.length * sl.eta[0].length;
     const b = soi();
-    summary.textContent = `η over Π and v∞/v_esc for ${sl.steering} steering, Δv/V = ${sig(sl.dv_over_V)} and c/V = ${sig(sl.c_over_V)}: ` +
+    setText(summary, `η over Π and v∞/v_esc for ${sl.steering} steering, Δv/V = ${sig(sl.dv_over_V)} and c/V = ${sig(sl.c_over_V)}: ` +
       `${n} sweep cells, η from ${sig(lo, 3)} to ${sig(hi, 3)}. ${counts.negative} cells have η < 0, ${counts.impact} impact ` +
       `(the path dips below the surface, with periapsis at ${sig(d.mask_r_p_over_R, 2)} body radii) and ${counts.unreliable} have no reliable η.` +
-      (b ? ` With ${cap(b.id)}'s sphere of influence, ${out} cells start their burn outside it.` : "");
+      (b ? ` With ${cap(b.id)}'s sphere of influence, ${out} cells start their burn outside it.` : ""));
     plot.dataset.cells = String(n);
     fillLegend(sl, counts);
     if (table.open) fillTable();
@@ -165,8 +165,8 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
     ctx.beginPath(); ctx.rect(m.left, m.top, W - m.left - m.right, H - m.top - m.bottom); ctx.clip();
     const steps = [0, 1, 2, 3, 4, 5, 6].map((k) => cssVar(`--ramp-${k}`));
     const ramp = scaleLinear<string>().domain(steps.map((_, k) => k / 6)).range(steps).clamp(true);
-    const ink = cssVar("--ink"), paper = cssVar("--bg");
-    const pattern = textures(ctx, ink, paper);
+    const ink = cssVar("--ink"), paper = cssVar("--surface", canvas);
+    const pattern = textures(ctx, paper);
     const X = sl.Pi_edges;
     const quad = (i: number, k: number) => {
       ctx.beginPath();
@@ -334,9 +334,10 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
   }
 }
 
-/** Ink textures on Paper (8 px tiles): 45° lines (η < 0), 135° lines (impact), dots (no reliable value). */
-export function textures(ctx: CanvasRenderingContext2D, ink: string, paper: string): Record<"negative" | "impact" | "unreliable", CanvasPattern> {
-  const tile = (draw: (c: CanvasRenderingContext2D) => void) => {
+/** Textures on the surface colour (8 px tiles), so these cells never depend on colour alone (author, 2026-10-23): 45° lines
+ *  in Critical (η < 0), 135° lines in Ink 2 (impact), dots in Muted (no reliable value). */
+export function textures(ctx: CanvasRenderingContext2D, paper: string): Record<"negative" | "impact" | "unreliable", CanvasPattern> {
+  const tile = (ink: string, draw: (c: CanvasRenderingContext2D) => void) => {
     const c = document.createElement("canvas");
     c.width = c.height = 8;
     const g = c.getContext("2d")!;
@@ -346,9 +347,9 @@ export function textures(ctx: CanvasRenderingContext2D, ink: string, paper: stri
     return ctx.createPattern(c, "repeat")!;
   };
   return {
-    negative: tile((g) => { g.beginPath(); g.moveTo(0, 8); g.lineTo(8, 0); g.moveTo(-1, 1); g.lineTo(1, -1); g.moveTo(7, 9); g.lineTo(9, 7); g.stroke(); }),
-    impact: tile((g) => { g.beginPath(); g.moveTo(0, 0); g.lineTo(8, 8); g.moveTo(-1, 7); g.lineTo(1, 9); g.moveTo(7, -1); g.lineTo(9, 1); g.stroke(); }),
-    unreliable: tile((g) => { g.beginPath(); g.arc(4, 4, 1, 0, 2 * Math.PI); g.fill(); }),
+    negative: tile(cssVar("--critical"), (g) => { g.beginPath(); g.moveTo(0, 8); g.lineTo(8, 0); g.moveTo(-1, 1); g.lineTo(1, -1); g.moveTo(7, 9); g.lineTo(9, 7); g.stroke(); }),
+    impact: tile(cssVar("--ink-2"), (g) => { g.beginPath(); g.moveTo(0, 0); g.lineTo(8, 8); g.moveTo(-1, 7); g.lineTo(1, 9); g.moveTo(7, -1); g.lineTo(9, 1); g.stroke(); }),
+    unreliable: tile(cssVar("--muted"), (g) => { g.beginPath(); g.arc(4, 4, 1, 0, 2 * Math.PI); g.fill(); }),
   };
 }
 

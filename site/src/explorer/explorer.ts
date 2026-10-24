@@ -5,7 +5,7 @@
 import tex from "virtual:tex";
 import { axisSlider, type Mark } from "../controls/axis-slider";
 import { segmented } from "../charts/common";
-import { frag, h, s } from "../lib/dom";
+import { frag, h, s, setText } from "../lib/dom";
 import { duration, lossRel, sig, speed } from "../lib/format";
 import { fromTargets, R_FLOOR, simulate, type SimResult } from "../sim/oberth-sim.js";
 import { flybyPath, impulsivePath } from "../sim/paths";
@@ -151,7 +151,7 @@ export function explorer(root: HTMLElement, d: ExplorerData): void {
     const avs = path.burn.map((q) => q.av!).filter((a) => a > 0);   // empty if an impact came before the burn
     const avLog: [number, number] = avs.length ? [Math.log10(Math.min(...avs)), Math.log10(Math.max(...avs))] : [0, 0];
     const etaWords = Number.isFinite(res.eta) ? etaText(res.eta) : res.impacted ? "undefined (impact)" : "undefined (captured)";
-    view.setScene({ path, impulsive: impulsivePath(vp, nd.dv, EXTEND + 6), bodyRadius: sc ? sc.R / sc.r_p : null, avLog,
+    view.setScene({ path, impulsive: impulsivePath(vp, nd.dv, EXTEND + 6), bodyRadius: sc ? sc.R / sc.r_p : null, sun: sc?.body === "sun", avLog,
       label: `Trajectory of the flyby: Π = ${sig(res.Pi)}, η = ${etaWords}` });
     showReadouts(res, nd, p);
     const unit = sc ? "W/kg" : "(simulator units)";
@@ -161,8 +161,8 @@ export function explorer(root: HTMLElement, d: ExplorerData): void {
       avKey.append(h("span", { class: "ramp-bar", "aria-hidden": "true" }), " ", frag(tex.av),
         ` along this burn: ${sig(10 ** avLog[0] * k, 2)} to ${sig(10 ** avLog[1] * k, 2)} ${unit}`);
     }
-    curveSummary.textContent = onCurve(res.Pi, res.captured || res.impacted ? null : res.loss_rel);
-    atlasSummary.textContent = onAtlas(res.Pi, state.v);
+    setText(curveSummary, onCurve(res.Pi, res.captured || res.impacted ? null : res.loss_rel));
+    setText(atlasSummary, onAtlas(res.Pi, state.v));
   }
 
   function edited(p: Preset | undefined): void {
