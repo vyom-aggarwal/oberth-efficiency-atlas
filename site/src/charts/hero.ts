@@ -159,7 +159,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   // ---------------------------------------------------------------- drawing
   function rampColour(av: number): string {
     const u = Math.min(1, Math.max(0, (Math.log10(av) - avLo) / (avHi - avLo)));
-    return cssVar(`--burn-${1 + Math.round(u * 6)}`);
+    return cssVar(`--av-${1 + Math.round(u * 6)}`);
   }
   function stroke(ctx: CanvasRenderingContext2D, pts: Pt[], until: number): void {
     ctx.beginPath();
@@ -174,9 +174,9 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     if (!W) size();
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--paper");
+    ctx.fillStyle = cssVar("--bg");
     ctx.fillRect(0, 0, W, H);
-    const ink = cssVar("--ink"), graphite = cssVar("--graphite"), rule = cssVar("--rule");
+    const ink = cssVar("--ink"), graphite = cssVar("--ink-2"), rule = cssVar("--grid");
     const origin = { x: 0, y: 0 };
     // Periapsis distance (dotted) and the Sun (radius r_p / (r_p/R☉)).
     ctx.setLineDash([2, 4]); ctx.strokeStyle = rule; ctx.lineWidth = 1;
@@ -210,7 +210,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
       }
       // Drag handles at the arc's ends (pointer devices).
       if (!narrow) for (const p of [b[0], b[b.length - 1]]) {
-        ctx.fillStyle = ink; ctx.strokeStyle = cssVar("--paper"); ctx.lineWidth = 2;
+        ctx.fillStyle = ink; ctx.strokeStyle = cssVar("--bg"); ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(sx(p), sy(p), 4.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
       }
     }
@@ -253,7 +253,7 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
         place(etaNote, at!.x - 22, at!.y - 11, "end");
         const ctx = canvas.getContext("2d")!;
         ctx.globalAlpha = annotAlpha;
-        ctx.strokeStyle = cssVar("--graphite"); ctx.lineWidth = 1; ctx.setLineDash([]);
+        ctx.strokeStyle = cssVar("--ink-2"); ctx.lineWidth = 1; ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(at!.x - 18, at!.y); ctx.lineTo(at!.x - 5, at!.y); ctx.stroke();
         ctx.globalAlpha = 1;
       } else place(etaNote, W / 2, 10, "middle");

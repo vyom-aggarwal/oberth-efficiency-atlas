@@ -69,7 +69,7 @@ export function burnColour(av: number, avScale: number): string | null {
   if (!(av > 0)) return null;
   const lo = Math.log10(AV_RANGE[0]), hi = Math.log10(AV_RANGE[1]);
   const u = Math.min(1, Math.max(0, (Math.log10(av * avScale) - lo) / (hi - lo)));
-  return cssVar(`--burn-${1 + Math.round(u * 6)}`);
+  return cssVar(`--av-${1 + Math.round(u * 6)}`);
 }
 
 /**
@@ -78,7 +78,7 @@ export function burnColour(av: number, avScale: number): string | null {
  */
 export function drawRingsAndSun(ctx: CanvasRenderingContext2D, cx: number, cy: number, sc: number, rhoSun: number,
                                 rings = RINGS, at: [number, number] = [0.72, 0.72]): void {
-  const rule = cssVar("--rule"), graphite = cssVar("--graphite");
+  const rule = cssVar("--grid"), graphite = cssVar("--ink-2");
   ctx.strokeStyle = rule; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
   ctx.font = `11px ${cssVar("--sans-cond") || "sans-serif"}`; ctx.fillStyle = graphite;
   for (const r of rings) {

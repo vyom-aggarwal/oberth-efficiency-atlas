@@ -41,7 +41,7 @@ const PI_DOMAIN: [number, number] = [1e-3, 3e3];
 const LOSS_DOMAIN: [number, number] = [1e-9, 1.5];
 const PI_TICKS = [1e-3, 1e-2, 1e-1, 1, 10, 100, 1000];
 const LOSS_TICKS = [1e-8, 1e-6, 1e-4, 1e-2, 1];
-const FAMILY_STEPS = [3, 4, 5, 6, 7];              // Slate steps, faint → strong as v∞/v_esc grows
+const FAMILY_STEPS = [2, 3, 4, 5, 6];              // η-ramp steps, faint → strong as v∞/v_esc grows
 
 // Label placement (layout, not data): offset from the marker in px, and text anchor.
 const LABEL_AT: Record<string, { dx: number; dy: number; anchor: "start" | "end" }> = {
@@ -184,7 +184,7 @@ export function universalCurve(root: HTMLElement, data: CurveData, site: SiteDat
       const ends: { x: number; y: number; text: string }[] = [];
       data.arrival_family.curves.forEach((c, i) => {
         const pts = c.median.Pi.map((p, j) => [p, c.median.loss_rel[j]] as [number, number]);
-        svg.append(s("path", { class: "sim-line", style: `stroke: var(--slate-${FAMILY_STEPS[i]})`, d: line().x((d) => x(d[0])).y((d) => y(d[1]))(pts) ?? "" }));
+        svg.append(s("path", { class: "sim-line", style: `stroke: var(--ramp-${FAMILY_STEPS[i]})`, d: line().x((d) => x(d[0])).y((d) => y(d[1]))(pts) ?? "" }));
         const last = pts[pts.length - 1];
         ends.push({ x: x(last[0]), y: y(last[1]), text: sig(c.v_over_vesc, 2) });
       });
@@ -311,7 +311,7 @@ function caseLabelText(c: Case, all: Case[]): string {
 function glyph(kind: "solid" | "dashed" | "hollow"): SVGSVGElement {
   const g = s("svg", { width: 22, height: 10, "aria-hidden": "true" });
   if (kind === "hollow") g.append(s("circle", { cx: 11, cy: 5, r: 4, class: "mark-pub", "stroke-width": 1.5 }));
-  else g.append(s("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: kind === "solid" ? "var(--ink)" : "var(--graphite)",
+  else g.append(s("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: kind === "solid" ? "var(--ink)" : "var(--ink-2)",
     "stroke-width": 2, "stroke-dasharray": kind === "dashed" ? "5 3" : null }));
   return g;
 }

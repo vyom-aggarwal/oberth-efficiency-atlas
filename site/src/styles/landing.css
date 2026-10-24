@@ -1,13 +1,13 @@
 /* The landing page (Phase 7, docs/landing_plan.md): the three-engine hero, the title and entry links, the findings,
-   reproducibility and scope. The Phase 6 system unchanged: page Paper, no cards, no rules between sections, Burn only
-   for a·v, Slate only for η; space and titles separate the parts. */
+   reproducibility and scope. Restyled in Phase 8 to the classic explorer (docs/restyle_plan.md): the a·v ramp only
+   for a·v, the η ramp only for η; space and titles separate the parts. */
 
 .landing { max-width: 1240px; margin: 0 auto; padding: 0 var(--gutter) var(--s9); }
 
 /* The hero: its figure title, then the dive beside its strip and key (stacked on narrow screens). Its height is capped
    in landing-hero.ts so that the title and the entry links stay above the fold (author, 2026-10-21). */
 .landing-hero { margin: var(--s2) 0 0; }
-.hero-figure-title { font-family: var(--serif); font-weight: 600; font-size: var(--t-h3); font-variation-settings: "opsz" 24;
+.hero-figure-title { font-family: var(--sans-cond); font-weight: 600; font-size: var(--t-h3);
                      line-height: 1.25; margin: 0 0 var(--s3); }
 .landing-hero-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s3) var(--s6); }
 @media (min-width: 900px) { .landing-hero-body { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; } }
@@ -43,10 +43,10 @@
 .landing-intro { margin: var(--s5) 0 var(--s8); }
 .landing-title { margin: 0; max-width: 22ch; }
 .slot-headline { margin-top: var(--s2); }
-.slot-headline p { margin: 0; max-width: 40ch; font-family: var(--serif); font-size: var(--t-h3); font-variation-settings: "opsz" 24; line-height: 1.3; }
-.slot-summary { margin-top: var(--s5); max-width: var(--measure); font-family: var(--serif); font-size: var(--t-prose); line-height: 1.6; }
+.slot-headline p { margin: 0; max-width: 40ch; font-size: var(--t-h2); line-height: 1.3; }
+.slot-summary { margin-top: var(--s5); max-width: var(--measure); font-size: var(--t-prose); line-height: 1.6; }
 .slot-summary p { margin: 0 0 var(--s3); }
-.slot-todo { margin-top: var(--s3); max-width: var(--measure); border: 1px dashed var(--graphite); border-radius: var(--radius);
+.slot-todo { margin-top: var(--s3); max-width: var(--measure); border: 1px dashed var(--ink-2); border-radius: var(--radius);
              padding: var(--s2) var(--s3); font-size: var(--t-label); }
 .slot-todo p, .slot-todo ul { margin: 0; }
 .entry-links ul { list-style: none; padding: 0; margin: var(--s4) 0 0; display: flex; flex-wrap: wrap; gap: var(--s2) var(--s6); }
@@ -63,13 +63,13 @@
 .landing-findings > h2, .landing-repro > h2 { margin: 0 0 var(--s5); }
 .findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--s7) var(--s6); }
 .finding { margin: 0; min-width: 0; }
-.finding-title { margin: 0 0 var(--s3); font-size: 1.1875rem; line-height: 1.3; }
+.finding-title { margin: 0 0 var(--s3); font-size: var(--t-h3); line-height: 1.3; }
 .finding-legend { font-size: var(--t-label); margin-top: var(--s2); }
-.finding-caption { margin-top: var(--s3); font-family: var(--serif); font-size: var(--t-caption); }
+.finding-caption { margin-top: var(--s3); font-size: var(--t-caption); color: var(--text-2); }
 .finding-caption .slot { margin: 0 0 var(--s2); }
 .finding-caption .slot p { margin: 0; }
 .finding-caption .slot-todo { margin-top: 0; }
 .finding-link { font-family: var(--sans); font-size: var(--t-ui); }
 .finding-plot .finding-canvas { position: absolute; left: 0; top: 0; }
 .finding-plot svg { position: relative; }
-.slate-bar { background: linear-gradient(90deg, var(--slate-1), var(--slate-2), var(--slate-3), var(--slate-4), var(--slate-5), var(--slate-6), var(--slate-7)); }
+.eta-bar { background: linear-gradient(90deg, var(--ramp-0), var(--ramp-1), var(--ramp-2), var(--ramp-3), var(--ramp-4), var(--ramp-5), var(--ramp-6)); }

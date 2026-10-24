@@ -82,8 +82,8 @@ export function atlasPlacement(container: HTMLElement, a: TheoryAtlas): (Pi: num
     const y = scaleLog().domain([ye[0], ye[ye.length - 1]]).range([H - m.bottom, m.top]).clamp(true);
     svg.replaceChildren(); overlay.replaceChildren();
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", String(H));
-    const slate = [1, 2, 3, 4, 5, 6, 7].map((k) => cssVar(`--slate-${k}`));
-    const ramp = scaleLinear<string>().domain(slate.map((_, k) => k / 6)).range(slate).clamp(true);
+    const steps = [0, 1, 2, 3, 4, 5, 6].map((k) => cssVar(`--ramp-${k}`));
+    const ramp = scaleLinear<string>().domain(steps.map((_, k) => k / 6)).range(steps).clamp(true);
     const g = s("g", { class: "atlas-cells" });
     a.eta.forEach((row, j) => row.forEach((e, i) => g.append(s("rect", {
       x: x(xe[i]), y: y(ye[j + 1]), width: x(xe[i + 1]) - x(xe[i]) + 0.5, height: y(ye[j]) - y(ye[j + 1]) + 0.5, fill: ramp(e) }))));

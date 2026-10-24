@@ -139,9 +139,9 @@ export function missionsFinding(body: HTMLElement, a: AtlasData, ms: MissionsDat
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.beginPath(); ctx.rect(m.left, m.top, W - m.left - m.right, H - m.top - m.bottom); ctx.clip();
-    const slate = [1, 2, 3, 4, 5, 6, 7].map((k) => cssVar(`--slate-${k}`));
-    const ramp = scaleLinear<string>().domain(slate.map((_, k) => k / 6)).range(slate).clamp(true);
-    const ink = cssVar("--ink"), paper = cssVar("--paper");
+    const steps = [0, 1, 2, 3, 4, 5, 6].map((k) => cssVar(`--ramp-${k}`));
+    const ramp = scaleLinear<string>().domain(steps.map((_, k) => k / 6)).range(steps).clamp(true);
+    const ink = cssVar("--ink"), paper = cssVar("--bg");
     const pattern = textures(ctx, ink, paper);
     const X = sl.Pi_edges;
     sl.eta.forEach((row, i) => row.forEach((e, k) => {
@@ -191,7 +191,7 @@ export function missionsFinding(body: HTMLElement, a: AtlasData, ms: MissionsDat
   const etaLabel = h("span", {});
   etaLabel.append(frag(tex.eta), " (simulation): 0");
   body.append(h("ul", { class: "legend finding-legend", "aria-label": "Legend" },
-    h("li", {}, etaLabel, h("span", { class: "ramp-bar slate-bar", "aria-hidden": "true" }), "1"),
+    h("li", {}, etaLabel, h("span", { class: "ramp-bar eta-bar", "aria-hidden": "true" }), "1"),
     h("li", {}, dot(true), dot(false), "Mission samples: burn starts inside or outside the SOI")));
 }
 

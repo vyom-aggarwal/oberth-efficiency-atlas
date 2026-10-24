@@ -140,12 +140,12 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--paper"); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = cssVar("--bg"); ctx.fillRect(0, 0, W, H);
     ctx.save();
     ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
     drawRingsAndSun(ctx, ox, oy, sc, dv.rhoSun, RINGS, [1, 0.04]);
     ctx.restore();
-    const rule = cssVar("--rule"), ink = cssVar("--ink"), paper = cssVar("--paper");
+    const rule = cssVar("--grid"), ink = cssVar("--ink"), paper = cssVar("--bg");
 
     // The outward normal (away from the Sun) at sample i of a path, for its lane.
     const normal = (e: DiveCase, i: number): [number, number] => {

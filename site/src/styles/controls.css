@@ -11,7 +11,7 @@
 .chip { position: relative; display: inline-flex; align-items: center; gap: var(--s2); min-height: 32px;
         padding: 2px var(--s2) 2px 6px; cursor: pointer; user-select: none; }
 .chip input { appearance: none; width: 14px; height: 14px; margin: 0; border: 1px solid var(--control-edge);
-              border-radius: var(--radius); background: var(--paper); display: grid; place-content: center; cursor: pointer; }
+              border-radius: var(--radius); background: var(--bg); display: grid; place-content: center; cursor: pointer; }
 .chip input::before { content: ""; width: 8px; height: 8px; background: var(--ink); transform: scale(0); }
 .chip input:checked::before { transform: scale(1); }
 .chip input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -24,12 +24,12 @@
                    cursor: pointer; font-size: var(--t-ui); color: var(--text); }
 .segmented label + label { border-left: 1px solid var(--control-edge); }
 .segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
-.segmented label:has(input:checked) { background: var(--ink); color: var(--paper); }
+.segmented label:has(input:checked) { background: var(--ink); color: var(--bg); }
 .segmented label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; z-index: 1; }
 
 /* Select, number field, button */
 .select, .number, .button {
-  font: inherit; font-size: var(--t-ui); color: var(--text); background: var(--paper);
+  font: inherit; font-size: var(--t-ui); color: var(--text); background: var(--bg);
   border: 1px solid var(--control-edge); border-radius: var(--radius); min-height: 32px;
 }
 .select { appearance: none; padding: 0 28px 0 var(--s2);
@@ -37,8 +37,8 @@
   background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
 .number { width: 9ch; padding: 0 var(--s2); font-variant-numeric: tabular-nums; text-align: right; }
 .button { padding: 0 var(--s3); cursor: pointer; }
-.button:hover { background: var(--rule); }
-.button:active { background: var(--ink); color: var(--paper); }
+.button:hover { background: var(--grid); }
+.button:active { background: var(--ink); color: var(--bg); }
 
 /* Range slider drawn as a Π axis: the native input is the control; the SVG scale beneath it is decoration
    aligned to the same track. */
@@ -50,9 +50,9 @@
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-track { height: 2px; background: var(--ink); }
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
-  border-radius: 50%; background: var(--ink); border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
+  border-radius: 50%; background: var(--ink); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--ink); }
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink);
-  border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
+  border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--ink); }
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
 .axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
 .axis-slider svg.marks-above { height: 0; }          /* set when drawn: engine marks on a narrow track */
@@ -77,7 +77,7 @@ details.data summary { cursor: pointer; font-size: var(--t-ui); width: max-conte
 details.data summary::marker { color: var(--text-2); }
 .data-table { border-collapse: collapse; margin-top: var(--s3); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
 .data-table caption { text-align: left; color: var(--text-2); padding-bottom: var(--s2); }
-.data-table th, .data-table td { text-align: left; padding: 4px var(--s3) 4px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.data-table th, .data-table td { text-align: left; padding: 4px var(--s3) 4px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
 .data-table td.num { text-align: right; }
 .table-scroll { overflow-x: auto; max-width: 100%; }
 

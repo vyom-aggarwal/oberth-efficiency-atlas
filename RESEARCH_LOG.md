@@ -3178,4 +3178,72 @@ byte-identical. Where the Phase 6 design plan conflicts, the author's preference
    on, in both themes. The ramp's light end moves only if it is below the 2:1 stroke minimum of
    Phase 6. The values are reported.
 
+## 2026-10-23: Phase 8 step 2, pass 1 (tokens and fonts): choices made while applying the plan
+
+**Greek-and-symbol fallbacks** (decision 2), cut by `site/tools/fonts.py` with fontTools from pinned
+Google Fonts files, each checked by sha256 and under OFL 1.1:
+
+| face | source | behind | characters |
+|---|---|---|---|
+| Oberth Greek Sans 400/700 | Arimo | Barlow | the basic Greek alphabet; ⁰⁴⁵⁶⁷⁸⁹⁻ⁿ₀₁ₚ→∞≈≤≥ (66) |
+| Oberth Greek Condensed 400/700 | Roboto Condensed | Barlow Semi Condensed | the same less ₚ and → (64) |
+| Oberth Greek Mono 400/500 | Noto Sans Mono | IBM Plex Mono | the same as Greek Sans (66) |
+| Oberth Symbols 400 | Noto Sans Math | all three, last | ∝ ☉ (none of the others has them) |
+
+- **The choice:** among the candidates with full coverage, the closest x-height, cap height and widths
+  to the primary, measured with fontTools (step 1 scratch evaluation). Arimo scored 0.037, Roboto
+  Condensed 0.033, Noto Sans Mono 0.036, with Noto Sans Mono's 0.6 em advance equal to Plex Mono's.
+- **Roboto Condensed lacks ₚ and →,** so the condensed stack lists Greek Sans after Greek Condensed.
+- **Each face's `unicode-range` equals its file's characters,** so a page fetches a subset only when
+  it shows one of them.
+- **Sizes:** 4–12 KB each, as WOFF; the venv has no brotli for WOFF2.
+- **The primaries:** only the faces the site uses are declared (Barlow 400–700 and italic 400,
+  Barlow Semi Condensed 400–700, Plex Mono 400/500).
+- **Removed:** Source Serif 4, Fira Sans and Fira Sans Condensed; the four fallback packages were
+  installed only to copy their licence texts.
+- **The test:** `tests/test_site_fonts.py` checks:
+  - the subsets against the manifest and the CSS;
+  - the primaries against the packages;
+  - that every character the site displays outside KaTeX has a self-hosted glyph in all three stacks
+    (34 characters, comments excluded).
+- **Pre-commit:** the `own-tests` rule gains `site/tools/<name>.py` → `tests/test_site_<name>.py`,
+  so a change to the generator runs its test (`check_all.py`, `tests/test_check_all.py`,
+  CLAUDE.md).
+
+**Palette:**
+- **`tools/palette.mjs` reads the tokens from `explorer/app.css`,** so the site cannot drift from the
+  classic. It derives `--link` and the a·v ramp `--av-1…7` and runs the plan's checks:
+  - text and non-text contrast on both surfaces;
+  - ramp monotonicity;
+  - the a·v faint end at least 2:1;
+  - colour-vision distinctness (Machado 2009), at least 8 for the worst deficiency.
+- **Results:** every check passes.
+  - Critical against every η step: the worst colour-vision ΔE is 17.7, against `--ramp-5` in light.
+    This meets decision 3's condition.
+  - The closest dark-theme pair is the Sun against `--av-6`, at 17.4.
+- **`src/styles/palette.test.ts`** (vitest) re-runs the checks and compares `palette.css`, so the
+  pre-commit hook covers them.
+
+**The band fill:** `color-mix(in srgb, var(--axis) 60%, transparent)`, rather than the plan's solid
+`#dcdcd6`.
+- The classic draws the band at 60 % alpha, so this matches it on whatever surface the band sits on;
+  the plan's hex was the same mix on `--bg` in linear light.
+- On `--bg` the gamma-space result differs from `#dcdcd6` by at most 2 in each channel.
+
+**Type** (the classic's steps):
+- ticks 11 px Plex Mono;
+- axis titles 12 px;
+- labels, annotations and captions 13 px;
+- interface 15 px;
+- prose, readouts and figure titles 18 px;
+- section titles and the key readout 24 px;
+- page titles 34 px.
+
+The narrow-screen size reductions of Phase 6 are dropped, since the classic has none. Two choices the
+plan left open:
+- **The landing headline** (the author's slot) is set at 24 px Barlow. It was the figure-title size
+  (23 px serif), and figure titles drop to 18 px. The headline budget re-measures at the end of the
+  step.
+- **The measure** is 72 ch, the classic's lede.
+
 

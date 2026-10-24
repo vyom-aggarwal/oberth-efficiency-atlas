@@ -40,6 +40,13 @@ def test_a_changed_script_runs_its_own_test_file():
     assert C.own_tests(["scripts\\check_numbers.py"]) == ["tests/test_check_numbers.py"]
 
 
+def test_a_changed_site_tool_runs_its_own_test_file():
+    # Phase 8: site/tools/<name>.py → tests/test_site_<name>.py; the site checks run as for any site/ file.
+    assert C.select_checks(["site/tools/fonts.py"], SOURCES) == ["typecheck", "vitest", "own-tests"]
+    assert C.own_tests(["site/tools/fonts.py"]) == ["tests/test_site_fonts.py"]
+    assert C.own_tests(["site/tools/palette.mjs", "site/tools/no_such_tool.py"]) == []
+
+
 def test_own_tests_skips_scripts_without_tests_deleted_files_and_files_a_named_check_runs():
     assert not (ROOT / "tests" / "test_fig_atlas.py").exists()
     assert C.select_checks(["scripts/fig_atlas.py"], SOURCES) == []

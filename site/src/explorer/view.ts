@@ -56,10 +56,10 @@ export function trajectoryView(canvas: HTMLCanvasElement): { setScene: (sc: Scen
     canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
     const ctx = canvas.getContext("2d")!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = cssVar("--paper"); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = cssVar("--bg"); ctx.fillRect(0, 0, W, H);
     if (!scene) return;
     canvas.setAttribute("aria-label", scene.label);
-    const ink = cssVar("--ink"), graphite = cssVar("--graphite"), rule = cssVar("--rule");
+    const ink = cssVar("--ink"), graphite = cssVar("--ink-2"), rule = cssVar("--grid");
     const [ox, oy] = toScreen({ x: 0, y: 0 });
     ctx.setLineDash([2, 4]); ctx.strokeStyle = rule; ctx.lineWidth = 1;          // periapsis distance
     ctx.beginPath(); ctx.arc(ox, oy, scale, 0, 2 * Math.PI); ctx.stroke();
@@ -83,7 +83,7 @@ export function trajectoryView(canvas: HTMLCanvasElement): { setScene: (sc: Scen
     const b = scene.path.burn;
     if (!b.length) return;                                  // an impact before the burn
     const [lo, hi] = scene.avLog;
-    const colour = (av: number) => cssVar(`--burn-${1 + Math.round(Math.min(1, Math.max(0, hi > lo ? (Math.log10(av) - lo) / (hi - lo) : 1)) * 6)}`);
+    const colour = (av: number) => cssVar(`--av-${1 + Math.round(Math.min(1, Math.max(0, hi > lo ? (Math.log10(av) - lo) / (hi - lo) : 1)) * 6)}`);
     const [ax, ay] = toScreen(b[0]), [bx, by] = toScreen(b[b.length - 1]);
     if (Math.hypot(bx - ax, by - ay) < 5) {
       ctx.fillStyle = colour(b[0].av!);

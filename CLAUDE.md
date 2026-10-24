@@ -56,7 +56,8 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
     - The exporter, the site data, any of its provenance sources, or `tests/`: the site-data tests.
     - Hook scripts: the hook tests.
     - A changed `tests/test_*.py` runs itself, and a changed `scripts/<name>.py` runs
-      `tests/test_<name>.py` if it exists (check `own-tests`, author 2026-10-20).
+      `tests/test_<name>.py` if it exists (check `own-tests`, author 2026-10-20). A changed
+      `site/tools/<name>.py` runs `tests/test_site_<name>.py` (Phase 8: the font generator).
     - Logs: nothing.
     - Enable it once per clone with `git config core.hooksPath .githooks`. Never bypass it with
       `--no-verify`.

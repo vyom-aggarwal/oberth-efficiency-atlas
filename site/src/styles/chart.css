@@ -16,7 +16,7 @@
 .annot-html a { pointer-events: auto; }
 .annot-html .annot-text { margin-left: 0.3em; }
 
-.axis path, .axis line { stroke: var(--graphite); }
+.axis path, .axis line { stroke: var(--ink-2); }
 .axis text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
 .gridline { stroke: var(--grid); stroke-width: 1; }
 .annot { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
@@ -26,11 +26,11 @@
 .band { fill: var(--band-fill); stroke: none; }
 .band-edge { fill: none; stroke: var(--band-edge); stroke-width: 1; }
 .theory-line { fill: none; stroke: var(--theory); stroke-width: 1.5; stroke-dasharray: 6 4; }
-.threshold { stroke: var(--graphite); stroke-width: 1; stroke-dasharray: 1 3; }
+.threshold { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 1 3; }
 .sim-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.mark-sim { fill: var(--ink); stroke: var(--paper); stroke-width: 2; }
-.mark-pub { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
-.range-bar { stroke: var(--graphite); stroke-width: 1.25; }
+.mark-sim { fill: var(--ink); stroke: var(--bg); stroke-width: 2; }
+.mark-pub { fill: var(--bg); stroke: var(--ink); stroke-width: 2; }
+.range-bar { stroke: var(--ink-2); stroke-width: 1.25; }
 .legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s5); list-style: none; padding: 0; margin: var(--s3) 0 0;
           font-size: var(--t-label); color: var(--text-2); max-width: var(--figure); }
 .legend li { display: inline-flex; align-items: center; gap: 6px; }
@@ -43,8 +43,8 @@
 /* Sweep data and theory in the regimes figure; theory curves keep distinct dashes so the legend tells them apart. */
 .data-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 .data-dot { fill: var(--ink); }
-.context-line { fill: none; stroke: var(--rule); stroke-width: 1; }
-.ref-line { stroke: var(--graphite); stroke-width: 1; }
+.context-line { fill: none; stroke: var(--grid); stroke-width: 1; }
+.ref-line { stroke: var(--ink-2); stroke-width: 1; }
 .theory-line.theory-linear { stroke-dasharray: 10 3; }
 .theory-line.theory-I { stroke-dasharray: 5 3; }
 .theory-line.theory-II { stroke-dasharray: 2 2.5; }
@@ -53,21 +53,21 @@
 /* Atlas: cells on a canvas beneath the SVG; lines over the cells carry a Paper halo; labels sit on a Paper wash. */
 .atlas-plot .atlas-canvas { position: absolute; left: 0; top: 0; }
 .atlas-plot svg { position: relative; }
-.plot-frame { fill: none; stroke: var(--graphite); stroke-width: 1; }
-.halo { fill: none; stroke: var(--paper); stroke-width: 4; stroke-linejoin: round; opacity: 0.85; }
+.plot-frame { fill: none; stroke: var(--ink-2); stroke-width: 1; }
+.halo { fill: none; stroke: var(--bg); stroke-width: 4; stroke-linejoin: round; opacity: 0.85; }
 .impact-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
 .impact-line.alt { stroke-dasharray: 8 3 2 3; }
 .guide-line { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 1 2.5; }
-.atlas-plot .annot-html { background: color-mix(in srgb, var(--paper) 85%, transparent); padding: 0 3px; }
+.atlas-plot .annot-html { background: color-mix(in srgb, var(--bg) 85%, transparent); padding: 0 3px; }
 .contour-label { color: var(--text-2); font-style: italic; }
 .guide-label { color: var(--text); }
-.tex-bg, .swatch { stroke: var(--graphite); stroke-width: 0; }
-.tex-bg { fill: var(--paper); }
+.tex-bg, .swatch { stroke: var(--ink-2); stroke-width: 0; }
+.tex-bg { fill: var(--bg); }
 .tex-line { stroke: var(--ink); stroke-width: 1; }
 .tex-dot { fill: var(--ink); }
 .swatch { stroke-width: 1; }
 .mission-dot { fill: var(--ink); }
-.mission-ring { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+.mission-ring { fill: var(--bg); stroke: var(--ink); stroke-width: 1; }
 .pattern-defs { position: absolute; }
 .ramp-ends { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
 .inline-select { display: inline-flex; align-items: center; }
@@ -90,16 +90,16 @@
 .engine-note { color: var(--text); }
 .strip-plot { margin-top: var(--s4); }
 .strip-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
-.strip-line.faint { stroke: var(--rule); }
-.imp-step { fill: none; stroke: var(--graphite); stroke-width: 1.2; }
-.strip-cursor { stroke: var(--graphite); stroke-width: 1; }
+.strip-line.faint { stroke: var(--grid); }
+.imp-step { fill: none; stroke: var(--ink-2); stroke-width: 1.2; }
+.strip-cursor { stroke: var(--ink-2); stroke-width: 1; }
 .dash-key { display: inline-flex; align-items: center; gap: 4px; margin-right: var(--s3); }
 
 /* Burn timing: the profile (Burn ramp by value) and its three time marks. */
 .profile-fill { stroke: none; }
 .profile-line { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .timing-mark { stroke-width: 1.5; }
-.timing-mark.mark-mid { stroke: var(--graphite); stroke-dasharray: 1 3; }
+.timing-mark.mark-mid { stroke: var(--ink-2); stroke-dasharray: 1 3; }
 .timing-mark.mark-xbar { stroke: var(--ink); }
 .timing-mark.mark-xhalf { stroke: var(--ink); stroke-dasharray: 6 3; }
 .timing-facts { margin-top: var(--s5); font-size: var(--t-label); }
@@ -114,7 +114,7 @@
 
 /* Tooltip: Paper, Graphite edge, no shadow. Values in tabular figures. */
 .tooltip { position: absolute; z-index: 10; pointer-events: auto; min-width: 200px; max-width: min(320px, 90vw);
-           background: var(--paper); color: var(--text); border: 1px solid var(--graphite); border-radius: var(--radius);
+           background: var(--bg); color: var(--text); border: 1px solid var(--ink-2); border-radius: var(--radius);
            padding: var(--s2) var(--s3); font-size: 0.875rem; line-height: 1.45; }
 .tooltip[hidden] { display: none; }
 .tooltip .tt-title { font-weight: 500; }
@@ -133,13 +133,13 @@
 .hero-stage .overlay { position: absolute; inset: 0; pointer-events: none; }   /* annotations are clamped inside it */
 .hero-canvas { display: block; width: 100%; touch-action: pan-y; }
 .hero-note { font-size: 1rem; font-family: var(--sans); color: var(--text); font-variant-numeric: tabular-nums lining-nums;
-             background: color-mix(in srgb, var(--paper) 82%, transparent); padding: 0 2px; }
+             background: color-mix(in srgb, var(--bg) 82%, transparent); padding: 0 2px; }
 .hero-eta { font-size: 1.125rem; font-weight: 500; }
 .annot-2-html { color: var(--text-2); }
 .hero-slider { margin-top: var(--s4); max-width: 1240px; }
 .hero-legend .num { font-variant-numeric: tabular-nums lining-nums; }
 .ramp-bar { display: inline-block; width: 96px; height: 8px; border-radius: 1px;
-            background: linear-gradient(90deg, var(--burn-1), var(--burn-2), var(--burn-3), var(--burn-4), var(--burn-5), var(--burn-6), var(--burn-7)); }
+            background: linear-gradient(90deg, var(--av-1), var(--av-2), var(--av-3), var(--av-4), var(--av-5), var(--av-6), var(--av-7)); }
 .line-key { display: inline-block; width: 24px; height: 0; border-top: 2px solid var(--ink); vertical-align: middle; }
-.line-key.dashed { border-top: 2px dashed var(--graphite); }
+.line-key.dashed { border-top: 2px dashed var(--ink-2); }
 .hero-facts { margin-top: var(--s4); font-size: var(--t-label); }

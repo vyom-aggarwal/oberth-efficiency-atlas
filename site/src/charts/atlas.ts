@@ -163,9 +163,9 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
     ctx.clearRect(0, 0, W, H);
     ctx.save();
     ctx.beginPath(); ctx.rect(m.left, m.top, W - m.left - m.right, H - m.top - m.bottom); ctx.clip();
-    const slate = [1, 2, 3, 4, 5, 6, 7].map((k) => cssVar(`--slate-${k}`));
-    const ramp = scaleLinear<string>().domain(slate.map((_, k) => k / 6)).range(slate).clamp(true);
-    const ink = cssVar("--ink"), paper = cssVar("--paper");
+    const steps = [0, 1, 2, 3, 4, 5, 6].map((k) => cssVar(`--ramp-${k}`));
+    const ramp = scaleLinear<string>().domain(steps.map((_, k) => k / 6)).range(steps).clamp(true);
+    const ink = cssVar("--ink"), paper = cssVar("--bg");
     const pattern = textures(ctx, ink, paper);
     const X = sl.Pi_edges;
     const quad = (i: number, k: number) => {
@@ -304,7 +304,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
         ...(counts.negative ? [[sw(`url(#${id("neg")})`), etaLab(" < 0")] as [Node, Node]] : []),
         ...(counts.impact ? [[sw(`url(#${id("imp")})`), document.createTextNode(`Impact: the path dips below the surface (periapsis at ${sig(d.mask_r_p_over_R, 2)} body radii)`)] as [Node, Node]] : []),
         ...(counts.unreliable ? [[sw(`url(#${id("unr")})`), document.createTextNode("No reliable η (captured, or outside the sweep's reliability checks)")] as [Node, Node]] : []),
-        ...(body ? [[sw("var(--paper)"), document.createTextNode(`Washed: burn starts outside ${cap(body.id)}'s sphere of influence`)] as [Node, Node]] : []),
+        ...(body ? [[sw("var(--bg)"), document.createTextNode(`Washed: burn starts outside ${cap(body.id)}'s sphere of influence`)] as [Node, Node]] : []),
       ]],
       ["Lines", [
         ...(contours("h=0.1R") ? [[line("impact-line"), document.createTextNode(`Impact boundary for a periapsis altitude of ${sig(d.mask_r_p_over_R - 1, 1)} R`)] as [Node, Node]] : []),
@@ -329,7 +329,7 @@ export function atlas(root: HTMLElement, d: AtlasData, ms: MissionsData, site: S
         s("rect", { width: 6, height: 6, class: "tex-bg" }), s("path", { d: "M0,0 L6,6 M-1,5 L1,7 M5,-1 L7,1", class: "tex-line" })),
       s("pattern", { id: id("unr"), width: 6, height: 6, patternUnits: "userSpaceOnUse" },
         s("rect", { width: 6, height: 6, class: "tex-bg" }), s("circle", { cx: 3, cy: 3, r: 0.9, class: "tex-dot" })),
-      s("linearGradient", { id: id("ramp") }, ...[1, 2, 3, 4, 5, 6, 7].map((k, j) => s("stop", { offset: j / 6, style: `stop-color: var(--slate-${k})` })))));
+      s("linearGradient", { id: id("ramp") }, ...[0, 1, 2, 3, 4, 5, 6].map((k, j) => s("stop", { offset: j / 6, style: `stop-color: var(--ramp-${k})` })))));
     return h("div", { class: "legend-groups", role: "group", "aria-label": "Legend" }, defs, legendGroups);   // filled by update()
   }
 }

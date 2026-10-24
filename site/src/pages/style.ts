@@ -14,15 +14,23 @@ const $ = (id: string) => document.getElementById(id)!;
 initShell("style");
 
 // ---------------------------------------------------------------- colour (values read from the generated tokens)
+// The classic explorer's tokens (tools/palette.mjs reads them from explorer/app.css), plus the derived link colour.
 const NAMED: [string, string, string][] = [
-  ["Paper", "--paper", "Page and chart surface"],
-  ["Ink", "--ink", "Text, axes, trajectories, simulation marks, links, focus"],
-  ["Graphite", "--graphite", "Secondary text, ticks, theory lines, control edges"],
-  ["Rule", "--rule", "Gridlines and quiet dividers"],
+  ["Background", "--bg", "Page surface"],
+  ["Panel", "--panel", "Figure, finding and control panels; canvases draw on it"],
+  ["Ink", "--ink", "Text, trajectories, theory lines (dashed)"],
+  ["Ink 2", "--ink-2", "Secondary text, simulation curves, the coast path"],
+  ["Muted", "--muted", "Control outlines, axis lines, thresholds; never small text"],
+  ["Grid", "--grid", "Gridlines, rings and quiet dividers"],
+  ["Axis", "--axis", "The plot frame; the loss band at 60 %"],
+  ["Accent", "--accent", "The reader's case, focus rings, checked controls"],
+  ["Link", "--link", "Link text (Ramp 4 in light: the accent is short of 4.5:1)"],
+  ["Sun", "--sun", "The Sun"],
+  ["Critical", "--critical", "Warnings (with an icon and text), η < 0 cells (hatched)"],
 ];
-const RAMPS: [string, string, string][] = [
-  ["Burn", "burn", "The rate of orbital-energy gain a·v, and nothing else: thrust arcs, the timing profile, engine panels."],
-  ["Slate", "slate", "Magnitudes that are not thrust: the η heatmap, the arrival-speed family, the thrust-profile band."],
+const RAMPS: [string, string, number, string][] = [
+  ["η ramp", "ramp", 0, "The η heatmap and the arrival-speed family (the classic's ramp)."],
+  ["a·v ramp", "av", 1, "The rate of orbital-energy gain a·v: thrust arcs, the timing profile, engine panels (Ramp 2 to 6 in OKLab)."],
 ];
 
 function luminance(hex: string): number {
@@ -38,16 +46,19 @@ function drawColour(): void {
   $("swatches").replaceChildren(...NAMED.map(([name, v, role]) => h("div", { class: "swatch" },
     h("div", { class: "chip-color", style: `background: var(${v})` }), h("div", { class: "name" }, name),
     h("div", { class: "role" }, role), h("div", { class: "hex" }, cssVar(v)))));
-  $("ramps").replaceChildren(...RAMPS.flatMap(([name, v, role]) => [
-    h("div", { class: "ramp", role: "img", "aria-label": `${name} ramp, 7 steps: ${[1, 2, 3, 4, 5, 6, 7].map((i) => cssVar(`--${v}-${i}`)).join(", ")}` },
-      h("div", { class: "ramp-name" }, name),
-      ...[1, 2, 3, 4, 5, 6, 7].map((i) => h("div", { class: "step", style: `background: var(--${v}-${i})`, title: cssVar(`--${v}-${i}`) })),
-      h("div", {}), ...[1, 2, 3, 4, 5, 6, 7].map((i) => h("div", { class: "step-n" }, String(i)))),
-    h("p", { class: "ramp-role" }, role)]));
-  const paper = cssVar("--paper");
-  $("checks").textContent = `Contrast on Paper, computed from the tokens: Ink ${sig(contrast(cssVar("--ink"), paper))}:1, ` +
-    `Graphite ${sig(contrast(cssVar("--graphite"), paper))}:1, Burn step 1 ${sig(contrast(cssVar("--burn-1"), paper))}:1. ` +
-    `The full checks run in tools/palette.mjs.`;
+  $("ramps").replaceChildren(...RAMPS.flatMap(([name, v, first, role]) => {
+    const idx = [0, 1, 2, 3, 4, 5, 6].map((k) => k + first);
+    return [
+      h("div", { class: "ramp", role: "img", "aria-label": `${name}, 7 steps: ${idx.map((i) => cssVar(`--${v}-${i}`)).join(", ")}` },
+        h("div", { class: "ramp-name" }, name),
+        ...idx.map((i) => h("div", { class: "step", style: `background: var(--${v}-${i})`, title: cssVar(`--${v}-${i}`) })),
+        h("div", {}), ...idx.map((i) => h("div", { class: "step-n" }, String(i)))),
+      h("p", { class: "ramp-role" }, role)];
+  }));
+  const on = (fg: string, bg: string) => sig(contrast(cssVar(fg), cssVar(bg)));
+  $("checks").textContent = `Contrast computed from the tokens, on the background and on the panel: Ink ${on("--ink", "--bg")} and ` +
+    `${on("--ink", "--panel")}:1, Ink 2 ${on("--ink-2", "--bg")} and ${on("--ink-2", "--panel")}:1, a·v step 1 ${on("--av-1", "--bg")} ` +
+    `and ${on("--av-1", "--panel")}:1. The full checks run in tools/palette.mjs.`;
 }
 themeShown.subscribe(() => requestAnimationFrame(drawColour));
 

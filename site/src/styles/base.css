@@ -1,65 +1,56 @@
-/* Type scale, spacing and element defaults. Colours come from palette.css (generated); roles below map
-   palette steps to jobs, per theme where the step differs. */
+/* Type scale, spacing and element defaults: the classic explorer's (Phase 8, docs/restyle_plan.md). Colours come
+   from palette.css (generated from the classic's stylesheet); roles below map palette tokens to jobs. */
 
 :root {
-  /* Type scale: ratio 1.2 from 19 px prose (docs/site_plan.md §5). */
-  --t-label: 0.8125rem;      /* 13 px  tick labels, legends, table cells */
-  --t-annot: 0.875rem;       /* 14 px  on-plot annotation (Fira Sans Condensed) */
-  --t-ui: 1rem;              /* 16 px  controls, navigation, readouts */
-  --t-caption: 1rem;         /* 16 px  captions, notes (serif) */
-  --t-prose: 1.1875rem;      /* 19 px  body */
-  --t-h3: 1.4375rem;         /* 23 px  figure titles */
-  --t-h2: 2.0625rem;         /* 33 px  section titles */
-  --t-display: clamp(2.4375rem, 1.55rem + 3.4vw, 3.5625rem); /* 39 → 57 px  hero title only */
+  /* Type: the classic's steps 13, 15, 18, 24 and 34 px, plus its chart sizes (11 px ticks, 12 px axis titles). */
+  --t-tick: 0.6875rem;       /* 11 px  tick labels (IBM Plex Mono) */
+  --t-axis: 0.75rem;         /* 12 px  axis titles */
+  --t-label: 0.8125rem;      /* 13 px  legends, table cells, eyebrows, notes */
+  --t-annot: 0.8125rem;      /* 13 px  on-plot annotation (Barlow Semi Condensed, regular or medium) */
+  --t-caption: 0.8125rem;    /* 13 px  captions (Ink 2), as the classic's figcaption */
+  --t-ui: 0.9375rem;         /* 15 px  controls, navigation, the classic's body */
+  --t-prose: 1.125rem;       /* 18 px  prose */
+  --t-readout: 1.125rem;     /* 18 px  readout values (IBM Plex Mono) */
+  --t-h3: 1.125rem;          /* 18 px  figure titles */
+  --t-h2: 1.5rem;            /* 24 px  section titles */
+  --t-key: 1.5rem;           /* 24 px  the key readout */
+  --t-display: 2.125rem;     /* 34 px  page titles, as the classic's h1 */
 
-  --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
-  --sans: "Fira Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --sans-cond: "Fira Sans Condensed", "Fira Sans", "Arial Narrow", sans-serif;
+  /* Each primary is followed by a self-hosted Greek-and-symbol fallback (fonts.css), so η, Π, Δ, τ, ∞ and the rest
+     have the same glyphs on every platform, CI's Linux runner included (author, 2026-10-23). */
+  --sans: "Barlow", "Oberth Greek Sans", "Oberth Symbols", "Helvetica Neue", Arial, sans-serif;
+  --sans-cond: "Barlow Semi Condensed", "Oberth Greek Condensed", "Oberth Greek Sans", "Oberth Symbols", "Arial Narrow",
+    "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", "Oberth Greek Mono", "Oberth Symbols", ui-monospace, "SFMono-Regular", Consolas, monospace;
 
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
-  --measure: 66ch;           /* prose line length (< 75 characters) */
+  --measure: 72ch;           /* prose line length, the classic's lede measure */
   --figure: 960px;           /* figures break out of the prose column */
   --gutter: 16px;
   --radius: 2px;
+  --r-panel: 8px;            /* the classic's panels */
+  --r-control: 6px;          /* selects, inputs, tooltips */
+  --r-pill: 999px;           /* segmented choices, chips */
 
-  /* Roles that are the same palette step in both themes. */
+  /* Roles. */
   --text: var(--ink);
-  --text-2: var(--graphite);
-  --grid: var(--rule);
-  --control-edge: var(--graphite);   /* WCAG 1.4.11: control boundaries need >= 3:1, which Rule does not give */
-  --theory: var(--graphite);
-}
-/* Roles whose step depends on the theme (the ramps run surface-to-contrast in each). */
-:root {
-  --band-fill: var(--slate-2);
-  --band-edge: var(--slate-5);
-  --hatch: var(--slate-4);
-}
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    --band-fill: var(--slate-3);
-    --band-edge: var(--slate-5);
-    --hatch: var(--slate-4);
-  }
-}
-:root[data-theme="dark"] {
-  --band-fill: var(--slate-3);
-  --band-edge: var(--slate-5);
-  --hatch: var(--slate-4);
+  --text-2: var(--ink-2);            /* small secondary text: --muted is short of 4.5:1 in light (restyle plan §4) */
+  --control-edge: var(--muted);      /* WCAG 1.4.11: control boundaries need >= 3:1, which --axis does not give */
+  --axis-line: var(--muted);         /* the two axis lines that carry ticks; the rest of the frame is --axis */
+  --theory: var(--ink);              /* theory curves, dashed (6, 4) */
+  --band-fill: color-mix(in srgb, var(--axis) 60%, transparent);   /* the classic's loss band */
+  --band-edge: var(--muted);
 }
 
 @media (min-width: 720px) {
   :root { --gutter: 32px; }
-}
-@media (max-width: 600px) {
-  :root { --t-prose: 1.0625rem; --t-h2: 1.6875rem; --t-h3: 1.25rem; --t-caption: 0.9375rem; }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
   font-size: var(--t-ui);
@@ -68,31 +59,32 @@ body {
   overflow-x: hidden;
 }
 h1, h2, h3 {
-  font-family: var(--serif);
-  font-weight: 600;
+  font-family: var(--sans-cond);
+  font-weight: 700;
   line-height: 1.15;
   margin: 0 0 var(--s4);
   text-wrap: balance;
 }
-h1 { font-size: var(--t-display); font-weight: 560; font-variation-settings: "opsz" 60; letter-spacing: -0.01em; }
-h2 { font-size: var(--t-h2); font-variation-settings: "opsz" 36; }
-h3 { font-size: var(--t-h3); font-variation-settings: "opsz" 24; }
+h1 { font-size: var(--t-display); line-height: 1.1; letter-spacing: 0.01em; }
+h2 { font-size: var(--t-h2); }
+h3 { font-size: var(--t-h3); font-weight: 600; }
 p { margin: 0 0 var(--s4); }
-a { color: var(--text); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a { color: var(--link); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 sup { line-height: 0; font-size: 0.72em; }
+code { font-family: var(--mono); font-size: 0.9em; }
 .katex { font-size: 1.05em; }
 
 .prose {
-  font-family: var(--serif);
+  font-family: var(--sans);
   font-size: var(--t-prose);
   line-height: 1.6;
   max-width: var(--measure);
   font-variant-numeric: lining-nums proportional-nums;
 }
 .prose em, .var { font-style: italic; }
-.caption { font-family: var(--serif); font-size: var(--t-caption); line-height: 1.5; color: var(--text-2); max-width: var(--measure); }
+.caption { font-size: var(--t-caption); line-height: 1.5; color: var(--text-2); max-width: var(--measure); }
 .label-text { font-size: var(--t-label); color: var(--text-2); }
 .visually-hidden {
   position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;

@@ -49,15 +49,22 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
   modules, SVG and Canvas 2D.
 - **Math:** KaTeX, rendered at build time, so the page ships no client-side math code.
 - **Prose:** Markdown, rendered at build time.
-- **Fonts:** self-hosted Source Serif 4, Fira Sans and Fira Sans Condensed (Latin and Greek
-  subsets).
+- **Fonts** (Phase 8: the classic explorer's), all self-hosted:
+  - Barlow (body and prose), Barlow Semi Condensed (headings, annotations) and IBM Plex Mono (ticks,
+    readouts), from the pinned `@fontsource` packages, Latin and Latin-ext;
+  - after each, a Greek-and-symbol fallback cut by `site/tools/fonts.py` from pinned Google Fonts files
+    (Arimo, Roboto Condensed, Noto Sans Mono, Noto Sans Math; OFL 1.1), so η, Π, Δ, τ and ∞ have the
+    same glyphs on every platform, CI included;
+  - `tests/test_site_fonts.py` checks the subsets and that every displayed character has a
+    self-hosted glyph.
 - **Node:** 24.18.1 (`site/.nvmrc`).
 - **Packages:** pinned exactly, with the 14-day age rule (`npm install --before=…`;
   `npm run check-age` verifies the lockfile).
-- **Palette:** generated in OKLCH and checked by `npm run palette`, which writes
-  `src/styles/palette.css`.
-  - The Burn ramp is used only for a·v; Slate for magnitudes.
-  - Dark mode is its own set of steps.
+- **Palette** (Phase 8): the classic explorer's, read from `explorer/app.css` by `npm run palette`,
+  which checks it and writes `src/styles/palette.css` (vitest re-runs the checks).
+  - The a·v ramp (`--av-1…7`, the classic blue ramp from step 2 to 6) is used only for a·v; the η
+    ramp (`--ramp-0…6`) for η and the arrival-speed family.
+  - Dark mode is the classic's own set of steps.
 - **The simulator** is the validated JS port of the Python integrator, `src/sim/oberth-sim.js`.
   `tests/test_explorer_js.py` checks it against Python to |Δη| ≤ 1e-8.
 

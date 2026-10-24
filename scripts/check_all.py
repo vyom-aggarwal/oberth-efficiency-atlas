@@ -111,14 +111,17 @@ def data_sources() -> set[str]:
 
 def own_tests(paths: list[str]) -> list[str]:
     """The test files that changes to `paths` name (author, 2026-10-20): a changed tests/test_*.py runs itself, and a
-    changed scripts/<name>.py runs tests/test_<name>.py when that file exists. Deleted files and files that a named
-    check already runs (RUN_BY_CHECK) are left out."""
+    changed scripts/<name>.py runs tests/test_<name>.py when that file exists; likewise a changed site/tools/<name>.py
+    runs tests/test_site_<name>.py (Phase 8: the font generator). Deleted files and files that a named check already
+    runs (RUN_BY_CHECK) are left out."""
     out: set[str] = set()
     for p in (q.replace("\\", "/") for q in paths):
         if re.fullmatch(r"tests/test_\w+\.py", p):
             t = p
         elif m := re.fullmatch(r"scripts/(\w+)\.py", p):
             t = f"tests/test_{m.group(1)}.py"
+        elif m := re.fullmatch(r"site/tools/(\w+)\.py", p):
+            t = f"tests/test_site_{m.group(1)}.py"
         else:
             continue
         if t not in RUN_BY_CHECK and (ROOT / t).is_file():
@@ -138,7 +141,7 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
     - .claude/hooks/, .claude/settings.json, tests/test_hooks.py → hooks
     - scripts/check_all.py, .githooks/, tests/test_check_all.py   → check-all
     - .github/, tests/test_workflow.py                            → workflow (actions pinned to commit SHAs)
-    - a test file, or a script with its own test file (own_tests) → own-tests
+    - a test file, or a script or site tool with its own test file (own_tests) → own-tests
     Anything else (logs, docs that feed nothing) needs no check here; the full run covers everything.
     """
     sources = data_sources() if sources is None else sources

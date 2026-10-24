@@ -129,9 +129,9 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
     const sc = side / (2 * RHO_MAX), cx = side / 2, cy = side / 2;
     // Periapsis points down, as in the hero: screen x = y_sim, screen y = x_sim.
     const P = (i: number): [number, number] => [cx + e.Y[i] * sc, cy + e.X[i] * sc];
-    ctx.fillStyle = cssVar("--paper"); ctx.fillRect(0, 0, side, side);
+    ctx.fillStyle = cssVar("--bg"); ctx.fillRect(0, 0, side, side);
     drawRingsAndSun(ctx, cx, cy, sc, dv.rhoSun);
-    const rule = cssVar("--rule"), ink = cssVar("--ink");
+    const rule = cssVar("--grid"), ink = cssVar("--ink");
     // The full path, faint; the path so far, Ink; the burn so far, coloured by a·v.
     const path = (from: number, to: number) => { ctx.beginPath(); for (let i = from; i < to; i++) { const [px, py] = P(i); if (i === from) ctx.moveTo(px, py); else ctx.lineTo(px, py); } ctx.stroke(); };
     ctx.strokeStyle = rule; ctx.lineWidth = 1; path(0, e.X.length);
@@ -147,7 +147,7 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
     }
     if (k > 0) {
       const [px, py] = P(Math.min(k, e.X.length) - 1);
-      ctx.fillStyle = ink; ctx.strokeStyle = cssVar("--paper"); ctx.lineWidth = 2;
+      ctx.fillStyle = ink; ctx.strokeStyle = cssVar("--bg"); ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(px, py, 4.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
     }
   }

@@ -97,7 +97,7 @@ export function timing(root: HTMLElement, data: TimingData, site: SiteData, opt:
     const grad = s("linearGradient", { id: gid, x1: 0, x2: 1, y1: 0, y2: 0 });
     data.x.forEach((xx, i) => {
       const u = (Math.log(r.profile[i]) - fLo) / (fHi - fLo);
-      grad.append(s("stop", { offset: xx, style: `stop-color: var(--burn-${1 + Math.round(u * 6)})` }));
+      grad.append(s("stop", { offset: xx, style: `stop-color: var(--av-${1 + Math.round(u * 6)})` }));
     });
     svg.append(s("defs", {}, grad));
     const pts = data.x.map((xx, i) => [xx, r.profile[i]] as [number, number]);

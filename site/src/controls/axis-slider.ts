@@ -63,14 +63,14 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
     const x = (v: number) => THUMB / 2 + ((Math.log10(v) - lmin) / (lmax - lmin)) * (width - THUMB);
     svg.replaceChildren();                       // no viewBox: SVG user units are CSS pixels
     for (const z of o.zones ?? []) {
-      svg.append(s("line", { x1: x(z.from), x2: x(z.to), y1: 3, y2: 3, stroke: "var(--graphite)", "stroke-width": 3 }),
+      svg.append(s("line", { x1: x(z.from), x2: x(z.to), y1: 3, y2: 3, stroke: "var(--ink-2)", "stroke-width": 3 }),
         s("text", { class: "annot-2", x: x(z.from) + 2, y: 32 }, z.label));
     }
     // A tick at every decade; on a narrow scale, a label at every second one (the ends always labelled).
     const every = (width - THUMB) / (lmax - lmin) < 48 ? 2 : 1;
     for (let e = Math.ceil(lmin); e <= Math.floor(lmax); e++) {
       const t = 10 ** e;
-      svg.append(s("line", { x1: x(t), x2: x(t), y1: 0, y2: 6, stroke: "var(--graphite)" }));
+      svg.append(s("line", { x1: x(t), x2: x(t), y1: 0, y2: 6, stroke: "var(--ink-2)" }));
       if ((e - Math.ceil(lmin)) % every) continue;
       // The end labels align with the scale's ends instead of centring past them.
       const anchor = x(t) < 24 ? "start" : x(t) > width - 24 ? "end" : "middle";
@@ -95,8 +95,8 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       const hollow = m.kind === "threshold";
       const parts = m.label.split("\n");
       const text = s("text", { class: hollow ? "mark-label hollow" : "mark-label", x: 0, y: 0 }, parts.join(" "));
-      const tri = s("path", { d: `M${mx},-4 l-4,-7 h8z`, fill: hollow ? "var(--paper)" : "var(--ink)",
-                             stroke: hollow ? "var(--graphite)" : "none", "stroke-width": 1.2 });
+      const tri = s("path", { d: `M${mx},-4 l-4,-7 h8z`, fill: hollow ? "var(--bg)" : "var(--ink)",
+                             stroke: hollow ? "var(--ink-2)" : "none", "stroke-width": 1.2 });
       svg.append(tri, text);
       let w = text.getComputedTextLength();
       let lines: SVGTSpanElement[] = [];
@@ -138,8 +138,8 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
     const items = [...marks].sort((a, b) => a.value - b.value).map((m) => {
       const hollow = m.kind === "threshold";
       const text = s("text", { class: hollow ? "mark-label hollow" : "mark-label", y }, (m.short ?? m.label).replace("\n", " "));
-      const path = s("path", { d: tri(x(m.value)), fill: hollow ? "var(--paper)" : "var(--ink)",
-                               stroke: hollow ? "var(--graphite)" : "none", "stroke-width": 1.2 });
+      const path = s("path", { d: tri(x(m.value)), fill: hollow ? "var(--bg)" : "var(--ink)",
+                               stroke: hollow ? "var(--ink-2)" : "none", "stroke-width": 1.2 });
       if (m.detail) { path.append(s("title", {}, m.detail)); text.append(s("title", {}, m.detail)); }
       into.append(path, text);
       const w = text.getComputedTextLength();
