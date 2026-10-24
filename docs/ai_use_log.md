@@ -547,3 +547,21 @@ added to the numbers file as values.
     wait for the drawn hero.
   - **An over-claim it did not make:** the empty-slot fold check passing said nothing about the
     written state. The author caught that, not the assistant.
+- **After Phase 7, deployment** (2026-10-22): the author reported a failed manual Pages run. The
+  assistant found that no manual run had reached GitHub, so nothing needed fixing. It made no commit
+  and told the author what to re-run.
+
+## Phase 8: restyle to the classic explorer (2026-10-23, step 1 awaiting approval)
+
+**Author decided:**
+- Restyle the whole site to the classic explorer's look, keeping everything else.
+- The author's preference overrides the Phase 6 design plan.
+
+**Assistant, step 1:**
+- the inventory of the classic explorer;
+- the role mapping and derivations;
+- palette checks, with the minimal fixes;
+- the same-colour flags;
+- the font coverage check (Windows measured);
+- the paper-palette comparison;
+- a current-against-proposed preview with a temporary override (`docs/restyle_plan.md`).

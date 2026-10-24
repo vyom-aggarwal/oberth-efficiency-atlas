@@ -3097,4 +3097,47 @@ To fit 390 × 844:
   no test is skipped. CI builds the placeholder site and runs all three projects; `test_workflow.py`
   checks this.
 
+## 2026-10-23: Phase 8 begins: restyle the site to match the classic explorer (step 1, awaiting approval)
+
+**Brief** (author): the site takes the classic explorer's colour scheme and visual style. Pages,
+structure, data, behaviour and the intent of every test stay. The classic explorer stays
+byte-identical. Where the Phase 6 design plan conflicts, the author's preference wins.
+
+**Step 1 results** (`docs/restyle_plan.md`; no site code changed):
+- **Inventory:**
+  - the classic has two themes (light default, dark), with the same switching mechanism as the
+    site;
+  - eleven colour tokens plus a seven-step blue ramp per theme;
+  - Barlow, Barlow Semi Condensed and IBM Plex Mono, loaded from Google Fonts, not system fonts;
+  - tinted 8 px panels and pill controls;
+  - the burn as one accent colour.
+- **Paper palette:** the classic light theme equals `plotting.py`'s neutrals and `SERIES[0]`, and
+  its ramp equals `BLUE_RAMP` except the faintest step (`#e3eefb` against `#cde2fb`). The paper
+  colours a·v and η with that ramp.
+- **Palette checks** (scratch script on `palette.mjs`'s maths, plus colour-vision simulation):
+  - The classic palette fails 14 checks, all in light except the control outlines:
+    - muted text 3.50:1;
+    - the accent as link text 4.30:1;
+    - green text 4.22:1;
+    - `--axis` control outlines and plot frame 1.75:1 (dark 2.11:1).
+  - The proposed fixes keep the look and leave 0 failures:
+    - small secondary text in `--ink-2`;
+    - links in `--ramp-4` in light;
+    - outlines and axis lines in `--muted`.
+  - The η ramp and the derived a·v ramp (`--ramp-2` to `--ramp-6`, OKLab) are monotone, with steps
+    of at least 0.062, and the a·v faint end is at least 2.23:1.
+- **Same colour, two quantities:**
+  - a·v and η share the blue ramp: never in one figure, but on the same page;
+  - the accent case marker is nearly invisible on blue (ΔE 1.7–5.0), so on blue it becomes an Ink
+    ring, as in the classic atlas;
+  - red/green chips are confusable under colour-vision deficiency (ΔE 7.0) and keep text and icon.
+- **Fonts:** none of the three covers Greek. Measured on Windows: Greek falls back to Arial, Arial
+  Narrow and Consolas. macOS, iOS and Android were not tested here; their documented stacks include
+  Greek.
+- **Preview:** current against proposed (`docs/screens/phase-8-proposal/`): the landing hero,
+  Figure 2 and Figure 4 at 1440 and 390 px, both themes. A temporary token override injected by a
+  throwaway spec; neither is committed.
+- **Open decisions** (plan §11): the a·v ramp colour, Greek fallbacks, the derivations, and the
+  contrast fixes.
+
 

@@ -18,6 +18,11 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-8-proposal/` (Phase 8, step 1): current against proposed, side by side.
+  - Covers the landing hero, Figure 2 (the universal curve) and Figure 4 (the atlas), at 1440 and
+    390 px in both themes.
+  - The proposed side is the test build with a temporary token override (`docs/restyle_plan.md`
+    §9). It is not the final restyle.
 - `phase-7/`: the landing page and the references page (Phase 7, for the author's review), as full
   pages at 1440 and 390 px in both themes.
   - `landing-<width>-<theme>-empty.png`: the production build (`dist-empty`), every prose slot
