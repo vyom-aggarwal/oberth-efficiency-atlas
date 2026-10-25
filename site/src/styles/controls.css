@@ -63,7 +63,7 @@
 .axis-slider svg.marks-above { height: 0; }          /* set when drawn: engine marks on a narrow track */
 .axis-slider .axis-note { grid-column: 1 / -1; margin: 0; font-size: var(--t-label); color: var(--text-2); }
 .axis-slider svg text { fill: var(--text-2); font-family: var(--mono); font-size: var(--t-tick); font-variant-numeric: tabular-nums lining-nums; }
-.axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 500; }
+.axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 600; }   /* engine names */
 .axis-slider svg text.mark-label.hollow { fill: var(--text-2); font-weight: 400; }   /* not .threshold: that class is the dotted line style */
 @media (pointer: coarse) {
   :is(.axis-slider, .snap-slider, .scrub) input[type="range"] { height: 44px; }

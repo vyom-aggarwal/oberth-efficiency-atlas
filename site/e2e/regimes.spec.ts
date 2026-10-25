@@ -63,7 +63,7 @@ test("regimes: the readout gives the nearest bin's η_W and η", async ({ page }
   await fig.locator(".plot svg rect.hit").hover();
   const tip = fig.locator(".tooltip");
   await expect(tip).toBeVisible();
-  await expect(tip).toContainText("η_W, median");
+  await expect(tip).toContainText("ηW, median");                     // η_W, typeset (notation.ts): η<sub>W</sub>
   await expect(tip).toContainText("η, median");
 });
 

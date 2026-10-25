@@ -64,12 +64,18 @@ export function clockText(dv: Dive, sv: number): string {
   return `t = ${hours >= 0 ? "+" : "−"}${sig(Math.abs(hours), 3)} h from perihelion`;
 }
 
-/** The Burn-ramp colour for a·v (nondimensional), on the animation's log scale; null where the engine is off. */
-export function burnColour(av: number, avScale: number): string | null {
+/** The a·v ramp step (1–7) for a·v (nondimensional), on the animation's log scale; null where the engine is off. */
+export function burnStep(av: number, avScale: number): number | null {
   if (!(av > 0)) return null;
   const lo = Math.log10(AV_RANGE[0]), hi = Math.log10(AV_RANGE[1]);
   const u = Math.min(1, Math.max(0, (Math.log10(av * avScale) - lo) / (hi - lo)));
-  return cssVar(`--av-${1 + Math.round(u * 6)}`);
+  return 1 + Math.round(u * 6);
+}
+
+/** The a·v ramp colour for a·v (nondimensional); null where the engine is off. */
+export function burnColour(av: number, avScale: number): string | null {
+  const k = burnStep(av, avScale);
+  return k === null ? null : cssVar(`--av-${k}`);
 }
 
 /**
@@ -83,11 +89,18 @@ export function drawRingsAndSun(ctx: CanvasRenderingContext2D, cx: number, cy: n
   const grid = cssVar("--grid"), axis = cssVar("--axis");
   ctx.lineWidth = 1;
   ctx.font = `11px ${cssVar("--mono") || "monospace"}`; ctx.fillStyle = cssVar("--ink-2");
+  ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  // A label that would touch one already drawn (rings close together on a small view) is left out; inner rings first.
+  const drawn: [number, number, number, number][] = [];
   for (const r of rings) {
     const rho = (1 + Math.log10(r)) * sc;
     ctx.strokeStyle = r === 1 ? axis : grid; ctx.setLineDash(r === 1 ? [4, 4] : []);
     ctx.beginPath(); ctx.arc(cx, cy, rho, 0, 2 * Math.PI); ctx.stroke();
-    ctx.fillText(r === 1 ? "rₚ" : `${r} rₚ`, cx + rho * at[0] + 2, cy + rho * at[1]);
+    const text = r === 1 ? "rₚ" : `${r} rₚ`, lx = cx + rho * at[0] + 2, ly = cy + rho * at[1];
+    const box: [number, number, number, number] = [lx, ly - 10, lx + ctx.measureText(text).width, ly + 3];
+    if (drawn.some(([a, b, c, d]) => box[0] < c + 4 && a < box[2] + 4 && box[1] < d && b < box[3])) continue;
+    drawn.push(box);
+    ctx.fillText(text, lx, ly);
   }
   ctx.setLineDash([]);
   ctx.fillStyle = cssVar("--sun");
@@ -101,7 +114,7 @@ export function drawRingsAndSun(ctx: CanvasRenderingContext2D, cx: number, cy: n
 export function drawEnergyStrip(strip: SVGSVGElement, dv: Dive, k: number, W: number, H: number, clipId: string): void {
   if (W < 200) return;
   const { t, tau, windowTau, timeS } = dv;
-  const m = { top: 10, right: 12, bottom: 34, left: 44 };
+  const m = { top: 10, right: 12, bottom: 38, left: 44 };              // room for the title's subscripts under the ticks
   const sl = (u: number) => Math.sign(u) * (Math.abs(u) <= 1 ? Math.abs(u) : 1 + Math.log10(Math.abs(u)));
   const L = sl(windowTau);
   const x = (tv: number) => m.left + ((sl(tv / tau) + L) / (2 * L)) * (W - m.left - m.right);
@@ -118,7 +131,7 @@ export function drawEnergyStrip(strip: SVGSVGElement, dv: Dive, k: number, W: nu
   for (const f of [0, 0.5, 1]) ax.append(s("line", { x1: m.left - 4, x2: m.left, y1: y(f), y2: y(f) }),
     s("text", { x: m.left - 7, y: y(f) + 4, "text-anchor": "end" }, String(f)));
   // The axis title in Barlow 12 px (not the ticks' mono), its subscripts typeset (dom.ts).
-  ax.append(s("text", { class: "axis-title", x: (m.left + W - m.right) / 2, y: H - 3, "text-anchor": "middle" },
+  ax.append(s("text", { class: "axis-title", x: (m.left + W - m.right) / 2, y: H - 6, "text-anchor": "middle" },
     `time from perihelion (τ = r_p/v_p = ${duration(tau * timeS)})`));
   strip.append(ax);
   // The impulsive step at perihelion.

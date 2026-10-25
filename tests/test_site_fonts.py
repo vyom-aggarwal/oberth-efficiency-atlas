@@ -77,10 +77,18 @@ def test_fallbacks_come_from_the_pinned_sources():
         assert set(e["codepoints"]) | set(e["missing"]) == set(wanted)
 
 
-def test_fallback_licences_are_shipped():
-    for pkg in F.LICENSES.values():
-        text = (FALLBACK / f"LICENSE-{pkg}.txt").read_text(encoding="utf-8")
-        assert "SIL Open Font License, Version 1.1" in text
+def test_fallback_licences_are_shipped_with_each_subset():
+    """Each subset's licence: its own copyright notice (name record 0, kept by the subsetter), then the OFL 1.1 text
+    (author, 2026-10-24). No Reserved Font Name is declared, so the subsets may keep their internal names."""
+    for e in MANIFEST:
+        slug, url, _ = F.LICENSES[e["source_family"]]
+        assert (e["license_file"], e["license_text"]) == (f"LICENSE-{slug}.txt", url)
+        text = (FALLBACK / e["license_file"]).read_text(encoding="utf-8")
+        notice = TTFont(FALLBACK / e["file"])["name"].getDebugName(0).strip()
+        header, _, body = text.partition(F.OFL_START)
+        assert header.strip() == notice, e["file"]
+        assert "SIL OPEN FONT LICENSE Version 1.1" in body and "Reserved Font Name" in body   # the licence's definitions
+        assert "reserved font name" not in header.lower()
 
 
 def test_fallback_unicode_ranges_equal_the_files():
@@ -123,6 +131,10 @@ def displayed_text() -> dict[str, str]:
         if not p.is_file() or p.suffix not in {".ts", ".html", ".md"} or SKIP_DIRS & set(p.relative_to(SITE).parts):
             continue
         if p.name.endswith(".test.ts") or p.name.endswith(".d.ts"):
+            continue
+        if p.relative_to(SITE).as_posix() == "src/lib/notation.ts":
+            # Its tables list every Unicode sub- and superscript for plain(), which writes only accessible names and
+            # title attributes: read aloud or shown by the browser in system fonts, never drawn in the site's fonts.
             continue
         text = p.read_text(encoding="utf-8")
         if p.suffix == ".md":

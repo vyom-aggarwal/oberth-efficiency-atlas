@@ -38,6 +38,7 @@
   .lh-key-compact { display: flex; margin: 0; font-size: var(--t-label); gap: 2px var(--s4); }
   .lh-legend .ramp-bar { width: 64px; }
   .lh-controls { gap: var(--s2); }
+  .lh-controls .scrub { min-width: 96px; }
   .lh-controls .clock { font-size: var(--t-axis); }   /* IBM Plex Mono at 12 px: the clock fits beside the scrub at 360 px */
 }
 

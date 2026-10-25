@@ -75,7 +75,9 @@
    8804,
    8805
   ],
-  "missing": []
+  "missing": [],
+  "license_file": "LICENSE-arimo.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/arimo/OFL.txt"
  },
  {
   "file": "greek-sans-700.woff",
@@ -153,7 +155,9 @@
    8804,
    8805
   ],
-  "missing": []
+  "missing": [],
+  "license_file": "LICENSE-arimo.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/arimo/OFL.txt"
  },
  {
   "file": "greek-condensed-400.woff",
@@ -232,7 +236,9 @@
   "missing": [
    8346,
    8594
-  ]
+  ],
+  "license_file": "LICENSE-roboto-condensed.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/robotocondensed/OFL.txt"
  },
  {
   "file": "greek-condensed-700.woff",
@@ -311,7 +317,9 @@
   "missing": [
    8346,
    8594
-  ]
+  ],
+  "license_file": "LICENSE-roboto-condensed.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/robotocondensed/OFL.txt"
  },
  {
   "file": "greek-mono-400.woff",
@@ -389,7 +397,9 @@
    8804,
    8805
   ],
-  "missing": []
+  "missing": [],
+  "license_file": "LICENSE-noto-sans-mono.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosansmono/OFL.txt"
  },
  {
   "file": "greek-mono-500.woff",
@@ -467,7 +477,9 @@
    8804,
    8805
   ],
-  "missing": []
+  "missing": [],
+  "license_file": "LICENSE-noto-sans-mono.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosansmono/OFL.txt"
  },
  {
   "file": "symbols-400.woff",
@@ -481,6 +493,8 @@
    8733,
    9737
   ],
-  "missing": []
+  "missing": [],
+  "license_file": "LICENSE-noto-sans-math.txt",
+  "license_text": "https://raw.githubusercontent.com/google/fonts/e7db6ca603fd4862010383ff17ffd6cc4ffac1c0/ofl/notosansmath/OFL.txt"
  }
 ]

@@ -49,7 +49,9 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* No faux bold: every family ships the weights the site uses except the symbols face (400 only), whose ∝ and ☉ keep
+   their drawn weight in bold labels rather than a smeared synthetic one. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; font-synthesis-weight: none; }
 body {
   margin: 0;
   background: var(--bg);

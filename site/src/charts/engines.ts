@@ -11,7 +11,7 @@ import { frag, h, onFontsLoaded, s } from "../lib/dom";
 import { duration, lossRel, sig } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
 import { dataTable, segmented } from "./common";
-import { AV_RANGE, burnColour, clockText, DASH, dashGlyph, dive, drawEnergyStrip, drawRingsAndSun, type DiveCase, type EnginesData } from "./dive-view";
+import { AV_RANGE, burnColour, burnStep, clockText, DASH, dashGlyph, dive, drawEnergyStrip, drawRingsAndSun, type DiveCase, type EnginesData } from "./dive-view";
 
 export type { EnginesData } from "./dive-view";
 
@@ -138,14 +138,18 @@ export function engines(root: HTMLElement, d: EnginesData, buf: ArrayBuffer, sit
     ctx.strokeStyle = rule; ctx.lineWidth = 1; path(0, e.X.length);
     ctx.strokeStyle = ink; ctx.lineWidth = 1.4; path(0, k);
     ctx.lineWidth = 4; ctx.lineCap = "round";
+    const steps = new Set<number>();                                     // the a·v steps drawn (e2e/av-stroke.spec.ts)
     for (let i = 1; i < k; i++) {
       if (!(e.av[i - 1] > 0)) continue;
       const colour = burnColour(e.av[i], dv.avScale);
+      const step = burnStep(e.av[i], dv.avScale);
+      if (step !== null) steps.add(step);
       if (!colour) continue;
       ctx.strokeStyle = colour;
       const [ax, ay] = P(i - 1), [bx, by] = P(i);
       ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
     }
+    canvas.dataset.avSteps = [...steps].sort().join(",");
     if (k > 0) {
       const [px, py] = P(Math.min(k, e.X.length) - 1);
       ctx.fillStyle = ink; ctx.strokeStyle = surface; ctx.lineWidth = 2;

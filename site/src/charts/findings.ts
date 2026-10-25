@@ -104,7 +104,7 @@ export function lossFinding(body: HTMLElement, d: CurveData, en: EnginesData, si
         h("div", { class: "tt-title" }, e.label.name + (e.label.caveat ? ` (${e.label.caveat})` : "")),
         h("dl", {}, h("dt", {}, "Π"), h("dd", {}, sig(e.c.Pi.value)), h("dt", {}, "loss/Δv"), h("dd", {}, lossRel(e.c.loss_rel.value))),
         h("div", { class: "tt-source" }, "Data: ", sourceLink(site, "figures/anim_numbers.json"))));
-      placer.add(ex, ey, document.createTextNode(e.label.short), e.i === 2 ? { dx: -12, dy: -14, anchor: "end" } : { dx: 12, dy: -14, anchor: "start" });
+      placer.add(ex, ey, h("span", { class: "engine-label" }, e.label.short), e.i === 2 ? { dx: -12, dy: -14, anchor: "end" } : { dx: 12, dy: -14, anchor: "start" });
     });
     placer.finish();
   });

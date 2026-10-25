@@ -14,7 +14,7 @@ import { frag, h, onFontsLoaded, s } from "../lib/dom";
 import { duration, lossRel, sig } from "../lib/format";
 import { cssVar, themeShown } from "../lib/theme";
 import { dataTable } from "./common";
-import { AV_RANGE, burnColour, clockText, DASH, dashGlyph, dive, drawEnergyStrip, drawRingsAndSun, type DiveCase, type EnginesData } from "./dive-view";
+import { AV_RANGE, burnColour, burnStep, clockText, DASH, dashGlyph, dive, drawEnergyStrip, drawRingsAndSun, type DiveCase, type EnginesData } from "./dive-view";
 
 const SWEEP_MS = 2400, LABELS_MS = 2400, DONE_MS = 2800;    // the sequence: sweep the clock, then labels, then done
 const SEEN = "oberth-landing-intro";                         // sessionStorage: the sequence has played this session
@@ -167,26 +167,48 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     ctx.strokeStyle = ink; ctx.lineWidth = 1.4;
     cases.forEach((e, i) => { ctx.setLineDash(DASH[i]); path(e, 0, Math.min(k, e.X.length)); });
     ctx.setLineDash([]);
-    // The burns so far, each in its lane, coloured by a·v. The solid stack's burn is a few samples long: a dot.
+    // The burns so far, each in its lane, coloured by a·v. The solid stack's burn is a few samples long: a dot. The a·v steps
+    // drawn are recorded on the canvas (data-av-steps) for the stroke-contrast test (e2e/av-stroke.spec.ts).
+    const steps = new Set<number>();
+    const colourAt = (e: DiveCase, i: number) => { const s = burnStep(e.av[i], dv.avScale); if (s !== null) steps.add(s); return burnColour(e.av[i], dv.avScale); };
     cases.forEach((e, j) => {
       const off = (j + 1) * lane;
       const on = burning[j].filter((i) => i < k);
       if (!on.length) return;
       if (on.length < 12) {
         const i = on[on.length >> 1], [nx, ny] = normal(e, i), [px, py] = P(e, i);
-        ctx.fillStyle = burnColour(e.av[i], dv.avScale) ?? ink;
+        ctx.fillStyle = colourAt(e, i) ?? ink;
         ctx.beginPath(); ctx.arc(px + nx * off, py + ny * off, 3, 0, 2 * Math.PI); ctx.fill();
         return;
       }
-      ctx.lineWidth = 3; ctx.lineCap = "butt";
+      // Each run of consecutive samples in one a·v step is stroked as one path. Stroked sample by sample, the segments'
+      // anti-aliased ends overlap and a short run never reaches its colour (fix 6: the SEP lane's pale end faded).
+      ctx.lineWidth = 3; ctx.lineCap = "butt"; ctx.lineJoin = "round";
+      let run: number[] = [], runColour: string | null = null;
+      const flush = () => {
+        if (runColour && run.length) {
+          ctx.strokeStyle = runColour;
+          ctx.beginPath();
+          run.forEach((i, n) => {
+            const [nx, ny] = normal(e, i), [px, py] = P(e, i);
+            if (n === 0) {                                            // the run starts at the sample before its first
+              const [ax, ay] = P(e, i - 1);
+              ctx.moveTo(ax + nx * off, ay + ny * off);
+            }
+            ctx.lineTo(px + nx * off, py + ny * off);
+          });
+          ctx.stroke();
+        }
+        run = []; runColour = null;
+      };
       for (const i of on) {
-        if (i === 0 || !(e.av[i - 1] > 0)) continue;
-        const colour = burnColour(e.av[i], dv.avScale);
-        if (!colour) continue;
-        const [ax, ay] = P(e, i - 1), [bx, by] = P(e, i), [nx, ny] = normal(e, i);
-        ctx.strokeStyle = colour;
-        ctx.beginPath(); ctx.moveTo(ax + nx * off, ay + ny * off); ctx.lineTo(bx + nx * off, by + ny * off); ctx.stroke();
+        if (i === 0 || !(e.av[i - 1] > 0)) { flush(); continue; }
+        const colour = colourAt(e, i);
+        if (!colour) { flush(); continue; }
+        if (colour !== runColour || (run.length && i !== run[run.length - 1] + 1)) flush();
+        runColour = colour; run.push(i);
       }
+      flush();
     });
     // Where each engine is now.
     if (k > 0) for (const e of cases) {
@@ -215,6 +237,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
       });
     }
     canvas.dataset.labelsClipped = String(clipped);
+    canvas.dataset.avSteps = [...steps].sort().join(",");
     canvas.dataset.k = String(k);
   }
 

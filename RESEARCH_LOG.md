@@ -3289,4 +3289,100 @@ plan left open:
 - **Headline:** the longest headline that fits is 444 characters at 1440 × 900 and 124 at 390 × 844
   (Phase 7: 365 and 114). The budget stays 100 for now and is re-measured after pass 3.
 
+## 2026-10-24: Phase 8 step 2, pass 3 (charts) and the six preview fixes
+
+Commits `bfb765e` (first part) and the pass 3 commit.
+
+**Charts, as the classic explorer:**
+- **Axes:**
+  - the two axis lines and their ticks in `--muted`, the rest of a frame in `--axis`;
+  - tick labels in IBM Plex Mono 11 px, axis titles in Barlow 12 px;
+  - gridlines in `--grid`.
+- **Lines:**
+  - theory in Ink, dashed (6, 4), 1.4 px (the regimes figure keeps its distinct dashes per theory curve);
+  - simulation curves (sweep medians, the case-study loss) in Ink 2;
+  - thresholds dotted (2, 3) in `--muted`;
+  - the band in Axis at 60 %, its edges Muted.
+- **Trajectories:**
+  - every canvas paints its panel's colour (`cssVar` reads `--surface` on the canvas);
+  - the r_p ring dashed (4, 4) in Axis, the other rings solid in Grid, ring labels in Plex Mono 11 px Ink 2;
+  - the Sun in `--sun`, other bodies in `--muted` (explorer).
+- **The reader's case** (explorer placement): an accent dot on a ring of the panel colour on the universal curve; an
+  Ink ring on a halo on the blue atlas; Critical (and dashed) when the case lies beyond a plot.
+- **Atlas textures:** η < 0 hatched in Critical, impact hatched in Ink 2, no reliable η as Muted dots, on the panel
+  colour, in the canvas and the legend alike.
+
+**The six fixes:**
+1. **Weights.** On-plot annotations are regular (400); engine names are bold (600): the landing hero's lane labels,
+   the loss finding's Solid, Nuclear and SEP* labels, the Π slider's engine marks, and the keys. Figure titles are bold.
+   The cause of "everything bold" in the preview: its Google Fonts import loaded Barlow Semi Condensed at 600 and 700
+   only, so regular labels were drawn in a bold face; the self-hosted 400 and 500 faces remove it.
+2. **Overflow.** `e2e/panel-text.spec.ts`, at 360 and 390 px, on the landing page, the article and the explorer:
+   - every piece of text inside a figure panel (SVG text including axis titles, HTML text, KaTeX overlays) stays
+     inside the panel's padding box;
+   - on-plot text overlaps no other on-plot text;
+   - canvas labels report no clipping.
+
+   Left out: scrollable tables (they scroll by design) and closed "Show data" disclosures, whose unshown text Chrome
+   reports at boxes outside the panel. It found the hero clock 7 px into the padding at 360 px: the scrub's minimum
+   width is now 96 px below 600 px. The strip's axis title is Barlow 12 px (it inherited the ticks' mono); the strip's
+   bottom margin grows from 34 to 38 px so the title's subscripts stay inside it.
+3. **Notation** (first part): `src/lib/notation.ts`; `e2e/notation.spec.ts` passes on every page at 1440 and 390 px.
+   - Typesetting: an index after a lone letter (`v_esc`, `Π_{eff}`, `r^−1.5`) becomes `<sub>`/`<sup>` in HTML and a
+     tspan in SVG (explicit shifts, −0.25 em and +0.45 em: Chrome's "sub" dropped the index below a tight axis title's
+     box). Accessible names take Unicode indices or the index after a space.
+   - The DOM helpers apply it to every string they append, except inside code.
+   - File names in running text become `<code>`; so do the source links, the footer's file names and the development
+     banners'.
+   - The regimes readout test now expects "ηW, median" (the typeset η_W).
+4. **One surface per panel** (first part).
+5. **Transparent KaTeX overlays** (first part): the atlas's on-cell labels keep a wash of the panel colour; axis
+   titles have none.
+6. **The faintest a·v stroke, measured on screen.** `e2e/av-stroke.spec.ts` reads the rendered pixels:
+   - Each canvas records the a·v steps it drew (`data-av-steps`). The test finds the faintest one's pixels at full
+     strength (within 2 per channel, with a neighbour in it too).
+   - It measures their mean colour against the surface pixel the canvas painted, which must equal the panel colour.
+   - The values are written to `runs/av_stroke_contrast.json`.
+
+   | canvas | theme | faintest step drawn | pixels at full strength | measured | token |
+   |---|---|---|---|---|---|
+   | landing hero lanes | light | 1 `#6da7ec` | 295 | 2.23:1 | 2.23:1 |
+   | landing hero lanes | dark | 1 `#1f5394` | 295 | 2.24:1 | 2.24:1 |
+   | Figure 7, SEP panel | light | 1 `#6da7ec` | 294 | 2.23:1 | 2.23:1 |
+   | Figure 7, SEP panel | dark | 1 `#1f5394` | 296 | 2.24:1 | 2.24:1 |
+
+   - Figure 7's solid and nuclear panels are at 8.29 and 4.81:1 (light), 10.2 and 5.70:1 (dark).
+   - **What the measurement found:** before this pass the hero's lanes were stroked sample by sample. The overlapping
+     anti-aliased ends of those sub-pixel segments meant the SEP lane's step-1 stretch never reached its colour: no
+     pixel at full strength in dark, and in light only 2 (stray edges of step 2). The pale end was therefore lighter
+     on screen than its token, which is what the preview showed.
+   - **The fix:** each run of samples in one step is now stroked as one path. The rendered colour then equals the
+     token, at 2.23:1 and 2.24:1, both at or above the 2:1 thin-mark rule, so the ramp's light end is unchanged.
+   - The research hero and the explorer still stroke sample by sample, with wider lines (5–6 px); they are not
+     measured here.
+
+**Also changed while testing:**
+- **Slider labels** keep 2 px inside the track. The bold SEP label, clamped exactly to the edge, overhung it by 1.1 px:
+  its box is wider than its measured advance.
+- **No faux bold** (`font-synthesis-weight: none`). The symbols face has 400 only; ∝ and ☉ keep their drawn weight in
+  bold labels.
+- **Ring labels** that would touch one already drawn are left out, inner rings first. At 390 px "10 rₚ" collided with
+  "30 rₚ" in the wider mono face; there the middle label is dropped.
+
+**Font licences** (author, 2026-10-24):
+- **No Reserved Font Names.** None of Arimo, Roboto Condensed, Noto Sans Mono or Noto Sans Math declares one. I checked
+  the header of each family's OFL.txt in google/fonts (commit `e7db6ca`) and the copyright records of the pinned font
+  files. The subsets therefore keep their internal names; the CSS family names differ anyway.
+- **The committed licences.** Each `LICENSE-<family>.txt` is now generated by `fonts.py`: the subset file's own
+  copyright notice, then the OFL 1.1 text from that pinned OFL.txt (sha256-checked). Before, they were copies of the
+  `@fontsource` packages' licence files.
+  - One difference: upstream Arimo's header now reads 2026, while the pinned v36 file says 2020.
+  - `LICENSE-content.md` lists the four fonts with their files and copyright holders.
+- **Reproducible output.** The generator keeps each source's timestamp (`recalcTimestamp=False`), so it now writes
+  identical files on every run. Its download cache is keyed on the last two URL parts, since every family's licence
+  file is named OFL.txt.
+- **The test** checks each licence against its subset's notice and that the header names no Reserved Font Name.
+
+**The test build:** Playwright, 154 tests, all pass.
+
 

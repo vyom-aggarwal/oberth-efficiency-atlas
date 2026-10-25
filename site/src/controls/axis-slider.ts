@@ -22,8 +22,9 @@ export interface AxisSliderOptions {
 }
 
 const THUMB = 18;              // px; matches controls.css
-const ROW = 17;                // px between mark-label rows: 1.2 × the 14 px label size
+const ROW = 17;                // px between mark-label rows: 1.3 × the 13 px label size
 const SPLIT_BELOW = 560;       // px of track: narrower, engine marks go above the track and thresholds below
+const EDGE = 2;                 // px: labels stay this far inside the track (a glyph's box can exceed its advance by ~1 px)
 
 export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Signal<number> } {
   const value = signal(o.value);
@@ -108,7 +109,7 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       }
       if (m.detail) { tri.append(s("title", {}, m.detail)); text.append(s("title", {}, m.detail)); }
       const n = Math.max(1, lines.length);
-      const left = Math.max(0, Math.min(mx - w / 2, width - w));
+      const left = Math.max(EDGE, Math.min(mx - w / 2, width - w - EDGE));
       let k = 0;
       while (k + n < rows.length && !Array.from({ length: n }, (_, j) => free(k + j, left, left + w)).every(Boolean)) k++;
       for (let j = 0; j < n; j++) rows[k + j].push([left, left + w]);
@@ -152,7 +153,7 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
         const overlap = a.left + a.w + 10 - b.left;
         if (overlap > 0.5) { a.left -= overlap / 2; b.left += overlap / 2; moved = true; }
       }
-      for (const it of items) it.left = Math.max(0, Math.min(width - it.w, it.left));
+      for (const it of items) it.left = Math.max(EDGE, Math.min(width - it.w - EDGE, it.left));
       if (!moved) break;
     }
     for (const it of items) it.text.setAttribute("x", String(it.left));

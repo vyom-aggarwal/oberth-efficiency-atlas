@@ -18,21 +18,29 @@
 .plot { position: relative; width: 100%; }
 .plot svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
 .plot .overlay { position: absolute; inset: 0; pointer-events: none; }
-.annot-html { position: absolute; font-family: var(--sans-cond); font-size: var(--t-annot); color: var(--text); white-space: nowrap; line-height: 1.25; }
+/* On-plot text (author's fix 1): annotations regular, engine names (.engine-label) bold; figure titles are bold too. */
+.annot-html { position: absolute; font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 400; color: var(--text);
+              white-space: nowrap; line-height: 1.25; }
+.engine-label { font-weight: 600; }
 .annot-html a { pointer-events: auto; }
 .annot-html .annot-text { margin-left: 0.3em; }
 
-.axis path, .axis line { stroke: var(--ink-2); }
-.axis text { fill: var(--text-2); font-family: var(--sans); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
+/* Axes, as the classic explorer: the two axis lines and their ticks in Muted (>= 3:1), tick labels in IBM Plex Mono
+   11 px, axis titles in Barlow 12 px; the rest of a plot frame in Axis. */
+.axis path, .axis line { stroke: var(--axis-line); }
+.axis text { fill: var(--text-2); font-family: var(--mono); font-size: var(--t-tick); font-variant-numeric: tabular-nums lining-nums; }
+.axis .axis-title { font-family: var(--sans); font-size: var(--t-axis); }
 .gridline { stroke: var(--grid); stroke-width: 1; }
-.annot { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); }
-.annot-2 { fill: var(--text-2); font-family: var(--sans-cond); font-size: var(--t-annot); }
+.annot { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 400; }
+.annot-2 { fill: var(--text-2); font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 400; }
 .leader { stroke: var(--text-2); stroke-width: 1; fill: none; }
 
 .band { fill: var(--band-fill); stroke: none; }
+/* Lines, as the classic's loss chart: theory in Ink, dashed (6, 4); simulation curves in Ink 2, solid; thresholds dotted
+   (2, 3) in Muted; the band in Axis at 60 %, its edges Muted. */
 .band-edge { fill: none; stroke: var(--band-edge); stroke-width: 1; }
-.theory-line { fill: none; stroke: var(--theory); stroke-width: 1.5; stroke-dasharray: 6 4; }
-.threshold { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 1 3; }
+.theory-line { fill: none; stroke: var(--theory); stroke-width: 1.4; stroke-dasharray: 6 4; }
+.threshold { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
 .sim-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .mark-sim { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
 .mark-pub { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
@@ -47,8 +55,8 @@
 .legend svg { overflow: visible; flex: none; }
 .range-box { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 /* Sweep data and theory in the regimes figure; theory curves keep distinct dashes so the legend tells them apart. */
-.data-line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
-.data-dot { fill: var(--ink); }
+.data-line { fill: none; stroke: var(--ink-2); stroke-width: 2; stroke-linejoin: round; }
+.data-dot { fill: var(--ink-2); }
 .context-line { fill: none; stroke: var(--grid); stroke-width: 1; }
 .ref-line { stroke: var(--ink-2); stroke-width: 1; }
 .theory-line.theory-linear { stroke-dasharray: 10 3; }
@@ -56,10 +64,10 @@
 .theory-line.theory-II { stroke-dasharray: 2 2.5; }
 .theory-line.theory-III { stroke-dasharray: 7 2 1.5 2; }
 .figure-note { font-size: var(--t-label); color: var(--text-2); max-width: var(--measure); margin: var(--s2) 0 0; }
-/* Atlas: cells on a canvas beneath the SVG; lines over the cells carry a Paper halo; labels sit on a Paper wash. */
+/* Atlas: cells on a canvas beneath the SVG; lines over the cells carry a halo of the panel colour. */
 .atlas-plot .atlas-canvas { position: absolute; left: 0; top: 0; }
 .atlas-plot svg { position: relative; }
-.plot-frame { fill: none; stroke: var(--ink-2); stroke-width: 1; }
+.plot-frame { fill: none; stroke: var(--axis); stroke-width: 1; }
 .halo { fill: none; stroke: var(--surface); stroke-width: 4; stroke-linejoin: round; opacity: 0.85; }
 .impact-line { fill: none; stroke: var(--ink); stroke-width: 1.6; }
 .impact-line.alt { stroke-dasharray: 8 3 2 3; }
