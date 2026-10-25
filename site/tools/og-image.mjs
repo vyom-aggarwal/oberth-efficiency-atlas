@@ -27,11 +27,13 @@ await page.route("http://site.test/**", async (route) => {
 await page.goto("http://site.test/");
 await page.locator(".lh-dive").waitFor();
 await page.evaluate(() => document.fonts.ready);
-// Only the dive (paths, Sun, rings, the lanes and their labels) on Paper, as large as the card allows; the card's text
+// Only the dive (paths, Sun, rings, the lanes and their labels), as large as the card allows, on the panel colour it is
+// drawn on (Phase 8: the card is one surface, as the panel; the canvas paints --surface); the card's text
 // comes from og:title and og:description.
 await page.evaluate(() => { document.getElementById("landing-hero").dataset.heightCap = "590"; });
 await page.addStyleTag({ content: ".landing-hero-body { grid-template-columns: minmax(0, 1fr) !important; } .lh-side { display: none !important; }" +
-  " body * { visibility: hidden !important; } .lh-dive { visibility: visible !important; }" });
+  " body * { visibility: hidden !important; } .lh-dive { visibility: visible !important; }" +
+  " html, body { background: var(--panel) !important; }" });
 await page.waitForTimeout(400);                                   // the hero redraws on resize
 const box = await page.locator(".lh-dive").evaluate((e) => {
   const r = e.getBoundingClientRect();
