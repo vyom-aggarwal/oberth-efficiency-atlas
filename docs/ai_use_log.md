@@ -551,7 +551,7 @@ added to the numbers file as values.
   assistant found that no manual run had reached GitHub, so nothing needed fixing. It made no commit
   and told the author what to re-run.
 
-## Phase 8: restyle to the classic explorer (2026-10-23 to 2026-10-24, step 2 in review)
+## Phase 8: restyle to the classic explorer (2026-10-23 to 2026-10-25, complete)
 
 **Author decided:**
 - Restyle the whole site to the classic explorer's look, keeping everything else.
@@ -569,6 +569,12 @@ added to the numbers file as values.
 - **Step 2 conduct:** two parts with a stop after each (after a usage cutoff landed mid-pass). Part A added the font
   licences' Reserved Font Name check; Part B the extra review screenshots.
 - **The v1.1-figures recolour is dropped,** since the site now matches the paper palette.
+- **Step 2 review** (2026-10-24 to 2026-10-25):
+  - Part A and Part B approved;
+  - the six interpretations below confirmed;
+  - asked for the dark-mode label weight to be measured (and fixed only if real), and for one more full Playwright
+    run after the last spec change.
+- **The author pushes and deploys.**
 
 **Assistant, step 1:**
 - the inventory of the classic explorer;
@@ -605,7 +611,7 @@ added to the numbers file as values.
   while the pinned file says 2020; the committed licence follows the file.
 - **The site matches the paper palette** (`v1.1-figures` no longer needed): the residual differences are logged.
 
-**Assistant interpretations, for the author to confirm:**
+**Assistant interpretations, all six confirmed by the author (2026-10-25):**
 - **Tooltips** sit on the page colour inside panels, not on the panel colour as the plan said.
 - **Readout tiles** wrap long values instead of the classic's ellipsis.
 - **The landing headline** is set at 24 px (the plan left it open).
@@ -626,3 +632,7 @@ added to the numbers file as values.
 - **The new tooltip captures focused the wrong target:** a pointer-only readout area instead of a focusable mark. They
   failed in the full run and were fixed and rerun.
 - **Blocked pipes, again:** test commands piped into `tail` without pipefail were blocked by the hook and rerun.
+- **A check left unreported:** during part B the assistant said it would inspect the computed weight of the dark-mode
+  labels, then did not report it. The author asked. The measurement found 400 Regular in both themes, rendered with
+  the same face, so the heavier look is light-on-dark appearance.
+- **An over-claim:** the part B report said `docs/site.md` also held interpretations to confirm; it held none.

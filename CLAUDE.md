@@ -211,6 +211,14 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
   - **Landing fold** (author, 2026-10-21): the title, headline and entry links stay above the fold
     at 1440 × 900 and 390 × 844. The headline budget is `HEADLINE_BUDGET` (100 characters,
     measured), and the build warns when a headline exceeds it.
+- **Phase 8 look** (`docs/restyle_plan.md`): the classic explorer's, which is the paper palette.
+  - `npm run palette`: `tools/palette.mjs` reads the tokens from `explorer/app.css` (never edit
+    `palette.css` by hand).
+  - `.venv/Scripts/python site/tools/fonts.py` regenerates `fonts.css`, the Greek-and-symbol
+    subsets and their licences, from pinned sources.
+  - Strings appended by `h()`/`s()` are typeset by `src/lib/notation.ts`: write "v_esc" and it
+    displays as a subscript; never show a literal "_" (`e2e/notation.spec.ts`).
+  - Canvases paint `cssVar("--surface", canvas)`: one surface per panel.
 - **Hero frame time:**
   - Enforced locally: p95 under 16 ms; `HERO_P95_MS` overrides.
   - Report-only in CI: the workflow sets `HERO_FRAME_TIME=report`, and the numbers go to the job

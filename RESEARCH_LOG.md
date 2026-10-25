@@ -3432,4 +3432,48 @@ is untouched.
   - The author's extra states: the atlas under inertial steering (all three textures), a tooltip on the universal
     curve, and the explorer's impact and SOI warnings at 390 px.
 
+## 2026-10-25: Phase 8 closed
+
+**Author:** Part B approved. All six interpretations confirmed:
+1. Tooltips inside a figure sit on the page colour, not the panel colour.
+2. Explorer readout tiles wrap long values instead of the classic's ellipsis.
+3. The landing headline is 24 px Barlow.
+4. On narrow views, a ring label that would collide is dropped ("10 rₚ" on the landing hero at 390 px).
+5. Synthesised bold is off site-wide.
+6. Every file name in running text is set as code automatically.
+
+**Review question: the dark-mode label weight** (the author asked; measured 2026-10-25, a throwaway probe, not
+committed):
+- **Computed style:** every on-plot label of the universal curve has `font-weight` 400 and `font-family`
+  "Barlow Semi Condensed" in both themes.
+- **Rendered face** (Chrome DevTools Protocol `CSS.getPlatformFontsForNode`): `BarlowSemiCondensed-Regular` in both,
+  with the Greek and ☉ from the Roboto Condensed and Noto Sans Math regular subsets.
+- **Conclusion:** the heavier look in dark mode is light text (#edece7) on a near-black panel, about 14:1, not a
+  weight difference. Nothing changed.
+
+**Final checks** (after the last spec change):
+- Playwright on the test, production and placeholder builds: 176 of 176 pass.
+  - Hero frame time p95 11 ms (target 16).
+  - Fold: production 603 / 702 px, placeholders 673 / 803 px.
+  - The longest headline that fits: 444 / 124 characters (budget 100).
+- `check_all.py`, full (part B, `8d82073`'s code): passes, 619 Python tests.
+- Lighthouse runs in CI after the author's push.
+
+**Phase 8 in summary:**
+- **The look:** the site takes the classic explorer's palette, type and components (`docs/restyle_plan.md`, approved
+  2026-10-23), which is also the paper figures' palette; the v1.1-figures recolour is dropped.
+- **The classic explorer** stays byte-identical (the test build's `/explorer/classic/` equals
+  `explorer/oberth_explorer.html`).
+- **Unchanged:** pages, navigation, layouts, data, interactions, provenance, the SEP caveat and the prose slots.
+- **Commits:**
+  - step 1: `e181598`, `64b87fa`;
+  - step 2: `648c475` (tokens and fonts), `e56b41d` (components), `bfb765e` and `f654988` (charts and the six fixes),
+    `ff9f71c` (Open Graph image), `8d82073` (checks and review screenshots); this entry closes the phase.
+- **New checks:**
+  - `src/styles/palette.test.ts` (the palette against the classic, contrast and colour vision);
+  - `tests/test_site_fonts.py` (subsets, licences, glyph coverage);
+  - `src/lib/notation.test.ts`;
+  - `e2e/notation.spec.ts`, `e2e/panel-text.spec.ts` and `e2e/av-stroke.spec.ts`.
+- **Deploys stay manual:** the author pushes and deploys.
+
 
