@@ -3476,4 +3476,25 @@ committed):
   - `e2e/notation.spec.ts`, `e2e/panel-text.spec.ts` and `e2e/av-stroke.spec.ts`.
 - **Deploys stay manual:** the author pushes and deploys.
 
+## 2026-10-25: the fold test after the author's headline (CI run 40239403845)
+
+**What failed:** the author published the landing headline (`312f21f`). The Site workflow then failed in Playwright,
+2 of 176, both in the production project's fold test, at 1440 × 900 and 390 × 844.
+- That test asserted that the production build shows no prose slot at all ("as deployed while the author writes",
+  Phase 7). The published headline is a slot, so the assertion failed.
+- The site itself was right: checks, Lighthouse, the build and the other 174 tests passed.
+- **A second weakness, latent:** the placeholder project passed only by coincidence. Placeholders fill only
+  unwritten slots, so that build now shows the real headline. Its 86 characters happen to sit in the 75–90 range the
+  test expects of the placeholder; a longer written headline would have failed it too.
+
+**The fix** (test only, its intent unchanged: what is shown stays above the fold):
+- **Production:** shows only what the author has written. The test fails on any placeholder or TODO slot, and puts
+  the headline, when shown, in the above-the-fold set.
+- **The placeholder build:** must fill every slot. The length and two-sentence checks apply only to slots still
+  holding placeholder text.
+- **In both:** a shown summary must follow the entry links.
+
+**Measured with the published headline:** the lowest of title, headline and entry links ends at 673 px at 1440 × 900
+and 803 px at 390 × 844. The headline budget (100) and the longest that fits (444 / 124) are unchanged.
+
 

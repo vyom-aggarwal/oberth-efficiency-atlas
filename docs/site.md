@@ -28,8 +28,10 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
 
   **The fold:** at 1440 × 900 and 390 × 844, the hero's figure title, the page title, the headline
   and the entry links fit above the fold. `e2e/fold.spec.ts` checks this in two states:
-  - with every slot empty (the production build);
-  - with an ≈80-character headline and a two-sentence summary (the placeholder build).
+  - with the slots as published (the production build: only what the author has written, never a placeholder
+    or TODO; since 2026-10-25, the headline);
+  - with every slot filled (the placeholder build: the author's text where written, placeholder text elsewhere,
+    such as an ≈80-character headline and a two-sentence summary).
 
   **The headline budget:** `HEADLINE_BUDGET` in `plugins/content-plugin.ts`, 100 characters.
   - `e2e/headline-budget.spec.ts` measures the longest headline that still fits (124 characters at
