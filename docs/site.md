@@ -1,8 +1,18 @@
 # The website
 
 The site presents the analysis. It reads committed outputs and never changes the analysis code
-(`src/oberth_atlas/`), its results or its scripts. The plan, the design and every decision behind
-it are in `docs/site_plan.md` and `RESEARCH_LOG.md` (Phase 6).
+(`src/oberth_atlas/`), its results or its scripts. The plan and every decision behind it are in
+`docs/site_plan.md` and `RESEARCH_LOG.md` (Phase 6).
+
+**The look** (Phase 8, `docs/restyle_plan.md`) is the classic explorer's, which is also the paper figures'
+palette:
+- **Colour:** the warm grey surface with flat 8 px panels; one blue accent; the blue η ramp; the derived a·v ramp.
+- **Type:** Barlow, Barlow Semi Condensed and IBM Plex Mono.
+- **Controls:** pills.
+- **One surface per panel:** canvases paint their panel's colour (`--surface`); controls and tooltips take the
+  other surface (`--raised`).
+- **Notation is typeset:** `src/lib/notation.ts`, applied by the DOM helpers to every string they append, turns
+  "v_esc" or "r^−1.5" into sub- and superscripts and sets file names in running text as code.
 
 ## Pages
 Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references page:
@@ -22,8 +32,9 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
   - with an ≈80-character headline and a two-sentence summary (the placeholder build).
 
   **The headline budget:** `HEADLINE_BUDGET` in `plugins/content-plugin.ts`, 100 characters.
-  - `e2e/headline-budget.spec.ts` measures the longest headline that still fits (114 characters at
-    390 × 844, 365 at 1440 × 900) and fails if the budget exceeds it.
+  - `e2e/headline-budget.spec.ts` measures the longest headline that still fits (124 characters at
+    390 × 844, 444 at 1440 × 900, after the Phase 8 restyle; 114 and 365 before) and fails if the budget
+    exceeds it.
   - The build prints a warning when the written headline is over the budget.
 - **`/research/`** is the long-form explanation (moved from `/`). It has:
   - the live hero flyby;
@@ -153,6 +164,13 @@ npm run lighthouse                       # Lighthouse: see below
   from `index.html`, and requires no warning.
 - **The Copy button:** tested on `http://localhost`, a secure context that the route handler
   serves, with clipboard permissions.
+- **Phase 8 specs:**
+  - `e2e/notation.spec.ts`: no displayed text, accessible name or tooltip has "_" outside code and URLs, on every
+    page at 1440 and 390 px;
+  - `e2e/panel-text.spec.ts`: every text inside a figure panel stays inside its padding, and on-plot text does not
+    overlap, at 360 and 390 px;
+  - `e2e/av-stroke.spec.ts`: the faintest a·v stroke, from rendered pixels, is at least 2:1 against its panel in
+    both themes (values in `runs/av_stroke_contrast.json`).
 - **Screenshots:** the screenshot specs write to `runs/screens/`. Checkpoint screenshots are kept
   in `docs/screens/` (`docs/screens/README.md`).
 - **Without `SITE_DIST`,** Playwright starts the dev server itself.
@@ -161,8 +179,9 @@ npm run lighthouse                       # Lighthouse: see below
 - **`scripts/check_all.py`** (repository root) is the gate before pushing: the type check,
   vitest, `check_numbers` and the full Python suite.
 - **The pre-commit hook** (`.githooks/pre-commit`) runs `check_all.py --staged`, only the checks
-  the staged files can affect. A changed test file runs itself, and a changed script runs its own
-  test file. Enable it once per clone with `git config core.hooksPath .githooks`.
+  the staged files can affect. A changed test file runs itself, a changed script runs its own
+  test file, and a changed `site/tools/<name>.py` runs `tests/test_site_<name>.py`. Enable it once per
+  clone with `git config core.hooksPath .githooks`.
 - **Playwright** is not in `check_all.py`. Run it as above; CI runs it on every push.
 - **Hero frame time** (`e2e/hero.spec.ts`, while dragging; simulation plus drawing):
 

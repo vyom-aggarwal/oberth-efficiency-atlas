@@ -18,6 +18,20 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
+  in both themes:
+  - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build
+    (`dist-ph`, which shows the article and its TODO notes). The landing page twice: `landing-…-filled` (that
+    build, every slot filled with placeholder text) and `landing-…-empty` (the production build, `dist-empty`, as
+    deployed today).
+  - **`figures/`:** every article figure, cropped (`e2e/screens.spec.ts`).
+  - **States the default views do not show** (author, 2026-10-24):
+    - `atlas-inertial-…`: the atlas under inertial steering, with the three textures (η < 0 in Critical, impact
+      in Ink 2, no reliable η in Muted dots);
+    - `curve-tooltip-1440-…`: the universal curve with a tooltip open;
+    - `explorer-impact-390-…` and `explorer-soi-390-…`: the explorer's two warnings (`e2e/screens-states.spec.ts`,
+      `e2e/screens-explorer.spec.ts`, from the test build).
+  - **`og-image.png`:** the regenerated Open Graph image.
 - `phase-8-proposal/` (Phase 8, step 1): current against proposed, side by side.
   - Covers the landing hero, Figure 2 (the universal curve) and Figure 4 (the atlas), at 1440 and
     390 px in both themes.

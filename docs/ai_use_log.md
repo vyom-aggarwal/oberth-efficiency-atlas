@@ -551,11 +551,24 @@ added to the numbers file as values.
   assistant found that no manual run had reached GitHub, so nothing needed fixing. It made no commit
   and told the author what to re-run.
 
-## Phase 8: restyle to the classic explorer (2026-10-23, step 1 awaiting approval)
+## Phase 8: restyle to the classic explorer (2026-10-23 to 2026-10-24, step 2 in review)
 
 **Author decided:**
 - Restyle the whole site to the classic explorer's look, keeping everything else.
 - The author's preference overrides the Phase 6 design plan.
+- **Step 1 review** (2026-10-23):
+  - a·v in blue;
+  - Greek self-hosted, against the assistant's recommendation (CI's Linux fonts differ, and the layout tests measure
+    text);
+  - the derivations approved, on condition that the special atlas cells keep their hatching and the red passes the
+    colour-vision check;
+  - the four contrast fixes.
+- **Six fixes from the preview:** annotation weights, a phone-width overflow with wider layout tests, typeset
+  subscripts with a no-underscore test, one surface per panel, transparent KaTeX overlays, and the faintest a·v
+  stroke measured on screen.
+- **Step 2 conduct:** two parts with a stop after each (after a usage cutoff landed mid-pass). Part A added the font
+  licences' Reserved Font Name check; Part B the extra review screenshots.
+- **The v1.1-figures recolour is dropped,** since the site now matches the paper palette.
 
 **Assistant, step 1:**
 - the inventory of the classic explorer;
@@ -565,3 +578,51 @@ added to the numbers file as values.
 - the font coverage check (Windows measured);
 - the paper-palette comparison;
 - a current-against-proposed preview with a temporary override (`docs/restyle_plan.md`).
+
+**Assistant, step 2, implemented** (three passes, then the Open Graph image, checks and screenshots):
+- **Tokens and fonts:**
+  - `tools/palette.mjs` reads the classic's tokens from `explorer/app.css` and checks them (contrast, ramps,
+    colour-vision distinctness), with a vitest test;
+  - the three classic families self-hosted;
+  - Greek-and-symbol fallback subsets chosen and cut with fontTools from pinned sources (`site/tools/fonts.py`),
+    with a test that every displayed character has a self-hosted glyph;
+  - the font licences built from each subset's copyright notice and the pinned OFL text.
+- **Components:** panels, pill controls with visible radio dots, readout tiles, eyebrows, critical warnings, accent
+  focus rings; tooltips and controls on the surface opposite their panel.
+- **Charts:** classic axes, ticks and line styles; the case markers; the atlas textures; canvases on the panel colour.
+- **The six fixes.** Notation is typeset centrally (`src/lib/notation.ts`, applied by the DOM helpers). Three new
+  Playwright specs:
+  - no underscore in displayed text;
+  - text inside figure panels at 360 and 390 px;
+  - the faintest a·v stroke from rendered pixels.
+
+**Assistant found:**
+- **The pale SEP lane** in the preview was a rendering artefact, not a palette problem. The hero's lanes were stroked
+  sample by sample, so the short step-1 stretch never reached its colour on screen. Stroking each run as one path
+  brings it to its token: 2.23:1 (light) and 2.24:1 (dark).
+- **"Everything bold"** in the preview came from the preview's own font import (600 and 700 only).
+- **No Reserved Font Name** in any of the four fallback families. Upstream Arimo's licence header has moved to 2026
+  while the pinned file says 2020; the committed licence follows the file.
+- **The site matches the paper palette** (`v1.1-figures` no longer needed): the residual differences are logged.
+
+**Assistant interpretations, for the author to confirm:**
+- **Tooltips** sit on the page colour inside panels, not on the panel colour as the plan said.
+- **Readout tiles** wrap long values instead of the classic's ellipsis.
+- **The landing headline** is set at 24 px (the plan left it open).
+- **On narrow views,** a ring label that would collide is dropped ("10 rₚ" at 390 px).
+- **No faux bold:** synthesised bold is turned off site-wide.
+- **Every file name in running text** is set as code automatically.
+
+**Assistant errors, disclosed:**
+- **A shared global regex's `lastIndex`** made the typesetter skip the first index in each string. The new
+  no-underscore test caught it before commit.
+- **The fallback-font download cache** was keyed on file names, so the four `OFL.txt` licence files collided. The
+  sha256 pin caught it.
+- **The first font output was not reproducible:** fontTools stamped the save time into every file. Fixed, and two
+  runs now give identical files.
+- **Pass 2 at 360 px:** the restyled hero clock overflowed (by 0.8 px, then 7 px into the padding). Both were found
+  by the tests and fixed.
+- **Part B's first Playwright run** was restarted, because I edited two screenshot specs while it was running.
+- **The new tooltip captures focused the wrong target:** a pointer-only readout area instead of a focusable mark. They
+  failed in the full run and were fixed and rerun.
+- **Blocked pipes, again:** test commands piped into `tail` without pipefail were blocked by the hook and rerun.

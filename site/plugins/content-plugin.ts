@@ -93,7 +93,8 @@ export const PLACEHOLDERS: Record<string, string> = {
  * The headline's length budget, in characters of plain text (author, 2026-10-21). A longer headline can push the entry
  * links below the fold on a phone. e2e/fold.spec.ts measures the longest headline that keeps them above the fold at
  * 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build reports a written headline over it.
- * Measured 2026-10-21: 114 characters at 390 × 844 (three lines; the binding size) and 365 at 1440 × 900. The budget
+ * Measured 2026-10-21: 114 characters at 390 × 844 (three lines; the binding size) and 365 at 1440 × 900; after the
+ * Phase 8 restyle (2026-10-24, Barlow 24 px): 124 and 444, so the budget is unchanged. The budget
  * keeps about one long word in hand, since where a headline wraps depends on its words.
  */
 export const HEADLINE_BUDGET = 100;

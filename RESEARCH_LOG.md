@@ -3385,4 +3385,51 @@ Commits `bfb765e` (first part) and the pass 3 commit.
 
 **The test build:** Playwright, 154 tests, all pass.
 
+## 2026-10-24: the v1.1-figures recolour is no longer needed
+
+**Decision** (author, Phase 8 brief: the recolour is dropped if step 1 confirmed that the site matches the paper
+figures' palette).
+
+**Background:** in Phase 6 (the entry above on the hero, its performance and tooltip provenance) the author accepted the
+divergence between the site's Phase 6 palette and the paper figures. A presentation-only recolour of the paper
+figures to the site palette, tagged `v1.1-figures`, was to follow the site.
+
+**What step 1 confirmed** (`docs/restyle_plan.md` §7, re-read against `src/oberth_atlas/plotting.py` today):
+- the site now takes the classic explorer's palette, whose light theme is the paper palette: `SURFACE`, `INK`,
+  `INK_2`, `MUTED`, `GRID` and `AXIS` are identical;
+- the accent is `SERIES[0]`;
+- the η ramp's steps 1–6 equal `BLUE_RAMP[1…6]`;
+- a·v and η are both on that blue ramp in the site and the paper.
+
+**So:** no figure script changes, no figures are regenerated, and `v1.1-figures` is not tagged. The analysis freeze
+is untouched.
+
+**Differences that remain, none of them a reason to recolour:**
+- `BLUE_RAMP[0]` is `#cde2fb` in the paper, `--ramp-0` `#e3eefb` on the site (the faintest step, η near 0);
+- negative η: the paper diverges into its red `#e34948`; the site hatches those cells in `--critical` `#c8302f`
+  (a texture, so the meaning does not rest on colour);
+- impact: the paper fills `#6f6e69` (`scripts/fig_atlas.py`); the site hatches in Ink 2;
+- some paper figures use the categorical orange and aqua (`SERIES[1…2]`), which the site does not;
+- the paper has no dark theme, and its font is Segoe UI / DejaVu Sans.
+
+## 2026-10-24: Phase 8 step 2, part B: checks, measurements and the review set
+
+- **Open Graph image** regenerated (`ff9f71c`). The card is now one surface, the panel colour the dive is drawn on;
+  otherwise the panel-coloured canvas would sit as a rectangle on the page colour.
+- **`check_all.py`, full:** the type check, vitest, `check_numbers` and all 619 Python tests pass.
+- **Playwright on the three builds** (test, production, placeholders): 174 of 176 passed.
+  - The two failures were the new tooltip screenshot captures, which focused the first hit target: a pointer-only
+    readout area that opens no tooltip on focus. They now focus a focusable mark (`.hit[tabindex]`), as
+    `e2e/tooltip.spec.ts` does, and pass.
+  - Hero frame time (enforced locally): p50 5.4 ms, p95 10.8 ms (target 16 ms).
+- **Fold**, the lowest of title, headline and entry links: production 603 px (1440 × 900) and 702 px (390 × 844);
+  placeholders 673 and 803.
+- **Headline budget:** the longest headline that fits is 124 characters at 390 × 844 and 444 at 1440 × 900 (Phase 7:
+  114 and 365). The budget stays 100, so `site/content/README.md` is unchanged. The measurements are updated in
+  `plugins/content-plugin.ts` and `docs/site.md`.
+- **Review screenshots:** `docs/screens/phase-8/` (`docs/screens/README.md`).
+  - Every page at 1440 and 390 px in both themes, and every article figure.
+  - The author's extra states: the atlas under inertial steering (all three textures), a tooltip on the universal
+    curve, and the explorer's impact and SOI warnings at 390 px.
+
 
