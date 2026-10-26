@@ -6,10 +6,27 @@
 .skip-link:focus { transform: none; }
 
 /* Header: wordmark, site links and the theme switch; on narrow screens the links fold behind "Menu". */
-.site-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3) var(--s5);
-               padding: var(--s4) var(--gutter); max-width: 1240px; margin: 0 auto; }
+.site-header {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3) var(--s5);
+  padding: var(--s4) var(--gutter); max-width: 1240px; margin: 0 auto;
+  position: sticky; top: 0; z-index: 40;
+}
+.site-header::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--grid) 90%, transparent);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+}
 .wordmark { font-family: var(--sans-cond); font-weight: 700; font-size: var(--t-h3); letter-spacing: 0.01em;
             color: var(--text); text-decoration: none; }
+.wordmark:hover { color: var(--link); }
 .site-menu { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
 .site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s5); }
 .site-nav a { color: var(--text); text-decoration: none; padding: 6px 0; }
@@ -78,7 +95,11 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 @media (max-width: 600px) { .facts { grid-template-columns: minmax(0, 1fr); } .facts dd { margin-bottom: var(--s2); } }
 
 /* Footer: labelled facts. */
-.site-footer { border-top: 1px solid var(--grid); padding: var(--s6) var(--gutter) var(--s8); }
+.site-footer {
+  border-top: 1px solid var(--grid);
+  padding: var(--s6) var(--gutter) var(--s8);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 35%, transparent), transparent 42%);
+}
 .footer-facts { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
                 gap: var(--s4) var(--s6); font-size: var(--t-label); }
 .footer-facts dt { color: var(--text-2); margin-bottom: 2px; }
