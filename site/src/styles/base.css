@@ -61,6 +61,30 @@ body {
   line-height: 1.5;
   font-variant-numeric: lining-nums tabular-nums;
   overflow-x: hidden;
+  position: relative;
+  isolation: isolate;
+}
+/* Soft depth behind content: accent and Sun glows tied to the palette (no extra colours). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 45% at 96% 4%, color-mix(in srgb, var(--sun) 11%, transparent), transparent 52%),
+    radial-gradient(ellipse 55% 40% at 50% 100%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
+    var(--bg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body::before {
+    animation: atmosphere-drift 48s ease-in-out infinite alternate;
+  }
+}
+@keyframes atmosphere-drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.03) translate3d(0, -0.75%, 0); }
 }
 h1, h2, h3 {
   font-family: var(--sans-cond);
