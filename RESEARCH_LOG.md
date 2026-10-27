@@ -3537,4 +3537,14 @@ site header sticky at every width, at `top: 0`, `z-index: 40`.
    visible, so a force only hid obstructions like this one. Playwright now confirms that the click reaches the
    control.
 
+## 2026-10-26: the CI runner pinned to Ubuntu 24.04
+
+- **The change** (author, 2026-10-26): every job in `.github/workflows/site.yml` runs on `ubuntu-24.04` instead of
+  `ubuntu-latest`.
+- **Why:** GitHub has annotated every run since 2026-10-19 that the latest label moves to Ubuntu 26. The checks,
+  Playwright (with the runner's installed Chrome) and Lighthouse were all validated on 24.04, the image the latest
+  label has pointed to so far.
+- **The test:** `tests/test_workflow.py` now requires every job to name `ubuntu-24.04` and forbids any `-latest`
+  label in the workflow. `methods.json` records the new test count, 620.
+
 

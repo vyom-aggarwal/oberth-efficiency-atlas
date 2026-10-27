@@ -1,5 +1,6 @@
 """The site workflow (.github/workflows/site.yml): every action pinned to a full commit SHA with its tag in a comment
-(author, 2026-10-19), deployment only on a manual run, and the gates the author set."""
+(author, 2026-10-19), every job on a pinned runner image (author, 2026-10-26), deployment only on a manual run, and the
+gates the author set."""
 
 import re
 from pathlib import Path
@@ -19,6 +20,16 @@ def test_every_action_is_pinned_to_a_full_commit_sha_with_its_tag():
     assert lines
     for line in lines:
         assert re.search(r"uses: [\w.-]+/[\w.-]+@[0-9a-f]{40} # v\d+\.\d+\.\d+$", line), line
+
+
+def test_every_job_runs_on_the_pinned_runner_image():
+    # Author, 2026-10-26: ubuntu-latest moves to Ubuntu 26 (GitHub's notice of 2026-10-19); the checks, Playwright and
+    # Lighthouse were validated on Ubuntu 24.04, so every job names it, and no "-latest" label is used anywhere.
+    jobs = load()["jobs"]
+    assert jobs
+    for name, job in jobs.items():
+        assert job["runs-on"] == "ubuntu-24.04", name
+    assert "-latest" not in WF.read_text(encoding="utf-8")
 
 
 def test_deploy_runs_only_by_hand_and_after_every_check():
