@@ -12,6 +12,7 @@ import type { SiteData, Sourced } from "../lib/data";
 import { frag, h, onFontsLoaded } from "../lib/dom";
 import { engineLabel } from "../lib/engine-label";
 import { duration, sig, speed } from "../lib/format";
+import { strokeRuns } from "../lib/runs";
 import { cssVar, themeShown } from "../lib/theme";
 
 export interface HeroData {
@@ -157,10 +158,12 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
   const impulsive_ = () => impulsivePath(vp, d.nd.dv, EXTEND + 6);
 
   // ---------------------------------------------------------------- drawing
-  function rampColour(av: number): string {
+  /** The a·v ramp step (1–7) for a·v on the hero's log scale. */
+  function rampStep(av: number): number {
     const u = Math.min(1, Math.max(0, (Math.log10(av) - avLo) / (avHi - avLo)));
-    return cssVar(`--av-${1 + Math.round(u * 6)}`);
+    return 1 + Math.round(u * 6);
   }
+  const stepColour = (k: number) => cssVar(`--av-${k}`);
   function stroke(ctx: CanvasRenderingContext2D, pts: Pt[], until: number): void {
     ctx.beginPath();
     let started = false;
@@ -198,23 +201,26 @@ export function hero(root: HTMLElement, d: HeroData, site: SiteData, opt: { figN
     const arcW = narrow ? 4.5 : 6;
     const b = finite.burn.filter((p) => p.t <= reveal);
     const span = b.length > 1 ? Math.hypot(sx(b[0]) - sx(b[b.length - 1]), sy(b[0]) - sy(b[b.length - 1])) : 0;
+    // The a·v steps drawn are recorded on the canvas (data-av-steps) for the stroke-contrast test.
+    let steps = new Set<number>();
     if (!b.length) {
       // Nothing of the burn revealed yet (the intro's first phase).
     } else if (span < arcW) {
-      ctx.fillStyle = rampColour(b[0].av!);
+      const k = rampStep(b[0].av!);
+      steps.add(k);
+      ctx.fillStyle = stepColour(k);
       ctx.beginPath(); ctx.arc(sx({ x: 1, y: 0 }), sy({ x: 1, y: 0 }), arcW * 0.75, 0, 2 * Math.PI); ctx.fill();
     } else {
+      // One path per run of one colour (lib/runs.ts): segment by segment, a short run never reached its colour.
       ctx.lineWidth = arcW;
-      for (let i = 0; i + 1 < b.length; i++) {
-        ctx.strokeStyle = rampColour(b[i].av!);
-        ctx.beginPath(); ctx.moveTo(sx(b[i]), sy(b[i])); ctx.lineTo(sx(b[i + 1]), sy(b[i + 1])); ctx.stroke();
-      }
+      steps = strokeRuns(ctx, b.length, (i) => rampStep(b[i].av!), (i) => [sx(b[i]), sy(b[i])], stepColour);
       // Drag handles at the arc's ends (pointer devices).
       if (!narrow) for (const p of [b[0], b[b.length - 1]]) {
         ctx.fillStyle = ink; ctx.strokeStyle = surface; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(sx(p), sy(p), 4.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
       }
     }
+    canvas.dataset.avSteps = [...steps].sort().join(",");
     annotate();
   }
 

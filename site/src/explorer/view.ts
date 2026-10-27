@@ -1,6 +1,7 @@
 // The explorer's trajectory view: a canvas in the hero's convention (periapsis down), the burn on the a·v ramp by
 // a·v, the impulsive exit dashed. Zoom and pan by wheel or pinch, drag, and keys (+ − arrows, 0 resets).
 import type { FlybyPath, Pt } from "../sim/paths";
+import { strokeRuns } from "../lib/runs";
 import { cssVar, themeShown } from "../lib/theme";
 
 export interface Scene {
@@ -80,23 +81,29 @@ export function trajectoryView(canvas: HTMLCanvasElement): { setScene: (sc: Scen
     ctx.setLineDash([]);
     ctx.strokeStyle = ink; ctx.lineWidth = 1.6;
     stroke(scene.path.pre); stroke(scene.path.post);
-    // The burn, coloured by a·v (a burn shorter than a few pixels is a dot).
+    // The burn, coloured by a·v (a burn shorter than a few pixels is a dot), one path per run of one colour
+    // (lib/runs.ts). The steps drawn are recorded on the canvas (data-av-steps) for the stroke-contrast test.
+    canvas.dataset.avSteps = "";
     const b = scene.path.burn;
     if (!b.length) return;                                  // an impact before the burn
     const [lo, hi] = scene.avLog;
-    const colour = (av: number) => cssVar(`--av-${1 + Math.round(Math.min(1, Math.max(0, hi > lo ? (Math.log10(av) - lo) / (hi - lo) : 1)) * 6)}`);
+    const step = (av: number) => 1 + Math.round(Math.min(1, Math.max(0, hi > lo ? (Math.log10(av) - lo) / (hi - lo) : 1)) * 6);
+    const colour = (k: number) => cssVar(`--av-${k}`);
     const [ax, ay] = toScreen(b[0]), [bx, by] = toScreen(b[b.length - 1]);
+    let steps = new Set<number>();
     if (Math.hypot(bx - ax, by - ay) < 5) {
-      ctx.fillStyle = colour(b[0].av!);
+      const k = step(b[0].av!);
+      steps.add(k);
+      ctx.fillStyle = colour(k);
       ctx.beginPath(); ctx.arc(ax, ay, 4, 0, 2 * Math.PI); ctx.fill();
     } else {
       ctx.lineWidth = 5;
-      for (let i = 0; i + 1 < b.length; i++) {
-        ctx.strokeStyle = colour(b[i].av!);
-        const [x0, y0] = toScreen(b[i]), [x1, y1] = toScreen(b[i + 1]);
-        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
-      }
+      strokeRuns(ctx, b.length, (i) => step(b[i].av!), (i) => toScreen(b[i]), colour);
+      // A long burn runs past the view (its faintest ends, far out): record only the steps drawn inside it.
+      const inView = (p: Pt) => { const [x, y] = toScreen(p); return x >= 0 && x <= W && y >= 0 && y <= H; };
+      for (let i = 0; i + 1 < b.length; i++) if (inView(b[i]) && inView(b[i + 1])) steps.add(step(b[i].av!));
     }
+    canvas.dataset.avSteps = [...steps].sort().join(",");
   }
 
   // ---------------------------------------------------------------- input

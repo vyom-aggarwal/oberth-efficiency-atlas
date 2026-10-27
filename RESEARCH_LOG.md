@@ -3547,4 +3547,31 @@ site header sticky at every width, at `top: 0`, `z-index: 40`.
 - **The test:** `tests/test_workflow.py` now requires every job to name `ubuntu-24.04` and forbids any `-latest`
   label in the workflow. `methods.json` records the new test count, 620.
 
+## 2026-10-26: the article hero and the explorer drawn one path per a·v run, and measured
+
+**The change** (author, 2026-10-26; the open item logged on 2026-10-24): the article hero's thrust arc and the
+explorer's burn are now stroked as one path per run of one a·v step, as the landing hero's lanes have been since
+pass 3. They share `src/lib/runs.ts`. Both canvases record the steps they draw (`data-av-steps`); the explorer records
+only the steps inside its view.
+
+**Measured** (`e2e/av-stroke.spec.ts`, now six canvases, rendered pixels against the panel colour sampled from each
+canvas):
+
+| canvas | state | faintest step | full-strength pixels | light | dark |
+|---|---|---|---|---|---|
+| article hero arc | Π = 368 (a long arc) | 1 | 3500 / 3505 | 2.23:1 | 2.24:1 |
+| explorer burn | Jupiter, Hall thruster, zoomed out | 1 | 206 / 206 | 2.23:1 | 2.24:1 |
+
+The landing hero and Figure 7 measure as before. Every faintest stroke equals its token, at or above 2:1, so the
+ramp is unchanged.
+
+**The explorer's framing:** its colours are relative to the burn's own a·v range, so step 1 is the burn's far ends.
+In the default view of this preset those ends lie outside the canvas: only steps 5–7 are in view (a first run
+counted all seven steps and found no step-1 pixels). The test therefore zooms out with the view's own key ("−") until
+step 1 is in view, then measures.
+
+**A flaky wait, found while repeating the spec:** one light run measured 3 of 6 canvases. The test read Figure 7's
+panels without waiting for their redraw after the clock was moved; it now waits for each panel to record its steps.
+The spec then passed 6 of 6 (both themes, three repeats).
+
 
