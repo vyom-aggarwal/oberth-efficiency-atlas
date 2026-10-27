@@ -3574,4 +3574,12 @@ step 1 is in view, then measures.
 panels without waiting for their redraw after the clock was moved; it now waits for each panel to record its steps.
 The spec then passed 6 of 6 (both themes, three repeats).
 
+**Another flaky wait, in the final full run** (189 of 190 passed): the article hero's layout test failed once on its
+very first check (360 px, Π = 0.001), with the η annotation and every slider label missing.
+- It waited only for the `<canvas>` element to exist, then 80 ms, so under the loaded parallel run it checked before
+  the first draw.
+- Repeated alone it passed 25 of 25.
+- It now waits until the hero has drawn: the canvas records its a·v steps, and the slider has its labels. 15 of 15 in
+  three repeats.
+
 

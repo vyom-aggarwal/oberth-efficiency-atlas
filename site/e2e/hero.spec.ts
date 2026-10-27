@@ -25,6 +25,10 @@ test("annotations and slider labels stay inside the figure at every width and Π
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("research/");
     await page.waitForSelector(".hero-canvas");
+    // Drawn, not just mounted (under a loaded parallel run the first check once ran before the first draw):
+    // the canvas records its a·v steps when it draws, and the slider its labels.
+    await expect(page.locator(".hero-canvas")).toHaveAttribute("data-av-steps", /\d/);
+    await expect(page.locator(".hero-slider svg text.mark-label").first()).toBeAttached();
     for (const Pi of [0.001, 0.0326, 0.976, 1.67, 30, 368, 1000]) {
       await setPi(page, Pi);
       await page.waitForTimeout(80);
