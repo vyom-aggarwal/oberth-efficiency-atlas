@@ -3497,4 +3497,44 @@ committed):
 **Measured with the published headline:** the lowest of title, headline and entry links ends at 673 px at 1440 × 900
 and 803 px at 390 × 844. The headline budget (100) and the longest that fits (444 / 124) are unchanged.
 
+## 2026-10-26: the sticky header from PR #1, fixed
+
+**What went wrong:** PR #1 ("Polish landing page visual styling", merged as `f57d45e` with its CI failing) made the
+site header sticky at every width, at `top: 0`, `z-index: 40`.
+- **The CI failure** (1 of 176): in the universal-curve collision test at 1440 px, the forced click on the "By arrival
+  speed" switch landed on the header. The test scrolls the switch to the viewport's top edge, under the 67 px header.
+  - With only the `position: sticky` line removed, the file passed 24 of 24 (three repeats); with it, it failed 3 of 3.
+  - Run alone, the test passed: the scroll position differs.
+- **Found while diagnosing:**
+  - on the article at 390 px, the header (y 0–68) covered the sticky section bar (y 0–49) entirely;
+  - at 1440 px it overlapped the side rail;
+  - `scroll-padding-top` counted only the section bar, so link targets and focused controls could land under the
+    header.
+
+**The fix** (author, 2026-10-26):
+1. **The header sticks only from 900 px,** the existing breakpoint where the landing hero goes two-column. Below
+   that it scrolls away and only the section bar sticks, as before PR #1. It stays positioned (`relative`) so its
+   translucent backdrop still has a box.
+2. **`shell.ts` (every page) measures the sticky elements in use,** and updates on resize and on crossing a
+   breakpoint. This replaces the research page's own bar measurement.
+   - `--header-h`: the header's height where it sticks, else 0.
+   - `--sticky-top`: the header's and the section bar's closed heights together. It is the base of
+     `scroll-padding-top`, so anchors, citation jumps and keyboard focus land below them.
+   - Between 900 and 1179 px both stick: the section bar sticks below the header (`top: var(--header-h)`), and so
+     does the rail from 1180 px (`top: calc(var(--header-h) + 24px)`).
+3. **Tests** (`e2e/sticky.spec.ts`) at 390, 768 and 1440 px as asked, plus 1024 px, the only range where the header
+   and the section bar stick together. They check that:
+   - the header never overlaps the section bar or the rail, at six scroll positions and after every section jump;
+   - Tab and Shift+Tab to the Curves switch leave it fully visible below every sticky element in view, and so does
+     choosing "By arrival speed" with the arrow keys;
+   - each section-navigation link leaves its heading visible below them (the rail is used from 1180 px; it was
+     wrongly assumed above 600 px);
+   - a citation link lands its reference fully visible.
+   - **Checked against the PR's stylesheet,** the new tests fail eight ways (the overlap and the section headings at
+     all four widths). With the fix they pass.
+4. **No more forced clicks** on the segmented radios: `curve.spec.ts`, `atlas.spec.ts`, `notation.spec.ts` and
+   `screens-states.spec.ts`. The force dates from Phase 6, when those inputs were invisible. Since Phase 8 they are
+   visible, so a force only hid obstructions like this one. Playwright now confirms that the click reaches the
+   control.
+
 

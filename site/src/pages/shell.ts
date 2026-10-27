@@ -56,4 +56,36 @@ export function initShell(page: "landing" | "research" | "references" | "explore
       }
     });
   }
+
+  trackSticky();
+}
+
+/**
+ * The sticky elements over the content (author, 2026-10-26, after PR #1): the site header from 900 px and the article's
+ * section bar below 1180 px. Their heights are measured, never assumed, and kept current on resize:
+ * - --header-h: the header's height where it sticks, else 0; the section bar and the side rail stick below it;
+ * - --sticky-top: the header's and the section bar's heights together, the base of scroll-padding-top, so a link
+ *   target, a citation jump or a focused control always lands below them.
+ * The section bar counts with its list closed: its title can wrap, but an open list is not a lasting overlay.
+ */
+function trackSticky(): void {
+  const root = document.documentElement;
+  const header = document.querySelector<HTMLElement>(".site-header");
+  const bar = document.querySelector<HTMLElement>(".section-nav-mobile");
+  const barTitle = bar?.querySelector<HTMLElement>("summary");
+  const update = () => {
+    const sticks = (e: HTMLElement) => { const cs = getComputedStyle(e); return cs.display !== "none" && cs.position === "sticky"; };
+    const headerH = header && sticks(header) ? header.offsetHeight : 0;
+    let barH = 0;
+    if (bar && barTitle && sticks(bar)) {
+      const cs = getComputedStyle(bar);
+      barH = barTitle.offsetHeight + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth);
+    }
+    root.style.setProperty("--header-h", `${Math.ceil(headerH)}px`);
+    root.style.setProperty("--sticky-top", `${Math.ceil(headerH + barH)}px`);
+  };
+  const ro = new ResizeObserver(update);
+  for (const e of [header, barTitle]) if (e) ro.observe(e);
+  window.addEventListener("resize", update);                 // crossing a breakpoint can switch stickiness without a resize
+  update();
 }

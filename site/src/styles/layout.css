@@ -5,12 +5,16 @@
              border: 1px solid var(--ink); z-index: 100; transform: translateY(-200%); }
 .skip-link:focus { transform: none; }
 
-/* Header: wordmark, site links and the theme switch; on narrow screens the links fold behind "Menu". */
+/* Header: wordmark, site links and the theme switch; on narrow screens the links fold behind "Menu". It sticks only
+   from 900 px (author, 2026-10-26, after PR #1); below that it scrolls away and only the article's section bar
+   sticks, as before. shell.ts measures every sticky element in use and sets --header-h (the header's height where it
+   sticks, else 0) and --sticky-top (all of them together). */
 .site-header {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3) var(--s5);
   padding: var(--s4) var(--gutter); max-width: 1240px; margin: 0 auto;
-  position: sticky; top: 0; z-index: 40;
+  position: relative; z-index: 40;
 }
+@media (min-width: 900px) { .site-header { position: sticky; top: 0; } }
 .site-header::before {
   content: "";
   position: absolute;
@@ -44,8 +48,8 @@
   .site-nav a { padding: 8px 0; min-height: 44px; display: inline-flex; align-items: center; }
 }
 
-/* Scrolling to a link target or a focused control stops below the sticky section bar (narrow screens); home.ts sets
-   --sticky-top to the bar's height. */
+/* Scrolling to a link target, a citation or a focused control stops below every sticky element in use (the header from
+   900 px, the section bar below 1180 px): shell.ts sets --sticky-top to their measured heights. */
 html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 
 /* Home: the hero spans the width; below it, a sticky section rail beside the content (stacked on narrow screens). */
@@ -57,7 +61,8 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 .section-nav { display: none; }
 @media (min-width: 1180px) {
   .home-grid { grid-template-columns: 196px minmax(0, 1fr); gap: var(--s7); }
-  .section-nav { display: block; position: sticky; top: var(--s5); align-self: start; max-height: calc(100vh - 2 * var(--s5));
+  .section-nav { display: block; position: sticky; top: calc(var(--header-h, 0px) + var(--s5)); align-self: start;
+                 max-height: calc(100vh - var(--header-h, 0px) - 2 * var(--s5));
                  overflow-y: auto; }
   .section-nav-mobile { display: none; }
 }
@@ -68,7 +73,7 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 .section-nav a[aria-current="true"], .section-nav-mobile a[aria-current="true"] { color: var(--text); font-weight: 500; }
 .section-nav a[aria-current="true"]::before, .section-nav-mobile a[aria-current="true"]::before {
   content: ""; position: absolute; left: 0; top: 50%; width: 8px; height: 2px; background: var(--accent); }
-.section-nav-mobile { position: sticky; top: 0; z-index: 20; background: var(--bg); margin: 0 calc(-1 * var(--gutter));
+.section-nav-mobile { position: sticky; top: var(--header-h, 0px); z-index: 20; background: var(--bg); margin: 0 calc(-1 * var(--gutter));
                       padding: var(--s2) var(--gutter); border-bottom: 1px solid var(--grid); }
 .section-nav-mobile summary { cursor: pointer; font-size: 0.9375rem; min-height: 32px; display: flex; align-items: center; gap: var(--s2); }
 .section-nav-mobile summary .label { color: var(--text-2); }

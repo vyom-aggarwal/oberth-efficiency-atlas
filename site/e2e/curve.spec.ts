@@ -43,7 +43,7 @@ for (const width of [390, 600, 768, 1024, 1440]) {
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".plot svg path.band")).toBeVisible();
     for (const mode of ["band", "family"]) {
-      await fig.locator(`.segmented input[value="${mode}"]`).check({ force: true });
+      await fig.locator(`.segmented input[value="${mode}"]`).check();
       await page.waitForTimeout(100);
       const problems = await fig.evaluate((root) => {
         const plot = root.querySelector(".plot")!.getBoundingClientRect();

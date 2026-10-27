@@ -12,7 +12,7 @@ async function open(page: Page, width: number) {
   return fig;
 }
 const choose = (fig: ReturnType<Page["locator"]>, group: string, value: string) =>
-  fig.locator(`.segmented input[name$="-${group}"][value="${value}"]`).check({ force: true });
+  fig.locator(`.segmented input[name$="-${group}"][value="${value}"]`).check();
 
 for (const width of [390, 768, 1440]) {
   test(`atlas: labels clear of each other and of the text, every slice, at ${width}px`, async ({ page }) => {

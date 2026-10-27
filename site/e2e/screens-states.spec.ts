@@ -23,7 +23,7 @@ for (const width of [1440, 390]) {
     const fig = page.locator("#fig-atlas");
     await fig.scrollIntoViewIfNeeded();
     await expect(fig.locator(".plot svg rect.plot-frame")).toBeVisible();
-    await fig.locator('.segmented input[name$="-steer"][value="inertial"]').check({ force: true });
+    await fig.locator('.segmented input[name$="-steer"][value="inertial"]').check();
     await fig.locator("select").selectOption("venus");
     await fig.locator(".chips label", { hasText: "Mission samples" }).click();
     await expect(fig.locator(".legend-group-title")).toHaveText(["Colour scale", "Fills", "Lines", "Marks"]);
@@ -43,7 +43,7 @@ for (const theme of ["light", "dark"] as const) {
       const fig = page.locator("#fig-atlas");
       await fig.scrollIntoViewIfNeeded();
       await expect(fig.locator(".plot svg rect.plot-frame")).toBeVisible();
-      await fig.locator('.segmented input[name$="-steer"][value="inertial"]').check({ force: true });
+      await fig.locator('.segmented input[name$="-steer"][value="inertial"]').check();
       await expect(fig.locator(".summary")).toContainText("73 cells have η");
       await crop(page, "fig-atlas", `atlas-inertial-${width}-${theme}.png`);
     });

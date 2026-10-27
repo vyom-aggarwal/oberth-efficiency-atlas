@@ -68,7 +68,7 @@ for (const path of PAGES) {
       found.push(...[...new Set(tips)].map((t) => `tooltip: "${t.slice(0, 120)}"`));
       const family = page.locator('#fig-universal-curve .segmented input[value="family"]');
       if (await family.count()) {
-        await family.check({ force: true });
+        await family.check();
         await page.waitForTimeout(100);
         found.push(...(await underscores(page)).map((t) => `family mode: ${t}`));
       }

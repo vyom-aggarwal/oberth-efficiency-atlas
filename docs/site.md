@@ -166,6 +166,10 @@ npm run lighthouse                       # Lighthouse: see below
   from `index.html`, and requires no warning.
 - **The Copy button:** tested on `http://localhost`, a secure context that the route handler
   serves, with clipboard permissions.
+- **Sticky elements** (2026-10-26): the header sticks from 900 px, the article's section bar below 1180 px (below the
+  header where both stick), the rail from 1180 px. `src/pages/shell.ts` measures them and sets `--header-h` and
+  `--sticky-top`, the base of `scroll-padding-top`. `e2e/sticky.spec.ts` checks at 390, 768, 1024 and 1440 px that
+  they never overlap and that Tab, Shift+Tab, section links and citation links land targets below them.
 - **Phase 8 specs:**
   - `e2e/notation.spec.ts`: no displayed text, accessible name or tooltip has "_" outside code and URLs, on every
     page at 1440 and 390 px;
