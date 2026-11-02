@@ -166,7 +166,7 @@ The step-1 findings, confirmed and made exact by the code:
 | Magnetic controls | **drop** (§1.3) | Controls stay where they are. |
 | Liquid buttons | **replace** (§1.3) | The round and outline shapes stay; hover and focus change colour, with no rising fill. |
 | Closing curve | **replace** (§1.3) | A straight edge with the escape leg drawn over it (§2.6). |
-| Lenis | **adopt, conditionally** | The author's four conditions, tested in pass 2 (§2.6). Fallback: native scrolling. |
+| Lenis | **adopt, conditionally** | The author's four conditions, tested in the optional pass 8 (§2.6, §2.13). Until then, and as the fallback: native scrolling. |
 | Barba curtains | **drop** (author) | Cross-document View Transitions as a progressive enhancement instead (§2.6). |
 | GSAP | **not used** (author, 2026-11-02) | §2.6. |
 | About page | **adopt** (layout; decision 4) | Modelled on the reference's About page (§2.4). |
@@ -348,8 +348,8 @@ texture. All checks pass on both surfaces:
 - **The article:** at 1180 px and wider it keeps its sticky side rail, restyled as a numbered list. Below that it keeps
   the sticky section bar, which carries the menu pill at its right end, so two fixed elements never stack.
 - **Sticky elements and scroll padding:** `shell.ts` keeps measuring every active sticky or fixed element and setting
-  `scroll-padding-top`. `e2e/sticky.spec.ts` keeps its checks at 390, 768, 1024 and 1440 px, extended in pass 2 to the
-  About page's sticky headings and to Lenis (§2.6).
+  `scroll-padding-top`. `e2e/sticky.spec.ts` keeps its checks at 390, 768, 1024 and 1440 px, extended in pass 2 to the menu pill, in pass 6 to the
+  About page's sticky headings, and in the optional pass 8 to Lenis (§2.6).
 
 ### 2.5 The landing page
 
@@ -461,7 +461,7 @@ is gone.
 **The 1.5 s cap** applies only to sequences that block content (the author). The preloader has its own 2 s cap, and the
 dive intro, which never blocks content, has a 3 s cap.
 
-**Lenis**, used only if all of the author's conditions hold, tested in pass 2:
+**Lenis**, deferred to the optional pass 8 (§2.13), and used then only if all of the author's conditions hold:
 1. It is never started under `prefers-reduced-motion`. It also needs a fine pointer at 768 px and wider, as in the
    reference, so touch keeps native scrolling.
 2. Keyboard scrolling, section-nav and citation jumps, and focus scrolling still land targets fully visible.
@@ -745,9 +745,9 @@ near, the work stops at the end of a pass.
    The pages keep their present layout in the new colours and type until their own pass.
 2. **Navigation, page shell and footer** on every page:
    - the header, the menu pill and drawer, the closing section and footer;
-   - Lenis with its four condition tests (§2.6), else native scrolling;
-   - View Transitions;
-   - the sticky-element and scroll-padding tests extended.
+   - the sticky-element and scroll-padding tests extended to the pill.
+
+   Native scrolling and no page transitions (the author, 2026-11-02: Lenis and View Transitions move to pass 8).
 3. **The landing page** (§2.5):
    - the hero, the preloader (`lib/flyby.ts`), the docked dive and the findings rows, the intro and key results;
    - the preloader's end-to-end placement check and its production cap test;
@@ -765,6 +765,11 @@ near, the work stops at the end of a pass.
 
 Then the full `check_all.py`, the full Playwright suite on all three builds, the fold and headline budget, screenshots
 of every page and the motion states, and the pull request.
+
+8. **Optional, after the author's final review and only if the budget allows** (the author, 2026-11-02, to protect the
+   weekly usage): Lenis with its four condition tests (§2.6), and the cross-document View Transitions. Until then the
+   site uses native scrolling and no page transitions, and the production site does not bundle Lenis (only the
+   development style page uses it).
 
 ## 3. Copying and attribution
 

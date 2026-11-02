@@ -3959,4 +3959,16 @@ used a dev server I started myself on port 5180 (`STYLE9_URL` points `tools/styl
   re-measures the fold and the headline budget. Until then the full Playwright suite is not expected to pass. It is
   not part of the fast checks run after each pass.
 
+## 2026-11-02: Phase 9 reordered: Lenis and View Transitions deferred to an optional pass 8
+
+The author approved pass 1 and confirmed the row-02 reading: pointing at row 02 counts as pointing at nothing, so the dive
+returns to the reader's clock. To protect the weekly usage, the author changed the order (plan §2.13), recorded here
+before pass 2 begins:
+- **Pass 2** covers only the header, the menu drawer and the footer (with the closing section) on every page.
+- **Lenis, with its four condition tests, and the View Transitions** move to a new optional pass 8, after pass 7 and the
+  author's final review, only if the budget allows.
+- **Until then:** native scrolling, no page transitions, and no Lenis in the production bundle. The development style
+  page `/style-9/` keeps its Lenis, so its notice entry stays.
+- **Review point:** unchanged, after pass 3, with the named screenshots.
+
 
