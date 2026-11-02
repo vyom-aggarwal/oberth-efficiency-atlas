@@ -1,26 +1,30 @@
-// Sticky elements must not cover what the reader moves to (author, 2026-10-18; extended 2026-10-26 after PR #1 made the
-// site header sticky). The header sticks from 900 px; the article's section bar sticks below 1180 px (a side rail
-// above that), below the header where both stick. At 390, 768, 1024 (both sticky) and 1440 px:
-// - the header never overlaps the section bar or the rail;
+// Sticky and fixed elements must not cover what the reader moves to (author, 2026-10-18; extended 2026-10-26 after
+// PR #1 made the site header sticky). Phase 9 (pass 2): the header no longer sticks; the article's section bar sticks
+// below 1180 px (a side rail above that), and the fixed menu pill sits at the top right (from 900 px once the header
+// has scrolled away; on the article below 1180 px, at the right end of the section bar). At 390, 768, 1024 and 1440 px:
+// - the header does not stick, and the pill never covers the section bar's title or the rail;
 // - a control reached with Tab or Shift+Tab (the Curves switch, and "By arrival speed" chosen with the arrow keys), the
 //   heading of a section reached from the section navigation, and a reference reached from a citation link all end
-//   fully visible below every sticky element in view.
+//   fully visible below every sticky or fixed element in view.
 import { expect, test, type Page } from "./fixtures";
 
-const STICKY = [".site-header", ".section-nav-mobile", ".section-nav"];
-
-/** The band at the top of the viewport that stuck elements cover (their lowest bottom), and the viewport height. */
+/** The band at the top of the viewport that the stuck section bar and the shown pill cover (their lowest bottom), and
+ *  the viewport height. */
 async function band(page: Page): Promise<{ top: number; bottom: number }> {
-  return page.evaluate((sel) => {
+  return page.evaluate(() => {
     let top = 0;
-    for (const e of document.querySelectorAll<HTMLElement>(sel.join(", "))) {
-      const cs = getComputedStyle(e), r = e.getBoundingClientRect();
-      if (cs.display === "none" || cs.position !== "sticky" || r.bottom <= 0) continue;
-      const stuckAt = parseFloat(cs.top) || 0;
-      if (r.top <= stuckAt + 1 && e.matches(".site-header, .section-nav-mobile")) top = Math.max(top, r.bottom);
+    const bar = document.querySelector<HTMLElement>(".section-nav-mobile");
+    if (bar) {
+      const cs = getComputedStyle(bar), r = bar.getBoundingClientRect();
+      if (cs.display !== "none" && cs.position === "sticky" && r.bottom > 0 && r.top <= (parseFloat(cs.top) || 0) + 1) top = r.bottom;
+    }
+    const pill = document.querySelector<HTMLElement>(".menu-pill");
+    if (pill) {
+      const cs = getComputedStyle(pill);
+      if (cs.display !== "none" && cs.visibility !== "hidden" && Number(cs.opacity) > 0) top = Math.max(top, pill.getBoundingClientRect().bottom);
     }
     return { top, bottom: window.innerHeight };
-  }, STICKY);
+  });
 }
 async function expectClear(page: Page, selector: string, what: string): Promise<void> {
   const r = await page.locator(selector).first().boundingBox();
@@ -29,21 +33,24 @@ async function expectClear(page: Page, selector: string, what: string): Promise<
   expect(r!.y, `${what}: top below the sticky elements (${Math.round(b.top)} px)`).toBeGreaterThanOrEqual(b.top - 0.5);
   expect(r!.y + r!.height, `${what}: bottom on screen`).toBeLessThanOrEqual(b.bottom + 0.5);
 }
-/** Overlaps between the header and the section bar or rail, as shown now. */
+/** Overlaps between the shown menu pill and the section bar's title or the rail, as shown now. */
 async function overlaps(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const shown = (s: string) => {
       const e = document.querySelector<HTMLElement>(s);
-      if (!e || getComputedStyle(e).display === "none") return null;
+      if (!e) return null;
+      const cs = getComputedStyle(e);
+      if (cs.display === "none" || cs.visibility === "hidden" || Number(cs.opacity) === 0) return null;
       const r = e.getBoundingClientRect();
       return r.bottom > 0 && r.top < window.innerHeight ? r : null;
     };
-    const header = shown(".site-header"), out: string[] = [];
-    if (!header) return out;
-    for (const s of [".section-nav-mobile", ".section-nav"]) {
+    const pill = shown(".menu-pill"), out: string[] = [];
+    if (!pill) return out;
+    for (const s of [".section-nav-mobile summary", ".section-nav"]) {
       const r = shown(s);
-      if (r && r.top < header.bottom - 0.5 && header.top < r.bottom - 0.5)
-        out.push(`${s} (${Math.round(r.top)}–${Math.round(r.bottom)}) overlaps the header (${Math.round(header.top)}–${Math.round(header.bottom)})`);
+      if (r && r.top < pill.bottom - 0.5 && pill.top < r.bottom - 0.5 && r.left < pill.right - 0.5 && pill.left < r.right - 0.5)
+        out.push(`${s} (${Math.round(r.left)}–${Math.round(r.right)} × ${Math.round(r.top)}–${Math.round(r.bottom)}) overlaps the pill ` +
+                 `(${Math.round(pill.left)}–${Math.round(pill.right)} × ${Math.round(pill.top)}–${Math.round(pill.bottom)})`);
     }
     return out;
   });
@@ -60,9 +67,9 @@ for (const width of [390, 768, 1024, 1440]) {
       await expect(page.locator("#fig-universal-curve .plot svg .hit[tabindex]").first()).toBeAttached();   // drawn
     });
 
-    test("the header never overlaps the section bar or the rail", async ({ page }) => {
+    test("the header does not stick, and the menu pill never covers the section bar's title or the rail", async ({ page }) => {
       const sticks = await page.evaluate(() => getComputedStyle(document.querySelector(".site-header")!).position);
-      expect(sticks, "the header sticks from 900 px only").toBe(width >= 900 ? "sticky" : "relative");
+      expect(sticks, "the header scrolls away (Phase 9)").toBe("relative");
       const height = await page.evaluate(() => document.documentElement.scrollHeight);
       for (const y of [0, 600, 1500, 3000, height / 2, height - 1200]) {
         await page.evaluate((v) => window.scrollTo(0, v), y);

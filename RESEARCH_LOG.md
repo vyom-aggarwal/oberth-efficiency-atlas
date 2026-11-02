@@ -3971,4 +3971,58 @@ before pass 2 begins:
   page `/style-9/` keeps its Lenis, so its notice entry stays.
 - **Review point:** unchanged, after pass 3, with the named screenshots.
 
+## 2026-11-02: Phase 9 pass 2: the header, the menu drawer and the footer on every page
+
+The approved style-page design, moved into the shared partials. Styles are in a new `site/src/styles/shell.css`; the
+old header, menu and footer rules are removed from `layout.css`.
+
+**The header** (`partials/header.html`):
+- **Layout.** The wordmark on the left. From 900 px, the inline links Research (when built), Explorer and References.
+- **Not sticky.** It scrolls away; Phase 7's sticky header from 900 px is gone.
+- **Source** leaves the inline links for the drawer, the closing section and the footer.
+
+**The menu pill and drawer:**
+- **The pill** reads "Menu" or "Close". It is fixed at the top right. From 900 px it appears once the header has
+  scrolled away, and is out of the tab order while hidden. Below 900 px it is always there.
+- **The drawer** lists the pages in display type (the current one marked by a short bar), then Source on GitHub, the
+  classic explorer and Cite. Cite jumps to the footer's citation, now `#cite`.
+- **Behaviour,** adapted from the reference as on the style page:
+  - the rest of the page is inert while it is open;
+  - Tab cycles between the pill and the drawer's links;
+  - Escape closes it and focus returns;
+  - from the keyboard it opens and closes without motion.
+- **New:** a link in the drawer closes it before navigating, so an in-page target is no longer inert.
+- **Without JavaScript** the inline links stay at every width and the pill stays hidden.
+
+**The closing section and footer** (`partials/footer.html`, on every page):
+- the escape leg over a straight edge (drawn by `shell.ts`; scroll-driven in CSS);
+- the author's closing-line slot (`content/landing/closing.md`, hidden in production until written);
+- "Open the explorer" (a round accent button), hidden on the explorer page itself;
+- outline links: Research (when built), Source on GitHub, Classic explorer;
+- the footer's facts, every one kept: author, citation with Copy, licences, source, analysis, site data, AI-use log,
+  offline explorer.
+
+**Sticky and fixed elements:**
+- **Measurements.** `shell.ts` sets `--header-h` to 0 and `--sticky-top` to the lowest bottom of the stuck section bar
+  and the pill. The pill counts wherever it is shown, because a jump always scrolls past the header.
+- **On the article below 1180 px** the section bar keeps 104 px free at its right end. The pill rides up with the
+  header until it sits centred in the bar (`--pill-top`), so two fixed elements never stack.
+- **Tests.** `e2e/sticky.spec.ts` now checks that the header does not stick and that the pill never covers the bar's
+  title or the rail. Its "fully visible" band includes the pill.
+
+**Deviations, recorded now:**
+- **About is not in the header yet.** The page arrives in pass 6, and a link to a missing page would fail the link
+  tests. The link comes with the page.
+- **The CTA on the explorer page.** The closing section's "Open the explorer" is hidden there rather than replaced.
+
+**Notices:** `shell.css` and `shell.ts` are added to `THIRD_PARTY_NOTICES.md` as files with adapted code (layouts;
+the drawer's focus handling), each with a header comment.
+
+**Checked** on the test build:
+- `pages.spec.ts` (with the new menu, inline-links, navigation and closing tests) and `sticky.spec.ts` at 390, 768,
+  1024 and 1440 px: 30 tests pass;
+- the landing spec's Copy and footer tests pass;
+- screenshots of the header, the open drawer, the closing section and the article's bar with the pill, at 1440 and
+  390 px, looked right.
+
 

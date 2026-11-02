@@ -1,54 +1,8 @@
-/* Page shell: header, navigation, sections. Space separates sections; figures sit in the classic explorer's flat panels
-   (chart.css). */
+/* Page layout: sections, the article's section navigation, facts and the explorer's regions. The header, the menu and
+   the footer are in shell.css (Phase 9 pass 2). Space separates sections; figures sit in flat panels (chart.css). */
 
-.skip-link { position: absolute; left: var(--s2); top: var(--s2); padding: var(--s2) var(--s3); background: var(--bg);
-             border: 1px solid var(--ink); z-index: 100; transform: translateY(-200%); }
-.skip-link:focus { transform: none; }
-
-/* Header: wordmark and site links; on narrow screens the links fold behind "Menu". It sticks only
-   from 900 px (author, 2026-10-26, after PR #1); below that it scrolls away and only the article's section bar
-   sticks, as before. shell.ts measures every sticky element in use and sets --header-h (the header's height where it
-   sticks, else 0) and --sticky-top (all of them together). */
-.site-header {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s3) var(--s5);
-  padding: var(--s4) var(--gutter); max-width: 1240px; margin: 0 auto;
-  position: relative; z-index: 40;
-}
-@media (min-width: 900px) { .site-header { position: sticky; top: 0; } }
-.site-header::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--grid) 90%, transparent);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-}
-.wordmark { font-family: var(--sans-cond); font-weight: 700; font-size: var(--t-h3); letter-spacing: 0.01em;
-            color: var(--text); text-decoration: none; }
-.wordmark:hover { color: var(--link); }
-.site-menu { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); }
-.site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s5); }
-.site-nav a { color: var(--text); text-decoration: none; padding: 6px 0; }
-.site-nav a:hover, .site-nav a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
-.menu-button { font: inherit; color: var(--text); background: var(--raised); border: 1px solid var(--control-edge);
-               border-radius: var(--r-control); min-height: 36px; padding: 0 var(--s3); cursor: pointer; }
-.menu-button[aria-expanded="true"] { background: var(--ink); color: var(--bg); }
-@media (min-width: 761px) { .menu-button { display: none; } }
-@media (max-width: 760px) {
-  .js-menu .site-menu { display: none; width: 100%; flex-direction: column; align-items: flex-start; gap: var(--s4);
-                        padding: var(--s3) 0 var(--s2); }
-  .js-menu .site-menu.open { display: flex; }
-  .site-nav { flex-direction: column; align-items: flex-start; gap: var(--s1); }
-  .site-nav a { padding: 8px 0; min-height: 44px; display: inline-flex; align-items: center; }
-}
-
-/* Scrolling to a link target, a citation or a focused control stops below every sticky element in use (the header from
-   900 px, the section bar below 1180 px): shell.ts sets --sticky-top to their measured heights. */
+/* Scrolling to a link target, a citation or a focused control stops below every sticky or fixed element in use (the
+   article's section bar below 1180 px, and the menu pill): shell.ts sets --sticky-top from their measured boxes. */
 html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 
 /* Home: the hero spans the width; below it, a sticky section rail beside the content (stacked on narrow screens). */
@@ -97,22 +51,6 @@ html { scroll-padding-top: calc(var(--sticky-top, 0px) + var(--s2)); }
 .facts dt { color: var(--text-2); }
 .facts dd { margin: 0; font-variant-numeric: tabular-nums lining-nums; }
 @media (max-width: 600px) { .facts { grid-template-columns: minmax(0, 1fr); } .facts dd { margin-bottom: var(--s2); } }
-
-/* Footer: labelled facts. */
-.site-footer {
-  border-top: 1px solid var(--grid);
-  padding: var(--s6) var(--gutter) var(--s8);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--panel) 35%, transparent), transparent 42%);
-}
-.footer-facts { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-                gap: var(--s4) var(--s6); font-size: var(--t-label); }
-.footer-facts dt { color: var(--text-2); margin-bottom: 2px; }
-.footer-facts dd { margin: 0; }
-/* The citation (from CITATION.cff) spans two columns where it can; its Copy button appears with the clipboard API. */
-.footer-facts > div:has(.citation-text) { grid-column: span 2; }
-@media (max-width: 600px) { .footer-facts > div:has(.citation-text) { grid-column: auto; } }
-.citation-text { overflow-wrap: anywhere; }
-.copy-button { margin-left: var(--s2); min-height: 28px; font-size: var(--t-label); }
 
 /* Explorer (checkpoint 5): case inputs, the trajectory, results, and where the case sits. */
 /* Region titles are the classic's eyebrows (in Ink 2: Muted is short of 4.5:1 for small text in light). */

@@ -787,3 +787,14 @@ added to the numbers file as values.
 - **Line endings:** the classic explorer is CRLF in a Windows checkout, so the pinned hash is taken over its LF text.
 - **Background motion:** Phase 8's background glow drifted for 48 s without end, which the Phase 9 motion rule
   forbids. It is removed.
+
+**Author decided** (2026-11-02, after pass 1): pass 1 approved; the row-02 reading confirmed; Lenis and the View
+Transitions deferred to an optional pass 8, to protect the weekly usage; pass 2 limited to the header, drawer and
+footer.
+
+**Assistant, pass 2 (header, menu drawer and footer):**
+- **Shell:** moved the approved design into the shared header and footer partials, with a new `shell.css`.
+- **Drawer:** the reference's focus handling, plus closing it before a link navigates.
+- **Closing section** on every page, with the escape leg.
+- **Sticky elements:** extended the measurements and their tests to the menu pill; added tests of the drawer's
+  keyboard handling and of the closing section.

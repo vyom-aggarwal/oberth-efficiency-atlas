@@ -25,7 +25,10 @@ as its licence requires. Package dependencies not listed here keep their own lic
   details. No asset files are copied.
 - **Files containing copied or adapted code**, each marked with a header comment naming the source and what in it is
   adapted:
-  - `site/src/styles/v9/components.css` (layouts: header, drawer, rows, buttons, closing section and footer)
+  - `site/src/styles/shell.css` (the site's header, drawer, buttons, closing section and footer layouts; Phase 9 pass 2)
+  - `site/src/pages/shell.ts` (the site's drawer: open, close and focus handling; Phase 9 pass 2)
+  - `site/src/styles/v9/components.css` (the development style page: header, drawer, rows, buttons, closing section and
+    footer layouts)
   - `site/src/styles/v9/style9.css` (the hero's composition)
   - `site/src/pages/style9.ts` (the drawer's open, close and focus handling; the Lenis settings)
   - `site/style-9/index.html` (the preloader's inline gate)

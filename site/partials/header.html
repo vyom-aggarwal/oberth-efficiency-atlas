@@ -1,13 +1,25 @@
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <a class="wordmark" href="{{base}}">Oberth Efficiency Atlas</a>
-  <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-menu" hidden>Menu</button>
-  <div class="site-menu" id="site-menu">
-    <nav class="site-nav" aria-label="Site">
-      <!--#research-link: data-page="research"-->
-      <a href="{{base}}explorer/" data-page="explorer">Explorer</a>
-      <a href="{{base}}references/" data-page="references">References</a>
-      <a href="{{repo}}" rel="noopener">Source</a>
-    </nav>
-  </div>
+  <nav class="site-nav" aria-label="Site">
+    <!--#research-link: data-page="research"-->
+    <a href="{{base}}explorer/" data-page="explorer">Explorer</a>
+    <a href="{{base}}references/" data-page="references">References</a>
+  </nav>
 </header>
+<button class="menu-pill" type="button" aria-expanded="false" aria-controls="site-drawer" hidden>Menu</button>
+<div class="menu-scrim" data-menu-scrim></div>
+<aside class="menu-drawer" id="site-drawer" aria-label="Menu" aria-hidden="true" inert>
+  <p class="menu-label">Navigation</p>
+  <nav class="menu-pages" aria-label="Pages">
+    <a href="{{base}}" data-page="landing">Home</a>
+    <!--#research-link: data-page="research"-->
+    <a href="{{base}}explorer/" data-page="explorer">Explorer</a>
+    <a href="{{base}}references/" data-page="references">References</a>
+  </nav>
+  <div class="menu-more">
+    <a href="{{repo}}" rel="noopener">Source on GitHub</a>
+    <a href="{{base}}explorer/classic/">Classic explorer</a>
+    <a href="#cite">Cite</a>
+  </div>
+</aside>
