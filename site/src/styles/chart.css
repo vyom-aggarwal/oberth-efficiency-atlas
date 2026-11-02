@@ -25,8 +25,8 @@
 .annot-html a { pointer-events: auto; }
 .annot-html .annot-text { margin-left: 0.3em; }
 
-/* Axes, as the classic explorer: the two axis lines and their ticks in Muted (>= 3:1), tick labels in IBM Plex Mono
-   11 px, axis titles in Barlow 12 px; the rest of a plot frame in Axis. */
+/* Axes, as the classic explorer: the two axis lines and their ticks in --axis-line (>= 3:1), tick labels in IBM Plex Mono
+   11 px, axis titles in the sans face at 12 px; the rest of a plot frame in Axis. */
 .axis path, .axis line { stroke: var(--axis-line); }
 .axis text { fill: var(--text-2); font-family: var(--mono); font-size: var(--t-tick); font-variant-numeric: tabular-nums lining-nums; }
 .axis .axis-title { font-family: var(--sans); font-size: var(--t-axis); }

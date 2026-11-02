@@ -211,9 +211,9 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
   - **Landing fold** (author, 2026-10-21): the title, headline and entry links stay above the fold
     at 1440 × 900 and 390 × 844. The headline budget is `HEADLINE_BUDGET` (100 characters,
     measured), and the build warns when a headline exceeds it.
-- **Phase 8 look** (`docs/restyle_plan.md`): the classic explorer's, which is the paper palette.
-  - `npm run palette`: `tools/palette.mjs` reads the tokens from `explorer/app.css` (never edit
-    `palette.css` by hand).
+- **Phase 9 look** (`docs/revamp_plan.md`; Phase 8's is in `docs/restyle_plan.md`): dark only.
+  - `npm run palette`: `tools/palette.mjs` defines the six interface colours and reads the data
+    colours from the classic's dark block in `explorer/app.css` (never edit `palette.css` by hand).
   - `.venv/Scripts/python site/tools/fonts.py` regenerates `fonts.css`, the Greek-and-symbol
     subsets and their licences, from pinned sources.
   - Strings appended by `h()`/`s()` are typeset by `src/lib/notation.ts`: write "v_esc" and it

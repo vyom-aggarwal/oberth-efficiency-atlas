@@ -79,5 +79,6 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 - **The website's faces:** DM Sans and IBM Plex Mono, from the pinned `@fontsource` packages. Their licences ship in
   those packages.
-- **The fallback subsets** cut by `site/tools/fonts.py`: Commissioner, Fira Mono, Arimo, Roboto Condensed, Noto Sans Mono
-  and Noto Sans Math. Each subset's copyright notice and licence text are in `site/src/fonts/fallback/LICENSE-*.txt`.
+- **The fallback subsets** cut by `site/tools/fonts.py`: Commissioner, Fira Mono, Noto Sans Math and Arimo (Roboto
+  Condensed and Noto Sans Mono went with the Phase 8 set in Phase 9's pass 1). Each subset's copyright notice and
+  licence text are in `site/src/fonts/fallback/LICENSE-*.txt`.

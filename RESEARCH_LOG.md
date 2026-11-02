@@ -3888,4 +3888,75 @@ point (after pass 3, the landing page) confirms.
 used a dev server I started myself on port 5180 (`STYLE9_URL` points `tools/style9-shots.mjs` at it). Only
 `style-9-1440-steer-focus.png` was retaken: row 01 is now reached by keyboard from row 02.
 
+## 2026-11-02: Phase 9 pass 1: tokens, fonts and base layout; dark only; the classic explorer pinned
+
+**Palette.** `site/tools/palette.mjs` now does what `phase9-palette.mjs` did in step 2, and that file is gone.
+- It defines the six interface colours and finds Signal by the same search: `#445be8`, ΔE 0.31 from the reference.
+- It reads the data colours from the classic explorer's dark block in `explorer/app.css`.
+- It writes a dark-only `palette.css`. Every value equals the approved step-2 tokens.
+- **Checks:** all pass, including every step-2 check plus critical as warning text (5.84 on Void, 5.31 on Panel).
+- **Tests:** `palette.test.ts` now checks the dark-only output and that Signal is the nearest passing variant.
+- **One new token, `--band`:** the classic's dark axis grey `#4b4a45`, read from `app.css`. The loss band's fill was a
+  literal in the step-2 `tokens.css`; it is now `color-mix(var(--band) 60%)` in `base.css`.
+
+**Fonts.** `site/tools/fonts.py` writes one set, Phase 9's, to `src/styles/fonts.css`.
+- The subsets lose their `v9-` prefix and are byte-identical to the approved ones.
+- The CSS differs from the step-2 `v9/fonts.css` only in its relative paths.
+- **Removed:** the Phase 8 subsets and licences (Roboto Condensed, Noto Sans Mono, Arimo's Greek), and the
+  `@fontsource/barlow` and `@fontsource/barlow-semi-condensed` packages (`npm uninstall`; no package added).
+- `fonts.py` now deletes any file in `src/fonts/fallback/` that is not in the set. A new font test checks that the
+  directory holds exactly the set.
+
+**Base layout.** `base.css` takes the Phase 9 type scale, spacing, shapes and element defaults from the step-2
+`tokens.css` (deleted), and maps the colours onto the role names the charts read.
+- `--sans-cond` now names DM Sans: one sans family.
+- `--t-h2` is the statement size.
+- `--measure` is 66 ch.
+- `--gutter` is the 3 vw page padding.
+
+**Deviations from the plan, recorded now:**
+- **Phase 8's drifting background is removed.** It was a body glow of accent and Sun tints, animated for 48 s, without
+  end. Phase 9's page is a flat Void, and nothing may move on its own for more than 5 s (§2.6).
+- **The theme switch goes in pass 1, not pass 2.** With no light palette it would do nothing. Removed with it:
+  - the switch, from the header partial and `shell.ts`;
+  - `themePref`;
+  - the inline script that applied a stored theme, from six pages.
+
+  `themeShown` stays as a constant, so the chart modules that subscribe to it are unchanged. The e2e specs that looped
+  over both themes now run dark only. The switch test is replaced by one that loads every page under a light system
+  setting and expects `color-scheme: dark`, a Void background and no switch.
+- **The development page `/style/` (Phase 6) stays** for now, with its colour list updated: `e2e/interact-style.spec.ts`
+  tests the curve and controls through it. It is reviewed at the end of the build.
+- **Until passes 4 and 5, the accent appears where the plan forbids it.** `--accent` is now the indigo Signal, and the
+  pages keep their Phase 8 markup until their own pass. It shows in:
+  - the explorer's case dot on the universal curve (Ink in pass 5);
+  - checked controls;
+  - the landing's section marks.
+
+  The test that no chart module or chart stylesheet reads the accent comes in pass 4, as planned.
+
+**The classic explorer, pinned** (plan §2.12):
+- `tests/test_site_data.py` pins the sha256 of `explorer/oberth_explorer.html` as the repository stores it:
+  `61675394…`, equal to `main`'s blob.
+  - The file has LF line endings in the repository and CRLF in a Windows checkout (`core.autocrlf`), so the test hashes
+    it with LF line endings.
+  - Rebuilding the classic on purpose means a new hash and a log entry.
+- `e2e/pages.spec.ts` (test build) and `e2e/prod.spec.ts` (production build) check that `/explorer/classic/` serves
+  that file byte for byte.
+
+**Checked** on the dev server:
+- every page (landing, article, explorer, references, 404, both style pages) under a light system setting at 1440 and
+  390 px;
+- each is dark, with a Void background, DM Sans, no console errors and no sideways scroll;
+- the classic explorer is unchanged: light, and still loading Barlow from Google Fonts itself.
+
+**E2E run on the test and production builds:**
+- `pages.spec.ts` (with the new dark-only and byte-for-byte tests), `interact-style.spec.ts` and `av-stroke.spec.ts`
+  pass (10 tests). `av-stroke` measured every canvas at 2:1 or more on the new panels.
+- The production project passes 8 of 9: the classic explorer byte for byte, the links, no console errors.
+- **One known interim failure:** `fold.spec.ts` at 390 × 844. The old landing page now gets the Phase 9 display size
+  (44 px at that width, 34 px before), so its entry links fall below the fold. Pass 3 replaces that page and
+  re-measures the fold and the headline budget. Until then the full Playwright suite is not expected to pass. It is
+  not part of the fast checks run after each pass.
+
 

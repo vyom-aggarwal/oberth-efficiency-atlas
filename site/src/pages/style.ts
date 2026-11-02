@@ -14,17 +14,17 @@ const $ = (id: string) => document.getElementById(id)!;
 initShell("style");
 
 // ---------------------------------------------------------------- colour (values read from the generated tokens)
-// The classic explorer's tokens (tools/palette.mjs reads them from explorer/app.css), plus the derived link colour.
+// The Phase 9 interface colours and the classic explorer's dark data steps (tools/palette.mjs; dark only since pass 1).
 const NAMED: [string, string, string][] = [
-  ["Background", "--bg", "Page surface"],
+  ["Void", "--void", "Page surface"],
   ["Panel", "--panel", "Figure, finding and control panels; canvases draw on it"],
-  ["Ink", "--ink", "Text, trajectories, theory lines (dashed)"],
-  ["Ink 2", "--ink-2", "Secondary text, simulation curves, the coast path"],
-  ["Muted", "--muted", "Control outlines, axis lines, thresholds; never small text"],
-  ["Grid", "--grid", "Gridlines, rings and quiet dividers"],
-  ["Axis", "--axis", "The plot frame; the loss band at 60 %"],
-  ["Accent", "--accent", "The reader's case, focus rings, checked controls"],
-  ["Link", "--link", "Link text (Ramp 4 in light: the accent is short of 4.5:1)"],
+  ["Ink", "--ink", "Text and links (underlined), trajectories, theory lines (dashed)"],
+  ["Quiet", "--quiet", "Secondary text, control outlines, axis lines"],
+  ["Rule", "--rule", "Hairlines, gridlines, rings"],
+  ["Signal", "--signal", "Fills with an Ink label, focus rings, selection; never text, never in a plot"],
+  ["Ink 2", "--ink-2", "Simulation curves, the coast path, the impact hatching"],
+  ["Muted", "--muted", "Thresholds, the no-reliable-η dots"],
+  ["Axis", "--axis", "The plot frame"],
   ["Sun", "--sun", "The Sun"],
   ["Critical", "--critical", "Warnings (with an icon and text), η < 0 cells (hatched)"],
 ];

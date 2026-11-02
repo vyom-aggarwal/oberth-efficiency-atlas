@@ -40,7 +40,7 @@ content and data.
 
 This document is steps 1 and 2. Step 2 adds only development-only material:
 - the style page `/style-9/` (§2.11);
-- the palette check `site/tools/phase9-palette.mjs`;
+- the palette check `site/tools/phase9-palette.mjs` (folded into `tools/palette.mjs` in pass 1);
 - the Phase 9 font set, generated beside the Phase 8 one until pass 1.
 
 ## 1. The reference (step 1)
@@ -213,7 +213,8 @@ distinctive interactions may not. Every element adapted in the first revision, c
 
 ### 2.1 Interface palette: six named colours
 
-A designed dark equivalent of the reference's palette, checked by `site/tools/phase9-palette.mjs` (all checks pass).
+A designed dark equivalent of the reference's palette, checked by `site/tools/palette.mjs` since pass 1 (step 2 used
+`phase9-palette.mjs`); all checks pass.
 
 | name | value | role | contrast |
 |---|---|---|---|
@@ -275,8 +276,8 @@ texture. All checks pass on both surfaces:
   - **Licences:** each subset ships its copyright notice and the OFL text (`LICENSE-commissioner.txt`,
     `LICENSE-fira-mono.txt`). Neither family declares a Reserved Font Name.
   - **Signs neither Greek face has:** → (with ∝ and ☉) comes from Noto Sans Math, and ⁻ ⁿ ₚ from Arimo.
-  - **Transition:** until pass 1 the Phase 9 set is written beside the Phase 8 one: `site/src/styles/v9/fonts.css`,
-    `v9-*` subsets and `manifest-v9.json`. `tests/test_site_fonts.py` checks both sets (§2.11).
+  - **Transition:** until pass 1 the Phase 9 set was written beside the Phase 8 one (`site/src/styles/v9/fonts.css`,
+    `v9-*` subsets, `manifest-v9.json`). Pass 1 made it the only set, in `fonts.css`, checked by `tests/test_site_fonts.py`.
 - **Metrics** (fontTools):
 
   | fallback / primary | x-height ratio | cap-height ratio | advance |

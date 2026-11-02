@@ -35,6 +35,13 @@ test("every link on the landing page that stays on the site resolves under the b
   }
 });
 
+// Phase 9: the classic offline explorer is deployed byte for byte (tests/test_site_data.py pins the file itself).
+test("the classic explorer is served at explorer/classic/, byte for byte", async ({ page }) => {
+  const res = await page.goto("explorer/classic/");
+  expect(res!.status()).toBe(200);
+  expect((await res!.body()).equals(readFileSync(new URL("../../explorer/oberth_explorer.html", import.meta.url)))).toBe(true);
+});
+
 // Above the fold: e2e/fold.spec.ts, which runs on this build (slots empty) and on the placeholder build.
 
 for (const path of ["", "references/", "explorer/", "404.html"]) {

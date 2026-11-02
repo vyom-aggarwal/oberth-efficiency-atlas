@@ -4,11 +4,14 @@ The site presents the analysis. It reads committed outputs and never changes the
 (`src/oberth_atlas/`), its results or its scripts. The plan and every decision behind it are in
 `docs/site_plan.md` and `RESEARCH_LOG.md` (Phase 6).
 
-**The look** (Phase 8, `docs/restyle_plan.md`) is the classic explorer's, which is also the paper figures'
-palette:
-- **Colour:** the warm grey surface with flat 8 px panels; one blue accent; the blue η ramp; the derived a·v ramp.
-- **Type:** Barlow, Barlow Semi Condensed and IBM Plex Mono.
+**The look** (Phase 9, `docs/revamp_plan.md`; being applied page by page on `phase-9-revamp`) is dark only:
+- **Colour:** six interface colours (Void, Panel, Ink, Quiet, Rule and the Signal accent, never text and never in a
+  plot); the data colours are the classic explorer's dark steps (the blue η ramp, the derived a·v ramp).
+- **Type:** DM Sans and IBM Plex Mono.
 - **Controls:** pills.
+
+Phase 8 (`docs/restyle_plan.md`) gave it the classic explorer's look, in a light and a dark theme with a switch. Pass 1
+of Phase 9 removed the light theme and the switch.
 - **One surface per panel:** canvases paint their panel's colour (`--surface`); controls and tooltips take the
   other surface (`--raised`).
 - **Notation is typeset:** `src/lib/notation.ts`, applied by the DOM helpers to every string they append, turns
@@ -62,22 +65,23 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
   modules, SVG and Canvas 2D.
 - **Math:** KaTeX, rendered at build time, so the page ships no client-side math code.
 - **Prose:** Markdown, rendered at build time.
-- **Fonts** (Phase 8: the classic explorer's), all self-hosted:
-  - Barlow (body and prose), Barlow Semi Condensed (headings, annotations) and IBM Plex Mono (ticks,
-    readouts), from the pinned `@fontsource` packages, Latin and Latin-ext;
+- **Fonts** (Phase 9), all self-hosted:
+  - DM Sans (display, interface and prose) and IBM Plex Mono (ticks, readouts), from the pinned `@fontsource`
+    packages, Latin and Latin-ext;
   - after each, a Greek-and-symbol fallback cut by `site/tools/fonts.py` from pinned Google Fonts files
-    (Arimo, Roboto Condensed, Noto Sans Mono, Noto Sans Math; OFL 1.1), so η, Π, Δ, τ and ∞ have the
-    same glyphs on every platform, CI included;
+    (Commissioner behind DM Sans, Fira Mono behind IBM Plex Mono, and the remaining signs from Noto Sans Math and
+    Arimo; OFL 1.1), so η, Π, Δ, τ and ∞ have the same glyphs on every platform, CI included;
   - `tests/test_site_fonts.py` checks the subsets and that every displayed character has a
     self-hosted glyph.
 - **Node:** 24.18.1 (`site/.nvmrc`).
 - **Packages:** pinned exactly, with the 14-day age rule (`npm install --before=…`;
   `npm run check-age` verifies the lockfile).
-- **Palette** (Phase 8): the classic explorer's, read from `explorer/app.css` by `npm run palette`,
-  which checks it and writes `src/styles/palette.css` (vitest re-runs the checks).
+- **Palette** (Phase 9): `npm run palette` runs `tools/palette.mjs`, which defines the six interface colours,
+  reads the data colours from the classic explorer's dark block in `explorer/app.css`, checks them all and writes
+  `src/styles/palette.css`, dark only (vitest re-runs the checks).
   - The a·v ramp (`--av-1…7`, the classic blue ramp from step 2 to 6) is used only for a·v; the η
     ramp (`--ramp-0…6`) for η and the arrival-speed family.
-  - Dark mode is the classic's own set of steps.
+  - `base.css` maps the colours onto the role names the charts read (`--bg`, `--surface`, `--grid`, …).
 - **The simulator** is the validated JS port of the Python integrator, `src/sim/oberth-sim.js`.
   `tests/test_explorer_js.py` checks it against Python to |Δη| ≤ 1e-8.
 
@@ -175,8 +179,8 @@ npm run lighthouse                       # Lighthouse: see below
     page at 1440 and 390 px;
   - `e2e/panel-text.spec.ts`: every text inside a figure panel stays inside its padding, and on-plot text does not
     overlap, at 360 and 390 px;
-  - `e2e/av-stroke.spec.ts`: the faintest a·v stroke, from rendered pixels, is at least 2:1 against its panel in
-    both themes (values in `runs/av_stroke_contrast.json`).
+  - `e2e/av-stroke.spec.ts`: the faintest a·v stroke, from rendered pixels, is at least 2:1 against its panel
+    (values in `runs/av_stroke_contrast.json`).
 - **Screenshots:** the screenshot specs write to `runs/screens/`. Checkpoint screenshots are kept
   in `docs/screens/` (`docs/screens/README.md`).
 - **Without `SITE_DIST`,** Playwright starts the dev server itself.

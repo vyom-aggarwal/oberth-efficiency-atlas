@@ -24,7 +24,7 @@ async function measure(page: Page, selector: string, label: string, theme: strin
     document.querySelectorAll<HTMLCanvasElement>(selector).forEach((cv, ci) => {
       const drawn = (cv.dataset.avSteps ?? "").split(",").filter(Boolean).map(Number);
       if (!drawn.length) return;
-      const step = Math.min(...drawn);                                // step 1 is the faint end in both themes
+      const step = Math.min(...drawn);                                // step 1 is the faint end
       const token = getComputedStyle(document.documentElement).getPropertyValue(`--av-${step}`).trim();
       const s = rgb(token);
       const { data } = cv.getContext("2d")!.getImageData(0, 0, cv.width, cv.height);
@@ -51,7 +51,7 @@ async function measure(page: Page, selector: string, label: string, theme: strin
   }, { selector, label, theme });
 }
 
-for (const theme of ["light", "dark"] as const) {
+for (const theme of ["dark"] as const) {             // dark only since Phase 9 (pass 1)
   test(`the faintest a·v stroke on screen is at least 2:1 against its panel (${theme})`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });         // the final frame: every burn drawn

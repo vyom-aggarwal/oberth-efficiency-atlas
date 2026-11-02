@@ -5,7 +5,7 @@
              border: 1px solid var(--ink); z-index: 100; transform: translateY(-200%); }
 .skip-link:focus { transform: none; }
 
-/* Header: wordmark, site links and the theme switch; on narrow screens the links fold behind "Menu". It sticks only
+/* Header: wordmark and site links; on narrow screens the links fold behind "Menu". It sticks only
    from 900 px (author, 2026-10-26, after PR #1); below that it scrolls away and only the article's section bar
    sticks, as before. shell.ts measures every sticky element in use and sets --header-h (the header's height where it
    sticks, else 0) and --sticky-top (all of them together). */
@@ -35,7 +35,6 @@
 .site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s5); }
 .site-nav a { color: var(--text); text-decoration: none; padding: 6px 0; }
 .site-nav a:hover, .site-nav a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.3em; }
-.theme-switch .segmented label { font-size: var(--t-label); min-height: 28px; padding: 0 var(--s2); }
 .menu-button { font: inherit; color: var(--text); background: var(--raised); border: 1px solid var(--control-edge);
                border-radius: var(--r-control); min-height: 36px; padding: 0 var(--s3); cursor: pointer; }
 .menu-button[aria-expanded="true"] { background: var(--ink); color: var(--bg); }

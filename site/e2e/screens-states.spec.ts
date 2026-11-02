@@ -18,7 +18,7 @@ async function crop(page: Page, id: string, file: string) {
 for (const width of [1440, 390]) {
   test(`atlas legend, inertial, Venus, mission samples, at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width > 600 ? 900 : 844 });
-    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await page.goto("research/");
     const fig = page.locator("#fig-atlas");
     await fig.scrollIntoViewIfNeeded();
@@ -31,10 +31,10 @@ for (const width of [1440, 390]) {
   });
 }
 
-// Phase 8 (author, 2026-10-24): the restyle in states the default views do not show, in both themes. The atlas under
+// Phase 8 (author, 2026-10-24): the restyle in states the default views do not show (dark only since Phase 9). The atlas under
 // inertial steering at the default Δv/V has all three textures (η < 0 in Critical, impact in Ink 2, no reliable η in
 // Muted dots); the universal curve with a tooltip open (opened by keyboard focus, which survives the capture).
-for (const theme of ["light", "dark"] as const) {
+for (const theme of ["dark"] as const) {             // dark only since Phase 9 (pass 1)
   for (const width of [1440, 390]) {
     test(`atlas, inertial steering (the three textures), at ${width}px, ${theme}`, async ({ page }) => {
       await page.setViewportSize({ width, height: width > 600 ? 900 : 844 });
@@ -66,7 +66,7 @@ for (const theme of ["light", "dark"] as const) {
 for (const [engine, file] of [["Nuclear", "nuclear"], ["SEP*", "sep"]]) {
   test(`engines at 390px with ${engine} chosen`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" });
+    await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await page.goto("research/");
     const fig = page.locator("#fig-engines");
     await fig.scrollIntoViewIfNeeded();

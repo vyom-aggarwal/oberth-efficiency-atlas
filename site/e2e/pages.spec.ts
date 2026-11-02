@@ -1,16 +1,21 @@
-// The pages and what they share (Phase 7 routes): the theme switch and the narrow-screen menu, the article's section
+// The pages and what they share (Phase 7 routes): dark only (Phase 9) and the narrow-screen menu, the article's section
 // navigation at /research/, the references page and its anchors, citations that resolve to it, the legacy
 // /#ref-n redirect, and the classic explorer route. Runs against a build that keeps the unfinished sections.
+import { readFileSync } from "node:fs";
 import { expect, test } from "./fixtures";
 
-test("theme switch pins a theme and returns to the system setting", async ({ page }) => {
-  await page.goto("");
-  await page.locator(".theme-switch label", { hasText: "Dark" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");     // remembered
-  await page.locator(".theme-switch label", { hasText: "System" }).click();
-  await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
+const CLASSIC = new URL("../../explorer/oberth_explorer.html", import.meta.url);
+
+test("dark only: every page is dark under a light system setting, with no theme switch (Phase 9)", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  for (const path of ["", "research/", "explorer/", "references/", "404.html"]) {
+    await page.goto(path);
+    const { scheme, bg, theme } = await page.evaluate(() => ({
+      scheme: getComputedStyle(document.documentElement).colorScheme, bg: getComputedStyle(document.body).backgroundColor,
+      theme: document.documentElement.getAttribute("data-theme") }));
+    expect([path, scheme, bg, theme]).toEqual([path, "dark", "rgb(17, 18, 20)", null]);    // Void, #111214
+    await expect(page.locator(".theme-switch, [data-theme-switch]")).toHaveCount(0);
+  }
 });
 
 test("narrow screens fold the site links behind a menu button", async ({ page }) => {
@@ -82,8 +87,10 @@ test("an old link to the reference list on / goes to the references page", async
   await expect(page.locator("#ref-3")).toBeVisible();
 });
 
-test("the classic explorer is served at explorer/classic/", async ({ page }) => {
+test("the classic explorer is served at explorer/classic/, byte for byte", async ({ page }) => {
   const res = await page.goto("explorer/classic/");
   expect(res?.status()).toBe(200);
   await expect(page).toHaveTitle(/Oberth/);
+  // Phase 9: the offline fallback stays byte-identical (tests/test_site_data.py pins the file itself).
+  expect((await res!.body()).equals(readFileSync(CLASSIC))).toBe(true);
 });

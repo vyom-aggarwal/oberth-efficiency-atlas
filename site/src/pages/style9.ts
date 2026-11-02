@@ -1,5 +1,5 @@
-// /style-9/: the Phase 9 system for the author's approval (docs/revamp_plan.md §2.11; development builds only). Uses
-// the new token sheet alone, so the rest of the site is untouched until pass 1: tokens, type, the controls, the live
+// /style-9/: the Phase 9 system for the author's approval (docs/revamp_plan.md §2.11; development builds only), on the
+// site's tokens since pass 1 (palette.css, fonts.css, base.css): tokens, type, the controls, the live
 // dive with this project's own interactions (§1.3, §2.6), and samples of the article, the explorer and the references
 // page in the new system (the styling covers every page: author, 2026-11-02).
 //
@@ -11,7 +11,9 @@
 // magnetic and liquid buttons, curved edges, round menu button and marquee ticker are not used (§1.3).
 import "katex/dist/katex.min.css";
 import "lenis/dist/lenis.css";
-import "../styles/v9/tokens.css";
+import "../styles/palette.css";
+import "../styles/fonts.css";
+import "../styles/base.css";
 import "../styles/chart.css";
 import "../styles/controls.css";
 import "../styles/layout.css";

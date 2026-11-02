@@ -1,10 +1,10 @@
 // Review screenshots of the explorer in states the default page does not show: a burn starting outside the sphere
-// of influence (Earth, Hall thruster) and an impact (Jupiter, gridded ion, inertial), in both themes (Phase 8). Written to
+// of influence (Earth, Hall thruster) and an impact (Jupiter, gridded ion, inertial), (dark only since Phase 9). Written to
 // runs/screens/.
 import { expect, test } from "./fixtures";
 
 const CASES = [["soi", "?preset=earth.hall"], ["impact", "?preset=jupiter.gridded_ion&s=inertial"]] as const;
-for (const [name, query] of CASES) for (const theme of ["light", "dark"] as const) {
+for (const [name, query] of CASES) for (const theme of ["dark"] as const) {             // dark only since Phase 9 (pass 1)
   for (const width of [1440, 390]) {
     test(`explorer ${name} at ${width}px, ${theme}`, async ({ page }) => {
       await page.setViewportSize({ width, height: width > 600 ? 900 : 844 });

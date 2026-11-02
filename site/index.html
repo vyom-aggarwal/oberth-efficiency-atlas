@@ -9,7 +9,6 @@
     <script>
       // Links to the reference list made before Phase 7 (/#ref-n) go to the references page (author, 2026-10-21).
       if (/^#ref-\d+$/.test(location.hash)) location.replace("{{base}}references/" + location.hash);
-      try { var t = localStorage.getItem("oberth-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
     </script>
     <script type="module" src="/src/pages/landing.ts"></script>
   </head>

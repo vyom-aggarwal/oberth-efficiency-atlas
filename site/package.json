@@ -24,8 +24,6 @@
     "og-image": "node tools/og-image.mjs"
   },
   "dependencies": {
-    "@fontsource/barlow": "5.3.0",
-    "@fontsource/barlow-semi-condensed": "5.3.0",
     "@fontsource/dm-sans": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
     "d3-array": "3.2.4",

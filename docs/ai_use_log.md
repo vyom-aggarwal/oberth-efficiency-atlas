@@ -772,3 +772,18 @@ added to the numbers file as values.
 - **Preloader:** moved its geometry and timing to `site/src/lib/flyby.ts`, with seven unit tests of the physical
   placement of the stages. The drawn path now passes exactly through every stage.
 - **Plan:** corrected my pass numbering to the author's brief: the landing page is pass 3, the article pass 4.
+
+**Assistant, pass 1 (tokens, fonts and base layout):**
+- **Palette:** folded the Phase 9 palette and its checks into `tools/palette.mjs`, which now writes a dark-only
+  `palette.css`.
+- **Fonts:** made the Phase 9 set the only one in `fonts.py` and its tests, and removed the Barlow packages.
+- **Base layout:** moved the Phase 9 scale and roles into `base.css`.
+- **Theme:** removed the light theme, the theme switch and its scripts. The e2e specs run dark only, with a new
+  dark-only test.
+- **Classic explorer:** pinned its hash in the site-data tests, and added byte-for-byte e2e checks of the served file
+  on the test and production builds.
+
+**Assistant found inside pass 1:**
+- **Line endings:** the classic explorer is CRLF in a Windows checkout, so the pinned hash is taken over its LF text.
+- **Background motion:** Phase 8's background glow drifted for 48 s without end, which the Phase 9 motion rule
+  forbids. It is removed.
