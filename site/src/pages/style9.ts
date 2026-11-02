@@ -26,6 +26,7 @@ import { axisSlider } from "../controls/axis-slider";
 import { segmented } from "../controls/segmented";
 import { loadBinary, loadData, type SiteData } from "../lib/data";
 import { h, s } from "../lib/dom";
+import { flybyPoint, NU_BURN, nuAt, pathAnomalies, STAGES, stageMark, SUN_R } from "../lib/flyby";
 import { sig } from "../lib/format";
 import { signal } from "../lib/signal";
 
@@ -51,22 +52,13 @@ const lenis = fine.matches && !reduced
 root.dataset.scroll = lenis ? "lenis" : "native";
 
 // ---------------------------------------------------------------- the preloader: a flyby, drawn (§2.6)
-// One hyperbola (e = 1.5) in the dive's radial mapping ρ = 1 + log₁₀(r/r_p), the Sun on the left as in the hero. A dot
-// flies it from the upper right, quickest through perihelion (half Kepler's timing, half uniform in angle, so the turn
-// stays visible), the burn arc is drawn heavier, and the stages appear at their points in physical order (author,
-// 2026-11-02: a centred burn ignites before perihelion). They stay up, so none has to be read in passing. Then the
-// screen fades. From the page's start: the flight 120–1120 ms, a 150 ms hold, a 350 ms fade, gone at 1.62 s on time.
-// A late script shortens the flight so the fade ends by 1.8 s; the screen is removed when the main thread next runs
-// (the fade itself runs on the compositor), and the inline gate's failsafe removes it at 2 s regardless. Any key,
-// click, tap or wheel ends it at once.
-const ECC = 1.5, NU_MAX = (125 * Math.PI) / 180, NU_BURN = (35 * Math.PI) / 180, SUN_R = 0.42;
-const STAGES: [string, number][] = [["Approach", -110], ["Ignition", -35], ["Periapsis", 0], ["Cutoff", 35], ["Escape", 110]];
+// The flyby of lib/flyby.ts, the Sun on the left as in the hero. A dot flies it from the upper right, quickest through
+// perihelion, the burn arc is drawn heavier, and the stages appear at their points in physical order. They stay up, so
+// none has to be read in passing. Then the screen fades. From the page's start: the flight 120–1120 ms, a 150 ms hold,
+// a 350 ms fade, gone at 1.62 s on time. A late script shortens the flight so the fade ends by 1.8 s; the screen is
+// removed when the main thread next runs (the fade itself runs on the compositor), and the inline gate's failsafe
+// removes it at 2 s regardless. Any key, click, tap or wheel ends it at once.
 const FLY_AT = 120, FLY_MS = 1000, HOLD_MS = 150, FADE_MS = 350, CAP_MS = 2000;
-/** A point of the hyperbola at true anomaly ν, in ρ units: the Sun at the origin, perihelion to its left. */
-function flybyPoint(nu: number): [number, number] {
-  const rho = 1 + Math.log10((1 + ECC) / (1 + ECC * Math.cos(nu)));
-  return [-rho * Math.cos(nu), rho * Math.sin(nu)];
-}
 function preloader(): Promise<void> {
   const el = $("preload9"), svg = el.querySelector<SVGSVGElement>("svg")!;
   const now = performance.now();                                  // ms since the page's time origin
@@ -74,7 +66,7 @@ function preloader(): Promise<void> {
   if (!root.classList.contains("preloading") || reduced || fly < 300) { root.classList.remove("preloading"); return Promise.resolve(); }
   // Geometry, fitted to the screen (stage names need room on both sides).
   const W = innerWidth, H = innerHeight, narrow = W < 600;
-  const N = 240, nus = Array.from({ length: N + 1 }, (_, i) => -NU_MAX + (2 * NU_MAX * i) / N), pts = nus.map(flybyPoint);
+  const nus = pathAnomalies(), pts = nus.map(flybyPoint);
   let x0 = -SUN_R, x1 = SUN_R, y0 = -SUN_R, y1 = SUN_R;
   for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
   const mx = narrow ? 92 : 140, my = 56;
@@ -82,28 +74,14 @@ function preloader(): Promise<void> {
   const ox = W / 2 - ((x0 + x1) / 2) * sc, oy = H / 2 - ((y0 + y1) / 2) * sc;
   const P = ([x, y]: [number, number]) => [ox + x * sc, oy + y * sc];
   const d = (list: [number, number][]) => list.map((p, i) => `${i ? "L" : "M"}${P(p).map((v) => v.toFixed(1)).join(",")}`).join("");
-  // Time along the flight: half the hyperbolic mean anomaly (Kepler), half the true anomaly.
-  const kk = Math.sqrt((ECC - 1) / (ECC + 1));
-  const M = (nu: number) => { const H_ = 2 * Math.atanh(kk * Math.tan(nu / 2)); return ECC * Math.sinh(H_) - H_; };
-  const Mmax = M(NU_MAX), us = nus.map((nu) => 0.25 * (M(nu) / Mmax + 1) + 0.25 * (nu / NU_MAX + 1));
-  const nuAt = (u: number) => {
-    let lo = 0, hi = N;
-    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (us[m] <= u) lo = m; else hi = m; }
-    return nus[lo] + ((nus[hi] - nus[lo]) * (u - us[lo])) / (us[hi] - us[lo] || 1);
-  };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const [sx, sy] = P([0, 0]);
   const flown = s("path", { class: "flown" }), burn = s("path", { class: "burn" }), dot = s("circle", { class: "dot", r: narrow ? 4 : 5 });
   const gap = narrow ? 12 : 16;
-  // Each name sits off the path on its convex side, along the normal (far out the path runs almost radially, so a
-  // radial offset would put the name on the line).
-  const marks = STAGES.map(([name, deg]) => {
-    const nu = (deg * Math.PI) / 180, p = flybyPoint(nu), a = flybyPoint(nu - 0.05), b = flybyPoint(nu + 0.05);
-    const tx = b[0] - a[0], ty = b[1] - a[1], tl = Math.hypot(tx, ty), cx = a[0] + b[0] - 2 * p[0], cy = a[1] + b[1] - 2 * p[1];
-    let [nx, ny] = [-ty / tl, tx / tl];
-    if (nx * cx + ny * cy > 0) { nx = -nx; ny = -ny; }
-    const [px, py] = P(p);
-    const g = s("g", { class: "stage" }, s("circle", { cx: px, cy: py, r: 2.5 }),
+  // Each name sits off the path on its convex side, along the normal.
+  const marks = STAGES.map(({ name, nu }) => {
+    const { p, n: [nx, ny] } = stageMark(nu), [px, py] = P(p);
+    const g = s("g", { class: "stage", "data-stage": name }, s("circle", { cx: px, cy: py, r: 2.5 }),
       s("text", { x: px + nx * gap, y: py + ny * gap, "text-anchor": nx < -0.3 ? "end" : nx > 0.3 ? "start" : "middle",
                   "dominant-baseline": ny < -0.3 ? "auto" : ny > 0.3 ? "hanging" : "middle" }, name));
     return { nu, g };
@@ -223,22 +201,28 @@ const DOCK_TOP = 96;                                              // the dive's 
 const fig = $("landing-hero"), home = $("dive-home"), dock = $("dock9"), stage = $("stage9"), rowsEl = $("rows9");
 let control: HeroControl | null = null, docked = false, dockFrom = 0, dockSpan = 1;
 type RowId = "loss" | "missions" | "hibberd";
-/** Each finding's state on the dive (the engines lit by index: 0 solid stack, 1 nuclear thermal, 2 SEP-class). */
-const STATES: Record<RowId, (c: HeroControl) => Steer> = {
+/** Each finding's state on the dive (the engines lit by index: 0 solid stack, 1 nuclear thermal, 2 SEP-class). Row 02,
+ *  the missions on the atlas, has none (author, 2026-11-02): the atlas covers six bodies and the dive one, so pointing
+ *  at it or focusing it counts as pointing at nothing, and the dive keeps what the other rows or the reader gave it. */
+const STATES: Partial<Record<RowId, (c: HeroControl) => Steer>> = {
   // Figure 01 marks these three engines by Π and loss: every burn, the paths quiet, the clock at the end.
   loss: (c) => ({ s: c.sMax, lit: [0, 1, 2], burns: true }),
-  // η, which the atlas maps, compares a burn with the impulsive one at periapsis: the clock at perihelion.
-  missions: () => ({ s: 0, lit: [], imp: true }),
   // The case study is Hibberd et al.'s reference stack, the dive's solid stack: just after its burn.
   hibberd: (c) => ({ s: c.afterBurn(0), lit: [0] }),
 };
+/** The line styles of the engines a row lights, in its category column. */
 const GLYPHS: Record<RowId, () => Node[]> = {
   loss: () => DASH.map((dash) => dashGlyph(dash)),
-  missions: () => [dashGlyph([], "imp")],
+  missions: () => [],
   hibberd: () => [dashGlyph(DASH[0])],
 };
 const heads = [...rowsEl.querySelectorAll<HTMLButtonElement>(".row9-head")];
 const rowOf = (b: HTMLElement) => b.closest("li")!.dataset.row as RowId;
+/** The row's button if the row steers the dive, else null. */
+const steerable = (el: Element | null) => {
+  const b = el?.closest("li")?.querySelector<HTMLButtonElement>(".row9-head") ?? null;
+  return b && STATES[rowOf(b)] ? b : null;
+};
 heads.forEach((b) => b.querySelector(".g")!.append(...GLYPHS[rowOf(b)]()));
 function measureDock(): void {
   if (!docked) return;
@@ -259,7 +243,7 @@ function placeDive(): void {
   docked = dockMq.matches;
   (docked ? dock : home).append(fig);
   root.classList.toggle("is-docked", docked);
-  heads.forEach((b) => { if (docked) b.setAttribute("aria-describedby", `row9-${rowOf(b)}-steer`); else b.removeAttribute("aria-describedby"); });
+  heads.forEach((b) => { if (docked && steerable(b)) b.setAttribute("aria-describedby", `row9-${rowOf(b)}-steer`); else b.removeAttribute("aria-describedby"); });
   if (docked) measureDock(); else { fig.style.removeProperty("--dock"); root.classList.remove("dive-docked"); steerTo(null); }
 }
 window.addEventListener("scroll", dockProgress, { passive: true });
@@ -274,15 +258,15 @@ function steerTo(b: HTMLButtonElement | null): void {
   steered = b;
   rowsEl.classList.toggle("has-active", Boolean(b));
   heads.forEach((x) => x.closest("li")!.classList.toggle("is-active", x === b));
-  if (control) control.steer(b ? STATES[rowOf(b)](control) : null);
+  if (control) control.steer(b ? STATES[rowOf(b)]!(control) : null);
 }
 const update = () => steerTo(docked ? (hovered ?? focused ?? opened) : null);
 rowsEl.addEventListener("pointerover", (e) => {
   if (e.pointerType === "touch") return;
-  hovered = (e.target as Element).closest("li")?.querySelector<HTMLButtonElement>(".row9-head") ?? null; update();
+  hovered = steerable(e.target as Element); update();
 });
 rowsEl.addEventListener("pointerleave", () => { hovered = null; update(); });
-rowsEl.addEventListener("focusin", (e) => { focused = (e.target as Element).closest("li")?.querySelector<HTMLButtonElement>(".row9-head") ?? null; update(); });
+rowsEl.addEventListener("focusin", (e) => { focused = steerable(e.target as Element); update(); });
 rowsEl.addEventListener("focusout", (e) => { if (!rowsEl.contains(e.relatedTarget as Node | null)) { focused = null; update(); } });
 // Opening in place: one row at a time; each figure is drawn the first time its row opens.
 const mounted = new Set<RowId>();
@@ -295,7 +279,7 @@ heads.forEach((b) => b.addEventListener("click", () => {
     $(x.getAttribute("aria-controls")!).hidden = !on;
     x.closest("li")!.classList.toggle("is-open", on);
   }
-  opened = open ? b : null;
+  opened = open ? steerable(b) : null;
   if (open && !mounted.has(rowOf(b))) { mounted.add(rowOf(b)); mountFigure(rowOf(b), $(b.getAttribute("aria-controls")!).querySelector<HTMLElement>(".finding-body")!); }
   update();
   requestAnimationFrame(measureDock);

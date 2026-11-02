@@ -209,8 +209,6 @@ a:hover > .round9.small, a:focus-visible > .round9.small { background: var(--ink
 @keyframes arrive9 { from { opacity: 0; } to { opacity: 1; } }
 
 /* ------------------------------------------------------------- the dive while steered (charts/landing-hero.ts steer()) */
-.lh-key li, .lh-key-compact li, .lh-legend li { transition: opacity 200ms; }
+.lh-key li, .lh-key-compact li { transition: opacity 200ms; }
 .lh-key li.dim, .lh-key-compact li.dim { opacity: 0.35; }
-.lh-legend li.lit { font-weight: 600; }
 .energy-strip .strip-line.dim { opacity: 0.25; }
-.energy-strip .imp-step.lit { stroke: var(--ink); stroke-width: 2.4; }

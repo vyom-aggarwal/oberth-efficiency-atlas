@@ -79,7 +79,7 @@ for (const w of [1440, 390]) {
     await page.screenshot({ path: file(`style-9-${w}-menu.png`) });
     await ctx.close();
   }
-  // Findings. At 1440: the dive mid-slide, then docked and steered by the pointer (row 3) and by keyboard focus (row 2),
+  // Findings. At 1440: the dive mid-slide, then docked and steered by the pointer (row 3) and by keyboard focus (row 1),
   // then row 1 open in place. At 390 (no dock): row 1 open in place.
   {
     const { ctx, page } = await seen(w);
@@ -96,11 +96,11 @@ for (const w of [1440, 390]) {
       await page.screenshot({ path: file("style-9-1440-steer-hover.png") });
       await page.mouse.move(5, 5);
       await page.waitForTimeout(700);
-      await page.locator(".row9-head").nth(0).focus();
-      await page.keyboard.press("Tab");
+      // Row 02 does not steer (author, 2026-11-02), so keyboard focus reaches row 01 from it.
+      await page.locator(".row9-head").nth(1).focus();
+      await page.keyboard.press("Shift+Tab");
       await page.waitForTimeout(900);
       await page.screenshot({ path: file("style-9-1440-steer-focus.png") });
-      await page.keyboard.press("Shift+Tab");
       await page.keyboard.press("Enter");
       await page.mouse.move(box.x + box.width * 0.3, 60);
     } else {

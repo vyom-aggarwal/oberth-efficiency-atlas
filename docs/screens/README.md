@@ -31,8 +31,9 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
   - **`-article`, `-explorer`, `-references`:** the samples of the other pages in the new system, each section whole;
   - **`-reduced`:** reduced motion (at 390 px, the full page);
   - **at 1440 px only:** `-dock-slide` (the dive sliding into its dock), `-steer-hover` (row 03 pointed at: the solid
-    stack alone), `-steer-focus` (row 02 focused from the keyboard: the clock at perihelion), and `-article-tooltip`
-    (Figure 2 with a tooltip open). Below 1100 px there is no dock.
+    stack alone), `-steer-focus` (row 01 focused from the keyboard: every burn, the clock at the end; retaken
+    2026-11-02 after the author decided that row 02 does not steer), and `-article-tooltip` (Figure 2 with a tooltip
+    open). Below 1100 px there is no dock.
 - `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
   in both themes:
   - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build

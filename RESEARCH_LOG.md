@@ -3833,4 +3833,59 @@ keyboard-focus previews.
 
 **Screenshots** (`docs/screens/phase-9-style/`): listed in `docs/screens/README.md`.
 
+## 2026-11-02: Phase 9 plan approved; row 02 leaves the dive; the build's passes and review point
+
+**The author approved the plan and the style page**, with these decisions (plan §2.10, 11–13):
+- **Findings:** both steering and opening in place.
+- **Row 02** (where real missions sit) does not steer the dive. The perihelion state is removed.
+- **The other replacements** are approved: the preloader, the title moved by the clock, the menu pill, plain buttons,
+  the closing leg.
+- **Preloader check:** the stage labels must sit at physically correct points on the drawn path, Ignition before
+  Periapsis on a centred burn, with an assertion.
+- **Preloader cap test:** against the production build, gone by 2.0 s from navigation start. Enforced locally,
+  report-only in CI, like the hero frame time.
+- **Review point:** stop after pass 3, the landing page, with screenshots at 1440 and 390 px (the docked dive with each
+  row hovered, a row open in place, the preloader mid-flight, reduced motion).
+
+**How "row 02 leaves the dive in its current state" is implemented** (my reading, recorded before the build depends on
+it):
+- Row 02 has no state. Pointing at it or focusing it counts as pointing at nothing.
+- The dive therefore keeps what the other sources give it: a focused or open row, else the reader's own clock.
+  - With row 03 open, pointing at row 02 keeps row 03's state.
+  - Moving the pointer from row 01 to row 02 returns the dive to the reader's clock, as leaving the rows does.
+- Row 02 shows no line styles in its category column, and has no hidden state description.
+- `landingHero`'s `imp` option (the emphasised impulsive reference), used only by row 02, is removed with it.
+- Checked in a headless run of the style page:
+  - row 01 pointed at gives `data-steer="012b"`;
+  - row 02 pointed at after it gives none;
+  - row 03 open, then row 02 pointed at, gives `"0"`.
+
+**The preloader's geometry moved to `site/src/lib/flyby.ts`, with seven unit tests** (`flyby.test.ts`):
+- the stages in the flight's order;
+- a centred burn: Ignition and Cutoff are the burn arc's ends, with equal Kepler times either side of periapsis;
+- Periapsis is the path's closest point to the Sun, at r = r_p;
+- each mark is a vertex of the drawn path and lies on the conic (checked against an independent formula);
+- the incoming leg is above the apse line and the outgoing below;
+- `nuAt` inverts the timing;
+- the names sit on the convex side.
+
+The drawn path now includes every stage's true anomaly among its samples, so each mark is exactly on it. A headless run
+confirmed that every mark is in the path's stroke (`isPointInStroke`) and that the marks switch on in physical order.
+
+**Correction to the plan's pass numbers.** The author's brief orders the passes:
+1. tokens, fonts and base layout;
+2. navigation, shell and footer;
+3. the landing page;
+4. the article and its figures;
+5. the explorer;
+6. references and new pages;
+7. the Open Graph image.
+
+My §2.12 table had the article as pass 3 and the landing as pass 4. It now follows the brief, which the author's review
+point (after pass 3, the landing page) confirms.
+
+**Tooling note.** The dev server started by the desktop app's preview stopped accepting connections. The headless checks
+used a dev server I started myself on port 5180 (`STYLE9_URL` points `tools/style9-shots.mjs` at it). Only
+`style-9-1440-steer-focus.png` was retaken: row 01 is now reached by keyboard from row 02.
+
 

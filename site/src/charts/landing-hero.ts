@@ -24,8 +24,8 @@ const RINGS = [3, 10, 30];
 const STEER_MS = 500;                                        // a steered clock eases to its state in this time
 
 /** A state the page can steer the dive to (Phase 9: the findings rows). The clock s; the engines lit (the others dim);
- * burns: the paths quieten so the burns stand out; imp: the impulsive reference is emphasised. */
-export interface Steer { s: number; lit: number[]; burns?: boolean; imp?: boolean }
+ * burns: the paths quieten so the burns stand out. */
+export interface Steer { s: number; lit: number[]; burns?: boolean }
 export interface HeroControl {
   /** Ease the dive to a state, or back to the reader's own clock with null (at once under reduced motion). */
   steer(state: Steer | null): void;
@@ -90,10 +90,10 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   let s_ = sMax, labels = true, running = false;
   let W = 0, SW = 0;                                         // laid-out widths of the view and the strip (0: not yet)
   // Steering (Phase 9): the reader's own clock is kept while a page steers, and restored after.
-  let lit: Set<number> | null = null, burnsOnly = false, imp = false, steering = false, own = sMax, tween = 0;
+  let lit: Set<number> | null = null, burnsOnly = false, steering = false, own = sMax, tween = 0;
   scrub.addEventListener("input", () => {
     if (running) end("done");
-    cancelAnimationFrame(tween); steering = false; lit = null; burnsOnly = imp = false; delete root.dataset.steer;
+    cancelAnimationFrame(tween); steering = false; lit = null; burnsOnly = false; delete root.dataset.steer;
     s_ = own = Number(scrub.value); draw();
   });
   function easeTo(to: number): void {
@@ -111,11 +111,11 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     if (running) end("done");
     if (st) {
       if (!steering) own = s_;
-      steering = true; lit = new Set(st.lit); burnsOnly = Boolean(st.burns); imp = Boolean(st.imp);
-      root.dataset.steer = `${st.lit.join("")}${st.burns ? "b" : ""}${st.imp ? "i" : ""}`;
+      steering = true; lit = new Set(st.lit); burnsOnly = Boolean(st.burns);
+      root.dataset.steer = `${st.lit.join("")}${st.burns ? "b" : ""}`;
       easeTo(st.s);
     } else if (steering) {
-      steering = false; lit = null; burnsOnly = imp = false; delete root.dataset.steer;
+      steering = false; lit = null; burnsOnly = false; delete root.dataset.steer;
       easeTo(own);
     }
   }
@@ -173,10 +173,8 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     root.dataset.cursor = strip.dataset.cursor ?? "";
     // A steered state dims the engines not lit, in the strip (two paths per engine, in order) and the keys.
     strip.querySelectorAll(".strip-line").forEach((p, n) => p.classList.toggle("dim", dimmed(n >> 1)));
-    strip.querySelector(".imp-step")?.classList.toggle("lit", imp);
     [...key.children].forEach((li, i) => li.classList.toggle("dim", dimmed(i)));
-    [...keyCompact.children].forEach((li, i) => li.classList.toggle("dim", i < cases.length ? dimmed(i) : Boolean(lit) && !imp));
-    legend.lastElementChild?.classList.toggle("lit", imp);
+    [...keyCompact.children].forEach((li, i) => li.classList.toggle("dim", i < cases.length ? dimmed(i) : lit !== null));
     opt.onFrame?.(k, s_);
   }
   function dimmed(j: number): boolean { return lit !== null && !lit.has(j); }

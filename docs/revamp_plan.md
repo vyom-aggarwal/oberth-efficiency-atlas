@@ -30,6 +30,14 @@ content and data.
 - **Decisions:** GSAP is not used; the preloader's words are the flyby's stages in physical order; the four departures
   are approved; the closing line is the author's text, in a content slot (§2.10).
 
+**Approved on 2026-11-02** (the author's third review; §2.10, items 11–13):
+- the findings keep both steering and opening in place;
+- row 02 does not steer the dive;
+- the other replacements are approved;
+- the preloader's stages get an assertion of their physical placement (§2.6);
+- the preloader's 2 s cap gets a test against the production build (§2.6);
+- the build stops for review after pass 3, the landing page (§2.13).
+
 This document is steps 1 and 2. Step 2 adds only development-only material:
 - the style page `/style-9/` (§2.11);
 - the palette check `site/tools/phase9-palette.mjs`;
@@ -359,7 +367,7 @@ texture. All checks pass on both surfaces:
    | number | title | category | the dive shows | why (from the data) |
    |---|---|---|---|---|
    | 01 | Loss against Π | universal curve | every burn, the paths quietened so the burns stand out, the clock at the end | Figure 01 marks these three engines by Π and loss: the lengths of their burns are Π made visible |
-   | 02 | Where real missions sit | atlas | the clock at perihelion, the engines faint, the impulsive reference emphasised in the strip and key | η, which the atlas maps, compares a burn with the impulsive one at periapsis |
+   | 02 | Where real missions sit | atlas | nothing: the dive keeps its state (the author, 2026-11-02) | the atlas covers six bodies and the dive one, so no state of the dive stands for it |
    | 03 | The Hibberd et al. check | case study | the solid stack alone, the clock just after its burn | the case study is Hibberd et al.'s reference stack, the dive's solid stack |
 
    - **Docking** (1100 × 700 and larger): the hero and the findings share one grid. The dive is sticky in a column that
@@ -371,9 +379,13 @@ texture. All checks pass on both surfaces:
      the key. The row pointed at stays Ink and the others go Quiet. Leaving the rows restores the reader's own clock.
      Scrubbing the dive takes it back from the rows. `landingHero` gains `steer()` for this; it changes nothing on a
      page that does not call it.
+   - **Row 02 has no state** (the author, 2026-11-02). Pointing at it or focusing it counts as pointing at nothing,
+     so the dive keeps what the other sources give it: a focused or open row, else the reader's own clock. With row
+     03 open, pointing at row 02 keeps row 03's state; moving from row 01 to row 02 returns the dive to the reader's
+     clock, as leaving the rows does.
    - **Visible before any hover:** each row's category column shows the line styles of the engines it lights (the
-     dive's key), so the link between rows and dive is never hover-only. Focus also announces the state (the row's
-     description).
+     dive's key; none for row 02), so the link between rows and dive is never hover-only. Focus also announces the
+     state (the row's description; row 02 has none).
    - **Opening in place** (every width): each row is a disclosure (a heading's button, `aria-expanded`). It opens to
      its live mini figure, the author's caption slot and the link to the research (or the explorer while the article
      is unpublished). One row is open at a time; an open row also holds the dive's state. Each figure is drawn the
@@ -411,7 +423,7 @@ conditions below; no scroll hijacking. Every interaction below is this project's
 | The dive's intro sweep | first load of a session, after the preloader | 2.8 s (measured 2.81–2.83 s); any input ends it | final frame |
 | The title, moved by the dive's clock | the intro, the reader scrubbing | its offset is the angle the solid stack has swept around the Sun, as a fraction of the whole sweep, times one line's width: it creeps in on approach, rushes through perihelion and slows on escape. Still whenever the clock is. | still, wrapped at display size |
 | The dive docking beside the findings | scrolling past the headline (1100 × 700 and larger) | its offset follows the scroll over 30 % of the screen's height (smoothstep) | in one step |
-| Steering the dive from a row | pointing at or focusing a row | the clock eases 500 ms; the engines not lit fade to 25 % | at once |
+| Steering the dive from a row | pointing at or focusing row 01 or 03 (row 02 has no state) | the clock eases 500 ms; the engines not lit fade to 25 % | at once |
 | A row opening in place | click, tap, Enter or Space | content fades in, 280 ms | at once |
 | Menu: pill, scrim, drawer | the pill | the drawer slides in 380 ms, out 300 ms; the pill fades in 200 ms once the header has gone; from the keyboard, no motion | instant |
 | Button states | hover or focus | colour change, 150 ms | instant |
@@ -424,6 +436,22 @@ mean anomaly) and half uniform in angle, so it visibly speeds through perihelion
 frames. The burn arc (±35° about perihelion) is drawn heavier. The stages appear at their points, in physical order
 (the author, decision 8): **Approach, Ignition, Periapsis, Cutoff, Escape**. They stay up once shown, so none has to be
 read in passing. Then the screen fades. No curtain, no curved edge, no centred word.
+
+**Its checks** (the author, 2026-11-02):
+- **Placement.** The geometry and timing live in `site/src/lib/flyby.ts`. `flyby.test.ts` asserts that:
+  - the stages come in the flight's order;
+  - Ignition and Cutoff are the burn arc's ends, with equal Kepler times either side of periapsis (a centred burn), so
+    Ignition comes before Periapsis;
+  - Periapsis is the path's closest point to the Sun;
+  - every mark is a vertex of the drawn path and lies on the conic;
+  - the incoming leg is drawn above the apse line;
+  - each name sits on the path's convex side.
+
+  Pass 3 adds an end-to-end check on the landing page: every mark is in the drawn path's stroke, and the marks switch
+  on in physical order.
+- **The 2 s cap.** A Playwright test against the production build asserts that the preloader is gone by 2.0 s from
+  navigation start. It is enforced locally and report-only in CI (`PRELOADER_CAP=report` in the workflow, the numbers
+  in the job summary), as the hero frame time is. Added in pass 3, when the preloader reaches the landing page.
 
 **The title** has no ticker and never moves by itself for more than the intro's 2.8 s. WCAG 2.2.2 asks for a pause
 control only for motion that lasts more than 5 s, so the pause control approved in decision 9 is no longer needed and
@@ -478,7 +506,7 @@ Landing, 1440 px, scrolled: the dive has slid into the dock column and stays the
   ─────────────────────────────────────────────────    │ live dive, docked (sticky)   │
   01   Loss against Π        ─ ‐‐ ··  universal curve (+) │ row 03 pointed at: Solid lit, │
   ─────────────────────────────────────────────────    │ the others faint; the clock  │
-  02   Where real missions sit   ─   atlas         (+) │ just after its burn          │
+  02   Where real missions sit       atlas         (+) │ just after its burn          │
   ─────────────────────────────────────────────────    │ ──────○──────                │
   03   The Hibberd et al. check  ─   case study    (−) │ t = +0.0458 h from perihelion│
        ┌ live mini figure, open in place ────────┐     └──────────────────────────────┘
@@ -645,15 +673,13 @@ Answered by the author on 2026-11-02:
 10. **Closing line:** a content slot, the author's text (`site/content/landing/closing.md`, a TODO note with my step-2
     wording as a candidate). Applied.
 
-New, for the author:
+Answered by the author on 2026-11-02 (the plan and style page approved):
 
-11. **The findings design** (§2.5): the dive docking beside the rows, steered by pointing and focus (your preferred
-    direction), with the rows also opening in place at every width. I combined the two because the docked dive can
-    show only the dive: the findings' own figures and your captions need a place that does not depend on hover.
-12. **Row 02's state:** the clock at perihelion with the impulsive reference emphasised is the weakest of the three
-    links (the atlas covers six bodies, the dive one). The alternative is for row 02 to leave the dive as it is.
-13. **The other replacements** (§1.3): the flyby preloader, the title moved by the dive's clock, the menu pill, plain
-    button states, and the escape leg over the closing section.
+11. **The findings design** (§2.5): keep both, the docked dive steered by the rows and the rows opening in place.
+12. **Row 02:** it does not steer the dive; hovering or focusing it leaves the dive as it is, and it still opens in
+    place. The perihelion state is removed. Applied (§2.5).
+13. **The other replacements** (§1.3): approved. The preloader's stages get an assertion of their physical placement,
+    and its 2 s cap a test against the production build (§2.6).
 
 ### 2.11 The style page
 
@@ -690,14 +716,54 @@ plugin's new directive included) and the site-data tests pass.
 | page | what changes | pass |
 |---|---|---|
 | Every page | Tokens and fonts; the header, the menu pill and drawer; the closing section and footer; dark only (the theme switch goes) | 1–2 |
-| `/` | The hero, the docked dive and the findings, the intro, key results, the closing section (§2.5) | 4 |
-| `/research/` | The numbered rail and section bar; display-size section titles with numbers; prose at 18 px and 66 ch; every figure in a Panel: titles, legends, controls, tooltips, "Show data" tables, captions, KaTeX; the TODO banners (development only) | 3 |
+| `/` | The hero, the docked dive and the findings, the intro, key results, the closing section (§2.5) | 3 |
+| `/research/` | The numbered rail and section bar; display-size section titles with numbers; prose at 18 px and 66 ch; every figure in a Panel: titles, legends, controls, tooltips, "Show data" tables, captions, KaTeX; the TODO banners (development only) | 4 |
 | Every figure | The chart modules are unchanged (they read the token names); the HTML around them is restyled (`site/src/styles/v9/pages.css`). The accent never enters a plot, legend or scale; a pass-4 test enforces it | 3–5 |
 | `/explorer/` | Four Panel regions with quiet titles; η at figure size; controls as pills; the reader's case an Ink dot; warnings in Critical with icon and text (unchanged) | 5 |
 | `/references/` | Rows between hairlines, the number in IBM Plex Mono; a cited entry reached by its link ringed in Signal | 6 |
 | `/about/` | New (§2.4) | 6 |
 | `/404.html` | Display title, a statement line, the links as outline pills (§2.7) | 6 |
 | `/explorer/classic/` | **Nothing:** byte-identical, the offline fallback. Today `e2e/pages.spec.ts` checks only that it is served; pass 1 adds a test that compares the built file byte for byte with `explorer/oberth_explorer.html` | 1 (the test) |
+
+(Corrected 2026-11-02: this table first had the article as pass 3 and the landing page as pass 4, against the brief's
+order in §2.13.)
+
+### 2.13 Step 3: the build, in the brief's seven passes
+
+Each pass is committed with a title and message, followed by the fast checks (`check_all.py --fast`). If a usage limit is
+near, the work stops at the end of a pass.
+1. **Tokens, fonts and base layout:**
+   - `tools/palette.mjs` takes over `phase9-palette.mjs`'s checks and writes a dark-only `palette.css`. The six
+     interface colours are defined there, the accent found by its search; the data colours are still read from the
+     classic's dark block.
+   - `fonts.py` writes only the Phase 9 set, and the Phase 8 families are removed.
+   - `base.css` takes the Phase 9 type scale, spacing and element defaults.
+   - The light theme and the theme switch go: `color-scheme: dark`, and no inline theme script.
+   - A test compares `/explorer/classic/` byte for byte with `explorer/oberth_explorer.html`.
+
+   The pages keep their present layout in the new colours and type until their own pass.
+2. **Navigation, page shell and footer** on every page:
+   - the header, the menu pill and drawer, the closing section and footer;
+   - Lenis with its four condition tests (§2.6), else native scrolling;
+   - View Transitions;
+   - the sticky-element and scroll-padding tests extended.
+3. **The landing page** (§2.5):
+   - the hero, the preloader (`lib/flyby.ts`), the docked dive and the findings rows, the intro and key results;
+   - the preloader's end-to-end placement check and its production cap test;
+   - the fold and headline budget re-measured.
+
+   **Review point** (the author, 2026-11-02): stop with screenshots at 1440 and 390 px, including:
+   - the docked dive with each row hovered;
+   - a row opened in place;
+   - the preloader mid-flight;
+   - reduced motion.
+4. **The research article and its figures,** with the test that no chart module or chart stylesheet reads the accent.
+5. **The explorer:** the reader's case an Ink dot.
+6. **The references page, the About page and the 404 page.**
+7. **The Open Graph image.**
+
+Then the full `check_all.py`, the full Playwright suite on all three builds, the fold and headline budget, screenshots
+of every page and the motion states, and the pull request.
 
 ## 3. Copying and attribution
 

@@ -637,7 +637,7 @@ added to the numbers file as values.
   the same face, so the heavier look is light-on-dark appearance.
 - **An over-claim:** the part B report said `docs/site.md` also held interpretations to confirm; it held none.
 
-## Phase 9: dark, portfolio-style revamp (from 2026-11-01; steps 1–2 awaiting approval)
+## Phase 9: dark, portfolio-style revamp (from 2026-11-01; plan approved 2026-11-02, build in progress)
 
 **Author decided:**
 - **The brief:** a dark interpretation of https://suhaslord.github.io/portfolio/, dark only.
@@ -756,3 +756,19 @@ added to the numbers file as values.
 - the findings design: docked steering plus rows that open in place;
 - row 02's state (the weakest link), or leaving the dive as it is for that row;
 - the other replacements.
+
+**Author decided** (approval of the plan, 2026-11-02):
+- **Findings:** both steering and opening in place.
+- **Row 02:** does not steer the dive; its perihelion state is removed.
+- **The other replacements:** approved.
+- **Preloader:** an assertion that its stage labels sit at physically correct points, Ignition before Periapsis.
+- **Preloader cap:** a test against the production build, enforced locally and report-only in CI.
+- **Review point:** after pass 3, the landing page, with named screenshots.
+- **Proceed** with pass 1.
+
+**Assistant, applying the approval:**
+- **Row 02:** implemented "leaves the dive in its current state" as pointing at nothing. The dive keeps a focused or
+  open row's state, else the reader's clock. Removed `landingHero`'s `imp` option, which only row 02 used.
+- **Preloader:** moved its geometry and timing to `site/src/lib/flyby.ts`, with seven unit tests of the physical
+  placement of the stages. The drawn path now passes exactly through every stage.
+- **Plan:** corrected my pass numbering to the author's brief: the landing page is pass 3, the article pass 4.
