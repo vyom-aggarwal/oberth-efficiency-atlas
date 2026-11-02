@@ -716,3 +716,43 @@ added to the numbers file as values.
 - the departures from the reference: no monogram, portrait previews with an Ink badge, no content slide, a pause
   control;
 - "Fly one yourself." as the closing line.
+
+**Author decided** (second review of steps 1–2, 2026-11-02):
+- **Scope:** the new styling covers every page, the article's figures and the explorer included; only the classic
+  explorer stays byte-identical. The style page gains article, explorer and references samples.
+- **Less copying:** the reference's styling may be borrowed, its signature interactions may not. Every adapted element
+  to be classified, each signature interaction replaced by one grounded in this project; for the findings, the
+  preferred direction is rows that drive the hero dive. The notices and headers to list only what is still adapted.
+- **Decisions:** no GSAP; the preloader words Approach, Ignition, Periapsis, Cutoff, Escape, in physical order; the four
+  departures approved; the closing line as the author's text in a content slot.
+
+**Assistant, the second revision:**
+- **Audit** (plan §1.3): classified every adapted element as styling (kept) or signature interaction (replaced), with
+  a reason for each.
+- **Designed and built the replacements** on the style page:
+  - the findings rows steer the dive, which docks beside them from 1100 × 700; each finding's state is grounded in the
+    exported data, and the rows also open in place to their live figures;
+  - a flyby preloader: a hyperbola drawn past the Sun, the stages named at their points;
+  - the title moved by the dive's clock, through the angle swept around the Sun, in place of the ticker;
+  - a text menu pill, plain button states, and the escape leg over a straight-edged closing section.
+- **`landingHero`:** gave it `steer()` and an `onFrame` callback, both inert unless a page calls them.
+- **Content plugin:** a `<!--#section:id-->` directive with a test, for the article sample; a `closing` slot.
+- **New stylesheet** `site/src/styles/v9/pages.css` (no reference code) for the article, figures, explorer and
+  references in the new system.
+- Updated `THIRD_PARTY_NOTICES.md`, the file headers, the plan and the screenshots.
+
+**Assistant found and changed inside the second revision:**
+- **The preloader ran over 2 s** (2.10–2.17 s). Two causes: the explorer and Figure 2 set themselves up during the
+  fade, and an animation's delay counts from its first frame, which the module's own set-up held back. Now those two
+  mount lazily after the preloader, the fade's start is set in page time, and late runs keep 200 ms in hand. Measured:
+  faded by 1.71–1.80 s, removed by 1.72–1.95 s.
+- **The stage names sat on the path** far out, where it runs almost radially; they now sit off it along its normal.
+- **The dive's clock overflowed its panel** once the shared controls stylesheet made that row a non-wrapping flex
+  row; it now wraps under the scrub.
+- **Reference entries split apart:** each italic journal name became its own grid cell. The rows are no longer grids.
+- **η wrapped onto two lines** in the explorer's results column; its size is capped.
+
+**Assistant proposals, for the author to confirm** (plan §2.10, items 11–13):
+- the findings design: docked steering plus rows that open in place;
+- row 02's state (the weakest link), or leaving the dive as it is for that row;
+- the other replacements.

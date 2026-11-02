@@ -8,23 +8,26 @@ as its licence requires. Package dependencies not listed here keep their own lic
 
 - **Source:** https://github.com/suhaslord/portfolio at commit `c98c5cce8ebd20797b4f1d92eeb878a88090ecdb`; the site is
   https://suhaslord.github.io/portfolio/.
-- **What is adapted:** the structure, proportions, timings, easings and motion logic of these components:
-  - the preloader curtain;
-  - the floating round menu button and the menu drawer with its curved edge;
-  - the name marquee;
-  - the magnetic controls, the reference's `spring()` follower included;
-  - the liquid round and outline buttons;
-  - the work rows with their pointer-following preview;
-  - the hero's composition;
-  - the contact section and footer.
+- **What is still adapted** (after the audit of 2026-11-02, `docs/revamp_plan.md` §1.3, which keeps the reference's
+  styling and replaces its signature interactions):
+  - **Design (layout and proportions):** the header; the menu drawer; the hero's composition; the work rows' layout
+    (index, large title, category, hairlines); the round and outline buttons' shapes and sizes; the contact section
+    and footer; the type scale and tracking, measured from the reference.
+  - **Code:** the menu drawer's open, close and focus handling (the keyboard's instant path, the Tab cycle, Escape,
+    focus return); the preloader's once-a-session gate before the first paint; the Lenis settings.
 
   They are rewritten on this project's dark tokens, without GSAP or Barba.
+- **No longer used** (replaced by this project's own interactions): the preloader's curtain with its curved edge and
+  its cycling greeting; the pointer-following work preview, its "View" badge and the `spring()` follower; the magnetic
+  controls; the liquid button fills; the curved section edges; the round menu button that morphs to ×, and the drawer
+  links' rotated stagger; the name marquee's ticker; the links' hover dot.
 - **What is not used:** the portrait, the biography and other text, the project images, the résumé and the contact
   details. No asset files are copied.
-- **Files containing copied or adapted code**, each marked with a header comment naming the source:
-  - `site/src/styles/v9/components.css`
-  - `site/src/styles/v9/style9.css`
-  - `site/src/pages/style9.ts`
+- **Files containing copied or adapted code**, each marked with a header comment naming the source and what in it is
+  adapted:
+  - `site/src/styles/v9/components.css` (layouts: header, drawer, rows, buttons, closing section and footer)
+  - `site/src/styles/v9/style9.css` (the hero's composition)
+  - `site/src/pages/style9.ts` (the drawer's open, close and focus handling; the Lenis settings)
   - `site/style-9/index.html` (the preloader's inline gate)
 
 The licence, verbatim:

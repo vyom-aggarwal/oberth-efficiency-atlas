@@ -1,14 +1,18 @@
 /* The /style-9/ page's own layout (development only). The hero follows the reference's composition (adapted from
    suhaslord/portfolio css/site.css, .hero and its children; MIT, THIRD_PARTY_NOTICES.md) with this project's content:
    the live three-engine dive where the portrait was, the case pill where the location pill was, and the published
-   headline where the role line was. The monogram is left out: behind a figure panel this wide it showed only as a
-   stray bar. */
+   headline where the role line was. The monogram is left out. The stage grid and the docked dive are this project's
+   own (§2.5). */
 
 /* ------------------------------------------------------------- hero */
 .hero9 { position: relative; background: var(--panel); --surface: var(--panel); overflow: hidden; padding: 100px 0 var(--s6);
          display: grid; gap: var(--s5); }
-.hero9-dive { position: relative; z-index: 1; margin: 0 var(--pad); padding: var(--s3); background: var(--void); --surface: var(--void);
+.hero9-home { position: relative; z-index: 1; margin: 0 var(--pad); }
+.hero9-dive { position: relative; margin: 0; padding: var(--s3); background: var(--void); --surface: var(--void);
               border-radius: var(--r-panel); box-shadow: 0 0 0 1px var(--rule), 0 40px 80px -40px rgb(0 0 0 / 0.7); }
+/* The clock under the scrub (the shared controls make that row a flex row that would not wrap). */
+.hero9-dive .lh-controls { flex-wrap: wrap; row-gap: 2px; }
+.hero9-dive .lh-controls .clock { flex: 1 0 100%; min-width: 0; }
 .hero9-pill { position: relative; z-index: 1; justify-self: start; display: flex; align-items: center; gap: var(--s5);
               padding: var(--s3) var(--s3) var(--s3) var(--pad); border-radius: 0 999px 999px 0; background: var(--void);
               font-size: var(--t-ui); line-height: 1.35; }
@@ -17,19 +21,18 @@
 .hero9-pill .sun9::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--sun);
                             box-shadow: 0 0 0 5px color-mix(in srgb, var(--sun) 25%, transparent); }
 .hero9-role { position: relative; z-index: 1; padding: 0 var(--pad); display: grid; gap: var(--s4); order: -1; }  /* narrow: the headline first, above the fold */
-.hero9-role .icon9 { width: 22px; height: 22px; }
+.hero9-role .rule9 { display: block; width: 48px; height: 2px; background: var(--ink); }
 /* The shared landing stylesheet is linked after this page's (Vite emits it as its own chunk), so these selectors are
    more specific than its .slot-headline rules. */
 .hero9 .hero9-headline .slot-headline p { margin: 0; max-width: 20ch; font-size: var(--t-statement); line-height: 1.2;
                                           letter-spacing: -0.03em; color: var(--ink); background: none; -webkit-background-clip: border-box;
                                           background-clip: border-box; }
 .hero9 .marquee9 { position: relative; z-index: 1; }
-.hero9-foot { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: var(--s4); padding: 0 var(--pad); }
+.hero9-foot { position: relative; z-index: 1; display: flex; align-items: center; justify-content: flex-end; gap: var(--s4); padding: 0 var(--pad); }
 .hero9-foot .cue9 { display: inline-flex; align-items: center; gap: var(--s3); font-size: 13px; color: var(--ink); text-decoration: none; }
-.hero9-foot .pause9 { width: 46px; height: 46px; min-width: 46px; min-height: 46px; }
 @media (min-width: 900px) {
   .hero9 { display: block; height: max(800px, 100svh); padding: 0; }
-  .hero9-dive { position: absolute; left: 50%; top: 96px; width: min(40vw, 590px); margin: 0; translate: -50% 0; }
+  .hero9-home { position: absolute; left: 50%; top: 96px; width: min(40vw, 590px); margin: 0; translate: -50% 0; }
   .hero9-pill { position: absolute; left: 0; top: 42%; }
   .hero9-role { position: absolute; left: calc(50% + min(20vw, 295px) + 2.5vw); right: var(--pad); top: 20%; padding: 0; gap: var(--s7); }
   .hero9 .hero9-headline .slot-headline p { max-width: none; }
@@ -37,11 +40,27 @@
   .hero9-foot { position: absolute; left: 0; right: 0; bottom: 22px; }
 }
 
+/* ------------------------------------------------------------- the stage: the hero and the findings in one grid. From
+   1100 × 700 the dive leaves the hero for the dock column, which spans both rows; it is sticky there, and --dock
+   (0 in the hero, 1 docked; style9.ts) slides it from the screen's centre into the column. */
+.dock9 { display: none; }
+@media (min-width: 1100px) and (min-height: 700px) {
+  .stage9 { display: grid; grid-template-columns: minmax(0, 1fr) 3vw min(40vw, 590px) var(--pad); }
+  .stage9 > .hero9 { grid-column: 1 / -1; grid-row: 1; }
+  .stage9 > .findings9 { grid-column: 1; grid-row: 2; align-self: start; }
+  .dock9 { display: block; grid-column: 3; grid-row: 1 / 3; position: relative; z-index: 2; pointer-events: none; }
+  .dock9 > .hero9-dive { position: sticky; top: 96px; margin-top: 96px; margin-bottom: var(--s8); pointer-events: auto;
+                         translate: calc((1 - var(--dock, 0)) * var(--dock-dx, 0px)) 0; }
+  .findings9 .row9-head { grid-template-columns: minmax(0, 1fr) minmax(140px, 26%) 24px; gap: 24px; padding: 3vw 2vw 3.4vw 8vw; }
+  .findings9 .row9-head .t { font-size: clamp(28px, 3vw, 46px); }
+  .findings9 .row9-body { padding-right: 2vw; }
+}
+
 /* ------------------------------------------------------------- sections */
 .block9 { padding-top: var(--s10); padding-bottom: var(--s5); display: grid; gap: var(--s6); }
 .display9 { font-size: var(--t-display); display: flex; align-items: baseline; gap: var(--s5); }
 .display9 .n9 { font-family: var(--mono); font-size: var(--t-label); color: var(--quiet); letter-spacing: 0; }
-.note9 { max-width: 70ch; }
+.note9 { max-width: 70ch; margin: 0; }
 .swatches9 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--s6) var(--s5); }
 .swatch9 { display: grid; gap: var(--s1); }
 .chip9 { height: 72px; border-radius: var(--r-control); box-shadow: inset 0 0 0 1px var(--rule); margin-bottom: var(--s2); }
@@ -74,3 +93,6 @@
 .slider9 { max-width: 760px; }
 .findings9 { padding-left: 0; padding-right: 0; }
 .findings9 > .display9, .findings9 > .eyebrow9 { padding: 0 var(--pad); }
+.findings9 > .note9 { max-width: calc(70ch + 2 * var(--pad)); }
+.sample9 { gap: var(--s5); }
+.sample9-head { display: grid; gap: var(--s4); }

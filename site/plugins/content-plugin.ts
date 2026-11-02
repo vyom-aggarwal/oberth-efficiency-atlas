@@ -87,6 +87,7 @@ export const PLACEHOLDERS: Record<string, string> = {
   "finding-loss": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-missions": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-hibberd": `[Placeholder caption, one or two sentences] ${LOREM}`,
+  closing: "[Placeholder closing line] Lorem ipsum dolor.",
 };
 
 /**

@@ -17,6 +17,19 @@ content and data.
   - Barba is not; native cross-document View Transitions may stand in for it.
 - **Decisions 1–6** are answered in §2.10. This revision applies them.
 
+**Revised again on 2026-11-02, after the author's second review:**
+- **Scope: every page.** The new styling covers the whole site: the landing page, the research article and every figure
+  (charts, tooltips, legends, controls, tables, captions, section navigation, KaTeX), the explorer's whole interface,
+  the references, the About page and the 404 page. Only the classic offline explorer at `/explorer/classic/` stays
+  byte-identical, as the fallback (§2.12). The style page gains samples of an article figure, the explorer and the
+  references (§2.11).
+- **Less copying of signature features.** Styling may be borrowed: palette, typography, spacing, panels, general
+  layout feel. The reference's distinctive interactions may not. Every adapted element is classified in §1.3, and each
+  signature interaction is replaced by one of this project's own (§2.5, §2.6). The test: someone who knows both sites
+  should not recognise any of them as the same trick.
+- **Decisions:** GSAP is not used; the preloader's words are the flyby's stages in physical order; the four departures
+  are approved; the closing line is the author's text, in a content slot (§2.10).
+
 This document is steps 1 and 2. Step 2 adds only development-only material:
 - the style page `/style-9/` (§2.11);
 - the palette check `site/tools/phase9-palette.mjs`;
@@ -123,41 +136,70 @@ The step-1 findings, confirmed and made exact by the code:
   - experience lists, with a sticky heading in a left column (28 %) and rows on the right;
   - the same contact section and footer.
 
-### 1.2 Adopt, adapt or drop (revised: copying allowed)
+### 1.2 Adopt, adapt or drop (revised 2026-11-02: styling borrowed, interactions our own)
 
 | element | decision | for this research site |
 |---|---|---|
-| Preloader | **adopt, with our words** | The stages of a powered flyby (§2.6), at most 2 s from the page's start, once a session, ended by any key, click, tap or wheel. Skipped under reduced motion or with a `#fragment`, and the content is in the DOM beneath it. |
-| Name marquee | **adopt** | The title alone, "Oberth Efficiency Atlas —" (decision 5), with the reference's ticker. Added: a pause control (WCAG 2.2.2); still and wrapped under reduced motion. |
+| Preloader | **replace** (§1.3) | Our own: a flyby drawn on the Void, the stages in physical order (§2.6). Kept from the brief: at most 2 s from the page's start, once a session, ended by any key, click, tap or wheel; skipped under reduced motion or with a `#fragment`; the content in the DOM beneath it. |
+| Name marquee | **replace** (§1.3) | The title at the same size, "Oberth Efficiency Atlas —" (decision 5), moved by the dive's clock instead of a ticker (§2.6). |
 | Monogram behind the portrait | **drop** | Behind a figure panel this wide it showed only as a stray bar (style page, 2026-11-01). |
 | Tilted portrait | **replace** | The live three-engine dive, straight, in a Void window on the Panel band: tilting a figure distorts it. |
 | Location pill | **adapt** | The case pill, "Hibberd et al.'s dive, perihelion 3.2 R☉" (the value from `engines.json`), with a still Sun mark in place of the spinning globe. |
-| Role line with arrow | **adopt** | The published headline. |
+| Role line with arrow | **adapt** | The published headline, under a short Ink rule (no arrow). |
 | "Selected work ↓" | **adapt** | "Findings ↓", a native in-page link. |
-| Intro statement and round button | **adopt** | The author's summary slot; "Read the research". |
-| Work list with previews | **adopt** | The three findings. Each preview is the live mini figure, not a screenshot. Changes: <ul><li>portrait panels (5:4), so each figure keeps its key in view;</li><li>an Ink "View" badge, since the accent never sits over a plot;</li><li>keyboard focus shows the preview beside the row.</li></ul> |
+| Intro statement and round button | **adopt** (layout) | The author's summary slot; "Read the research". |
+| Work list with previews | **replace** (§1.3) | The three findings as rows (the reference's row layout, kept as styling) that steer the docked dive and open in place (§2.5). No pointer-following preview, no badge. |
 | "More work¹⁰" pill | **adapt** | "The full research⁷": the number of figures, from the content. |
 | Gallery | **drop** | Screenshots of figures that are live elsewhere. |
 | Recognition statistics | **adapt** | Key results as large numbers, each linked to its source file (§2.5). |
-| Contact section | **adopt** | "Fly one yourself." with a round accent "Open the explorer" and pills. No e-mail. |
+| Contact section | **adopt** (layout) | The author's closing line (a content slot), a round accent "Open the explorer" and outline links. No e-mail. Its curved top edge is replaced (§1.3). |
 | Fine-print footer | **adapt** | Analysis tag, site-data commit, links (Source, About and licences, Cite). No local time. |
-| Header, round menu button, drawer | **adopt** | The reference's structure and timings. Added: the round button leaves the tab order while hidden; the background is `inert` while the drawer is open. |
-| Magnetic controls | **adopt** | The reference's springs and strengths. Fine pointers at 768 px and wider only; never under reduced motion; any key resets them. |
-| Liquid buttons | **adopt** | Under reduced motion the fill appears without moving. |
-| Closing curve | **adopt, natively** | A CSS scroll-driven animation where supported, a still curve elsewhere. The content's slide from under the curve is dropped: it hides the title until scrolled. |
+| Header and drawer | **adopt** (layout) | The header's layout and the drawer's layout and focus handling. The round button that morphs to × is replaced by a text pill; the drawer's curved edge and rotated link stagger go (§1.3). |
+| Magnetic controls | **drop** (§1.3) | Controls stay where they are. |
+| Liquid buttons | **replace** (§1.3) | The round and outline shapes stay; hover and focus change colour, with no rising fill. |
+| Closing curve | **replace** (§1.3) | A straight edge with the escape leg drawn over it (§2.6). |
 | Lenis | **adopt, conditionally** | The author's four conditions, tested in pass 2 (§2.6). Fallback: native scrolling. |
 | Barba curtains | **drop** (author) | Cross-document View Transitions as a progressive enhancement instead (§2.6). |
-| GSAP | **not used** | §2.6, decision 7. |
-| About page | **adopt** (decision 4) | Modelled on the reference's About page (§2.4). |
+| GSAP | **not used** (author, 2026-11-02) | §2.6. |
+| About page | **adopt** (layout; decision 4) | Modelled on the reference's About page (§2.4). |
 | Résumé and contact pages | **drop** | Personal. |
 
 **How it stays distinguishable:**
 - dark only;
 - the live dive where the portrait was, and no monogram;
-- our marquee line and preloader words;
+- every interaction is this project's own (§1.3): the flyby preloader, the title moved by the dive's clock, the dive
+  docking beside the findings that steer it, the rows opening in place, the menu pill, the escape leg;
 - our sections: findings, key results, the explorer as the call to action, provenance in the footer;
-- previews are live figures;
 - the About page holds the citation, licences, reproducibility and the AI-use disclosure.
+
+### 1.3 Audit: general styling or signature interaction (2026-11-02)
+
+The author's rule: styling may be borrowed (palette, typography, spacing, panels, general layout feel); the reference's
+distinctive interactions may not. Every element adapted in the first revision, classified:
+
+| element | class | reason | becomes |
+|---|---|---|---|
+| Palette roles: a dark ink and panel, one indigo accent | styling: keep | Colour roles are styling. Ours is a dark re-derivation with its own checks (§2.1). | — |
+| Typography: DM Sans at one weight, the size scale, tracking | styling: keep | Type is styling (decision 3). | — |
+| Spacing: 3 vw padding, hairline rows, band rhythm | styling: keep | Layout feel. | — |
+| Hero composition: centred media, edge pill, statement on the right, a large title at the bottom | styling: keep | A still composition; the content is ours. | The dive leaves it to dock beside the findings (§2.5). |
+| Header layout, inline links | styling: keep | Ubiquitous. | The hover dot under links (a reference detail) becomes an underline, as every link here. |
+| Rows layout: index, large title, category, hairlines | styling: keep | A still list layout. | — |
+| Round and outline button shapes and sizes | styling: keep | Shapes are styling. | — |
+| Closing section and footer layout | styling: keep | A still layout. | — |
+| Drawer layout and its focus handling | styling: keep | A side drawer is generic; the keyboard handling is good practice. | — |
+| **The cursor-following graph preview** (a 5:4 panel on a spring, tilting with speed, a rail of figures, a "View" badge, the row's text sliding apart) | **signature: replace** | The reference's most recognisable trick (the author's example). | The rows steer the docked dive; each row opens in place to its live figure (§2.5). |
+| **The preloader's curved-curtain lift** (and the centred cycling word with its dot) | **signature: replace** | A curtain lifting with a curved edge that flattens is the reference's hallmark; the centred word cycling with a dot is its greeting. | A flyby drawn on the Void: a dot flies a hyperbola past the Sun, each stage named at its point, then the screen fades (§2.6). |
+| **Curved section edges** (the closing section's curve that flattens on scroll; the drawer's curved edge) | **signature: replace** | The same hallmark as the curtain. | Straight edges. Over the closing band, the escape leg draws itself as it scrolls in (§2.6). The drawer's edge is plain. |
+| **Magnetic buttons** | **signature: replace** | A pointer-following pull is a hallmark of the reference's genre, and it moves a control from under the pointer. | Nothing: controls stay put. This project's motion lives in its figures. |
+| **Liquid buttons** | **signature: replace** | The elliptical fill rising from below is the reference's button hover. | A plain colour change on hover and focus (150 ms). |
+| **The round menu button morphing to ×** | **signature: replace** | A hamburger turning into × is generic, but an 80 px disc that pops in after the hero, turns indigo and morphs is the reference's. | A text pill, "Menu" or "Close", that fades in once the header has gone (§2.4). |
+| Drawer links' rotated stagger | signature: replace | The 4° rotation and 35 ms stagger are the reference's. | The links arrive with the drawer. |
+| **The marquee** (a ticker drifting without end, turning with the scroll direction, skewing with scroll speed) | **signature: replace** | The drifting name ticker is the reference's headline motif. | The title moves only with the dive's clock (§2.6). It moves for less than 5 s on its own, so it needs no pause control. |
+| Hero settle after the preloader | general: keep, simplified | Content rising into place is generic. | A 24 px rise as the preloader fades. |
+| Smooth scrolling (Lenis) | library: keep, conditionally | Many sites use it; the author's conditions apply. | — |
+| Footer links' underline on hover | general: keep | A ubiquitous micro-pattern. | — |
+| Section heads rising into view | general: drop | Not needed: the motion budget goes to the figures. | — |
 
 ## 2. Design plan (step 2)
 
@@ -172,7 +214,7 @@ A designed dark equivalent of the reference's palette, checked by `site/tools/ph
 | **Ink** | `#ecebe7` | text, and links (underlined); the main round button | 15.71 on Void / 14.28 on Panel |
 | **Quiet** | `#a3a4a8` | secondary text; control outlines and axis lines | 7.53 / 6.84 |
 | **Rule** | `#2f3135` | hairlines and gridlines (decorative) | 1.31 on Panel |
-| **Signal** | `#445be8` | accent fills (with an Ink label), the open menu button, focus rings, selection | see below |
+| **Signal** | `#445be8` | accent fills with an Ink label (the round "Open the explorer"), focus rings, selection | see below |
 
 **The accent** (decision 1) is the reference's indigo, moved by the least that passes:
 - The exact `#455ce9` takes an Ink label at 4.44:1, below 4.5. As a focus ring it gives 3.53:1 on Void and 3.21:1 on
@@ -184,9 +226,9 @@ A designed dark equivalent of the reference's palette, checked by `site/tools/ph
 - **Never text:** as text it would be 3.5:1, so links are Ink and underlined.
 - **Never inside a plot area, legend or colour scale** (the author's rule). Its closest data blue is η step 3 at
   ΔE 8.3 (2.5 under colour-vision deficiency), which is why the rule exists. Consequences:
-  - The preview badge, which rides over live plots, is Ink.
   - The explorer marks the reader's case on the universal curve with an accent dot today. That dot becomes Ink in
-    pass 5.
+    pass 5 (shown Ink on the style page's explorer sample).
+  - The steered dive dims and emphasises with Ink, Quiet and opacity, never the accent.
   - A test from pass 4 fails if a chart module or chart stylesheet reads `--signal` or `--accent`.
 
 ### 2.2 Data colours: unchanged, re-validated
@@ -279,22 +321,23 @@ texture. All checks pass on both surfaces:
 
   The article's disclosure section stays where it is.
 
-**Navigation** (the reference's):
+**Navigation** (the reference's layout, our own control):
 - **Header** (not sticky; it scrolls away): the wordmark on the left. Research, Explorer, References and About sit inline
-  on the right at 900 px and wider, with the reference's hover dot.
-- **The round menu button,** fixed at top right:
-  - 80 px at 900 px and wider, where it appears once 42 % of the hero (or 100 px of an inner page) has scrolled away;
-  - 54 px and always present below that.
+  on the right at 900 px and wider, underlined on hover and on the current page.
+- **The menu pill,** fixed at top right: a text button reading "Menu", or "Close" while the drawer is open (no icon,
+  no morph).
+  - At 900 px and wider it fades in once the header has scrolled out of view; below 900 px it is always there.
+  - While hidden it is out of the tab order.
 
-  While hidden it is out of the tab order. It opens the drawer:
-  - Panel, 37.5 vw wide (460–700 px), full width on phones;
-  - display-size links with a dot on the current page;
+  It opens the drawer:
+  - Panel, 37.5 vw wide (460–700 px), full width on phones, with a straight edge;
+  - display-size links, the current page marked by a short bar (the section rail's marker);
   - secondary links: source, classic explorer, cite.
 
-  The button turns into an accent close (×). The background is `inert`; Tab cycles between the button and the
-  links; Escape closes; focus returns.
+  The background is `inert`; Tab cycles between the pill and the links; Escape closes; focus returns. From the
+  keyboard the drawer opens and closes without motion.
 - **The article:** at 1180 px and wider it keeps its sticky side rail, restyled as a numbered list. Below that it keeps
-  the sticky section bar, which carries the menu button at its right end, so two fixed elements never stack.
+  the sticky section bar, which carries the menu pill at its right end, so two fixed elements never stack.
 - **Sticky elements and scroll padding:** `shell.ts` keeps measuring every active sticky or fixed element and setting
   `scroll-padding-top`. `e2e/sticky.spec.ts` keeps its checks at 390, 768, 1024 and 1440 px, extended in pass 2 to the
   About page's sticky headings and to Lenis (§2.6).
@@ -303,28 +346,43 @@ texture. All checks pass on both surfaces:
 
 1. **Hero** (the Panel band, 100 svh, at least 800 px; at 390 px, in the order below):
    - the header;
-   - the published headline with its arrow, first at narrow widths so it stays above the fold;
+   - the published headline under a short Ink rule, first at narrow widths so it stays above the fold;
    - the live dive in a Void window (40 vw, at most 590 px), with its scrub control and clock;
    - the case pill on the left edge;
-   - the marquee across the bottom;
-   - the pause control (bottom left) and "Findings ↓" (bottom right).
+   - the title across the bottom, moved by the dive's clock (§2.6);
+   - "Findings ↓" (bottom right).
 
-   Its first frame is drawn beneath the preloader; its intro starts as the curtain clears (`landingHero`'s new
-   `start` option).
-2. **Intro:** the author's summary, a detail column of scope facts (`methods.json`), and a round, magnetic "Read the
-   research" button.
-3. **Findings** (rows, as in the reference's work list):
+   Its first frame is drawn beneath the preloader; its intro starts as the preloader clears (`landingHero`'s `start`
+   option).
+2. **Findings, beside the docked dive** (the author's preferred direction; my design):
 
-   | number | title | category |
-   |---|---|---|
-   | 01 | Loss against Π | universal curve |
-   | 02 | Where real missions sit | atlas |
-   | 03 | The Hibberd et al. check | case study |
+   | number | title | category | the dive shows | why (from the data) |
+   |---|---|---|---|---|
+   | 01 | Loss against Π | universal curve | every burn, the paths quietened so the burns stand out, the clock at the end | Figure 01 marks these three engines by Π and loss: the lengths of their burns are Π made visible |
+   | 02 | Where real missions sit | atlas | the clock at perihelion, the engines faint, the impulsive reference emphasised in the strip and key | η, which the atlas maps, compares a burn with the impulsive one at periapsis |
+   | 03 | The Hibberd et al. check | case study | the solid stack alone, the clock just after its burn | the case study is Hibberd et al.'s reference stack, the dive's solid stack |
 
-   - **Preview:** a fine pointer gets the live mini figure in a 5:4 panel that follows it. Keyboard focus places the
-     same panel beside the row.
-   - **Below 768 px:** each row becomes a card with the figure inline.
-   - **Links:** each row links to the figure in the research, or to the explorer while the article is unpublished.
+   - **Docking** (1100 × 700 and larger): the hero and the findings share one grid. The dive is sticky in a column that
+     spans both. As the headline scrolls away, the dive slides from the screen's centre into that column (its offset
+     follows the scroll; in one step under reduced motion), and the rows arrive in the left column beside it. It
+     stays docked to the end of the findings, then scrolls away with them.
+   - **Steering:** pointing at a row or focusing it moves the dive to that row's state. The clock eases there in
+     500 ms (at once under reduced motion); the engines not lit fade to a quarter, in the canvas, the energy strip and
+     the key. The row pointed at stays Ink and the others go Quiet. Leaving the rows restores the reader's own clock.
+     Scrubbing the dive takes it back from the rows. `landingHero` gains `steer()` for this; it changes nothing on a
+     page that does not call it.
+   - **Visible before any hover:** each row's category column shows the line styles of the engines it lights (the
+     dive's key), so the link between rows and dive is never hover-only. Focus also announces the state (the row's
+     description).
+   - **Opening in place** (every width): each row is a disclosure (a heading's button, `aria-expanded`). It opens to
+     its live mini figure, the author's caption slot and the link to the research (or the explorer while the article
+     is unpublished). One row is open at a time; an open row also holds the dive's state. Each figure is drawn the
+     first time its row opens.
+   - **Below 1100 px** (or under 700 px tall): no dock. The dive stays in the hero, and the rows open in place.
+   - **The intro** (the author's summary, scope facts and "Read the research") sits after the findings, so nothing
+     comes between the hero and the dock.
+3. **Intro:** the author's summary, a detail column of scope facts (`methods.json`), and a round "Read the research"
+   button.
 4. **Key results** (large numbers, each from site data, with a link to its source file):
 
    | value | from |
@@ -335,36 +393,44 @@ texture. All checks pass on both surfaces:
    | the bound loss/Δv ≲ Π²/96 holds to a ratio of 1.010 for Π ≤ 1 | `rule_numbers.json` |
 
    The numbers do not count up.
-5. **Closing section** (Panel under a flattening Void curve):
-   - "Fly one yourself.";
-   - a round accent "Open the explorer" (magnetic);
-   - pills: Research, Source on GitHub, Classic explorer;
+5. **Closing section** (Panel, a straight top edge with the escape leg over it; on every page):
+   - the author's closing line (the content slot `content/landing/closing.md`; hidden in production until written);
+   - a round accent "Open the explorer";
+   - outline links: Research, Source on GitHub, Classic explorer;
    - the fine-print footer.
 
 ### 2.6 Motion
 
-One easing family: the reference's `cubic-bezier(.22, 1, .36, 1)`, and GSAP's named curves as cubic Béziers where the
-reference uses them. Native scrolling, or Lenis under the conditions below; no scroll hijacking.
+One easing family, `cubic-bezier(.22, 1, .36, 1)` (expo out where a move settles). Native scrolling, or Lenis under the
+conditions below; no scroll hijacking. Every interaction below is this project's own (§1.3).
 
 | animation | trigger | timing | under reduced motion |
 |---|---|---|---|
-| Preloader: our words, then the curtain lifts with its curved edge | first load of a session, no `#fragment` | words at 0, 180, 290, …, 620 ms; lift from 0.8 s over 950 ms; gone by 1.75 s by design, measured 1.83 s at both widths. Hard cap 2 s from the page's start (a late script shortens the lift; an inline failsafe removes it at 2 s). Any key, click, tap or wheel ends it. | not shown |
-| Hero settle: headline, pill, marquee and header move into place | with the preloader | 1.3–1.5 s, expo out (content visible throughout) | none |
-| The dive's intro sweep | first load of a session, after the preloader | 2.8 s (measured 2.84 s); any input ends it | final frame |
-| Marquee drift | while in view | 55 px/s; turns with the scroll direction, up to 3× and 2.5° skew with scroll speed (Lenis's velocity); pause control | still, wrapped at display size |
-| Menu drawer, curve, staggered links, veil | button | open 700/750 ms, links 35 ms apart; close 500 ms; instant from the keyboard | instant |
-| Liquid fill | hover or focus | 500 ms | appears without moving |
-| Magnetic pull | fine pointer at 768 px and wider | springs 600/44 (label 460/38) | off |
-| Findings preview: follow, tilt, rail, badge; row text slides | fine pointer; focus places it, still | springs 360/34 and 180/25; rail 700 ms; text 650 ms | appears in place |
-| Closing curve flattens | scrolling into the section (scroll-driven animation) | scrubbed | a still curve |
+| Preloader: a flyby drawn, the stages named at their points, then a fade | first load of a session, no `#fragment` | flight 120–1120 ms from the page's start, a 150 ms hold, a 350 ms fade: gone at 1.62 s on time. A late script shortens the flight so the fade ends by 1.8 s; measured on the dev server: faded by 1.71–1.80 s, removed by 1.72–1.95 s (six runs). The inline failsafe removes it at 2 s. Any key, click, tap or wheel ends it. | not shown |
+| Hero settle: headline, pill, title and header rise 24 px | as the preloader fades | 700 ms, expo out (content in place throughout) | none |
+| The dive's intro sweep | first load of a session, after the preloader | 2.8 s (measured 2.81–2.83 s); any input ends it | final frame |
+| The title, moved by the dive's clock | the intro, the reader scrubbing | its offset is the angle the solid stack has swept around the Sun, as a fraction of the whole sweep, times one line's width: it creeps in on approach, rushes through perihelion and slows on escape. Still whenever the clock is. | still, wrapped at display size |
+| The dive docking beside the findings | scrolling past the headline (1100 × 700 and larger) | its offset follows the scroll over 30 % of the screen's height (smoothstep) | in one step |
+| Steering the dive from a row | pointing at or focusing a row | the clock eases 500 ms; the engines not lit fade to 25 % | at once |
+| A row opening in place | click, tap, Enter or Space | content fades in, 280 ms | at once |
+| Menu: pill, scrim, drawer | the pill | the drawer slides in 380 ms, out 300 ms; the pill fades in 200 ms once the header has gone; from the keyboard, no motion | instant |
+| Button states | hover or focus | colour change, 150 ms | instant |
+| The escape leg | the closing band scrolling in (scroll-driven animation) | draws itself, scrubbed; its end dot appears last | drawn whole |
 | Page transitions | navigating between pages (cross-document View Transitions, Chrome 126+) | at most 400 ms; an enhancement, ignored elsewhere | none |
-| Section-head rise | entering the viewport, once | the reference's 1.05 s, power3 out | none |
 
-**The preloader's words** (proposed; decision 8): Approach · Periapsis · Ignition · Burn · Cutoff · Escape, the stages
-of a powered flyby, each with the reference's dot.
+**The preloader** (my design): one hyperbola, e = 1.5, in the dive's radial mapping ρ = 1 + log₁₀(r/r_p), the Sun at
+its focus on the left, as in the hero. A dot flies it from the upper right. Its timing is half Kepler's (the hyperbolic
+mean anomaly) and half uniform in angle, so it visibly speeds through perihelion without the turn vanishing in two
+frames. The burn arc (±35° about perihelion) is drawn heavier. The stages appear at their points, in physical order
+(the author, decision 8): **Approach, Ignition, Periapsis, Cutoff, Escape**. They stay up once shown, so none has to be
+read in passing. Then the screen fades. No curtain, no curved edge, no centred word.
 
-**The 1.5 s cap** now applies only to sequences that block content (the author). The preloader has its own 2 s cap, and
-the dive intro, which never blocks content, has a 3 s cap.
+**The title** has no ticker and never moves by itself for more than the intro's 2.8 s. WCAG 2.2.2 asks for a pause
+control only for motion that lasts more than 5 s, so the pause control approved in decision 9 is no longer needed and
+is gone.
+
+**The 1.5 s cap** applies only to sequences that block content (the author). The preloader has its own 2 s cap, and the
+dive intro, which never blocks content, has a 3 s cap.
 
 **Lenis**, used only if all of the author's conditions hold, tested in pass 2:
 1. It is never started under `prefers-reduced-motion`. It also needs a fine pointer at 768 px and wider, as in the
@@ -376,45 +442,53 @@ the dive intro, which never blocks content, has a 3 s cap.
 
 If any one fails, Lenis comes out, native scrolling stays, and I report it. Its settings are the reference's: lerp
 0.095, smooth wheel, no touch sync, no anchor handling. Native anchor jumps keep `scroll-padding-top`, it pauses while
-the drawer is open, and `[data-lenis-prevent]` keeps the drawer scrollable.
+the drawer is open, and `[data-lenis-prevent]` keeps the drawer scrollable and leaves the explorer's wheel zoom to the
+explorer.
 
 **View Transitions** (in place of Barba):
 - `@view-transition { navigation: auto; }` inside `prefers-reduced-motion: no-preference`;
 - the old page lifts away and the new one rises, at most 400 ms;
 - every page keeps its own scripts and tests.
 
-**GSAP is not used** (decision 7):
-- **Coverage:** everything the reference does with it here is a timeline of transforms or a ticker. CSS transitions
-  and the Web Animations API cover those with the same durations and equivalent curves. The springs are the reference's
-  own code.
-- **Cost:** it would add a second animation runtime and a non-open-source licence to an MIT repository.
-- It can be added later if fidelity calls for it.
+**GSAP is not used** (the author, 2026-11-02). CSS transitions, scroll-driven animations and the Web Animations API cover
+everything above.
 
 ### 2.7 Wireframes
 
-Landing, 1440 px (the first screen ends at 900; the style page's hero is this composition):
+Landing, 1440 px, first screen (the style page's hero is this composition):
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐ Panel band
-│ Oberth Efficiency Atlas                               Research  Explorer  References  About │  (80 px round menu
-│                       ┌──────────────────────────────┐                                     │   button appears
-│                       │ live dive (Void window)      │    ↘                                │   after scrolling)
+│ Oberth Efficiency Atlas                               Research  Explorer  References  About │  ( Menu ) pill fades in
+│                       ┌──────────────────────────────┐                                     │   once the header
+│                       │ live dive (Void window)      │    ──                               │   has gone
 │                       │ Solid · Nuclear · SEP lanes, │                                     │
 │ ┌──────────────────┐  │ the Sun, strip, key          │    [published headline,             │
-│ │ Hibberd et al.'s ◉│  │ ──○───────── t = +413 h      │     statement type, 4–5 lines]      │
-│ │ dive, 3.2 R☉     │  └──────────────────────────────┘                                     │
-│ └──────────────────┘                                                                       │
-│ …rth Efficiency Atlas — Oberth Efficiency Atlas — Oberth Effic…        (marquee, 216 px)     │
-│ (❚❚)                                                                       Findings (↓)     │
+│ │ Hibberd et al.'s ◉│  │ ──○──────────                │     statement type, 4–5 lines]      │
+│ │ dive, 3.2 R☉     │  │ t = +413 h from perihelion   │                                     │
+│ └──────────────────┘  └──────────────────────────────┘                                     │
+│ …rth Efficiency Atlas — Oberth Efficiency Atlas — Oberth Effic…  (title, 216 px; moves with   │
+│                                                                    the dive's clock)  Findings (↓) │
 └──────────────────────────────────────────────────────────────────────────────────────────┘
-  [summary, statement type]                            Engines … Bodies … Sweep …    ( Read the research )
-  01   Loss against Π          ┌──────────┐                            universal curve
-  ─────────────────────────────│ live     │──────────────────────────────────────────────
-  02   Where real missions sit │ preview  │ (View)                     atlas
-  ─────────────────────────────│ 5:4      │──────────────────────────────────────────────
-  03   The Hibberd et al. check└──────────┘                            case study
+```
+
+Landing, 1440 px, scrolled: the dive has slid into the dock column and stays there through the findings:
+```
+                                                                                     ( Menu )
+  01  Findings                                         ┌──────────────────────────────┐
+  ─────────────────────────────────────────────────    │ live dive, docked (sticky)   │
+  01   Loss against Π        ─ ‐‐ ··  universal curve (+) │ row 03 pointed at: Solid lit, │
+  ─────────────────────────────────────────────────    │ the others faint; the clock  │
+  02   Where real missions sit   ─   atlas         (+) │ just after its burn          │
+  ─────────────────────────────────────────────────    │ ──────○──────                │
+  03   The Hibberd et al. check  ─   case study    (−) │ t = +0.0458 h from perihelion│
+       ┌ live mini figure, open in place ────────┐     └──────────────────────────────┘
+       │ caption slot · In the research          │
+       └─────────────────────────────────────────┘
+  [summary, statement type]          Engines … Bodies … Sweep …        ( Read the research )
   135,720 ↗src        69 / 69 ↗src         Π = 0.976 ↗src          1.010 ↗src
- ╭──────────────────────────────────────────────────────────────────────────────────────────╮ curve (flattens)
-  Fly one yourself.                                                  ( Open the explorer )   Panel
+ ─────────────────────────────────────────────────────────────────────────────────────── straight edge
+  ___________________________________________________________________________________●  escape leg (draws in)
+  [closing line: the author's slot]                                  ( Open the explorer )   Panel
   ───────────────────────────────────────────────────────────────────────────────────────────
   (Research) (Source on GitHub ↗) (Classic explorer)
   Analysis v1.0-analysis   Site data 55381c7                     Links: Source · About and licences · Cite
@@ -423,23 +497,27 @@ Landing, 1440 px (the first screen ends at 900; the style page's hero is this co
 Landing, 390 px:
 ```
 ┌──────────────────────────────┐ Panel
-│ Oberth Efficiency Atlas  (≡) │  54 px round button
-│ ↘                            │
+│ Oberth Efficiency Atlas (Menu)│  the pill, always there
+│ ──                           │
 │ [headline, 4 lines]          │  above the fold
 │ ┌──────────────────────────┐ │
 │ │ live dive (Void window)  │ │
 │ └──────────────────────────┘ │
 │ (Hibberd et al.'s dive ◉)    │
-│ Oberth Efficiency Atl…       │  marquee, 96 px
-│ (❚❚)            Findings (↓) │
+│ Oberth Efficiency Atl…       │  title, 96 px
+│                 Findings (↓) │
 └──────────────────────────────┘
- 01 Loss against Π   universal curve
- ┌──────────────────────────┐  figure inline (cards below 768 px)
+ 01 Loss against Π           (+)
+    ─ ‐‐ ··  universal curve
+ ┌──────────────────────────┐  opens in place: figure, caption, link
  └──────────────────────────┘
  …
- Fly one yourself. ( Open the explorer )
+ [closing line] ( Open the explorer )
  fine print, stacked
 ```
+
+404, 1440 and 390 px: the header, "Page not found" at display size, one statement-size line, the links as outline
+pills (Home, Research, Explorer, References, Single-file explorer), then the closing section and footer.
 
 About, 1440 px (`/about/`):
 ```
@@ -458,7 +536,7 @@ About, 1440 px (`/about/`):
  AI use          │ [author's slot] · docs/ai_use_log.md ↗
  Author          │ [author's slot]
  ╭─────────────────────────────────────────────────────────────────────────────────────────╮
-  Fly one yourself. …   footer
+  [closing line] …   footer
 ```
 
 About, 390 px: the title, the divider with Cite, the intro and the citation card stacked; each section's heading above
@@ -516,12 +594,12 @@ number sits above each entry.
 
 | generic template trait | changed to |
 |---|---|
-| Anyone's name in the marquee | The project's title. The page's subject is a figure, not a person. |
-| A greeting preloader | The six stages of a powered flyby, at most 2 s, once a session, skippable. |
+| Anyone's name in a drifting marquee | The project's title, moved only by the dive's clock. |
+| A greeting preloader | A flyby drawn, its five stages named in physical order, at most 2 s, once a session, skippable. |
 | A portrait and monogram | The live three-engine dive in a straight window, and no monogram. |
-| Screenshot previews | Live mini figures from the exported data, also shown on keyboard focus. |
+| Screenshot previews that follow the cursor | Rows that steer the dive and open in place to live figures. |
 | Statistics that count up | Static numbers, each linked to its source file. |
-| "Let's work together" and an e-mail | "Fly one yourself." with the explorer as the action. |
+| "Let's work together" and an e-mail | The author's closing line, with the explorer as the action. |
 | Local time in the footer | Provenance: the analysis tag and the site-data commit. |
 | An accent as decoration | Fixed jobs only: fills, focus, selection. Never text, never in a plot. |
 
@@ -530,10 +608,10 @@ number sits above each entry.
 | contract | how it is kept |
 |---|---|
 | **Data** | Every number from `site/public/data/*.json` with provenance; the key results add source links; `check_numbers` and the site-data tests unchanged. The pill's 3.2 R☉ comes from `engines.json`. |
-| **Prose** | All prose is the author's. The About page's prose is in slots. TODO sections stay hidden in production. The published headline stays above the fold at both sizes. The preloader words and "Fly one yourself." are interface labels for the author to approve (§2.10). |
-| **Figure meaning** | Simulation solid, theory dashed, published hollow; the SEP caveat; the hatching; the accent never in a plot (§2.1). |
-| **Explorer** | Behaviour, URL state and the validated simulator unchanged. The classic explorer byte-identical. |
-| **Accessibility** | <ul><li>Keyboard operation: the drawer's focus cycle, Escape and focus return; a keyboard path for every pointer effect.</li><li>Visible focus: accent rings at ≥ 3:1.</li><li>Text alternatives; WCAG AA (§2.1); no sideways scroll at 360 px.</li><li>Reduced motion: no preloader, no Lenis, no movement.</li><li>Lenis's conditions (§2.6).</li></ul> |
+| **Prose** | All prose is the author's. The About page's prose and the closing line are in slots. TODO sections stay hidden in production. The published headline stays above the fold at both sizes. The preloader's words are the author's (decision 8); the rows' state descriptions are interface text. |
+| **Figure meaning** | Simulation solid, theory dashed, published hollow; the SEP caveat; the hatching; the accent never in a plot (§2.1). A steered dive only fades engines and moves the clock: it draws nothing the data do not hold. |
+| **Explorer** | Behaviour, URL state and the validated simulator unchanged; restyled in pass 5. The classic explorer at `/explorer/classic/` byte-identical (§2.12). |
+| **Accessibility** | <ul><li>Keyboard operation: the drawer's focus cycle, Escape and focus return; the findings rows are a disclosure list, and focusing a row steers the dive as pointing does (its description says what the dive shows).</li><li>Visible focus: accent rings at ≥ 3:1.</li><li>Text alternatives; WCAG AA (§2.1); no sideways scroll at 360 px.</li><li>Motion: nothing moves on its own for more than 5 s (WCAG 2.2.2).</li><li>Reduced motion: no preloader, no Lenis, no movement; the dock and the steered clock change in one step.</li><li>Lenis's conditions (§2.6).</li></ul> |
 | **Performance** | Lighthouse at least 90 for accessibility, best practices and SEO in CI, performance reported. The hero frame time within budget. Lenis adds 5.4 kB gzipped (`lenis.min.js`, measured); GSAP is not added. |
 | **Packages and fonts** | Pinned under the 14-day rule; self-hosted through `fonts.py`. |
 | **Attribution** | `THIRD_PARTY_NOTICES.md`, a header in every file with copied or adapted code, the About page's credit and notices (§3). |
@@ -556,54 +634,85 @@ Answered by the author on 2026-11-01:
    Applied. My step-2 plan said the dive intro took 4.8 s. That was wrong: it has been 2.8 s since Phase 7
    (`DONE_MS = 2800`), so it already met the 3 s rule.
 
+Answered by the author on 2026-11-02:
+
+7. **GSAP:** not used.
+8. **Preloader words:** the flyby's stages in physical order, Approach, Ignition, Periapsis, Cutoff, Escape (a centred
+   burn ignites before periapsis). Applied (§2.6).
+9. **Departures from the reference:** approved: no monogram; 5:4 previews if previews survived (they did not: §1.3);
+   no closing content slide; a pause control on the marquee (no longer needed: the title never moves on its own for
+   more than 5 s, §2.6).
+10. **Closing line:** a content slot, the author's text (`site/content/landing/closing.md`, a TODO note with my step-2
+    wording as a candidate). Applied.
+
 New, for the author:
 
-7. **GSAP:** I recommend not using it (§2.6). Its licence and the 14-day rule both allow it.
-8. **Preloader words:** Approach, Periapsis, Ignition, Burn, Cutoff, Escape (§2.6). The alternative is the symbols
-   Δv, τ, t_b, Π, η.
-9. **Departures from the reference** (all applied on the style page):
-   - **Monogram:** dropped (§1.2).
-   - **Preview:** portrait (5:4) instead of square, with an Ink badge.
-   - **Closing section:** its content slide is dropped.
-   - **Marquee:** gains a pause control.
-10. **"Fly one yourself."** is my wording, kept from step 2. It is yours to replace.
+11. **The findings design** (§2.5): the dive docking beside the rows, steered by pointing and focus (your preferred
+    direction), with the rows also opening in place at every width. I combined the two because the docked dive can
+    show only the dive: the findings' own figures and your captions need a place that does not depend on hover.
+12. **Row 02's state:** the clock at perihelion with the impulsive reference emphasised is the weakest of the three
+    links (the atlas covers six bodies, the dive one). The alternative is for row 02 to leave the dive as it is.
+13. **The other replacements** (§1.3): the flyby preloader, the title moved by the dive's clock, the menu pill, plain
+    button states, and the escape leg over the closing section.
 
 ### 2.11 The style page
 
-`/style-9/`, development builds only, revised for the decisions:
+`/style-9/`, development builds only, revised for the decisions of 2026-11-02:
 - **The hero** in the landing composition: the header, the live dive in a Void window, the case pill, the headline,
-  and the title marquee with its pause control.
-- **The preloader**, the menu (round button and drawer), the liquid and magnetic buttons, the findings rows with live
-  previews, and the closing section with its footer.
-- **Colour** (the six names, each with its contrast), **type** (DM Sans and IBM Plex Mono, with Greek through the
-  fallbacks), and the **controls**.
+  and the title moved by the dive's clock.
+- **01 Findings**, straight after the hero: the dive docks beside the rows, which steer it and open in place.
+- **The preloader** (the flyby), the menu (pill and drawer), the plain button states, and the closing section with
+  the escape leg, the closing-line slot and the footer.
+- **02 Colour** (the six names, each with its contrast), **03 Type** (DM Sans and IBM Plex Mono, with Greek through the
+  fallbacks), **04 Controls**.
+- **Samples of the other pages** (the author: every page is restyled), live and in the new system:
+  - **05 Article:** the numbered section rail (the sticky bar below 1180 px), one section with its TODO notes (the
+    author's, as development builds show them) and Figure 2 with its legend, controls, tooltips, data table and
+    caption. The content plugin's new `<!--#section:id-->` places the one section.
+  - **06 Explorer:** the whole interface, with the reader's case an Ink dot on the curve.
+  - **07 References:** the list as rows.
 - **Lenis** for fine pointers, off under reduced motion.
+- Figure 2 and the explorer mount when they near the viewport, never before the preloader has gone.
 
 **Screenshots:** `docs/screens/phase-9-style/`, made by `site/tools/style9-shots.mjs` against the dev server, at 1440
-and 390 px:
-- the preloader (a word at 0.45 s, the curtain lifting at 1.5 s);
-- the hero's final frame and the menu open;
-- reduced motion (at 390 px, full page);
-- the full page;
-- at 1440 px only (below 768 px there is no pointer preview): the hover preview and the keyboard-focus preview.
+and 390 px (the list is in `docs/screens/README.md`): the preloader in flight and with every stage up; the hero
+mid-intro and final; the menu; a row open in place; the closing section; the article, explorer and references samples;
+reduced motion; the full page. At 1440 px also: the dive mid-slide, steered by the pointer and by keyboard focus, and
+Figure 2 with a tooltip open.
 
 The script also measures the preloader's and the intro's lengths in page time.
 
-**Checks** (2026-11-01):
-- `phase9-palette.mjs` passes.
-- `tests/test_site_fonts.py` passes for both font sets, including the Phase 9 Greek sources.
-- The type check passes.
+**Checks** (2026-11-02): the palette check, the font tests for both sets, the type check, vitest (the content
+plugin's new directive included) and the site-data tests pass.
+
+### 2.12 Scope: every page (the author, 2026-11-02)
+
+| page | what changes | pass |
+|---|---|---|
+| Every page | Tokens and fonts; the header, the menu pill and drawer; the closing section and footer; dark only (the theme switch goes) | 1–2 |
+| `/` | The hero, the docked dive and the findings, the intro, key results, the closing section (§2.5) | 4 |
+| `/research/` | The numbered rail and section bar; display-size section titles with numbers; prose at 18 px and 66 ch; every figure in a Panel: titles, legends, controls, tooltips, "Show data" tables, captions, KaTeX; the TODO banners (development only) | 3 |
+| Every figure | The chart modules are unchanged (they read the token names); the HTML around them is restyled (`site/src/styles/v9/pages.css`). The accent never enters a plot, legend or scale; a pass-4 test enforces it | 3–5 |
+| `/explorer/` | Four Panel regions with quiet titles; η at figure size; controls as pills; the reader's case an Ink dot; warnings in Critical with icon and text (unchanged) | 5 |
+| `/references/` | Rows between hairlines, the number in IBM Plex Mono; a cited entry reached by its link ringed in Signal | 6 |
+| `/about/` | New (§2.4) | 6 |
+| `/404.html` | Display title, a statement line, the links as outline pills (§2.7) | 6 |
+| `/explorer/classic/` | **Nothing:** byte-identical, the offline fallback. Today `e2e/pages.spec.ts` checks only that it is served; pass 1 adds a test that compares the built file byte for byte with `explorer/oberth_explorer.html` | 1 (the test) |
 
 ## 3. Copying and attribution
 
 - **Notices:** `THIRD_PARTY_NOTICES.md` holds:
   - the reference's MIT notice, verbatim;
-  - what is adapted and what is not;
+  - what is still adapted after the audit (§1.3): layouts and proportions (header, drawer, rows, buttons' shapes, hero
+    composition, closing section and footer), the drawer's focus handling, the preloader's once-a-session gate and
+    the Lenis settings;
+  - what is no longer used: every signature interaction in §1.3, and the personal content;
   - the list of files with copied or adapted code: `site/src/styles/v9/components.css`, `site/src/styles/v9/style9.css`,
-    `site/src/pages/style9.ts` and `site/style-9/index.html`.
+    `site/src/pages/style9.ts` and `site/style-9/index.html`. The new `site/src/styles/v9/pages.css` holds none.
 
-  The list grows as passes 1–7 move this code into the site.
-- **Headers:** each such file starts with a comment naming the source (repository and commit) and the licence.
+  The list follows the code as passes 1–7 move it into the site.
+- **Headers:** each such file starts with a comment naming the source (repository and commit), the licence and what in
+  it is adapted.
 - **Not used:** the portrait, the text, the images, the résumé and the contact details.
 - **The built site** carries the notice through the About page, which shows the reference's MIT notice in full and the
   credit line. The minifier strips comments, so the page is where the notice travels.

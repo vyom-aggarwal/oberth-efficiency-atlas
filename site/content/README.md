@@ -24,6 +24,7 @@ One Markdown file per section of the research article (`/research/`); the order 
 | `finding-loss.md` | caption of "Loss against Π, with the 1 % line" |
 | `finding-missions.md` | caption of "Where real missions sit" |
 | `finding-hibberd.md` | caption of "The Hibberd et al. check" |
+| `closing.md` | the closing line at the foot of every page, above "Open the explorer" (Phase 9; on the style page `/style-9/` until pass 6) |
 
 - Plain Markdown: no front matter, KaTeX math and `<sup>n</sup>` citations as above.
 - A file that still contains `TODO` is left out of the production build; the page closes up without

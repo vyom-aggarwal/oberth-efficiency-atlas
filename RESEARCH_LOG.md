@@ -3754,4 +3754,83 @@ with this project's content and data.
 (a word, then the lift), the hero, the menu open, reduced motion and the full page; at 1440 px, the hover and
 keyboard-focus previews.
 
+## 2026-11-02: Phase 9 step 2, second revision: every page in scope, the signature interactions replaced
+
+**The author's second review** (decisions in `docs/revamp_plan.md` §2.10):
+- **Scope widened to every page.** The article and every figure, the explorer's whole interface, the references, the
+  About and 404 pages. Only `/explorer/classic/` stays byte-identical.
+- **Less copying.** The reference's styling stays; its signature interactions go, each replaced by one of this project's
+  own. Test: someone who knows both sites should not recognise the trick.
+- **Decided:** no GSAP; preloader words Approach, Ignition, Periapsis, Cutoff, Escape (physical order: a centred burn
+  ignites before periapsis); the four departures approved; the closing line in a content slot.
+
+**Deviations from the approved step-2 design, recorded before the screenshots that depend on them:**
+- **The audit** (plan §1.3) classifies each adapted element as styling (kept) or signature interaction (replaced).
+- **Replaced:**
+  - the pointer-following preview;
+  - the curved-curtain preloader;
+  - the curved section edges;
+  - the magnetic and liquid buttons;
+  - the round menu button morphing to ×, with the drawer's rotated link stagger;
+  - the marquee's ticker;
+  - the links' hover dot.
+
+  `spring()` goes with the preview and the magnetic controls.
+- **Findings** (the author's preferred direction, my design, plan §2.5):
+  - **Dock.** From 1100 × 700 the hero's dive is sticky in a column spanning the hero and the findings. It slides from
+    the centre into that column as the headline scrolls away.
+  - **Steering.** Pointing at a row or focusing it steers the dive. The states come from the data:
+    - 01: every burn, the clock at the end;
+    - 02: the clock at perihelion, the impulsive reference emphasised;
+    - 03: the solid stack alone, just after its burn (`afterBurn(0)`, from the burn's samples).
+  - **Open in place.** The rows also open in place at every width, so the findings' figures and the author's captions
+    never depend on hover.
+  - **Plumbing.** `landingHero` gains `steer()` and `onFrame`. Neither changes anything unless a page calls it, and the
+    vitest suite and type check pass.
+- **Preloader:**
+  - **Path.** A hyperbola (e = 1.5) in the dive's radial mapping, the Sun at the focus.
+  - **Timing.** The dot's timing is half Kepler's (the hyperbolic mean anomaly) and half uniform in true anomaly. With
+    Kepler's alone the burn arc (±35°) takes about 2 % of the flight, about two frames.
+  - **Stage names.** They stay up once shown.
+  - **Schedule.** 120–1120 ms flight, 150 ms hold, 350 ms fade.
+- **Title.** Its offset is the angle the solid stack has swept around the Sun at the dive's clock, as a fraction of the
+  whole sweep, times one line's width.
+  - It moves only during the 2.8 s intro and while the reader scrubs or the rows steer.
+  - So nothing moves on its own for more than 5 s, and the pause control, approved as a departure, is no longer needed
+    under WCAG 2.2.2. It is removed.
+- **Closing section.** A straight edge, with the outgoing leg of a hyperbola (e = 3, perihelion to 80°) drawn over it by
+  a scroll-driven animation (drawn whole where unsupported or under reduced motion).
+  - The closing line moves to the slot `site/content/landing/closing.md`: a TODO note with "Fly one yourself." as a
+    candidate.
+- **Samples.** Article (Figure 2 with its section, via the new content-plugin directive `<!--#section:id-->`), explorer
+  and references, styled by a new `site/src/styles/v9/pages.css` with no reference code. The explorer's case dot is
+  Ink there.
+
+**Surprises, fixed before the final screenshots:**
+- **The new preloader first measured 2.10–2.17 s, over the 2 s cap.** Two causes:
+  - The explorer and Figure 2 were set up on the main thread during the fade.
+  - A Web Animations delay counts from the animation's first frame, which the module's synchronous set-up pushed back.
+
+  The fixes:
+  - Both now mount lazily, after the preloader.
+  - The fade's `startTime` is set in page time.
+  - A late script keeps 200 ms in hand.
+
+  Six dev-server runs, plus the screenshot run's two: the script took over at 210–389 ms; faded by 1.71–1.80 s; removed
+  by 1.72–1.95 s. Removal waits for the main thread; the opacity fade runs on the compositor.
+- **Stage names drawn on the path.** Far out the path runs almost radially, so radial offsets landed on it; they now
+  go along the path's normal, on its convex side.
+- **Styling bugs exposed by the shared controls and layout stylesheets the samples need:**
+  - the dive's clock overflowed its panel (that row became a non-wrapping flex row);
+  - reference entries' italic journal names became separate grid cells;
+  - η wrapped in the explorer's results column.
+
+  All three are fixed in the v9 sheets.
+- **The classic explorer's protection is weaker than the plan assumed.** `e2e/pages.spec.ts` only checks that
+  `/explorer/classic/` is served; a byte comparison is added to pass 1 (plan §2.12).
+
+**Measured:** dive intro 2.81–2.83 s.
+
+**Screenshots** (`docs/screens/phase-9-style/`): listed in `docs/screens/README.md`.
+
 

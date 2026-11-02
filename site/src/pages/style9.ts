@@ -1,22 +1,27 @@
 // /style-9/: the Phase 9 system for the author's approval (docs/revamp_plan.md §2.11; development builds only). Uses
-// the new token sheet alone, so the rest of the site is untouched until pass 1: tokens, type, one data figure (the
-// live three-engine dive), the controls, and the motion (preloader, menu, marquee, magnetic buttons, preview rows).
+// the new token sheet alone, so the rest of the site is untouched until pass 1: tokens, type, the controls, the live
+// dive with this project's own interactions (§1.3, §2.6), and samples of the article, the explorer and the references
+// page in the new system (the styling covers every page: author, 2026-11-02).
 //
 // Adapted from Suhas Beemineni's portfolio, https://github.com/suhaslord/portfolio at commit c98c5cc (MIT licence,
-// "Copyright (c) 2026 SuahsTheLord"; THIRD_PARTY_NOTICES.md): js/site.js (the preloader's timeline in reveal(), the
-// menu's open, close and focus handling, the name marquee's ticker, the has-scrolled threshold, the Lenis settings) and
-// js/motion.js (spring(), the magnetic controls, the work-row preview). GSAP timelines are rewritten as CSS transitions
-// and the Web Animations API with the same durations and equivalent easings; the springs are the reference's own code.
-// Changes for this project: our preloader words, our marquee line, keyboard focus showing the preview, the menu button
-// leaving the tab order while hidden, a pause control on the marquee, and the live mini figures as previews.
+// "Copyright (c) 2026 SuahsTheLord"; THIRD_PARTY_NOTICES.md), js/site.js: the menu drawer's open, close and focus
+// handling (the keyboard's instant path, the Tab cycle, Escape, focus return) and the Lenis settings. The rest is this
+// project's own: the flyby preloader, the menu pill, the dive docking beside the findings rows that steer it, the
+// title that moves with the dive's clock, and the escape leg over the closing section. The reference's preview,
+// magnetic and liquid buttons, curved edges, round menu button and marquee ticker are not used (§1.3).
 import "katex/dist/katex.min.css";
 import "lenis/dist/lenis.css";
 import "../styles/v9/tokens.css";
 import "../styles/chart.css";
+import "../styles/controls.css";
+import "../styles/layout.css";
 import "../styles/landing.css";
 import "../styles/v9/components.css";
+import "../styles/v9/pages.css";
 import "../styles/v9/style9.css";
 import Lenis from "lenis";
+import { DASH, dashGlyph, dive } from "../charts/dive-view";
+import type { HeroControl, Steer } from "../charts/landing-hero";
 import { axisSlider } from "../controls/axis-slider";
 import { segmented } from "../controls/segmented";
 import { loadBinary, loadData, type SiteData } from "../lib/data";
@@ -29,45 +34,13 @@ const root = document.documentElement;
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const css = (name: string) => getComputedStyle(root).getPropertyValue(name).trim();
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const fine = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)");   // the reference's test
+const fine = window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 768px)");   // the reference's test, for Lenis
 /** Icons as SVG, not glyphs: no font has to carry them (tests/test_site_fonts.py checks every displayed character). */
-const ICONS = { pause: "M5 3v10M11 3v10", play: "M5 3l8 5-8 5z", ne: "M4 12L12 4M6 4h6v6", se: "M4 4l8 8M12 6v6H6", down: "M8 3v10M4 9l4 4 4-4" };
+const ICONS = { ne: "M4 12L12 4M6 4h6v6", down: "M8 3v10M4 9l4 4 4-4", chev: "M4 6l4 4 4-4" };
 const icon = (name: keyof typeof ICONS, size = 16) => s("svg", { width: size, height: size, viewBox: "0 0 16 16", "aria-hidden": "true", class: "icon9" },
-  s("path", { d: ICONS[name], fill: name === "play" ? "currentColor" : "none", stroke: "currentColor", "stroke-width": 1.2,
-              "stroke-linecap": "round", "stroke-linejoin": "round" }));
-/** A liquid button or link: the fill that rises on hover or focus, and the label above it. */
-const liquid = (tag: "a" | "button", cls: string, label: (Node | string)[], attrs: Record<string, string> = {}) =>
-  h(tag, { class: `${cls} liquid`, ...(tag === "a" ? { href: "#" } : { type: "button" }), ...attrs },
-    h("span", { class: "fill", "aria-hidden": "true" }), h("span", { class: "label" }, ...label));
-// GSAP's eases as cubic Béziers (power2/3/4 are the quad/cubic/quart curves; expo as usually approximated).
-const EASE = { p2InOut: "cubic-bezier(.455,.03,.515,.955)", p3InOut: "cubic-bezier(.645,.045,.355,1)", expoInOut: "cubic-bezier(.87,0,.13,1)",
-               expoOut: "cubic-bezier(.16,1,.3,1)", p3Out: "cubic-bezier(.215,.61,.355,1)" };
-
-// ---------------------------------------------------------------- one clock for every follower (the reference's ticker)
-const tickers = new Set<(ms: number) => void>();
-let last = performance.now();
-const loop = (now: number) => { const ms = Math.min(now - last, 64); last = now; tickers.forEach((f) => f(ms)); requestAnimationFrame(loop); };
-requestAnimationFrame(loop);
-
-/** A critically damped follower (js/motion.js spring(), unchanged). */
-function spring(value = 0, stiffness = 360, damping = 34) {
-  let position = value, velocity = 0;
-  return {
-    get value() { return position; },
-    get velocity() { return velocity; },
-    snap(next: number) { position = next; velocity = 0; },
-    step(target: number, seconds: number) {
-      const time = clamp(seconds, 0, 0.064), steps = Math.max(1, Math.ceil(time * 120)), dt = time / steps;
-      for (let i = 0; i < steps; i++) {
-        velocity += ((target - position) * stiffness - velocity * damping) * dt;
-        position += velocity * dt;
-      }
-      if (Math.abs(target - position) < 0.005 && Math.abs(velocity) < 0.025) { position = target; velocity = 0; }
-      return position;
-    },
-  };
-}
-type Spring = ReturnType<typeof spring>;
+  s("path", { d: ICONS[name], fill: "none", stroke: "currentColor", "stroke-width": 1.2, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+const link = (cls: string, label: (Node | string)[]) => h("a", { class: cls, href: "#" }, ...label);
+const EXPO_OUT = "cubic-bezier(.16,1,.3,1)";
 
 // ---------------------------------------------------------------- smooth scrolling: Lenis, fine pointers only, never under
 // reduced motion (author's conditions, 2026-11-01; the reference's settings). Touch and keyboard scrolling stay native.
@@ -77,58 +50,115 @@ const lenis = fine.matches && !reduced
   : null;
 root.dataset.scroll = lenis ? "lenis" : "native";
 
-// ---------------------------------------------------------------- the preloader (js/site.js reveal(), the greeting)
-// The words are the stages of a powered flyby (proposed, for the author to approve). Timing, from the page's start (the
-// curtain is painted with the page): a word every 110 ms after the first 180 ms, the last at 620 ms, held to 0.8 s; then
-// the word lifts away and the curtain rises with its curved edge, 950 ms: done at 1.75 s. If this script runs late, the
-// sequence joins at the word that is due and the lift shortens, so the curtain is gone by 2 s from the page's start in
-// every case (the author's cap); the inline gate's failsafe removes it at 2 s regardless. Any key, click, tap or wheel
-// ends it at once.
-const WORDS = ["Approach", "Periapsis", "Ignition", "Burn", "Cutoff", "Escape"];
-const WORD_AT = WORDS.map((_, i) => (i === 0 ? 0 : 180 + (i - 1) * 110));
-const LIFT_AT = 800, LIFT_MS = 950, CAP_MS = 2000;
+// ---------------------------------------------------------------- the preloader: a flyby, drawn (§2.6)
+// One hyperbola (e = 1.5) in the dive's radial mapping ρ = 1 + log₁₀(r/r_p), the Sun on the left as in the hero. A dot
+// flies it from the upper right, quickest through perihelion (half Kepler's timing, half uniform in angle, so the turn
+// stays visible), the burn arc is drawn heavier, and the stages appear at their points in physical order (author,
+// 2026-11-02: a centred burn ignites before perihelion). They stay up, so none has to be read in passing. Then the
+// screen fades. From the page's start: the flight 120–1120 ms, a 150 ms hold, a 350 ms fade, gone at 1.62 s on time.
+// A late script shortens the flight so the fade ends by 1.8 s; the screen is removed when the main thread next runs
+// (the fade itself runs on the compositor), and the inline gate's failsafe removes it at 2 s regardless. Any key,
+// click, tap or wheel ends it at once.
+const ECC = 1.5, NU_MAX = (125 * Math.PI) / 180, NU_BURN = (35 * Math.PI) / 180, SUN_R = 0.42;
+const STAGES: [string, number][] = [["Approach", -110], ["Ignition", -35], ["Periapsis", 0], ["Cutoff", 35], ["Escape", 110]];
+const FLY_AT = 120, FLY_MS = 1000, HOLD_MS = 150, FADE_MS = 350, CAP_MS = 2000;
+/** A point of the hyperbola at true anomaly ν, in ρ units: the Sun at the origin, perihelion to its left. */
+function flybyPoint(nu: number): [number, number] {
+  const rho = 1 + Math.log10((1 + ECC) / (1 + ECC * Math.cos(nu)));
+  return [-rho * Math.cos(nu), rho * Math.sin(nu)];
+}
 function preloader(): Promise<void> {
-  const el = $("preload9");
+  const el = $("preload9"), svg = el.querySelector<SVGSVGElement>("svg")!;
   const now = performance.now();                                  // ms since the page's time origin
-  const lift = Math.max(now, LIFT_AT), dur = Math.min(LIFT_MS, CAP_MS - lift);
-  if (!root.classList.contains("preloading") || reduced || dur < 250) { root.classList.remove("preloading"); return Promise.resolve(); }
-  const word = el.querySelector<HTMLElement>(".word")!, curve = el.querySelector<HTMLElement>(".curve")!;
-  word.textContent = WORDS[WORD_AT.filter((t) => t <= now).length - 1];
-  const timers = WORDS.map((w, i) => (WORD_AT[i] > now ? window.setTimeout(() => { word.textContent = w; }, WORD_AT[i] - now) : 0));
-  const k = dur / LIFT_MS, d = lift - now;                        // the lift's scale (1 on time) and its delay from now
-  const at = (duration: number, delay: number, easing: string, fill: FillMode = "forwards") => ({ duration: duration * k, delay: d + delay * k, easing, fill });
-  const curtain = el.animate([{ transform: "none" }, { transform: "translateY(-115%)" }], at(LIFT_MS, 0, EASE.expoInOut));
-  const anims = [curtain,
-    word.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-45px)" }], at(500, 0, EASE.p2InOut)),
-    curve.animate([{ transform: "scaleY(1)" }, { transform: "scaleY(0)" }], at(850, 100, EASE.p3InOut)),
-    // The hero settles as the curtain clears (content is visible throughout; it only moves into place).
-    ...[$("role9"), $("pill9")].map((e, i) => e.animate([{ transform: "translateY(110px)" }, { transform: "none" }], at(1300, 140 + i * 55, EASE.expoOut, "backwards"))),
-    $("marquee9").animate([{ transform: "translateY(180px)" }, { transform: "none" }], at(1500, 180, EASE.expoOut, "backwards")),
-    document.querySelector<HTMLElement>(".head9")!.animate([{ transform: "translateY(-18px)", opacity: 0 }, { transform: "none", opacity: 1 }],
-      at(800, 240, EASE.p3Out, "backwards")),
-  ];
+  const start = Math.max(now, FLY_AT), fly = Math.min(FLY_MS, CAP_MS - 200 - start - HOLD_MS - FADE_MS);   // 200 ms in hand
+  if (!root.classList.contains("preloading") || reduced || fly < 300) { root.classList.remove("preloading"); return Promise.resolve(); }
+  // Geometry, fitted to the screen (stage names need room on both sides).
+  const W = innerWidth, H = innerHeight, narrow = W < 600;
+  const N = 240, nus = Array.from({ length: N + 1 }, (_, i) => -NU_MAX + (2 * NU_MAX * i) / N), pts = nus.map(flybyPoint);
+  let x0 = -SUN_R, x1 = SUN_R, y0 = -SUN_R, y1 = SUN_R;
+  for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  const mx = narrow ? 92 : 140, my = 56;
+  const sc = Math.min((W - 2 * mx) / (x1 - x0), (H - 2 * my) / (y1 - y0), (0.62 * H) / (y1 - y0));
+  const ox = W / 2 - ((x0 + x1) / 2) * sc, oy = H / 2 - ((y0 + y1) / 2) * sc;
+  const P = ([x, y]: [number, number]) => [ox + x * sc, oy + y * sc];
+  const d = (list: [number, number][]) => list.map((p, i) => `${i ? "L" : "M"}${P(p).map((v) => v.toFixed(1)).join(",")}`).join("");
+  // Time along the flight: half the hyperbolic mean anomaly (Kepler), half the true anomaly.
+  const kk = Math.sqrt((ECC - 1) / (ECC + 1));
+  const M = (nu: number) => { const H_ = 2 * Math.atanh(kk * Math.tan(nu / 2)); return ECC * Math.sinh(H_) - H_; };
+  const Mmax = M(NU_MAX), us = nus.map((nu) => 0.25 * (M(nu) / Mmax + 1) + 0.25 * (nu / NU_MAX + 1));
+  const nuAt = (u: number) => {
+    let lo = 0, hi = N;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (us[m] <= u) lo = m; else hi = m; }
+    return nus[lo] + ((nus[hi] - nus[lo]) * (u - us[lo])) / (us[hi] - us[lo] || 1);
+  };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const [sx, sy] = P([0, 0]);
+  const flown = s("path", { class: "flown" }), burn = s("path", { class: "burn" }), dot = s("circle", { class: "dot", r: narrow ? 4 : 5 });
+  const gap = narrow ? 12 : 16;
+  // Each name sits off the path on its convex side, along the normal (far out the path runs almost radially, so a
+  // radial offset would put the name on the line).
+  const marks = STAGES.map(([name, deg]) => {
+    const nu = (deg * Math.PI) / 180, p = flybyPoint(nu), a = flybyPoint(nu - 0.05), b = flybyPoint(nu + 0.05);
+    const tx = b[0] - a[0], ty = b[1] - a[1], tl = Math.hypot(tx, ty), cx = a[0] + b[0] - 2 * p[0], cy = a[1] + b[1] - 2 * p[1];
+    let [nx, ny] = [-ty / tl, tx / tl];
+    if (nx * cx + ny * cy > 0) { nx = -nx; ny = -ny; }
+    const [px, py] = P(p);
+    const g = s("g", { class: "stage" }, s("circle", { cx: px, cy: py, r: 2.5 }),
+      s("text", { x: px + nx * gap, y: py + ny * gap, "text-anchor": nx < -0.3 ? "end" : nx > 0.3 ? "start" : "middle",
+                  "dominant-baseline": ny < -0.3 ? "auto" : ny > 0.3 ? "hanging" : "middle" }, name));
+    return { nu, g };
+  });
+  svg.replaceChildren(s("path", { class: "full", d: d(pts) }), s("circle", { class: "sun", cx: sx, cy: sy, r: SUN_R * sc }),
+    burn, flown, ...marks.map((m) => m.g), dot);
+  let raf = 0;
+  const frame = (t: number) => {
+    const nu = nuAt(clamp((t - start) / fly, 0, 1)), here = flybyPoint(nu), upto = nus.filter((v) => v < nu).map(flybyPoint);
+    flown.setAttribute("d", d([...upto, here]));
+    if (nu > -NU_BURN) burn.setAttribute("d", d([...nus.filter((v) => v > -NU_BURN && v < Math.min(nu, NU_BURN)).map(flybyPoint), flybyPoint(Math.min(nu, NU_BURN))]));
+    const [dx, dy] = P(here); dot.setAttribute("cx", dx.toFixed(1)); dot.setAttribute("cy", dy.toFixed(1));
+    marks.forEach((m) => m.g.classList.toggle("on", nu >= m.nu - 1e-9));
+    if (t < start + fly) raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  // The fade, and the hero settling as it clears (content is in place beneath throughout; it only moves 24 px). Their
+  // start times are set in page time, not as delays: a delay counts from an animation's first frame, which the rest of
+  // this module's set-up holds back.
+  const fadeAt = start + fly + HOLD_MS;
+  const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: FADE_MS, easing: "ease", fill: "forwards" });
+  fade.startTime = fadeAt;
+  const settle = [$("role9"), $("pill9"), $("marquee9"), document.querySelector<HTMLElement>(".head9")!].map((e, i) => {
+    const a = e.animate([{ transform: "translateY(24px)" }, { transform: "none" }], { duration: 700, delay: i * 40, easing: EXPO_OUT, fill: "backwards" });
+    a.startTime = fadeAt;
+    return a;
+  });
   const EVENTS = ["keydown", "pointerdown", "wheel", "touchstart"];
-  const skip = () => { timers.forEach(clearTimeout); anims.forEach((a) => a.finish()); root.dataset.preloader = "skipped"; };
+  const skip = () => { cancelAnimationFrame(raf); frame(start + fly); [fade, ...settle].forEach((a) => a.finish()); root.dataset.preloader = "skipped"; };
   EVENTS.forEach((ev) => window.addEventListener(ev, skip, { passive: true, capture: true }));
   root.dataset.preloader = "running";
-  return curtain.finished.then(() => {
+  root.dataset.preloaderStart = String(Math.round(now));                 // when this script took over (diagnostics)
+  root.dataset.preloaderFaded = String(Math.round(fadeAt + FADE_MS));    // when the fade is scheduled to end
+  return fade.finished.then(() => {
     EVENTS.forEach((ev) => window.removeEventListener(ev, skip, { capture: true }));
+    cancelAnimationFrame(raf);
     root.classList.remove("preloading");
     root.dataset.preloaderMs = String(Math.round(performance.now()));    // from the page's start (tools/style9-shots.mjs)
     if (root.dataset.preloader === "running") root.dataset.preloader = "done";
-    curtain.cancel();
+    fade.cancel();
   });
 }
 const preloaded = preloader();
 
-// ---------------------------------------------------------------- the menu (js/site.js setup(): toggle, panel, scrim)
-const toggle = document.querySelector<HTMLButtonElement>(".menu9-toggle")!, panel = $("menu9"), scrim = $("scrim9");
+// ---------------------------------------------------------------- the menu: a text pill and the drawer
+// The pill is this project's (no round button, no morph): it reads "Menu" or "Close". From 900 px the header's links are
+// inline and the pill appears once the header has scrolled out of view; below 900 px it is always there. The drawer's
+// open, close and focus handling are the reference's (js/site.js setup()).
+const pill = document.querySelector<HTMLButtonElement>(".menu9-pill")!, panel = $("menu9"), scrim = $("scrim9");
 const background = () => [...document.querySelectorAll<HTMLElement>(".head9, main, .close9")];
 let menuOpen = false, returnFocus: HTMLElement | null = null;
 function openMenu(instant: boolean): void {
   returnFocus = document.activeElement as HTMLElement | null; menuOpen = true;
   root.classList.toggle("menu-instant", instant); root.classList.add("menu-open");
-  toggle.setAttribute("aria-expanded", "true"); toggle.setAttribute("aria-label", "Close navigation");
+  pill.setAttribute("aria-expanded", "true"); pill.textContent = "Close";
   panel.setAttribute("aria-hidden", "false"); panel.inert = false;
   background().forEach((el) => { el.inert = true; });
   lenis?.stop();
@@ -138,14 +168,14 @@ function closeMenu(instant: boolean, restoreFocus = true): void {
   if (!menuOpen) return;
   menuOpen = false;
   root.classList.toggle("menu-instant", instant); root.classList.remove("menu-open");
-  toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-label", "Open navigation");
+  pill.setAttribute("aria-expanded", "false"); pill.textContent = "Menu";
   panel.setAttribute("aria-hidden", "true"); panel.inert = true;
   background().forEach((el) => { el.inert = false; });
   lenis?.start();
-  if (restoreFocus) (returnFocus?.isConnected ? returnFocus : toggle).focus({ preventScroll: true });
+  if (restoreFocus) (returnFocus?.isConnected ? returnFocus : pill).focus({ preventScroll: true });
 }
-// Opened from the keyboard (a click with detail 0), the menu appears without motion, as in the reference.
-toggle.addEventListener("click", (e) => (menuOpen ? closeMenu(e.detail === 0) : openMenu(e.detail === 0)));
+// Opened from the keyboard (a click with detail 0), the drawer appears without motion, as in the reference.
+pill.addEventListener("click", (e) => (menuOpen ? closeMenu(e.detail === 0) : openMenu(e.detail === 0)));
 scrim.addEventListener("click", () => closeMenu(false));
 document.addEventListener("keydown", (e) => {
   if (!menuOpen) return;
@@ -153,55 +183,124 @@ document.addEventListener("keydown", (e) => {
   if (e.key !== "Tab") return;
   const links = [...panel.querySelectorAll<HTMLAnchorElement>("a")], first = links[0], lastLink = links[links.length - 1];
   const at = document.activeElement;
-  if (e.shiftKey && at === first) { e.preventDefault(); toggle.focus(); }
-  else if (e.shiftKey && at === toggle) { e.preventDefault(); lastLink.focus(); }
-  else if (!e.shiftKey && at === lastLink) { e.preventDefault(); toggle.focus(); }
-  else if (!e.shiftKey && at === toggle) { e.preventDefault(); first.focus(); }
+  if (e.shiftKey && at === first) { e.preventDefault(); pill.focus(); }
+  else if (e.shiftKey && at === pill) { e.preventDefault(); lastLink.focus(); }
+  else if (!e.shiftKey && at === lastLink) { e.preventDefault(); pill.focus(); }
+  else if (!e.shiftKey && at === pill) { e.preventDefault(); first.focus(); }
 });
 $("menu9-bottom").prepend(h("a", { href: "#" }, "Source on GitHub", icon("ne", 12)));
-// The round button appears once 42 % of the hero has scrolled away (wide screens; below 900 px it is always there).
-const hero = document.querySelector<HTMLElement>(".hero9")!;
-const onScroll = () => root.classList.toggle("has-scrolled", window.scrollY > hero.offsetHeight * 0.42);
+const head = document.querySelector<HTMLElement>(".head9")!;
+const onScroll = () => root.classList.toggle("has-scrolled", window.scrollY > head.offsetHeight);
 window.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
-// ---------------------------------------------------------------- the marquee (js/site.js, .name-track ticker)
-// The title alone (author decision 5). It drifts at 55 px/s, turns with the scroll direction and leans with its speed
-// (Lenis's velocity); it stops off screen, on the pause control (WCAG 2.2.2), and entirely under reduced motion.
+// ---------------------------------------------------------------- the title, moving with the dive's clock (§2.6)
+// No ticker: the title's offset is the angle the solid stack has swept around the Sun by the dive's clock, as a fraction
+// of the whole sweep, times one line's width. It creeps in on approach, rushes through perihelion and slows on escape,
+// and it moves only while the clock does: during the dive's intro (under 3 s, once a session) and while the reader
+// scrubs. Nothing moves on its own for more than 5 s, so it needs no pause control (WCAG 2.2.2). Still under reduced
+// motion, wrapped at display size.
 const track = $("marquee9-track");
 const line = () => h("span", { class: "line" }, "Oberth Efficiency Atlas —");
 track.append(line(), line(), line());
-const pause = liquid("button", "round9 small pause9", [icon("pause")], { "aria-pressed": "false", "aria-label": "Pause the moving title" });
-let paused = false;
-pause.addEventListener("click", () => {
-  paused = !paused;
-  pause.setAttribute("aria-pressed", String(paused));
-  pause.setAttribute("aria-label", paused ? "Play the moving title" : "Pause the moving title");
-  pause.querySelector(".label")!.replaceChildren(icon(paused ? "play" : "pause"));
-});
-$("foot9").append(pause, h("a", { class: "cue9", href: "#findings9" }, "Findings",
-  h("span", { class: "round9 small liquid", "aria-hidden": "true" }, h("span", { class: "fill" }), h("span", { class: "label" }, icon("down")))));
-if (!reduced) {
-  let width = 1, position = 0, direction = 1, speed = 1, velocity = 1, skew = 0, skewTarget = 0, visible = true;
-  const first = track.firstElementChild as HTMLElement;
-  const measure = () => { width = first.getBoundingClientRect().width || 1; };
-  new ResizeObserver(measure).observe(first); measure();
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(hero);
-  lenis?.on("scroll", (l: Lenis) => {
-    const v = l.velocity;
-    if (Math.abs(v) > 0.04) direction = v > 0 ? 1 : -1;
-    speed = 1 + Math.min(Math.abs(v) * 0.04, 2);
-    skewTarget = clamp(v * -0.065, -2.5, 2.5);
-  });
-  tickers.add((ms) => {
-    if (!visible || paused || document.hidden) return;
-    const dt = Math.min(ms, 50);
-    velocity += (direction * speed - velocity) * (1 - Math.exp(-dt / 160));
-    position = (position + velocity * dt * 0.055 + width) % width;
-    skew += (skewTarget - skew) * (1 - Math.exp(-dt / 180)); skewTarget *= Math.exp(-dt / 220); speed += (1 - speed) * (1 - Math.exp(-dt / 260));
-    track.style.transform = `translate3d(${-position}px, 0, 0) skewX(${skew}deg)`;
-  });
+let lineW = 1, sweep: Float64Array | null = null;
+new ResizeObserver(() => { lineW = (track.firstElementChild as HTMLElement).getBoundingClientRect().width || 1; }).observe(track.firstElementChild!);
+function onFrame(k: number): void {
+  if (reduced || !sweep) return;
+  const i = clamp(k - 1, 0, sweep.length - 1), f = sweep[i] / sweep[sweep.length - 1];
+  track.style.transform = `translate3d(${(-f * lineW).toFixed(1)}px, 0, 0)`;
 }
+$("foot9").append(h("a", { class: "cue9", href: "#findings9" }, "Findings", h("span", { class: "round9 small", "aria-hidden": "true" }, icon("down"))));
+$("role9").prepend(h("span", { class: "rule9", "aria-hidden": "true" }));
+
+// ---------------------------------------------------------------- the findings rows and the docked dive (§2.5)
+// From 1100 px wide and 700 px tall the hero's dive is sticky, and as the headline scrolls away it slides from the
+// centre into the right-hand column beside the rows (its offset follows the scroll; in one step under reduced motion).
+// Pointing at a row or focusing it steers the dive to that finding's state; leaving restores the reader's own clock.
+// Each row also opens in place, at every width, to its live figure, the author's caption and its link.
+const dockMq = window.matchMedia("(min-width: 1100px) and (min-height: 700px)");
+const DOCK_TOP = 96;                                              // the dive's top edge, in the hero and docked
+const fig = $("landing-hero"), home = $("dive-home"), dock = $("dock9"), stage = $("stage9"), rowsEl = $("rows9");
+let control: HeroControl | null = null, docked = false, dockFrom = 0, dockSpan = 1;
+type RowId = "loss" | "missions" | "hibberd";
+/** Each finding's state on the dive (the engines lit by index: 0 solid stack, 1 nuclear thermal, 2 SEP-class). */
+const STATES: Record<RowId, (c: HeroControl) => Steer> = {
+  // Figure 01 marks these three engines by Π and loss: every burn, the paths quiet, the clock at the end.
+  loss: (c) => ({ s: c.sMax, lit: [0, 1, 2], burns: true }),
+  // η, which the atlas maps, compares a burn with the impulsive one at periapsis: the clock at perihelion.
+  missions: () => ({ s: 0, lit: [], imp: true }),
+  // The case study is Hibberd et al.'s reference stack, the dive's solid stack: just after its burn.
+  hibberd: (c) => ({ s: c.afterBurn(0), lit: [0] }),
+};
+const GLYPHS: Record<RowId, () => Node[]> = {
+  loss: () => DASH.map((dash) => dashGlyph(dash)),
+  missions: () => [dashGlyph([], "imp")],
+  hibberd: () => [dashGlyph(DASH[0])],
+};
+const heads = [...rowsEl.querySelectorAll<HTMLButtonElement>(".row9-head")];
+const rowOf = (b: HTMLElement) => b.closest("li")!.dataset.row as RowId;
+heads.forEach((b) => b.querySelector(".g")!.append(...GLYPHS[rowOf(b)]()));
+function measureDock(): void {
+  if (!docked) return;
+  const sr = stage.getBoundingClientRect(), dr = dock.getBoundingClientRect(), role = $("role9");
+  fig.style.setProperty("--dock-dx", `${(sr.left + sr.width / 2 - (dr.left + dr.width / 2)).toFixed(1)}px`);
+  // The slide starts once the headline has cleared the dive's top edge, and takes 30 % of the screen's height.
+  dockFrom = role.offsetTop + role.offsetHeight - DOCK_TOP + 16; dockSpan = 0.3 * innerHeight;
+  dockProgress();
+}
+function dockProgress(): void {
+  if (!docked) return;
+  const p = clamp((window.scrollY - dockFrom) / dockSpan, 0, 1);
+  const e = reduced ? (p >= 0.5 ? 1 : 0) : p * p * (3 - 2 * p);
+  fig.style.setProperty("--dock", e.toFixed(4));
+  root.classList.toggle("dive-docked", e === 1);
+}
+function placeDive(): void {
+  docked = dockMq.matches;
+  (docked ? dock : home).append(fig);
+  root.classList.toggle("is-docked", docked);
+  heads.forEach((b) => { if (docked) b.setAttribute("aria-describedby", `row9-${rowOf(b)}-steer`); else b.removeAttribute("aria-describedby"); });
+  if (docked) measureDock(); else { fig.style.removeProperty("--dock"); root.classList.remove("dive-docked"); steerTo(null); }
+}
+window.addEventListener("scroll", dockProgress, { passive: true });
+new ResizeObserver(measureDock).observe(stage);
+dockMq.addEventListener("change", placeDive);
+preloaded.then(measureDock);
+// Steering: the row pointed at, else the focused row, else the open one, else none.
+let hovered: HTMLButtonElement | null = null, focused: HTMLButtonElement | null = null, opened: HTMLButtonElement | null = null;
+let steered: HTMLButtonElement | null = null;
+function steerTo(b: HTMLButtonElement | null): void {
+  if (b === steered) return;
+  steered = b;
+  rowsEl.classList.toggle("has-active", Boolean(b));
+  heads.forEach((x) => x.closest("li")!.classList.toggle("is-active", x === b));
+  if (control) control.steer(b ? STATES[rowOf(b)](control) : null);
+}
+const update = () => steerTo(docked ? (hovered ?? focused ?? opened) : null);
+rowsEl.addEventListener("pointerover", (e) => {
+  if (e.pointerType === "touch") return;
+  hovered = (e.target as Element).closest("li")?.querySelector<HTMLButtonElement>(".row9-head") ?? null; update();
+});
+rowsEl.addEventListener("pointerleave", () => { hovered = null; update(); });
+rowsEl.addEventListener("focusin", (e) => { focused = (e.target as Element).closest("li")?.querySelector<HTMLButtonElement>(".row9-head") ?? null; update(); });
+rowsEl.addEventListener("focusout", (e) => { if (!rowsEl.contains(e.relatedTarget as Node | null)) { focused = null; update(); } });
+// Opening in place: one row at a time; each figure is drawn the first time its row opens.
+const mounted = new Set<RowId>();
+let mountFigure: (id: RowId, body: HTMLElement) => void = () => {};
+heads.forEach((b) => b.addEventListener("click", () => {
+  const open = b.getAttribute("aria-expanded") !== "true";
+  for (const x of heads) {
+    const on = open && x === b;
+    x.setAttribute("aria-expanded", String(on));
+    $(x.getAttribute("aria-controls")!).hidden = !on;
+    x.closest("li")!.classList.toggle("is-open", on);
+  }
+  opened = open ? b : null;
+  if (open && !mounted.has(rowOf(b))) { mounted.add(rowOf(b)); mountFigure(rowOf(b), $(b.getAttribute("aria-controls")!).querySelector<HTMLElement>(".finding-body")!); }
+  update();
+  requestAnimationFrame(measureDock);
+}));
+placeDive();
 
 // ---------------------------------------------------------------- colour: the six named colours, and the data colours
 const NAMED: [string, string, string][] = [
@@ -210,7 +309,7 @@ const NAMED: [string, string, string][] = [
   ["Ink", "--ink", "Text and links (underlined); the main round button"],
   ["Quiet", "--quiet", "Secondary text; control outlines, axis lines"],
   ["Rule", "--rule", "Hairlines and gridlines"],
-  ["Signal", "--signal", "Accent fills, the open menu button, focus rings, selection. Never text, never in a plot"],
+  ["Signal", "--signal", "Accent fills (the call to action), focus rings, selection. Never text, never in a plot"],
 ];
 const lum = (hex: string) => {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
@@ -234,7 +333,7 @@ $("datastrip9").append(
 
 // ---------------------------------------------------------------- type
 const SPEC: [string, string, string][] = [
-  ["Marquee (DM Sans 400, tracking −0.025 em)", "spec-marquee", "Oberth Efficiency Atlas —"],
+  ["Title (DM Sans 400, tracking −0.025 em)", "spec-marquee", "Oberth Efficiency Atlas —"],
   ["Display: section titles, the closing line", "spec-display", "01  Findings"],
   ["Figure: key results (IBM Plex Mono)", "spec-figure", "135,720"],
   ["Statement: the headline, the summary", "spec-statement", "Sphinx of black quartz, judge my vow: η, Π, Δ, τ"],
@@ -251,152 +350,100 @@ for (const el of document.querySelectorAll<HTMLElement>(".spec9")) {
   el.firstElementChild!.append(`, ${Math.round(parseFloat(getComputedStyle(sample).fontSize))} px`);
 }
 
-// ---------------------------------------------------------------- controls
+// ---------------------------------------------------------------- controls: plain states, no pull and no fill (§1.3)
 const steering = signal<"prograde" | "inertial">("prograde");
 const sel = h("select", { class: "select9", "aria-label": "Preset" }, h("option", {}, "Hibberd et al.'s solar dive"), h("option", {}, "Jupiter, Hall thruster"));
 const slider = axisSlider({ id: "pi9", label: "Π", min: 1e-3, max: 1e3, value: 0.0326,
   marks: [{ value: 0.0326, label: "Solid" }, { value: 1.67, label: "Nuclear" }, { value: 368, label: "SEP*" }], format: (v) => sig(v) });
 $("controls9-body").append(
-  h("div", { class: "row9" }, liquid("a", "round9 magnetic", ["Read the research"]), liquid("a", "round9 accent magnetic", ["Open the explorer"]),
-    liquid("a", "pill9 magnetic", ["The full research", h("sup", {}, "7")]), liquid("a", "pill9 magnetic", ["Source on GitHub", icon("ne", 12)])),
+  h("div", { class: "row9" }, link("round9", ["Read the research"]), link("round9 accent", ["Open the explorer"]),
+    link("pill9", ["The full research", h("sup", {}, "7")]), link("pill9", ["Source on GitHub", icon("ne", 12)])),
   h("div", { class: "row9" }, segmented("steer9", "Steering", [["prograde", "prograde"], ["inertial", "inertial"]], steering), sel),
   h("div", { class: "slider9" }, slider.el));
 
-// ---------------------------------------------------------------- findings rows and their preview (js/motion.js)
-const ROWS: [string, string, string][] = [["01", "Loss against Π", "universal curve"], ["02", "Where real missions sit", "atlas"],
-  ["03", "The Hibberd et al. check", "case study"]];
-const rows = ROWS.map(([n, t, c]) => h("a", { href: "#" }, h("span", { class: "n" }, n), h("span", { class: "t" }, t), h("span", { class: "c" }, c)));
-$("rows9").append(...rows.map((a) => h("li", {}, a)));
-const panes = ROWS.map(() => h("div", { class: "finding-body" }));
-$("rail9").append(...panes.map((b, i) => h("figure", { class: "pane", id: `pv9-${i + 1}` }, b)));
-{
-  const box = $("preview9"), rail = $("rail9"), badge = $("badge9");
-  let active: HTMLAnchorElement | null = null, known = false, dirty = false, rendering = false, byFocus = false, halfW = 180, halfH = 180;
-  const pointer = { x: 0, y: 0 };
-  const photo = { x: spring(), y: spring() }, button = { x: spring(0, 600, 44), y: spring(0, 600, 44) }, angle: Spring = spring(0, 180, 25);
-  const measure = () => { halfW = box.offsetWidth / 2; halfH = box.offsetHeight / 2; };
-  new ResizeObserver(measure).observe(box); measure();
-  const target = () => ({ x: clamp(pointer.x, halfW + 18, innerWidth - halfW - 18), y: clamp(pointer.y, halfH + 18, innerHeight - halfH - 18) });
-  const place = (x: number, y: number, r = 0) => { box.style.transform = `translate(${x - halfW}px, ${y - halfH}px) rotate(${r}deg)`; };
-  const placeBadge = (x: number, y: number) => { badge.style.transform = `translate(${x}px, ${y}px)`; };
-  const hide = () => {
-    if (!active) return;
-    active.classList.remove("is-active"); active = null; rendering = false;
-    box.classList.remove("is-visible", "by-focus"); badge.classList.remove("is-visible");
-  };
-  const show = (row: HTMLAnchorElement, at?: { x: number; y: number }) => {
-    if (!fine.matches) return;
-    const i = rows.indexOf(row);
-    if (active !== row) { active?.classList.remove("is-active"); active = row; row.classList.add("is-active"); }
-    if (!rendering) {
-      const t = at ?? target();
-      photo.x.snap(t.x); photo.y.snap(t.y); button.x.snap(pointer.x); button.y.snap(pointer.y); angle.snap(0);
-      place(t.x, t.y); placeBadge(pointer.x, pointer.y);
-      rail.style.transition = "none"; rail.style.transform = `translateY(${-100 * i}%)`; void rail.offsetHeight; rail.style.transition = "";
-    } else rail.style.transform = `translateY(${-100 * i}%)`;
-    rendering = true;
-    box.classList.add("is-visible"); box.classList.toggle("by-focus", byFocus); badge.classList.toggle("is-visible", !byFocus);
-  };
-  const sample = () => {
-    if (!known) return;
-    const row = document.elementFromPoint(pointer.x, pointer.y)?.closest<HTMLAnchorElement>(".rows9 a");
-    if (row && !menuOpen && !root.classList.contains("preloading")) show(row); else hide();
-  };
-  document.addEventListener("pointermove", (e) => {
-    if (e.pointerType === "touch") { known = false; hide(); return; }
-    if (byFocus) { byFocus = false; hide(); }
-    known = true; pointer.x = e.clientX; pointer.y = e.clientY; dirty = true;
-  });
-  document.addEventListener("pointerout", (e) => { if (!e.relatedTarget) { known = false; hide(); } });
-  document.addEventListener("keydown", () => { known = false; if (!byFocus) hide(); });
-  window.addEventListener("scroll", () => { dirty = true; }, { passive: true });
-  window.addEventListener("blur", () => { known = false; hide(); });
-  // Keyboard focus places the preview beside the row, still (an addition: the reference hides it on any key).
-  for (const row of rows) {
-    row.addEventListener("focus", () => {
-      if (!row.matches(":focus-visible")) return;
-      const r = row.getBoundingClientRect();
-      byFocus = true; rendering = false;
-      show(row, { x: clamp(r.left + r.width * 0.62, halfW + 18, innerWidth - halfW - 18), y: clamp(r.top + r.height / 2, halfH + 18, innerHeight - halfH - 18) });
-    });
-    row.addEventListener("blur", () => { if (byFocus) { byFocus = false; hide(); } });
+// ---------------------------------------------------------------- the closing section: the escape leg (§2.6)
+// Over the band's straight top edge, the outgoing leg of a hyperbola (e = 3, from perihelion to 80° of true anomaly),
+// stretched to the band's width: it leaves low on the left and climbs out to the right, the opening's approach
+// answered by an escape. Where scroll-driven animation is supported it draws itself as the band scrolls in; elsewhere,
+// and under reduced motion, it is drawn whole.
+const escape = $("escape9") as unknown as SVGSVGElement;
+function drawEscape(): void {
+  const W = Math.round(escape.clientWidth), H = Math.round(escape.clientHeight);
+  if (!W || !H) return;
+  const e = 3, p = 1 + e, nuEnd = (80 * Math.PI) / 180, pts: [number, number][] = [];
+  for (let i = 0; i <= 120; i++) {
+    const nu = (nuEnd * i) / 120, r = p / (1 + e * Math.cos(nu));
+    pts.push([r * Math.sin(nu), r * Math.cos(nu)]);            // along the periapsis velocity, and toward periapsis
   }
-  tickers.add((ms) => {
-    if (document.hidden) return;
-    if (dirty) { dirty = false; sample(); }
-    if (!rendering || byFocus) return;
-    const sec = ms / 1000, t = target();
-    const x = photo.x.step(t.x, sec), y = photo.y.step(t.y, sec);
-    place(x, y, angle.step(clamp(photo.x.velocity * 0.004, -2.8, 2.8), sec));
-    placeBadge(button.x.step(pointer.x, sec), button.y.step(pointer.y, sec));
-  });
+  const xEnd = pts[120][0], yEnd = pts[120][1];
+  const X = (x: number) => 0.02 * W + (x / xEnd) * 0.94 * W, Y = (y: number) => H * (0.82 - 0.7 * (1 - y) / (1 - yEnd));
+  escape.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  escape.replaceChildren(
+    s("path", { class: "leg", pathLength: 1, d: pts.map(([x, y], i) => `${i ? "L" : "M"}${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join("") }),
+    s("circle", { class: "dot", cx: X(xEnd).toFixed(1), cy: Y(yEnd).toFixed(1), r: 4.5 }));
 }
-
-// ---------------------------------------------------------------- the closing section and footer
-$("cta9").append(liquid("a", "round9 accent magnetic", ["Open the explorer"], { "data-magnet": ".45" }));
-$("links9").append(liquid("a", "pill9 on-accent magnetic", ["Research"]), liquid("a", "pill9 on-accent magnetic", ["Source on GitHub", icon("ne", 12)]),
-  liquid("a", "pill9 on-accent magnetic", ["Classic explorer"]));
+new ResizeObserver(drawEscape).observe(escape);
+$("cta9").append(link("round9 accent", ["Open the explorer"]));
+$("links9").append(link("pill9", ["Research"]), link("pill9", ["Source on GitHub", icon("ne", 12)]), link("pill9", ["Classic explorer"]));
 $("flinks9").append(h("a", { href: "#" }, "Source"), h("a", { href: "#" }, "About and licences"), h("a", { href: "#" }, "Cite"));
-$("role9").prepend(icon("se", 22));
 
-// ---------------------------------------------------------------- magnetic controls (js/motion.js, .magnetic)
-// Fine pointers only, never under reduced motion; the label follows at half the pull. Any key, blur or touch resets.
-if (fine.matches && !reduced) {
-  type State = { el: HTMLElement; text: HTMLElement | null; hovered: boolean; px: number; py: number; x: Spring; y: Spring; tx: Spring; ty: Spring };
-  const moving = new Set<State>();
-  for (const el of document.querySelectorAll<HTMLElement>(".magnetic")) {
-    const st: State = { el, text: el.querySelector<HTMLElement>(".label"), hovered: false, px: 0, py: 0,
-                        x: spring(0, 600, 44), y: spring(0, 600, 44), tx: spring(0, 460, 38), ty: spring(0, 460, 38) };
-    const aim = (e: PointerEvent) => { if (e.pointerType === "touch") return; st.hovered = true; st.px = e.clientX; st.py = e.clientY; moving.add(st); };
-    el.addEventListener("pointerenter", aim); el.addEventListener("pointermove", aim);
-    el.addEventListener("pointerleave", () => { st.hovered = false; moving.add(st); });
-  }
-  const reset = () => {
-    moving.forEach((st) => {
-      st.hovered = false; [st.x, st.y, st.tx, st.ty].forEach((a) => a.snap(0));
-      st.el.style.translate = ""; if (st.text) st.text.style.translate = "";
-    });
-    moving.clear();
-  };
-  document.addEventListener("keydown", reset); window.addEventListener("blur", reset);
-  document.addEventListener("pointerdown", (e) => { if (e.pointerType === "touch") reset(); });
-  tickers.add((ms) => {
-    if (!moving.size || document.hidden) return;
-    const sec = ms / 1000;
-    moving.forEach((st) => {
-      let x = 0, y = 0;
-      if (st.hovered) {
-        if (!st.el.matches(":hover")) st.hovered = false;
-        else {
-          const r = st.el.getBoundingClientRect();
-          const strength = st.el.dataset.magnet ? Number(st.el.dataset.magnet) * r.width : st.el.classList.contains("round9") ? 100 : 28;
-          // The box already carries the pull: take it out, so the pull does not feed on itself.
-          x = clamp((st.px - r.left + st.x.value) / r.width - 0.5, -0.5, 0.5) * strength;
-          y = clamp((st.py - r.top + st.y.value) / r.height - 0.5, -0.5, 0.5) * strength;
-        }
-      }
-      st.el.style.translate = `${st.x.step(x, sec)}px ${st.y.step(y, sec)}px`;
-      if (st.text) st.text.style.translate = `${st.tx.step(x * 0.5, sec)}px ${st.ty.step(y * 0.5, sec)}px`;
-      if (!st.hovered && [st.x, st.y, st.tx, st.ty].every((a) => a.value === 0 && a.velocity === 0)) moving.delete(st);
-    });
-  });
+// ---------------------------------------------------------------- the article sample: its section marked current
+for (const a of document.querySelectorAll<HTMLAnchorElement>(".article9 [data-nav]")) {
+  if (a.dataset.nav === "universal-curve") a.setAttribute("aria-current", "true");
+  a.addEventListener("click", (e) => e.preventDefault());           // the other sections are not on this page
 }
 
 // ---------------------------------------------------------------- data: the dive (drawn beneath the preloader; its intro
-// starts as the curtain clears), the pill, the previews and the fine print
+// starts as it clears), the pill, the fine print, the findings' figures, Figure 2 and the explorer
 (async () => {
   const [{ landingHero }, site, engines] = await Promise.all([
     import("../charts/landing-hero"), loadData<SiteData>("site.json"), loadData<any>("engines.json")]);
-  const pill = $("pill9");
-  pill.append(h("span", {}, "Hibberd et al.'s dive,", h("br"), `perihelion ${engines.units.r_p_over_R_sun.value} R☉`), h("span", { class: "sun9", "aria-hidden": "true" }));
+  $("pill9").append(h("span", {}, "Hibberd et al.'s dive,", h("br"), `perihelion ${engines.units.r_p_over_R_sun.value} R☉`), h("span", { class: "sun9", "aria-hidden": "true" }));
   $("tag9").textContent = site.repo.tag;
   $("data9").textContent = site.provenance.git;
   const buf = await loadBinary(engines.binary);
-  const fig = $("landing-hero");
-  landingHero(fig, fig.querySelector<HTMLElement>(".landing-hero-body")!, engines, buf, site, { reducedMotion: reduced, start: preloaded });
-  const [f, curve, atlas, missions, cas] = await Promise.all([import("../charts/findings"), loadData<any>("curve.json"),
-    loadData<any>("atlas.json"), loadData<any>("missions.json"), loadData<any>("case.json")]);
-  f.lossFinding(panes[0], curve, engines, site);
-  f.missionsFinding(panes[1], atlas, missions, site);
-  f.hibberdFinding(panes[2], cas, site);
+  // The angle the solid stack has swept around the Sun, sample by sample (the radial mapping keeps angles).
+  const solid = dive(engines, buf).cases[0];
+  sweep = new Float64Array(solid.X.length);
+  for (let i = 1; i < solid.X.length; i++) {
+    let da = Math.atan2(solid.Y[i], solid.X[i]) - Math.atan2(solid.Y[i - 1], solid.X[i - 1]);
+    da -= 2 * Math.PI * Math.round(da / (2 * Math.PI));
+    sweep[i] = sweep[i - 1] + Math.abs(da);
+  }
+  control = landingHero(fig, fig.querySelector<HTMLElement>(".landing-hero-body")!, engines, buf, site,
+    { reducedMotion: reduced, start: preloaded, onFrame });
+  steered = null; update();
+  mountFigure = (id, body) => {
+    const load = async () => {
+      const f = await import("../charts/findings");
+      if (id === "loss") f.lossFinding(body, await loadData<any>("curve.json"), engines, site);
+      else if (id === "missions") { const [atlas, missions] = await Promise.all([loadData<any>("atlas.json"), loadData<any>("missions.json")]); f.missionsFinding(body, atlas, missions, site); }
+      else f.hibberdFinding(body, await loadData<any>("case.json"), site);
+    };
+    load().catch((err) => console.error(err));
+  };
+  for (const b of heads) if (b.getAttribute("aria-expanded") === "true" && !mounted.has(rowOf(b))) {
+    mounted.add(rowOf(b)); mountFigure(rowOf(b), $(b.getAttribute("aria-controls")!).querySelector<HTMLElement>(".finding-body")!);
+  }
+  // Figure 2 and the explorer, each when it nears the viewport and never before the preloader has gone (their set-up
+  // would hold up its frames), as the article loads its figures.
+  await preloaded;
+  const near = (el: Element, run: () => Promise<void>) => {
+    const io = new IntersectionObserver((es) => {
+      if (!es.some((e) => e.isIntersecting)) return;
+      io.disconnect(); run().catch((err) => console.error(err));
+    }, { rootMargin: "600px 0px" });
+    io.observe(el);
+  };
+  const fig2 = document.querySelector<HTMLElement>(".article9 figure[data-figure='universal-curve']");
+  if (fig2) near(fig2, async () => {
+    const [{ universalCurve }, curve] = await Promise.all([import("../charts/universal-curve"), loadData<any>("curve.json")]);
+    universalCurve(fig2.querySelector<HTMLElement>(".figure-body")!, curve, site, { figN: Number(fig2.dataset.figN ?? 0), title: "Loss as a fraction of Δv against Π" });
+  });
+  const ex = document.querySelector<HTMLElement>("[data-explorer]")!;
+  near(ex, async () => {
+    const [{ explorer }, presets, hero, curve] = await Promise.all([import("../explorer/explorer"), loadData<any>("presets.json"),
+      loadData<any>("hero.json"), loadData<any>("curve.json")]);
+    explorer(ex, { presets, hero, curve });
+  });
 })().catch((err) => console.error(err));

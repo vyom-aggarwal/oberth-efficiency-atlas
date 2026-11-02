@@ -18,16 +18,21 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
-- `phase-9-style/` (Phase 9, step 2, revised 2026-11-01 for the author's decisions): the development-only style page
-  `/style-9/` (`docs/revamp_plan.md` §2.11), for the author's approval. Made by `site/tools/style9-shots.mjs`
-  (in `site/`, with `npm run dev` running):
+- `phase-9-style/` (Phase 9, step 2, revised again 2026-11-02: every page in scope, the reference's signature
+  interactions replaced): the development-only style page `/style-9/` (`docs/revamp_plan.md` §2.11), for the author's
+  approval. Made by `site/tools/style9-shots.mjs` (in `site/`, with `npm run dev` running), at 1440 and 390 px unless
+  noted:
   - **`style-9-<width>.png`:** the full page;
-  - **`-preloader-word`, `-preloader-lift`:** the preloader at 0.45 s (a word) and 1.5 s (the curtain lifting);
-  - **`-hero`:** the hero's final frame;
-  - **`-menu`:** the drawer open;
+  - **`-preloader-flight`, `-preloader-stages`:** the flyby preloader at 0.75 s (in flight) and 1.2 s (every stage up);
+  - **`-hero-intro`, `-hero`:** the hero 1.2 s into the dive's intro (the title moved by its clock), and its final frame;
+  - **`-menu`:** the menu pill and the drawer open;
+  - **`-row-open`:** a findings row open in place, its live figure and caption slot;
+  - **`-closing`:** the closing section, the escape leg drawn;
+  - **`-article`, `-explorer`, `-references`:** the samples of the other pages in the new system, each section whole;
   - **`-reduced`:** reduced motion (at 390 px, the full page);
-  - **`style-9-1440-hover-preview.png`, `style-9-1440-focus-preview.png`:** a findings row's live preview, following
-    the pointer and placed by keyboard focus.
+  - **at 1440 px only:** `-dock-slide` (the dive sliding into its dock), `-steer-hover` (row 03 pointed at: the solid
+    stack alone), `-steer-focus` (row 02 focused from the keyboard: the clock at perihelion), and `-article-tooltip`
+    (Figure 2 with a tooltip open). Below 1100 px there is no dock.
 - `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
   in both themes:
   - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build
