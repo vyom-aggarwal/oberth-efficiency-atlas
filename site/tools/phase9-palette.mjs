@@ -1,5 +1,6 @@
 // Phase 9, step 2 (docs/revamp_plan.md): the proposed dark interface palette, checked, with the data colours (which do
 // not change) re-checked on the new surfaces. Folded into tools/palette.mjs in pass 1 once the plan is approved.
+// Revised 2026-11-01 for the author's decisions: the reference's indigo accent, or its nearest passing variant.
 // Run (in site/): node tools/phase9-palette.mjs        exit 1 on any failure.
 import { contrast, themes } from "./palette.mjs";
 
@@ -17,6 +18,16 @@ function oklab(hex) {
           0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s];
 }
 const dE = (x, y) => Math.hypot(...oklab(x).map((v, i) => v - oklab(y)[i])) * 100;
+/** OKLCH → hex, or null when outside the sRGB gamut. */
+function fromLch(L, C, h) {
+  const a = C * Math.cos((h * Math.PI) / 180), b = C * Math.sin((h * Math.PI) / 180);
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3, m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3,
+        s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  const rgb = [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s, -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+               -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s];
+  return rgb.every((v) => v >= 0 && v <= 1) ? toHex(rgb) : null;
+}
+const lch = (hex) => { const [L, a, b] = oklab(hex); return [L, Math.hypot(a, b), hue(hex)]; };
 const hue = (hex) => { const [, a, b] = oklab(hex); return ((Math.atan2(b, a) * 180) / Math.PI + 360) % 360; };
 const CVD = {
   protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
@@ -31,16 +42,18 @@ const worst = (x, y) => Math.min(...Object.values(CVD).map((M) => dE(sim(x, M), 
 // deepest preloader black becomes the page (Void); its dark contact section the raised surface, which also takes the
 // role of its mid-grey hero band (Panel: the hero stage, figure panels, the menu drawer); its near-black ink an
 // off-white (Ink); its mid-grey muted text a light grey that keeps 4.5:1 and outlines controls at 3:1 (Quiet); its pale
-// hairline a dark one (Rule); and its electric indigo an electric violet (Signal), moved off the blue data ramps.
-// First draft (logged in the plan): a violet-shifted indigo #7c6cff was ΔE 11.6 from an a·v step and took a white
-// label at only 3.86:1, so the accent moved to #c27bff with a Void label.
-export const UI = {
+// hairline a dark one (Rule). The accent (Signal) is the reference's indigo (author decision 1, 2026-11-01), or the
+// nearest variant that passes every accent check below.
+// History (docs/revamp_plan.md §2.1): the step-2 draft used an electric violet, #c27bff, to stay clear of the data
+// blues; the author chose the indigo instead, with the rule that the accent never appears inside a plot area, legend or
+// colour scale. That rule replaces the old "accent vs every data blue" check (the distance is now reported only).
+const REFERENCE_ACCENT = "#455ce9";    // the reference's --blue (measurements.json, 2026-11-01)
+const BASE = {
   void: "#111214",     // page background
   panel: "#1b1c1f",    // raised surface: the hero stage, figure panels, cards, the menu drawer
-  ink: "#ecebe7",      // text
+  ink: "#ecebe7",      // text, and link text (underlined): the accent is never text
   quiet: "#a3a4a8",    // secondary text (captions, labels, notes); control outlines and axis lines
   rule: "#2f3135",     // hairlines and gridlines (decorative)
-  signal: "#c27bff",   // the accent: round buttons (Void label), focus rings, links, the reader's case off blue data
 };
 
 const failures = [];
@@ -48,13 +61,41 @@ const check = (ok, msg) => { console.log(`${ok ? "pass" : "FAIL"}  ${msg}`); if 
 const r2 = (v) => v.toFixed(2);
 const surfaces = ["void", "panel"];
 
-console.log("interface palette:", Object.entries(UI).map(([k, v]) => `${k} ${v}`).join("  "));
+// The accent's jobs, each a contrast floor (WCAG 2.2: 1.4.3 text, 1.4.11 non-text). It is never text on a surface (link
+// text is Ink, underlined), so it has no 4.5:1 floor against Void or Panel.
+const ACCENT_JOBS = [
+  [(a) => contrast(BASE.ink, a), 4.5, "Ink label on an accent button"],
+  [(a) => contrast(BASE.ink, a), 4.5, "Ink text on the accent selection background"],
+  [(a) => contrast(a, BASE.void), 3, "focus ring and open menu button on Void"],
+  [(a) => contrast(a, BASE.panel), 3, "focus ring on Panel"],
+];
+const passes = (a) => ACCENT_JOBS.every(([f, need]) => f(a) >= need);
+console.log(`the reference's accent ${REFERENCE_ACCENT}:`);
+for (const [f, need, job] of ACCENT_JOBS)
+  console.log(`  ${f(REFERENCE_ACCENT) >= need ? "ok  " : "fails"}  ${job}: ${r2(f(REFERENCE_ACCENT))}:1 (>= ${need})`);
+// The nearest variant that passes every job: the smallest OKLab distance over a fine OKLCH grid around it (lightness
+// ±0.06 in 0.001 steps, chroma ±0.05 in 0.002, hue ±8° in 0.5°), checked on the rounded hex.
+let accent = REFERENCE_ACCENT;
+if (!passes(REFERENCE_ACCENT)) {
+  const [L0, C0, h0] = lch(REFERENCE_ACCENT);
+  let best = Infinity;
+  for (let dL = -0.06; dL <= 0.06; dL += 0.001) for (let dC = -0.05; dC <= 0.05; dC += 0.002) for (let dh = -8; dh <= 8; dh += 0.5) {
+    const hex = fromLch(L0 + dL, C0 + dC, h0 + dh);
+    if (!hex || !passes(hex)) continue;
+    const d = dE(hex, REFERENCE_ACCENT);
+    if (d < best) { best = d; accent = hex; }
+  }
+  console.log(`  nearest variant that passes: ${accent}, ΔE ${best.toFixed(2)} from the reference (OKLab x100; a just-noticeable`
+              + ` difference is about 2)`);
+}
+export const UI = { ...BASE, signal: accent };
+
+console.log("\ninterface palette:", Object.entries(UI).map(([k, v]) => `${k} ${v}`).join("  "));
 for (const s of surfaces) {
-  for (const [k, need, job] of [["ink", 7, "text"], ["quiet", 4.5, "secondary text"], ["signal", 4.5, "link text"],
-                                ["quiet", 3, "control outline, axis line"], ["signal", 3, "focus ring, accent marks"]])
+  for (const [k, need, job] of [["ink", 7, "text"], ["quiet", 4.5, "secondary text"], ["quiet", 3, "control outline, axis line"]])
     check(contrast(UI[k], UI[s]) >= need, `${k} on ${s}: ${r2(contrast(UI[k], UI[s]))}:1 (>= ${need}, ${job})`);
 }
-check(contrast(UI.void, UI.signal) >= 4.5, `Void label on the accent button: ${r2(contrast(UI.void, UI.signal))}:1 (>= 4.5)`);
+for (const [f, need, job] of ACCENT_JOBS) check(f(UI.signal) >= need, `accent ${UI.signal}, ${job}: ${r2(f(UI.signal))}:1 (>= ${need})`);
 check(contrast(UI.void, UI.ink) >= 4.5, `Void label on an Ink button: ${r2(contrast(UI.void, UI.ink))}:1 (>= 4.5)`);
 console.log(`info  surfaces step: void→panel ΔL ${r2((oklab(UI.panel)[0] - oklab(UI.void)[0]) * 100)} (OKLab L x100); rule on panel ${r2(contrast(UI.rule, UI.panel))}:1 (decorative)`);
 
@@ -74,16 +115,16 @@ for (const [name, r] of [["η ramp", D.ramp], ["a·v ramp", D.av]]) {
   const L = r.map((h) => oklab(h)[0]), dL = L.slice(1).map((v, i) => v - L[i]);
   check(dL.every((d) => d > 0) && Math.min(...dL) >= 0.06, `${name} lightness monotone, min step ${Math.min(...dL).toFixed(3)} (>= 0.06)`);
 }
-// The accent against the blue data ramps: it marks the reader's case and focus, so it must not be one of the blues.
+// The accent against the blue data ramps, reported only: an indigo sits close to them, which is why the accent never
+// appears inside a plot area, legend or colour scale (author rule, 2026-11-01; enforced by a test from pass 4).
 let minN = Infinity, minC = Infinity, at = "";
 for (const [name, r] of [["η", D.ramp], ["a·v", D.av]]) r.forEach((h, k) => {
   const n = dE(UI.signal, h), c = worst(UI.signal, h);
   if (n < minN) { minN = n; at = `${name} step ${k}`; }
   minC = Math.min(minC, c);
 });
-check(minN >= 15, `accent vs every data blue: closest ΔE ${minN.toFixed(1)} (${at}; >= 15 for normal vision)`);
-console.log(`info  accent vs data blues, worst colour-vision ΔE ${minC.toFixed(1)}: the case marker keeps a shape (ring) and the reference's indigo ${"#455ce9"} would be ΔE ${Math.min(...D.ramp.map((h) => dE("#455ce9", h))).toFixed(1)} from the η ramp`);
-console.log(`info  hues (OKLab): accent ${hue(UI.signal).toFixed(0)}°, the reference's indigo ${hue("#455ce9").toFixed(0)}°, η ramp mid ${hue(D.ramp[3]).toFixed(0)}°`);
+console.log(`info  accent vs data blues: closest ΔE ${minN.toFixed(1)} (${at}), worst colour-vision ΔE ${minC.toFixed(1)}; kept out of every plot`);
+console.log(`info  hues (OKLab): accent ${hue(UI.signal).toFixed(0)}°, η ramp mid ${hue(D.ramp[3]).toFixed(0)}°`);
 // Critical against the η ramp (decision 3 of Phase 8): unchanged colours, re-checked.
 const cr = Math.min(...D.ramp.map((h) => worst(D.critical, h)));
 check(cr >= 8, `critical vs every η step, worst colour-vision ΔE ${cr.toFixed(1)} (>= 8)`);

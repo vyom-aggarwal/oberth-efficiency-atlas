@@ -1,85 +1,132 @@
 /* Phase 9 components (docs/revamp_plan.md §2.4–2.6), for the style page until passes 2–6 apply them to the site.
-   One easing curve; motion is CSS or a few lines of requestAnimationFrame; nothing moves under reduced motion. */
+
+   Adapted from Suhas Beemineni's portfolio, https://github.com/suhaslord/portfolio, css/site.css at commit c98c5cc
+   (MIT licence, "Copyright (c) 2026 SuahsTheLord"; THIRD_PARTY_NOTICES.md): the preloader curtain, the menu toggle,
+   drawer and curve, the name marquee, the liquid round and outline buttons, the work rows with their pointer preview,
+   and the contact section and footer. Their structure, proportions, timings and easings are the reference's; the
+   colours are this project's dark tokens, and the motion runs on CSS transitions and the reference's own springs
+   (pages/style9.ts), not GSAP. Nothing moves under reduced motion. */
 
 .wrap9 { padding: 0 var(--pad); }
-.eyebrow9 { font-size: var(--t-label); color: var(--quiet); letter-spacing: 0.02em; }
+.eyebrow9 { font-size: var(--t-label); color: var(--quiet); letter-spacing: 0.01em; }
 .panel9 { background: var(--panel); border-radius: var(--r-panel); padding: var(--s4); --surface: var(--panel); --raised: var(--void); }
+.icon9 { display: block; flex: none; }
 
-/* Header: not sticky; inline links from 900 px. */
-.head9 { display: flex; align-items: center; justify-content: space-between; gap: var(--s5); padding: var(--s5) var(--pad); }
-.head9 .wordmark9 { color: var(--ink); text-decoration: none; font-size: var(--t-ui); }
+/* ------------------------------------------------------------- preloader (.page-transition, .transition-label/-curve)
+   Shown only on the first load of a session, without a #fragment, without reduced motion: an inline script in <head>
+   sets html.preloading before the first paint (with a 2 s failsafe), and the page content is in the DOM beneath it. */
+.preload9 { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; background: var(--void); color: var(--ink);
+            overflow: visible; will-change: transform; }
+html.preloading .preload9 { display: grid; }
+html.preloading { overflow: hidden; }
+.preload9 .word { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 0.45em; white-space: nowrap;
+                  font-size: clamp(34px, 3.6vw, 58px); line-height: 1.5; letter-spacing: -0.02em; }
+.preload9 .word::before { content: ""; width: 0.18em; height: 0.18em; border-radius: 50%; background: currentColor; flex: none; }
+.preload9 .curve { position: absolute; left: -25%; width: 150%; height: 30svh; bottom: -15svh; border-radius: 0 0 50% 50%;
+                   background: inherit; transform-origin: center center; }
+@media (max-width: 767px) { .preload9 .curve { height: 20svh; bottom: -10svh; } }
+@media (prefers-reduced-motion: reduce) { .preload9 { display: none !important; } html.preloading { overflow: auto; } }
+
+/* ------------------------------------------------------------- header: inline links from 900 px */
+.head9 { position: absolute; inset: 0 0 auto; z-index: 3; height: 90px; display: flex; align-items: center;
+         justify-content: space-between; padding: 0 var(--pad); }
+.head9 .brand9 { color: var(--ink); text-decoration: none; font-size: var(--t-ui); letter-spacing: -0.025em; }
 .head9 nav { display: none; gap: var(--s6); }
-.head9 nav a { color: var(--ink); text-decoration: none; font-size: var(--t-ui); position: relative; }
-.head9 nav a::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 5px; height: 5px; border-radius: 50%;
-                       background: var(--ink); transform: translateX(-50%) scale(0); transition: transform 300ms var(--ease); }
-.head9 nav a:hover::after, .head9 nav a:focus-visible::after, .head9 nav a[aria-current="page"]::after { transform: translateX(-50%) scale(1); }
+.head9 nav a { position: relative; padding: 8px 0; color: var(--ink); text-decoration: none; font-size: var(--t-ui); }
+.head9 nav a::after { content: ""; position: absolute; left: calc(50% - 2.5px); bottom: -1px; width: 5px; height: 5px;
+                      border-radius: 50%; background: currentColor; transform: scale(0); transition: transform 300ms var(--ease); }
+.head9 nav a:hover::after, .head9 nav a:focus-visible::after, .head9 nav a[aria-current="page"]::after { transform: scale(1); }
 @media (min-width: 900px) { .head9 nav { display: flex; } }
 
-/* The floating round menu button (fixed, top right) and the drawer. */
-.menu-fab { position: fixed; top: var(--s4); right: var(--pad); z-index: 50; width: 56px; height: 56px; border-radius: 50%;
-            border: 0; background: var(--ink); color: var(--void); cursor: pointer; display: grid; place-items: center;
-            transition: background-color 250ms var(--ease), transform 300ms var(--ease); }
-.menu-fab .bars, .menu-fab .bars::before { display: block; width: 18px; height: 1.5px; background: currentColor; position: relative;
-                                           transition: transform 300ms var(--ease); }
-.menu-fab .bars::before { content: ""; position: absolute; top: 6px; }
-.menu-fab .bars { transform: translateY(-3px); }
-.menu-fab[data-away] { transform: scale(0); visibility: hidden; transition: transform 300ms var(--ease), visibility 0s 300ms; }
-.menu-fab[aria-expanded="true"] { background: var(--signal); }
-.menu-fab[aria-expanded="true"] .bars { transform: rotate(45deg); }
-.menu-fab[aria-expanded="true"] .bars::before { transform: translateY(-6px) rotate(-90deg); }
-.veil9 { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.55); opacity: 0; pointer-events: none;
-         transition: opacity 300ms var(--ease); }
-.veil9.open { opacity: 1; pointer-events: auto; }
-.drawer9 { position: fixed; top: 0; right: 0; bottom: 0; z-index: 45; width: min(480px, 100vw); background: var(--panel);
-           padding: 120px var(--s7) var(--s7); transform: translateX(100%); transition: transform 450ms var(--ease);
-           display: flex; flex-direction: column; gap: var(--s6); visibility: hidden; }
-.drawer9.open { transform: none; visibility: visible; }
-.drawer9 .eyebrow9 { border-bottom: 1px solid var(--rule); padding-bottom: var(--s5); }
-.drawer9 ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s1); }
-.drawer9 li a { color: var(--ink); text-decoration: none; font-size: clamp(40px, 4.2vw, 56px); letter-spacing: var(--track-display);
-                line-height: 1.15; display: inline-block; transform: translateX(40px); opacity: 0;
-                transition: transform 450ms var(--ease), opacity 450ms var(--ease); }
-.drawer9.open li a { transform: none; opacity: 1; }
-.drawer9.open li:nth-child(2) a { transition-delay: 30ms; } .drawer9.open li:nth-child(3) a { transition-delay: 60ms; }
-.drawer9.open li:nth-child(4) a { transition-delay: 90ms; } .drawer9.open li:nth-child(5) a { transition-delay: 120ms; }
-.drawer9 li a[aria-current="page"]::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-                                            background: var(--ink); margin: 0 var(--s4) 0 calc(-1 * (8px + var(--s4))); vertical-align: middle; }
-.drawer9 .secondary { display: flex; gap: var(--s5); border-top: 1px solid var(--rule); padding-top: var(--s5); }
-.drawer9 .secondary a { color: var(--ink); font-size: var(--t-label); text-decoration: none; }
+/* ------------------------------------------------------------- menu: toggle, scrim, drawer (.menu-toggle, .menu-panel) */
+.menu9-toggle { position: fixed; z-index: 60; right: 18px; top: 15px; width: 54px; height: 54px; border: 1px solid rgb(255 255 255 / 0.2);
+                border-radius: 50%; background: var(--ink); color: var(--void); display: grid; place-content: center; gap: 5px;
+                cursor: pointer; transition: background-color 200ms, opacity 250ms, scale 300ms var(--ease), visibility 0s; }
+.menu9-toggle span { display: block; width: 18px; height: 1.5px; background: currentColor; transition: transform 220ms var(--ease); }
+.menu9-toggle:hover { scale: 1.06; }
+.menu-open .menu9-toggle { background: var(--signal); color: var(--ink); }
+.menu-open .menu9-toggle span:first-child { transform: translateY(3.25px) rotate(45deg); }
+.menu-open .menu9-toggle span:last-child { transform: translateY(-3.25px) rotate(-45deg); }
+@media (min-width: 900px) {
+  .menu9-toggle { width: 80px; height: 80px; top: 24px; right: 24px; }
+  .menu9-toggle span { width: 25px; }
+  /* Wide screens: the header's links are inline, so the round button waits until the header has scrolled away. While
+     away it is out of the tab order too (visibility). */
+  html:not(.has-scrolled):not(.menu-open) .menu9-toggle { scale: 0; opacity: 0; pointer-events: none; visibility: hidden;
+                                                            transition: opacity 250ms, scale 300ms var(--ease), visibility 0s 300ms; }
+}
+.menu9-scrim { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.6); opacity: 0; visibility: hidden;
+               transition: opacity 300ms, visibility 0s 300ms; }
+.menu-open .menu9-scrim { opacity: 1; visibility: visible; transition: opacity 300ms; }
+.menu9-panel { position: fixed; inset: 0 0 0 auto; z-index: 50; width: 100%; background: var(--panel); color: var(--ink);
+               padding: 15svh 12vw 35px; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain;
+               transform: translateX(115%); visibility: hidden;
+               transition: transform 500ms cubic-bezier(.645, .045, .355, 1), visibility 0s 500ms; }
+.menu-open .menu9-panel { transform: none; visibility: visible; transition: transform 700ms cubic-bezier(.165, .84, .44, 1); }
+.menu9-curve { position: absolute; top: 0; bottom: 0; left: -80px; width: 160px; border-radius: 50%; background: var(--panel);
+               transform-origin: right center; pointer-events: none; z-index: -1; transition: transform 500ms cubic-bezier(.645, .045, .355, 1); }
+.menu-open .menu9-curve { transform: scaleX(0); transition: transform 750ms cubic-bezier(.165, .84, .44, 1); }
+.menu9-panel .label { font-size: 12px; color: var(--quiet); margin: 0 0 20px; }
+.menu9-panel nav { display: grid; padding: 22px 0; margin-bottom: 22px; border-top: 1px solid rgb(255 255 255 / 0.25);
+                   border-bottom: 1px solid rgb(255 255 255 / 0.25); }
+.menu9-panel nav a { position: relative; justify-self: start; color: var(--ink); text-decoration: none; font-size: 12vw; line-height: 1.2;
+                     letter-spacing: -0.02em; transform: translateX(75px) rotate(4deg); transform-origin: left center;
+                     transition: transform 0s 500ms; }
+.menu-open .menu9-panel nav a { transform: none; transition: transform 750ms cubic-bezier(.16, 1, .3, 1) calc(40ms + var(--i, 0) * 35ms); }
+.menu9-panel nav a[aria-current="page"]::before { content: ""; position: absolute; left: -30px; top: 50%; width: 9px; height: 9px;
+                                                  margin-top: -4.5px; border-radius: 50%; background: currentColor; }
+.menu9-panel .bottom { display: flex; flex-wrap: wrap; gap: 22px; font-size: 14px; }
+.menu9-panel .bottom a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.menu9-panel .bottom a:hover, .menu9-panel .bottom a:focus-visible { text-decoration: underline; text-underline-offset: 5px; }
+.menu-open { overflow: hidden; }
+@media (min-width: 900px) {
+  .menu9-panel { width: 37.5vw; min-width: 460px; max-width: 700px; padding: 15svh 7.5vw 40px; overflow: visible; }
+  .menu9-curve { left: -150px; width: 300px; }
+  .menu9-panel nav a { font-size: clamp(48px, 5vw, 80px); }
+}
+/* Opened or closed from the keyboard (the reference's instant path): no motion. */
+.menu-instant .menu9-panel, .menu-instant .menu9-panel nav a, .menu-instant .menu9-curve, .menu-instant .menu9-scrim { transition: none !important; }
 
-/* The marquee: the title line, twice, drifting; a pause control (WCAG 2.2.2); static under reduced motion. */
-.marquee9 { position: relative; overflow: hidden; white-space: nowrap; padding: var(--s2) 0; }
-.marquee9 .track { display: inline-flex; animation: drift9 60s linear infinite; will-change: transform; }
-.marquee9 .line { font-size: var(--t-marquee); line-height: 1; letter-spacing: var(--track-display); padding-right: 0.25em; color: var(--ink); }
-.marquee9 .line sub { font-size: 0.42em; letter-spacing: 0; vertical-align: baseline; position: relative; top: 0.18em; }
-.marquee9.paused .track { animation-play-state: paused; }
-@keyframes drift9 { to { transform: translateX(-50%); } }
-.marquee9 .pause9 { position: absolute; right: var(--pad); bottom: var(--s3); }
-/* Reduced motion: nothing moves, so the line shows once, wrapped at display size (a static 216 px line would cut the
-   title mid-word), and the pause control goes. */
+/* ------------------------------------------------------------- the marquee (.name-marquee, .name-track) */
+.marquee9 { position: relative; overflow: hidden; }
+.marquee9 .track { display: flex; width: max-content; will-change: transform; }
+.marquee9 .line { font-size: var(--t-marquee); line-height: 1.08; letter-spacing: var(--track-marquee); white-space: nowrap;
+                  padding: 0 0.12em 0.08em 0; color: var(--ink); }
+/* Reduced motion: nothing moves, so the line shows once, wrapped at display size (a still 216 px line would cut the
+   title), and the pause control goes. */
 @media (prefers-reduced-motion: reduce) {
-  .marquee9 { white-space: normal; }
-  .marquee9 .track { animation: none; display: block; }
+  .marquee9 .track { width: auto; display: block; transform: none !important; }
   .marquee9 .line + .line { display: none; }
-  .marquee9 .line { display: block; font-size: var(--t-display); line-height: 1.05; padding: 0 var(--pad); }
-  .round9.pause9 { display: none; }     /* more specific than .round9's display, which comes later in this file */
+  .marquee9 .line { display: block; white-space: normal; font-size: var(--t-display); line-height: 1.05; padding: 0 var(--pad); }
+  .pause9 { display: none !important; }
 }
 
-/* Buttons: round (the two primary actions; magnetic for fine pointers) and pills (everything else). */
-.round9 { --size: 148px; width: var(--size); height: var(--size); border-radius: 50%; border: 0; display: inline-grid; place-items: center;
-          background: var(--signal); color: var(--void); font: inherit; font-size: var(--t-ui); text-decoration: none; cursor: pointer;
-          position: relative; overflow: hidden; isolation: isolate; transition: transform 350ms var(--ease); }
-.round9::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--ink);
-                  transform: translateY(101%); transition: transform 350ms var(--ease); }
-.round9:hover::before, .round9:focus-visible::before { transform: none; }
-.round9.outline { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--quiet); --size: 56px; }
-.round9.outline::before { background: var(--panel); }
-.pill9 { display: inline-flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s5); border-radius: var(--r-pill);
-         border: 1px solid var(--quiet); color: var(--ink); background: transparent; font: inherit; font-size: var(--t-ui);
-         text-decoration: none; cursor: pointer; transition: background-color 300ms var(--ease), color 300ms var(--ease); }
-.pill9:hover, .pill9:focus-visible { background: var(--ink); color: var(--void); }
-.pill9 sup { font-size: 0.65em; margin-left: -0.15em; }
-.pill9.small { min-height: 32px; padding: 0 var(--s4); font-size: var(--t-label); }
+/* ------------------------------------------------------------- buttons: liquid round and outline (.circle-button,
+   .liquid > .button-fill, .outline-link). A fill rises inside on hover or focus; the two primary round buttons and the
+   closing call to action are magnetic for fine pointers (style9.ts). */
+.liquid { position: relative; isolation: isolate; overflow: hidden; display: inline-flex; align-items: center; justify-content: center;
+          text-decoration: none; cursor: pointer; transition: color 250ms, border-color 250ms; }
+.liquid > .fill { position: absolute; z-index: 0; left: -25%; top: -50%; width: 150%; height: 200%; border-radius: 50%;
+                  background: var(--fill); transform: translateY(110%); pointer-events: none;
+                  transition: transform 500ms cubic-bezier(.22, 1, .36, 1); }
+.liquid > .label { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: var(--s2); pointer-events: none; }
+.liquid:hover > .fill, .liquid:focus-visible > .fill { transform: none; }
+.round9 { --fill: var(--signal); width: 12vw; height: 12vw; min-width: 135px; min-height: 135px; max-width: 180px; max-height: 180px;
+          border-radius: 50%; border: 0; background: var(--ink); color: var(--void); font: inherit; font-size: clamp(14px, 1.2vw, 18px); }
+.round9:hover, .round9:focus-visible { color: var(--ink); }
+.round9.accent { --fill: color-mix(in oklab, var(--signal) 78%, black); background: var(--signal); color: var(--ink); }
+.round9:active { scale: 0.97; }
+.round9.small { width: 46px; height: 46px; min-width: 46px; min-height: 46px; background: transparent; color: var(--ink);
+                box-shadow: inset 0 0 0 1px var(--quiet); --fill: var(--ink); }
+.round9.small:hover, .round9.small:focus-visible { color: var(--void); }
+.pill9 { --fill: var(--ink); min-height: 48px; padding: 0 var(--s6); border-radius: var(--r-pill); border: 1px solid var(--quiet);
+         color: var(--ink); background: transparent; font: inherit; font-size: var(--t-ui); }
+.pill9:hover, .pill9:focus-visible { color: var(--void); border-color: var(--ink); }
+.pill9.on-accent { --fill: var(--signal); }
+.pill9.on-accent:hover, .pill9.on-accent:focus-visible { color: var(--ink); border-color: var(--signal); }
+.pill9 sup { font-size: 0.65em; margin-left: -0.15em; line-height: 0; }
+.magnetic { will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .liquid > .fill { transition: none; } .magnetic { transform: none !important; } }
 
 /* The switch (radio pills), select and slider, restyled from the shared controls. */
 .segmented { display: inline-flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; }
@@ -105,14 +152,68 @@
 .axis-slider .number { width: 9ch; font-family: var(--mono); font-size: var(--t-label); color: var(--ink); background: var(--void);
                        border: 1px solid var(--quiet); border-radius: var(--r-pill); min-height: 36px; padding: 0 var(--s3); text-align: right; }
 
-/* Findings rows: number, title, category; the title shifts and dims on hover or focus, an arrow appears. */
-.rows9 { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.rows9 li { border-bottom: 1px solid var(--rule); }
-.rows9 a { display: grid; grid-template-columns: 4ch 1fr auto 2ch; align-items: baseline; gap: var(--s5); padding: var(--s7) 0;
-           color: var(--ink); text-decoration: none; }
-.rows9 .n { font-family: var(--mono); font-size: var(--t-label); color: var(--quiet); }
-.rows9 .t { font-size: var(--t-statement); letter-spacing: -0.02em; transition: transform 300ms var(--ease), color 300ms var(--ease); }
-.rows9 .c { font-size: var(--t-label); color: var(--quiet); }
-.rows9 .arrow { opacity: 0; transform: translate(-6px, 6px); transition: opacity 300ms var(--ease), transform 300ms var(--ease); }
-.rows9 a:hover .t, .rows9 a:focus-visible .t { transform: translateX(12px); color: var(--quiet); }
-.rows9 a:hover .arrow, .rows9 a:focus-visible .arrow { opacity: 1; transform: none; }
+/* ------------------------------------------------------------- work rows and their preview (.work-row, .work-preview,
+   .preview-rail, .work-preview-action). Rows dim on hover; the title slides left and the category right while the
+   preview, a live mini figure, follows the pointer. Keyboard focus shows the same preview beside the row. */
+.rows9 { list-style: none; margin: 0; padding: 0; }
+.rows9 li { border-top: 1px solid var(--rule); }
+.rows9 li:last-child { border-bottom: 1px solid var(--rule); }
+.rows9 a { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 25%; align-items: center; gap: 40px;
+           padding: 4.1vw 4vw 4.8vw 8vw; color: var(--ink); text-decoration: none; transition: color 240ms; }
+.rows9 .n { position: absolute; left: 3vw; top: 50%; translate: 0 -50%; font-family: var(--mono); font-size: 12px; color: var(--quiet); }
+.rows9 .t { font-size: clamp(30px, 5.25vw, 76px); line-height: 1.2; letter-spacing: -0.035em; transition: transform 650ms cubic-bezier(.215, .61, .355, 1); }
+.rows9 .c { font-size: clamp(13px, 1.2vw, 17px); color: var(--quiet); transition: transform 650ms cubic-bezier(.215, .61, .355, 1); }
+.rows9 a:hover, .rows9 a:focus-visible, .rows9 a.is-active { color: var(--quiet); }
+.rows9 a.is-active .t { transform: translateX(-25px); }
+.rows9 a.is-active .c { transform: translateX(25px); }
+.rows9 a:focus-visible { outline-offset: -2px; }
+@media (max-width: 767px) {
+  .rows9 a { grid-template-columns: 1fr; gap: 6px; padding: 28px 0 32px 40px; }
+  .rows9 .n { left: 0; top: 34px; translate: none; }
+}
+/* Portrait (5:4), not the reference's square: each mini figure keeps its key in view. */
+.preview9 { position: fixed; left: 0; top: 0; z-index: 30; width: 28vw; height: 35vw; min-width: 320px; min-height: 400px;
+            max-width: 460px; max-height: 575px; pointer-events: none; visibility: hidden; }
+.preview9.is-visible { visibility: visible; }
+.preview9 .inner { width: 100%; height: 100%; overflow: hidden; border-radius: 4px; background: var(--panel); --surface: var(--panel);
+                   box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.6), 0 0 0 1px var(--rule); opacity: 0; scale: 0.9;
+                   transition: opacity 280ms cubic-bezier(.25, .46, .45, .94), scale 280ms cubic-bezier(.25, .46, .45, .94); }
+.preview9.is-visible .inner { opacity: 1; scale: 1; transition: opacity 650ms cubic-bezier(.16, 1, .3, 1), scale 650ms cubic-bezier(.16, 1, .3, 1); }
+.preview9 .rail { height: 100%; transition: transform 700ms cubic-bezier(.16, 1, .3, 1); }
+.preview9 .pane { height: 100%; padding: var(--s4); display: grid; align-content: center; }
+.badge9 { position: fixed; left: 0; top: 0; z-index: 31; width: 86px; height: 86px; margin: -43px 0 0 -43px; pointer-events: none; }
+/* Ink, not the reference's accent: the badge rides over a live plot, where the accent never appears. */
+.badge9 span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: var(--ink); color: var(--void);
+               font-size: 16px; opacity: 0; scale: 0.85; transition: opacity 220ms, scale 220ms; }
+.badge9.is-visible span { opacity: 1; scale: 1; transition: opacity 400ms cubic-bezier(.215, .61, .355, 1), scale 400ms cubic-bezier(.215, .61, .355, 1); }
+.preview9.by-focus + .badge9 { display: none; }
+@media (prefers-reduced-motion: reduce) { .preview9 .inner, .preview9 .rail, .badge9 span { transition: none; } }
+
+/* ------------------------------------------------------------- closing section and footer (.contact-section,
+   .contact-curve, .contact-title, .contact-line, .contact-cta-wrap, .site-footer). The curve over its top edge
+   flattens as the section scrolls in: a native scroll-driven animation where supported, a still curve elsewhere. */
+.close9 { position: relative; background: var(--panel); --surface: var(--panel); overflow: hidden; isolation: isolate; view-timeline: --close9; }
+.close9-curve { position: absolute; z-index: 2; top: -1px; left: -25%; width: 150%; height: clamp(65px, 12vw, 220px); border-radius: 0 0 50% 50%;
+                background: var(--void); transform-origin: center top; transform: scaleY(0.45); pointer-events: none; }
+.close9-content { position: relative; padding-top: max(110px, 14.4vw); }
+.close9-title { font-size: clamp(48px, 6.125vw, 88px); line-height: 1.065; letter-spacing: -0.035em; max-width: 14ch; }
+.close9-line { position: relative; margin-top: max(80px, 7.2vw); padding-top: max(80px, 6.8vw); border-top: 1px solid rgb(255 255 255 / 0.2); }
+.close9-cta { position: absolute; right: 8.5%; top: min(-60px, -6vw); }
+.close9-links { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 1vw; }
+.foot9 { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 40px; padding: max(70px, 11.1vw) var(--pad) 26px;
+         font-size: 13px; line-height: 1.6; }
+.foot9 .meta { display: flex; flex-wrap: wrap; gap: max(24px, 3vw); }
+.foot9 .meta > div, .foot9 nav { display: grid; gap: 4px; }
+.foot9 .key { font-size: 12px; color: var(--quiet); }
+.foot9 nav div { display: flex; flex-wrap: wrap; gap: 0 30px; }
+.foot9 a { color: var(--ink); text-decoration: none; position: relative; }
+.foot9 a::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: currentColor; transform: scaleX(0);
+                  transform-origin: left; transition: transform 300ms var(--ease); }
+.foot9 a:hover::after, .foot9 a:focus-visible::after { transform: scaleX(1); }
+/* The reference also slides the content down from under the curve; left out, so the title is never hidden. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .close9-curve { animation: flatten9 linear both; animation-timeline: --close9; animation-range: entry 0% entry 100%; }
+  }
+}
+@keyframes flatten9 { from { transform: scaleY(1); } to { transform: scaleY(0); } }

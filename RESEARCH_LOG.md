@@ -3647,4 +3647,111 @@ with this project's content and data.
   - **One isolation quirk:** Vite links the shared landing stylesheet after the page's own, so the style page's
     headline rule needs a more specific selector. The landing stylesheet is rewritten in pass 3.
 
+## 2026-11-01: Phase 9 steps 1–2 revised after the author's review: copying allowed, decisions applied
+
+**The author's changes to the brief** (review of steps 1–2):
+- **Copying:** allowed. The reference's repository is MIT, and the result should be close to it.
+  - Its code, CSS, animation logic and component structure may be reused.
+  - Its MIT notice must be kept verbatim in `THIRD_PARTY_NOTICES.md`, with every file containing copied or adapted
+    code marked and listed.
+  - None of its personal content may be used.
+  - The result must stay distinguishable.
+  - The About page must carry the credit "Design adapted from Suhas Beemineni's portfolio (MIT licence)".
+- **Libraries:**
+  - GSAP is allowed (licence and 14-day rule to be reported);
+  - Lenis is allowed only under four conditions;
+  - Barba is not; cross-document View Transitions are allowed instead.
+- **Decisions:**
+  1. the reference's indigo, never in a plot area, legend or colour scale (or the nearest passing variant);
+  2. the existing dark data steps;
+  3. DM Sans and IBM Plex Mono, with Commissioner's and Fira Mono's Greek as fallbacks through `fonts.py`;
+  4. an About page modelled on the reference's;
+  5. the title alone in the marquee;
+  6. a preloader of about 2 s at most, and the dive intro at most 3 s. The 1.5 s cap now applies only to sequences that
+     block content.
+
+**Reference code read** (`runs/reference-src/`, not committed, from `suhaslord/portfolio` at `c98c5cc`):
+- `js/site.js`, `js/motion.js`, `css/site.css` and the pages' markup.
+- **Adapted, each file with a header naming the source,** and listed in `THIRD_PARTY_NOTICES.md`:
+  - the preloader's timeline and curve;
+  - the menu, with its keyboard instant path and focus cycle;
+  - the marquee's ticker;
+  - `spring()` and the magnetic controls;
+  - the work-row preview;
+  - the liquid buttons;
+  - the closing curve and footer;
+  - the hero's composition.
+
+  GSAP timelines are rewritten as CSS transitions and the Web Animations API, with the same durations and the
+  equivalent Bézier curves.
+- **Corrections to my step-1 inventory,** from the code:
+  - The marquee runs at 0.055 px/ms, which is 55 px/s at normal frame rates. The 18 px/s I measured in step 1 came from
+    headless captures with slow frames, where the ticker clamps each step to 50 ms.
+  - The work rows are about 220 px tall at 1440 px, not 110.
+
+**Libraries:**
+- **GSAP 3.15.0:**
+  - Published 2026-04-13, so it qualifies under the 14-day rule.
+  - Licence: the GSAP Standard "no charge" License (Webflow, effective 2025-04-30). Free, commercial use included,
+    not open source. It forbids use in no-code animation tools that compete with Webflow, and removing GSAP's notices.
+  - **Not used** (my recommendation, decision 7 in the plan): CSS and the Web Animations API cover every timeline here,
+    and the springs are the reference's own code.
+- **Lenis 1.3.27:**
+  - MIT, published 2026-10-15, so it qualifies; 5.4 kB gzipped.
+  - On the style page for fine pointers at 768 px and wider, never under reduced motion.
+  - The author's four conditions get tests in pass 2. If any fails, Lenis comes out.
+
+**Accent (decision 1):**
+- The reference's `#455ce9` takes an Ink label at only 4.44:1.
+- The nearest variant passing every accent job is `#445be8`, ΔE 0.31, found by a grid search in OKLCH
+  (`phase9-palette.mjs`). It gives an Ink label at 4.51:1 and focus rings at 3.49:1 on Void and 3.17:1 on Panel.
+- It is never text (links are Ink, underlined).
+- The old "accent vs every data blue" check is replaced by the author's rule. The distance, ΔE 8.3 from η step 3, is now
+  reported only. Consequences:
+  - the preview's "View" badge is Ink, because it rides over live plots;
+  - the explorer's accent case dot becomes Ink in pass 5;
+  - a test from pass 4 will fail on any chart code that reads the accent.
+
+**Fonts (decision 3):**
+- `@fontsource/dm-sans` 5.3.0 is added. `@fontsource/commissioner` and `@fontsource/fira-mono` are removed.
+- `fonts.py` gains a Phase 9 set, written beside the Phase 8 set until pass 1:
+  - **files:** `site/src/styles/v9/fonts.css`, `v9-*` subsets, `manifest-v9.json`;
+  - **Greek:** Commissioner 400 and 600 behind DM Sans, Fira Mono 400 and 500 behind IBM Plex Mono;
+  - **signs:** → from Noto Sans Math, ⁻ ⁿ ₚ from Arimo.
+- **Sources:** pinned Google Fonts files by sha256. OFL texts are pinned to google/fonts `e7db6ca`; neither declares a
+  Reserved Font Name.
+- **The Fira Mono question from the step-2 entry,** settled: the committed `LICENSE-fira-mono.txt` opens with the font
+  file's own record, "Digitized data copyright © 2012-2015, The Mozilla Foundation and Telefonica S.A.".
+- **Metrics:** x-height ratios 1.016 and 0.979 against the primaries, and the same 0.6 em mono advance, so no
+  `size-adjust` is needed.
+- **Output:** the Phase 8 set regenerates byte-identical. `tests/test_site_fonts.py` now checks both sets.
+
+**Preloader (decision 6):**
+- The words are the stages of a powered flyby: Approach, Periapsis, Ignition, Burn, Cutoff, Escape (proposed).
+- **Timing,** from the page's start: the lift starts at 0.8 s and lasts 950 ms, so it is done at 1.75 s by design.
+  `site/tools/style9-shots.mjs` measured 1.83 s at both widths.
+- **The 2 s cap holds even if the script is late:** it joins at the word that is due and shortens the lift, and an
+  inline failsafe removes the curtain at 2 s.
+- It shows once a session, never with a `#fragment` or under reduced motion. Any key, click, tap or wheel ends it.
+- **Two deviations inside the step:**
+  - The first timing, a lift at 1.0 s, measured 2.17 s with screenshots and 1.97 s without. The second, at 0.9 s,
+    measured 1.999 s from the page's start.
+  - So the words were tightened to 110 ms apart and the lift starts at 0.8 s.
+
+**Dive intro:**
+- My step-2 plan said it took 4.8 s and proposed compressing it to 1.5 s. That was wrong: it has been 2.8 s since
+  Phase 7 (`DONE_MS = 2800`; measured 2.84 s), within the author's 3 s.
+- `landingHero` gains an optional `start` promise. With it, the dive draws its first frame beneath the preloader and
+  starts the intro as the curtain clears. Without it, behaviour is unchanged.
+
+**Departures from the reference, found while building the style page:**
+- **The monogram is dropped:** behind a 590 px figure it showed only as a stray bar.
+- **The preview is portrait (5:4)** instead of square, so the Hibberd figure's key stays in view.
+- **The closing section's content slide is dropped:** it hides the title under the curve until scrolled.
+- **The marquee keeps a pause control,** for WCAG 2.2.2.
+
+**Screenshots** (`docs/screens/phase-9-style/`, by `site/tools/style9-shots.mjs`): at 1440 and 390 px, the preloader
+(a word, then the lift), the hero, the menu open, reduced motion and the full page; at 1440 px, the hover and
+keyboard-focus previews.
+
 

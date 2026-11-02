@@ -672,3 +672,47 @@ added to the numbers file as values.
 - an About the project page;
 - the marquee line;
 - the dive's intro compressed to 1.5 s.
+
+**Author decided** (review of steps 1–2, 2026-11-01):
+- **Copying:** allowed, with the reference's MIT notice kept and every file marked. No personal content. The result must
+  stay distinguishable, and the About page carries the design credit.
+- **Libraries:** GSAP allowed; Lenis only under four conditions; no Barba, but View Transitions allowed.
+- **Decisions:**
+  - the reference's indigo, never in a plot;
+  - the existing dark data steps confirmed;
+  - DM Sans and IBM Plex Mono with Commissioner's and Fira Mono's Greek;
+  - an About page modelled on the reference's;
+  - the title alone in the marquee;
+  - a preloader of about 2 s at most, and the dive intro at most 3 s.
+
+**Assistant, the step-2 revision:**
+- **Copying:** read the reference's code and adapted its components (`THIRD_PARTY_NOTICES.md`, with headers in the four
+  files). Reported GSAP's licence and dates; recommended not using it.
+- **Accent:** computed the nearest passing variant, `#445be8` (ΔE 0.31).
+- **Fonts:** extended `fonts.py` with the Phase 9 set, and the font tests to cover both sets.
+- **Style page:** rebuilt it with the preloader, the reference's menu, marquee, magnetic and liquid buttons, live
+  previews, the closing section, and Lenis.
+- **`landingHero`:** gave it an optional `start` promise.
+- **Screenshots:** wrote `site/tools/style9-shots.mjs` to capture them and measure the load sequences.
+
+**Assistant found and changed inside the revision:**
+- **The preloader's first timings ran over 2 s** as measured (1.999–2.17 s). It is now tied to the page's start, with
+  a hard cap and a failsafe, and measured at 1.83 s.
+- **The previews were empty:** the mini figures need a `figure` ancestor with an id.
+- **Badge:** the accent "View" badge sat over live plots, so it is Ink.
+- **The monogram** showed only as a bar, so it is dropped.
+- **The square preview cut a figure's key,** so it is portrait.
+- **The closing section's content slide hid the title,** so it is dropped.
+- **At 390 px the dive pushed the headline below the fold,** so the headline comes first.
+
+**Corrections to my own earlier claims:**
+- the dive intro was 2.8 s, not 4.8 s;
+- the reference's marquee runs at 55 px/s, not 18 (my step-1 measurement came from throttled headless frames);
+- its rows are about 220 px tall, not 110.
+
+**Assistant proposals, for the author to confirm** (plan §2.10):
+- not using GSAP;
+- the preloader words;
+- the departures from the reference: no monogram, portrait previews with an Ink badge, no content slide, a pause
+  control;
+- "Fly one yourself." as the closing line.

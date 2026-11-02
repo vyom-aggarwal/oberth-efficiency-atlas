@@ -18,6 +18,14 @@ Each face declares a unicode-range equal to the characters its file covers, so t
 a page uses one of them. tests/test_site_fonts.py checks the files, the ranges, and that every character the
 site displays has a self-hosted glyph.
 
+Phase 9 (docs/revamp_plan.md §2.3; author decision 3, 2026-11-01): the reference's DM Sans and IBM Plex Mono, with
+Greek from Commissioner behind DM Sans and from Fira Mono behind IBM Plex Mono, so Greek renders identically
+everywhere. Measured 2026-11-01 (fontTools): x-height ratios 1.016 (DM Sans / Commissioner) and 0.979 (IBM Plex Mono /
+Fira Mono), cap heights 0.982 and 1.013, and Fira Mono keeps Plex Mono's 0.6 em advance, so no size-adjust is needed.
+The super- and subscripts and signs those two lack come from the existing sources: → (with ∝ and ☉) from Noto Sans
+Math, and ⁻ ⁿ ₚ from Arimo. Until pass 1 makes it the only set, the Phase 9 set is written beside the Phase 8 one: its
+own stylesheet (site/src/styles/v9/fonts.css), subsets named v9-*, and manifest-v9.json.
+
 Run (repository root): .venv/Scripts/python site/tools/fonts.py   (downloads into runs/fonts-cache/ once)
 """
 
@@ -25,9 +33,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import urllib.request
 from pathlib import Path
+from typing import NamedTuple
 
 from fontTools import subset
 from fontTools.ttLib import TTFont
@@ -36,6 +46,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "site"
 OUT_DIR = SITE / "src" / "fonts" / "fallback"
 CSS = SITE / "src" / "styles" / "fonts.css"
+CSS9 = SITE / "src" / "styles" / "v9" / "fonts.css"
 CACHE = ROOT / "runs" / "fonts-cache"
 
 # The characters the site displays that the primaries' Latin and Latin-ext subsets leave out (measured
@@ -69,6 +80,25 @@ FALLBACKS = [
      "https://fonts.gstatic.com/s/notosansmath/v19/7Aump_cpkSecTWaHRlH2hyV5UHkG.ttf",
      "3cbaf44af13f592bc7f7172a50edab4c73ac2f3d19af2d697a01ebd3288e322d", LAST),
 ]
+ARIMO_400 = FALLBACKS[0][4:6]
+NOTO_MATH = FALLBACKS[-1][4:6]
+FALLBACKS9 = [
+    ("v9-greek-sans-400", "Oberth Greek Sans", 400, "Commissioner",
+     "https://fonts.gstatic.com/s/commissioner/v24/tDaH2o2WnlgI0FNDgduEk4jAhwgumbU1SVfU5BD8OuRL8OstC6KOhgvBYWSFJ-Mgdrgiju6fF8meZm0rk4eF-ZugTMNdGPc.ttf",
+     "ca0b5b501b33f678dadd7bff7e7b139d91659930afd332c4495c0196e18d46fe", GREEK + SYMBOLS),
+    ("v9-greek-sans-600", "Oberth Greek Sans", 600, "Commissioner",
+     "https://fonts.gstatic.com/s/commissioner/v24/tDaH2o2WnlgI0FNDgduEk4jAhwgumbU1SVfU5BD8OuRL8OstC6KOhgvBYWSFJ-Mgdrgiju6fF8meZm0rk4eF-ZugTB1aGPc.ttf",
+     "4c341530211050734b52526c8fb10645b3bc1e431f252570763f032469b9a589", GREEK + SYMBOLS),
+    ("v9-greek-mono-400", "Oberth Greek Mono", 400, "Fira Mono",
+     "https://fonts.gstatic.com/s/firamono/v16/N0bX2SlFPv1weGeLZDtQIQ.ttf",
+     "da844d7e07243308a5b668a89bf194693e440bc6a31f6f5c37d29542f914ceca", GREEK + SYMBOLS),
+    ("v9-greek-mono-500", "Oberth Greek Mono", 500, "Fira Mono",
+     "https://fonts.gstatic.com/s/firamono/v16/N0bS2SlFPv1weGeLZDto1d33mQ.ttf",
+     "e1edd52f9bdcdc4d4b31f4d3acbba634fa906aa320ed77556b9899df873e5fa8", GREEK + SYMBOLS),
+    # The signs neither Greek source has: one family in two files, each limited to its own characters.
+    ("v9-symbols-400", "Oberth Symbols", 400, "Noto Sans Math", *NOTO_MATH, LAST + [ord("→")]),
+    ("v9-supers-400", "Oberth Symbols", 400, "Arimo", *ARIMO_400, [ord(c) for c in "⁻ⁿₚ"]),
+]
 # The licence of each source family: the SIL Open Font License 1.1 text from the family's OFL.txt in google/fonts,
 # pinned to a commit and checked by sha256. Each committed LICENSE-<slug>.txt is the copyright notice of the very file
 # subset here (its name table, record 0) followed by that licence text. None of the four declares a Reserved Font Name
@@ -83,6 +113,10 @@ LICENSES = {
                        "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"),
     "Noto Sans Math": ("noto-sans-math", f"{GOOGLE_FONTS}/notosansmath/OFL.txt",
                        "403a95275b469061b7d4371c328e0ada3bc7d63328abe2e88aad5cd243b2fe21"),
+    "Commissioner": ("commissioner", f"{GOOGLE_FONTS}/commissioner/OFL.txt",
+                     "4a7d88c77b4bc39ff84f2e058ba8f015636c50ce33588a86d9da97defe519933"),
+    "Fira Mono": ("fira-mono", f"{GOOGLE_FONTS}/firamono/OFL.txt",
+                  "d1829ff3455bbf3b9d13dfb0a57758a863107c9108aab48558f26f37f1094180"),
 }
 OFL_START = "This Font Software is licensed under the SIL Open Font License, Version 1.1."
 
@@ -104,7 +138,33 @@ PRIMARIES = [
     ("barlow-semi-condensed", "Barlow Semi Condensed", [(400, "normal"), (500, "normal"), (600, "normal"), (700, "normal")]),
     ("ibm-plex-mono", "IBM Plex Mono", [(400, "normal"), (500, "normal")]),
 ]
+# Phase 9: 400 almost everywhere, as in the reference; 600 for figure titles and engine names; 400 italic for prose.
+PRIMARIES9 = [
+    ("dm-sans", "DM Sans", [(400, "normal"), (600, "normal"), (400, "italic")]),
+    ("ibm-plex-mono", "IBM Plex Mono", [(400, "normal"), (500, "normal")]),
+]
 SUBSETS = ["latin-ext", "latin"]
+
+
+class FontSet(NamedTuple):
+    """One generated set: its primaries, its fallback subsets, its stylesheet, its manifest and the stylesheet that
+    declares its stacks."""
+    primaries: list
+    fallbacks: list
+    css: Path
+    manifest: str
+    stacks: Path
+
+
+SETS = {
+    "phase8": FontSet(PRIMARIES, FALLBACKS, CSS, "manifest.json", SITE / "src" / "styles" / "base.css"),
+    "phase9": FontSet(PRIMARIES9, FALLBACKS9, CSS9, "manifest-v9.json", SITE / "src" / "styles" / "v9" / "tokens.css"),
+}
+
+
+def rel(css: Path, target: Path) -> str:
+    """target's URL relative to the stylesheet css."""
+    return Path(os.path.relpath(target, css.parent)).as_posix()
 
 
 def ranges(codepoints: list[int]) -> str:
@@ -130,9 +190,9 @@ def source(url: str, sha: str) -> Path:
     return path
 
 
-def primary_faces() -> list[str]:
+def primary_faces(fs: FontSet = SETS["phase8"]) -> list[str]:
     rules = []
-    for pkg, family, faces in PRIMARIES:
+    for pkg, family, faces in fs.primaries:
         for weight, style in faces:
             css = (SITE / "node_modules" / "@fontsource" / pkg / f"{weight}{'-italic' if style == 'italic' else ''}.css").read_text(encoding="utf-8")
             for sub in SUBSETS:
@@ -140,17 +200,33 @@ def primary_faces() -> list[str]:
                 if not m:
                     raise SystemExit(f"@fontsource/{pkg}: no {sub} {weight} {style} face")
                 urange = re.search(r"unicode-range:\s*([^;]+);", m.group(1)).group(1)
+                url = rel(fs.css, SITE / "node_modules" / "@fontsource" / pkg / "files" / f"{pkg}-{sub}-{weight}-{style}.woff2")
                 rules.append(
                     f'@font-face {{\n  font-family: "{family}";\n  font-style: {style};\n  font-display: swap;\n  font-weight: {weight};\n'
-                    f'  src: url("../../node_modules/@fontsource/{pkg}/files/{pkg}-{sub}-{weight}-{style}.woff2") format("woff2");\n'
+                    f'  src: url("{url}") format("woff2");\n'
                     f"  unicode-range: {urange};\n}}")
     return rules
 
 
+HEADERS = {
+    "phase8": ("/* Generated by site/tools/fonts.py; do not edit by hand. The classic explorer's families (Barlow, Barlow\n"
+               "   Semi Condensed, IBM Plex Mono) from the pinned @fontsource packages, Latin and Latin-ext; then the Greek-\n"
+               "   and-symbol fallbacks cut from pinned full fonts (Phase 8, RESEARCH_LOG 2026-10-23). */\n\n"),
+    "phase9": ("/* Generated by site/tools/fonts.py; do not edit by hand. Phase 9 (docs/revamp_plan.md §2.3): DM Sans and IBM\n"
+               "   Plex Mono from the pinned @fontsource packages, Latin and Latin-ext; then Greek from Commissioner (behind\n"
+               "   DM Sans) and Fira Mono (behind IBM Plex Mono), and the remaining signs, cut from pinned full fonts. */\n\n"),
+}
+
+
 def main() -> None:
+    for name, fs in SETS.items():
+        generate(name, fs)
+
+
+def generate(name: str, fs: FontSet) -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     manifest, rules = [], []
-    for slug, family, weight, src_family, url, sha, wanted in FALLBACKS:
+    for slug, family, weight, src_family, url, sha, wanted in fs.fallbacks:
         path = source(url, sha)
         cmap = TTFont(path).getBestCmap()
         keep = sorted(c for c in wanted if c in cmap)
@@ -169,24 +245,21 @@ def main() -> None:
                          "source": url, "sha256": sha, "license": "OFL-1.1", "codepoints": keep,
                          "missing": sorted(set(wanted) - set(keep))})
         rules.append(f'@font-face {{\n  font-family: "{family}";\n  font-style: normal;\n  font-display: swap;\n  font-weight: {weight};\n'
-                     f'  src: url("../fonts/fallback/{out.name}") format("woff");\n  unicode-range: {ranges(keep)};\n}}')
+                     f'  src: url("{rel(fs.css, out)}") format("woff");\n  unicode-range: {ranges(keep)};\n}}')
         print(f"{out.name}: {len(keep)} characters from {src_family} {weight}; missing {ranges(manifest[-1]['missing']) or 'none'}")
     for e in manifest:
         slug, url, _ = LICENSES[e["source_family"]]
         e["license_file"], e["license_text"] = f"LICENSE-{slug}.txt", url
-    (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    (OUT_DIR / fs.manifest).write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     written = set()
-    for slug, family, weight, src_family, url, sha, wanted in FALLBACKS:
+    for slug, family, weight, src_family, url, sha, wanted in fs.fallbacks:
         if src_family in written:
             continue
         written.add(src_family)
         text = licence_text(src_family, source(url, sha))
         (OUT_DIR / f"LICENSE-{LICENSES[src_family][0]}.txt").write_text(text, encoding="utf-8", newline="\n")
-    header = ("/* Generated by site/tools/fonts.py; do not edit by hand. The classic explorer's families (Barlow, Barlow\n"
-              "   Semi Condensed, IBM Plex Mono) from the pinned @fontsource packages, Latin and Latin-ext; then the Greek-\n"
-              "   and-symbol fallbacks cut from pinned full fonts (Phase 8, RESEARCH_LOG 2026-10-23). */\n\n")
-    CSS.write_text(header + "\n".join(primary_faces() + rules) + "\n", encoding="utf-8")
-    print(f"wrote {CSS.relative_to(ROOT)} and {OUT_DIR.relative_to(ROOT)}/")
+    fs.css.write_text(HEADERS[name] + "\n".join(primary_faces(fs) + rules) + "\n", encoding="utf-8")
+    print(f"wrote {fs.css.relative_to(ROOT)} and {OUT_DIR.relative_to(ROOT)}/ ({name})")
 
 
 if __name__ == "__main__":

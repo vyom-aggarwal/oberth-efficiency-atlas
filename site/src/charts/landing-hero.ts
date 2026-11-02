@@ -21,7 +21,7 @@ const SEEN = "oberth-landing-intro";                         // sessionStorage: 
 const RINGS = [3, 10, 30];
 
 export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData, buf: ArrayBuffer, site: SiteData,
-                            opt: { reducedMotion: boolean }): void {
+                            opt: { reducedMotion: boolean; start?: Promise<unknown> }): void {
   const dv = dive(d, buf);
   const { cases, sMax } = dv;
   // Extent of the three paths in ρ units (the view is fitted to it).
@@ -102,10 +102,15 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   else if (seen) end("seen");
   else {
     // Any reader input during the sequence ends it on the final frame.
-    for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) {
-      window.addEventListener(ev, () => { if (running) { s_ = sMax; scrub.value = String(sMax); end("done"); } }, { once: true, passive: true });
-    }
-    intro();
+    const begin = () => {
+      for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) {
+        window.addEventListener(ev, () => { if (running) { s_ = sMax; scrub.value = String(sMax); end("done"); } }, { once: true, passive: true });
+      }
+      intro();
+    };
+    // Phase 9: given opt.start (the landing's preloader), the sequence waits for it, showing its first frame meanwhile.
+    if (opt.start) { s_ = -sMax; labels = false; scrub.value = String(s_); root.dataset.intro = "waiting"; opt.start.then(begin); }
+    else begin();
   }
 
   // ---------------------------------------------------------------- drawing

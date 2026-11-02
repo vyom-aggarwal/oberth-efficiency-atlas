@@ -7,45 +7,59 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="robots" content="noindex" />
     <title>Phase 9 style</title>
+    <!-- The preloader's gate, before the first paint (adapted from suhaslord/portfolio index.html; MIT,
+         THIRD_PARTY_NOTICES.md): the first load of a session only, never with a #fragment or under reduced motion,
+         with a failsafe if the page script never runs. The page content stays in the DOM beneath it. -->
+    <script>
+      try {
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches && !location.hash && !sessionStorage.getItem("oberth-preloaded")) {
+          sessionStorage.setItem("oberth-preloaded", "1");
+          document.documentElement.classList.add("preloading");
+          setTimeout(function () { document.documentElement.classList.remove("preloading"); }, 2000);
+        }
+      } catch (e) { /* no storage: no preloader */ }
+    </script>
     <script type="module" src="/src/pages/style9.ts"></script>
   </head>
   <body>
+    <div class="preload9" id="preload9" aria-hidden="true"><span class="word">Approach</span><div class="curve"></div></div>
     <a class="visually-hidden" href="#main">Skip to content</a>
     <header class="head9">
-      <a class="wordmark9" href="#">Oberth Efficiency Atlas</a>
+      <a class="brand9" href="#">Oberth Efficiency Atlas</a>
       <nav aria-label="Site"><a href="#">Research</a><a href="#">Explorer</a><a href="#">References</a><a href="#">About</a></nav>
     </header>
-    <button class="menu-fab" type="button" aria-expanded="false" aria-controls="drawer9" aria-label="Menu"><span class="bars" aria-hidden="true"></span></button>
-    <div class="veil9" id="veil9"></div>
-    <aside class="drawer9" id="drawer9" aria-label="Menu" aria-hidden="true">
-      <p class="eyebrow9">Navigation</p>
-      <ul>
-        <li><a href="#" aria-current="page">Home</a></li>
-        <li><a href="#">Research</a></li>
-        <li><a href="#">Explorer</a></li>
-        <li><a href="#">References</a></li>
-        <li><a href="#">About</a></li>
-      </ul>
-      <div class="secondary"><a href="#">Source on GitHub</a><a href="#">Classic explorer</a><a href="#">Cite</a></div>
+    <button class="menu9-toggle" type="button" aria-expanded="false" aria-controls="menu9" aria-label="Open navigation"><span></span><span></span></button>
+    <div class="menu9-scrim" id="scrim9"></div>
+    <aside class="menu9-panel" id="menu9" aria-label="Menu" aria-hidden="true" inert data-lenis-prevent>
+      <div class="menu9-curve" aria-hidden="true"></div>
+      <p class="label">Navigation</p>
+      <nav aria-label="Pages">
+        <a href="#" aria-current="page" style="--i: 0">Home</a>
+        <a href="#" style="--i: 1">Research</a>
+        <a href="#" style="--i: 2">Explorer</a>
+        <a href="#" style="--i: 3">References</a>
+        <a href="#" style="--i: 4">About</a>
+      </nav>
+      <div class="bottom" id="menu9-bottom"><a href="#">Classic explorer</a><a href="#">Cite</a></div>
     </aside>
 
     <main id="main">
       <section class="hero9" aria-labelledby="hero9-title">
-        <div class="wrap9 hero9-top">
-          <p class="eyebrow9">Development page (not deployed): the Phase 9 system, for the author's approval (docs/revamp_plan.md §2.11).</p>
-          <div class="hero9-headline"><!--#slot:headline--></div>
-        </div>
         <h1 id="hero9-title" class="visually-hidden">Oberth Efficiency Atlas</h1>
+        <figure class="hero9-dive" id="landing-hero" data-intro=""><div class="landing-hero-body"></div></figure>
+        <p class="hero9-pill" id="pill9"></p>
+        <div class="hero9-role" id="role9"><div class="hero9-headline"><!--#slot:headline--></div></div>
         <div class="marquee9" id="marquee9" aria-hidden="true"><div class="track" id="marquee9-track"></div></div>
-        <div class="wrap9 hero9-foot">
-          <button class="round9 outline pause9" type="button" id="pause9" aria-pressed="false" aria-label="Pause the moving title"></button>
-        </div>
+        <div class="hero9-foot" id="foot9"></div>
       </section>
 
       <section class="wrap9 block9" aria-labelledby="colour9">
+        <p class="eyebrow9 note9">Development page (not deployed): the Phase 9 system for the author's approval, revised for the
+          decisions of 2026-11-01 (docs/revamp_plan.md §2.11).</p>
         <h2 class="display9" id="colour9"><span class="n9">01</span>Colour</h2>
         <div class="swatches9" id="swatches9"></div>
-        <p class="eyebrow9">Data colours, unchanged: the η ramp, the a·v ramp, and the three special-cell textures.</p>
+        <p class="eyebrow9">Data colours, unchanged: the η ramp, the a·v ramp, and the three special-cell textures. The accent
+          never appears inside a plot area, legend or colour scale.</p>
         <div class="datastrip9" id="datastrip9"></div>
       </section>
 
@@ -54,19 +68,36 @@
         <div class="specimens9" id="specimens9"></div>
       </section>
 
-      <section class="wrap9 block9" aria-labelledby="figure9">
-        <h2 class="display9" id="figure9"><span class="n9">03</span>A data figure</h2>
-        <figure class="panel9 fig9" id="landing-hero" data-intro="">
-          <figcaption class="eyebrow9">The live three-engine dive, on Panel (the faintest a·v stroke is measured here).</figcaption>
-          <div class="landing-hero-body"></div>
-        </figure>
+      <section class="wrap9 block9" aria-labelledby="controls9">
+        <h2 class="display9" id="controls9"><span class="n9">03</span>Controls</h2>
+        <div class="controls9" id="controls9-body"></div>
       </section>
 
-      <section class="wrap9 block9" aria-labelledby="controls9">
-        <h2 class="display9" id="controls9"><span class="n9">04</span>Controls</h2>
-        <div class="controls9" id="controls9-body"></div>
+      <section class="block9 findings9" id="findings9" aria-labelledby="findings9-title">
+        <h2 class="display9" id="findings9-title"><span class="n9">04</span>Findings</h2>
+        <p class="eyebrow9">Rows with a pointer-following preview: the live mini figure. Keyboard focus shows it beside the row.</p>
         <ol class="rows9" id="rows9"></ol>
       </section>
     </main>
+    <div class="preview9" id="preview9" aria-hidden="true" inert><div class="inner"><div class="rail" id="rail9"></div></div></div>
+    <div class="badge9" id="badge9" aria-hidden="true"><span>View</span></div>
+
+    <div class="close9">
+      <div class="close9-curve" aria-hidden="true"></div>
+      <section class="close9-content wrap9" aria-labelledby="close9-title">
+        <h2 class="close9-title" id="close9-title">Fly one yourself.</h2>
+        <div class="close9-line">
+          <div class="close9-cta" id="cta9"></div>
+          <div class="close9-links" id="links9"></div>
+        </div>
+      </section>
+      <footer class="foot9">
+        <div class="meta">
+          <div><span class="key">Analysis</span><span id="tag9"></span></div>
+          <div><span class="key">Site data</span><span id="data9"></span></div>
+        </div>
+        <nav aria-label="Footer"><span class="key">Links</span><div id="flinks9"></div></nav>
+      </footer>
+    </div>
   </body>
 </html>

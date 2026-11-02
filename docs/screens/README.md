@@ -18,13 +18,16 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
-- `phase-9-style/` (Phase 9, step 2): the development-only style page `/style-9/` in the proposed dark system
-  (`docs/revamp_plan.md` §2.11), for the author's approval:
-  - **`style-9-<width>.png`:** the full page, with motion;
-  - **`-hero`:** a frame of the moving title, with its pause control;
-  - **`-reduced-hero`:** the same under reduced motion, the line still and wrapped;
+- `phase-9-style/` (Phase 9, step 2, revised 2026-11-01 for the author's decisions): the development-only style page
+  `/style-9/` (`docs/revamp_plan.md` §2.11), for the author's approval. Made by `site/tools/style9-shots.mjs`
+  (in `site/`, with `npm run dev` running):
+  - **`style-9-<width>.png`:** the full page;
+  - **`-preloader-word`, `-preloader-lift`:** the preloader at 0.45 s (a word) and 1.5 s (the curtain lifting);
+  - **`-hero`:** the hero's final frame;
   - **`-menu`:** the drawer open;
-  - **`style-9-1440-row-hover.png`:** a findings row on hover.
+  - **`-reduced`:** reduced motion (at 390 px, the full page);
+  - **`style-9-1440-hover-preview.png`, `style-9-1440-focus-preview.png`:** a findings row's live preview, following
+    the pointer and placed by keyboard focus.
 - `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
   in both themes:
   - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build
