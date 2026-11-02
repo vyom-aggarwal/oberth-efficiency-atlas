@@ -161,6 +161,22 @@ function sectionHTML(s: Section, dev: boolean): string {
     `<h2 id="h-${s.id}">${esc(s.title)}</h2>${banner}${before}${fig}${after}</section>`;
 }
 
+/**
+ * The article's directives in a page: <!--#hero-->, <!--#sections--> and <!--#section-nav--> (/research/), and
+ * <!--#section:id--> for one kept section on its own (the Phase 9 style page shows one in the new system). A section
+ * not kept in this build renders as nothing.
+ */
+export function articleHTML(html: string, kept: Section[], dev: boolean): string {
+  const hero = kept.find((s) => s.id === "hero");
+  const rest = kept.filter((s) => s.id !== "hero");
+  const nav = rest.map((s) => `<li><a href="#${s.id}" data-nav="${s.id}">${esc(s.title)}</a></li>`).join("");
+  return html
+    .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Research</h1>`)
+    .replace("<!--#sections-->", rest.map((s) => sectionHTML(s, dev)).join("\n"))
+    .replace(/<!--#section:([\w-]+)-->/g, (_m, id: string) => { const s = kept.find((k) => k.id === id); return s ? sectionHTML(s, dev) : ""; })
+    .replace(/<!--#section-nav-->/g, nav);
+}
+
 function readData(name: string): any {
   const p = DATA + name;
   return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null;
@@ -262,15 +278,8 @@ export function contentPlugin(): Plugin {
           const site = readData("site.json");
           out = out.replace("<!--#references-->", referenceListHTML(site?.references ?? []));
         }
-        if (!out.includes("<!--#sections-->")) return out;
-        const kept = keptSections(loadSections(base), dev);
-        const hero = kept.find((s) => s.id === "hero");
-        const rest = kept.filter((s) => s.id !== "hero");
-        const nav = rest.map((s) => `<li><a href="#${s.id}" data-nav="${s.id}">${esc(s.title)}</a></li>`).join("");
-        return out
-          .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Research</h1>`)
-          .replace("<!--#sections-->", rest.map((s) => sectionHTML(s, dev)).join("\n"))
-          .replace(/<!--#section-nav-->/g, nav);
+        if (!/<!--#(sections|section:|section-nav)/.test(out)) return out;
+        return articleHTML(out, keptSections(loadSections(base), dev), dev);
       },
     },
     configureServer(server) {

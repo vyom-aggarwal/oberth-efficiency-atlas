@@ -7,6 +7,8 @@
 // Motion: one sequence on first load (at most 3 s; once per browser session through sessionStorage; the final frame
 // at once under prefers-reduced-motion; any reader input ends it), then the reader scrubs time. Every value comes from
 // engines.json and engines.bin (scripts/export_site_data.py), drawn through charts/dive-view.ts.
+// Phase 9 (docs/revamp_plan.md §2.6): a page may steer the dive to a state (the findings rows: the clock, the engines
+// lit, the others faint) and follow its clock (onFrame: the moving title). Without either, nothing changes.
 import tex from "virtual:tex";
 import { sourceLink } from "../lib/cite";
 import type { SiteData } from "../lib/data";
@@ -19,9 +21,22 @@ import { AV_RANGE, burnColour, burnStep, clockText, DASH, dashGlyph, dive, drawE
 const SWEEP_MS = 2400, LABELS_MS = 2400, DONE_MS = 2800;    // the sequence: sweep the clock, then labels, then done
 const SEEN = "oberth-landing-intro";                         // sessionStorage: the sequence has played this session
 const RINGS = [3, 10, 30];
+const STEER_MS = 500;                                        // a steered clock eases to its state in this time
+
+/** A state the page can steer the dive to (Phase 9: the findings rows). The clock s; the engines lit (the others dim);
+ * burns: the paths quieten so the burns stand out; imp: the impulsive reference is emphasised. */
+export interface Steer { s: number; lit: number[]; burns?: boolean; imp?: boolean }
+export interface HeroControl {
+  /** Ease the dive to a state, or back to the reader's own clock with null (at once under reduced motion). */
+  steer(state: Steer | null): void;
+  /** The clock's range, s ∈ [−sMax, sMax]. */
+  sMax: number;
+  /** The clock just after engine j's burn has ended. */
+  afterBurn(j: number): number;
+}
 
 export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData, buf: ArrayBuffer, site: SiteData,
-                            opt: { reducedMotion: boolean; start?: Promise<unknown> }): void {
+                            opt: { reducedMotion: boolean; start?: Promise<unknown>; onFrame?: (k: number, s: number) => void }): HeroControl {
   const dv = dive(d, buf);
   const { cases, sMax } = dv;
   // Extent of the three paths in ρ units (the view is fitted to it).
@@ -74,10 +89,40 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   // ---------------------------------------------------------------- time and the sequence
   let s_ = sMax, labels = true, running = false;
   let W = 0, SW = 0;                                         // laid-out widths of the view and the strip (0: not yet)
-  scrub.addEventListener("input", () => { if (running) end("done"); s_ = Number(scrub.value); draw(); });
+  // Steering (Phase 9): the reader's own clock is kept while a page steers, and restored after.
+  let lit: Set<number> | null = null, burnsOnly = false, imp = false, steering = false, own = sMax, tween = 0;
+  scrub.addEventListener("input", () => {
+    if (running) end("done");
+    cancelAnimationFrame(tween); steering = false; lit = null; burnsOnly = imp = false; delete root.dataset.steer;
+    s_ = own = Number(scrub.value); draw();
+  });
+  function easeTo(to: number): void {
+    cancelAnimationFrame(tween);
+    if (opt.reducedMotion) { s_ = to; scrub.value = String(s_); draw(); return; }
+    const from = s_, t0 = performance.now();
+    const step = (now: number) => {
+      const u = Math.min(1, (now - t0) / STEER_MS), e = u < 0.5 ? 4 * u ** 3 : 1 - (-2 * u + 2) ** 3 / 2;
+      s_ = from + (to - from) * e; scrub.value = String(s_); draw();
+      if (u < 1) tween = requestAnimationFrame(step);
+    };
+    tween = requestAnimationFrame(step);
+  }
+  function steer(st: Steer | null): void {
+    if (running) end("done");
+    if (st) {
+      if (!steering) own = s_;
+      steering = true; lit = new Set(st.lit); burnsOnly = Boolean(st.burns); imp = Boolean(st.imp);
+      root.dataset.steer = `${st.lit.join("")}${st.burns ? "b" : ""}${st.imp ? "i" : ""}`;
+      easeTo(st.s);
+    } else if (steering) {
+      steering = false; lit = null; burnsOnly = imp = false; delete root.dataset.steer;
+      easeTo(own);
+    }
+  }
   function end(state: string): void {
     running = false; labels = true; root.dataset.intro = state;
     if (state !== "done") { s_ = sMax; scrub.value = String(sMax); }
+    own = s_;
     draw();
   }
   function intro(): void {
@@ -92,7 +137,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
       labels = e >= LABELS_MS;
       scrub.value = String(s_);
       draw();
-      if (e >= DONE_MS) { running = false; root.dataset.intro = "done"; } else requestAnimationFrame(step);
+      if (e >= DONE_MS) { running = false; own = s_; root.dataset.intro = "done"; } else requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   }
@@ -126,7 +171,15 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     drawView(k);
     drawEnergyStrip(strip, dv, k, SW, SW < 480 ? 80 : 124, "hero-clip");
     root.dataset.cursor = strip.dataset.cursor ?? "";
+    // A steered state dims the engines not lit, in the strip (two paths per engine, in order) and the keys.
+    strip.querySelectorAll(".strip-line").forEach((p, n) => p.classList.toggle("dim", dimmed(n >> 1)));
+    strip.querySelector(".imp-step")?.classList.toggle("lit", imp);
+    [...key.children].forEach((li, i) => li.classList.toggle("dim", dimmed(i)));
+    [...keyCompact.children].forEach((li, i) => li.classList.toggle("dim", i < cases.length ? dimmed(i) : Boolean(lit) && !imp));
+    legend.lastElementChild?.classList.toggle("lit", imp);
+    opt.onFrame?.(k, s_);
   }
+  function dimmed(j: number): boolean { return lit !== null && !lit.has(j); }
 
   function drawView(k: number): void {
     const narrow = W < 560;
@@ -166,12 +219,14 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
       for (let i = from; i < to; i++) { const [px, py] = P(e, i); if (i === from) ctx.moveTo(px, py); else ctx.lineTo(px, py); }
       ctx.stroke();
     };
-    // Full paths, faint; the paths so far, Ink in each engine's line style.
+    // Full paths, faint; the paths so far, Ink in each engine's line style (Quiet when a steered state shows the burns;
+    // an engine a steered state does not light is drawn faint throughout, here and below).
+    const fade = (j: number) => { ctx.globalAlpha = dimmed(j) ? 0.25 : 1; };
     ctx.lineWidth = 1; ctx.strokeStyle = rule;
     for (const e of cases) path(e, 0, e.X.length);
-    ctx.strokeStyle = ink; ctx.lineWidth = 1.4;
-    cases.forEach((e, i) => { ctx.setLineDash(DASH[i]); path(e, 0, Math.min(k, e.X.length)); });
-    ctx.setLineDash([]);
+    ctx.strokeStyle = burnsOnly ? cssVar("--axis-line") : ink; ctx.lineWidth = 1.4;
+    cases.forEach((e, i) => { fade(i); ctx.setLineDash(DASH[i]); path(e, 0, Math.min(k, e.X.length)); });
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
     // The burns so far, each in its lane, coloured by a·v. The solid stack's burn is a few samples long: a dot. The a·v steps
     // drawn are recorded on the canvas (data-av-steps) for the stroke-contrast test (e2e/av-stroke.spec.ts).
     const steps = new Set<number>();
@@ -180,6 +235,7 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
       const off = (j + 1) * lane;
       const on = burning[j].filter((i) => i < k);
       if (!on.length) return;
+      fade(j);
       if (on.length < 12) {
         const i = on[on.length >> 1], [nx, ny] = normal(e, i), [px, py] = P(e, i);
         ctx.fillStyle = colourAt(e, i) ?? ink;
@@ -215,12 +271,15 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
       }
       flush();
     });
+    ctx.globalAlpha = 1;
     // Where each engine is now.
-    if (k > 0) for (const e of cases) {
+    if (k > 0) cases.forEach((e, j) => {
       const [px, py] = P(e, Math.min(k, e.X.length) - 1);
+      fade(j);
       ctx.fillStyle = ink; ctx.strokeStyle = surface; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(px, py, 3.5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
-    }
+    });
+    ctx.globalAlpha = 1;
     // Lane labels, outside the lanes: "Solid", "Nuclear", "SEP*" (short names, as on the hero's narrow Π axis).
     let clipped = 0;
     if (labels) {
@@ -232,8 +291,10 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
         const align = nx < -0.35 ? "right" : nx > 0.35 ? "left" : "center";
         const base = ny < -0.35 ? "bottom" : ny > 0.35 ? "top" : "middle";
         ctx.textAlign = align; ctx.textBaseline = base;
+        ctx.globalAlpha = dimmed(j) ? 0.4 : 1;
         ctx.lineWidth = 3; ctx.strokeStyle = surface; ctx.strokeText(e.label.short, lx, ly);
         ctx.fillStyle = ink; ctx.fillText(e.label.short, lx, ly);
+        ctx.globalAlpha = 1;
         // Whether the label fits inside the view (checked by the layout tests: data-labels-clipped = 0).
         const w = ctx.measureText(e.label.short).width;
         const x0 = align === "right" ? lx - w : align === "left" ? lx : lx - w / 2;
@@ -245,6 +306,14 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
     canvas.dataset.avSteps = [...steps].sort().join(",");
     canvas.dataset.k = String(k);
   }
+
+  return {
+    steer, sMax,
+    afterBurn(j) {
+      const on = burning[j], i = Math.min((on[on.length - 1] ?? 0) + 2, dv.t.length - 1);
+      return Math.max(-sMax, Math.min(sMax, Math.asinh(dv.t[i] / dv.tau)));
+    },
+  };
 
   function table(): HTMLDetailsElement {
     return dataTable("The three engines on Hibberd et al.'s dive (the animation's runs; loss is the equivalent-Δv loss)",
