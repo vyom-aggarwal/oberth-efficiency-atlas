@@ -636,3 +636,39 @@ added to the numbers file as values.
   labels, then did not report it. The author asked. The measurement found 400 Regular in both themes, rendered with
   the same face, so the heavier look is light-on-dark appearance.
 - **An over-claim:** the part B report said `docs/site.md` also held interpretations to confirm; it held none.
+
+## Phase 9: dark, portfolio-style revamp (from 2026-11-01; steps 1–2 awaiting approval)
+
+**Author decided:**
+- **The brief:** a dark interpretation of https://suhaslord.github.io/portfolio/, dark only.
+  - Inspiration, not copying; licence and typefaces to be reported.
+  - Site-only, under the analysis freeze, every non-visual contract kept.
+  - Work on `phase-9-revamp` through a pull request with green CI.
+  - A plan with a style page first, then a build in seven passes.
+
+**Assistant, steps 1 and 2:**
+- **Studied the reference.** Playwright captures (not committed) and computed measurements. Reported: the MIT licence,
+  four OFL typefaces (none commercial), and the libraries used.
+- **Wrote the plan** (`docs/revamp_plan.md`):
+  - an inventory in its own words, and an adopt, adapt or drop decision for each element;
+  - a six-colour dark palette with every check, the data colours re-checked on it, and the faintest a·v stroke
+    measured from rendered pixels;
+  - typography chosen with fontTools for native Greek: Commissioner and Fira Mono, both OFL;
+  - the information architecture, the landing page, a motion table, ASCII wireframes and a pass-2 review.
+- **Built the development-only style page** `/style-9/` in isolation, with screenshots.
+
+**Assistant found and changed inside step 2:**
+- **The first accent sat too close to the data blues:** ΔE 11.6, and it failed a white label. It moved to electric
+  violet `#c27bff`.
+- **The style page's floating button covered a header link at 1440 px.** From 900 px it now waits until the header has
+  scrolled away.
+- **A still marquee cut the title mid-word under reduced motion.** It now wraps at display size.
+- **Glyph icons had no self-hosted glyph.** The font test caught it; they are SVG now.
+
+**Assistant interpretations, for the author to confirm** (plan §2.10):
+- the accent's move off indigo;
+- "the paper-matched blue ramp" on a dark-only site meaning the dark steps already in use;
+- Commissioner and Fira Mono over the reference's DM Sans and IBM Plex Mono;
+- an About the project page;
+- the marquee line;
+- the dive's intro compressed to 1.5 s.

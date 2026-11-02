@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="robots" content="noindex" />
+    <title>Phase 9 style</title>
+    <script type="module" src="/src/pages/style9.ts"></script>
+  </head>
+  <body>
+    <a class="visually-hidden" href="#main">Skip to content</a>
+    <header class="head9">
+      <a class="wordmark9" href="#">Oberth Efficiency Atlas</a>
+      <nav aria-label="Site"><a href="#">Research</a><a href="#">Explorer</a><a href="#">References</a><a href="#">About</a></nav>
+    </header>
+    <button class="menu-fab" type="button" aria-expanded="false" aria-controls="drawer9" aria-label="Menu"><span class="bars" aria-hidden="true"></span></button>
+    <div class="veil9" id="veil9"></div>
+    <aside class="drawer9" id="drawer9" aria-label="Menu" aria-hidden="true">
+      <p class="eyebrow9">Navigation</p>
+      <ul>
+        <li><a href="#" aria-current="page">Home</a></li>
+        <li><a href="#">Research</a></li>
+        <li><a href="#">Explorer</a></li>
+        <li><a href="#">References</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+      <div class="secondary"><a href="#">Source on GitHub</a><a href="#">Classic explorer</a><a href="#">Cite</a></div>
+    </aside>
+
+    <main id="main">
+      <section class="hero9" aria-labelledby="hero9-title">
+        <div class="wrap9 hero9-top">
+          <p class="eyebrow9">Development page (not deployed): the Phase 9 system, for the author's approval (docs/revamp_plan.md §2.11).</p>
+          <div class="hero9-headline"><!--#slot:headline--></div>
+        </div>
+        <h1 id="hero9-title" class="visually-hidden">Oberth Efficiency Atlas</h1>
+        <div class="marquee9" id="marquee9" aria-hidden="true"><div class="track" id="marquee9-track"></div></div>
+        <div class="wrap9 hero9-foot">
+          <button class="round9 outline pause9" type="button" id="pause9" aria-pressed="false" aria-label="Pause the moving title"></button>
+        </div>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="colour9">
+        <h2 class="display9" id="colour9"><span class="n9">01</span>Colour</h2>
+        <div class="swatches9" id="swatches9"></div>
+        <p class="eyebrow9">Data colours, unchanged: the η ramp, the a·v ramp, and the three special-cell textures.</p>
+        <div class="datastrip9" id="datastrip9"></div>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="type9">
+        <h2 class="display9" id="type9"><span class="n9">02</span>Type</h2>
+        <div class="specimens9" id="specimens9"></div>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="figure9">
+        <h2 class="display9" id="figure9"><span class="n9">03</span>A data figure</h2>
+        <figure class="panel9 fig9" id="landing-hero" data-intro="">
+          <figcaption class="eyebrow9">The live three-engine dive, on Panel (the faintest a·v stroke is measured here).</figcaption>
+          <div class="landing-hero-body"></div>
+        </figure>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="controls9">
+        <h2 class="display9" id="controls9"><span class="n9">04</span>Controls</h2>
+        <div class="controls9" id="controls9-body"></div>
+        <ol class="rows9" id="rows9"></ol>
+      </section>
+    </main>
+  </body>
+</html>

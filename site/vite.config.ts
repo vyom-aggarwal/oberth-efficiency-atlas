@@ -19,6 +19,8 @@ export default defineConfig(({ command, mode }) => {
   if (researchIncluded(command)) pages.research = resolve(__dirname, "research/index.html");
   // /style/ is a design reference for development only: served by the dev server, never built for production.
   if (command === "serve" || mode === "development") pages.style = resolve(__dirname, "style/index.html");
+  // /style-9/: the Phase 9 system for the author's approval (docs/revamp_plan.md §2.11), also development only.
+  if (command === "serve" || mode === "development") pages.style9 = resolve(__dirname, "style-9/index.html");
   return {
     base,
     plugins: [texPlugin(), contentPlugin()],

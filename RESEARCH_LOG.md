@@ -3582,4 +3582,69 @@ very first check (360 px, Π = 0.001), with the η annotation and every slider l
 - It now waits until the hero has drawn: the canvas records its a·v steps, and the slider has its labels. 15 of 15 in
   three repeats.
 
+## 2026-11-01: Phase 9 begins: a dark, portfolio-style revamp (steps 1 and 2)
+
+**Brief** (author, 2026-11-01): revamp the site's look as a dark interpretation of https://suhaslord.github.io/portfolio/,
+with this project's content and data.
+- **Dark only:** the light theme and the theme toggle go, and `color-scheme: dark` is set.
+- **Inspiration, not copying.** Site-only; the analysis freeze holds. Every contract that isn't visual stays.
+- **Work on the branch `phase-9-revamp`;** main changes only through a pull request with green CI.
+- **The sticky-header fix** was already on main (`ba0dae9`), so it stands. The new navigation keeps equivalent tests.
+
+**Step 1, the reference** (`docs/revamp_plan.md` §1):
+- **Captured** with Playwright at 1440 and 390 px into `runs/reference/`, not committed: load frames, hero, sections,
+  footer, the menu, row hovers, and computed measurements.
+- **Licence:** MIT ("Copyright (c) 2026 SuahsTheLord"). Nothing is copied.
+- **Typefaces,** all OFL 1.1 (none commercial): DM Sans (the home page's only face, at weight 400), Space Grotesk, Lora,
+  IBM Plex Mono.
+- **Libraries:** GSAP with ScrollTrigger, Lenis and Barba.
+- **Measured traits:**
+  - one family at one weight, from 12 to 216 px, with tight tracking on large sizes;
+  - one easing curve, `cubic-bezier(.22, 1, .36, 1)`, with transitions of 0.2–0.8 s;
+  - a greeting preloader from 0.6 to 2.6 s;
+  - the marquee at 216 px, drifting about 18 px/s;
+  - an 80 px floating menu button.
+- **Inventory** in my own words, and an adopt, adapt or drop decision for each element, with reasons (§1.2).
+
+**Step 2, the design plan** (§2), for the author's approval:
+- **Interface palette, six named colours** (all checks pass, `site/tools/phase9-palette.mjs`): Void `#111214`, Panel
+  `#1b1c1f`, Ink `#ecebe7`, Quiet `#a3a4a8`, Rule `#2f3135`, Signal `#c27bff`.
+  - **A deviation inside the step:** the first accent, a violet-shifted indigo `#7c6cff`, was ΔE 11.6 from an a·v step
+    and took a white label at only 3.86:1. It moved to electric violet `#c27bff` (ΔE 15.9 from every data blue,
+    6.76:1 with a Void label).
+  - The reference's own indigo would sit ΔE 8.3 from the η ramp.
+- **Data colours** are unchanged: the classic's dark steps. Re-checked on the new surfaces, all pass:
+  - the faintest a·v stroke 2.43:1 on Void and 2.21:1 on Panel;
+  - the hatching, the dots and the Sun at 4.85–9.64:1;
+  - ramps monotone (steps 0.082 and 0.071);
+  - critical against the η ramp, worst colour-vision ΔE 17.6.
+  - **Rendered, on the style page's live dive:** step 1 at full strength (279 px at 1440, 141 at 390) on the sampled
+    panel colour, 2.21:1.
+- **Typography:** Commissioner (OFL) for display, interface and prose, and Fira Mono (OFL) for data.
+  - Both have native Greek. Commissioner's proportions are the closest to DM Sans among the families with Greek
+    (0.026; fontTools).
+  - DM Sans would be allowed (OFL) but has no Greek.
+  - `@fontsource/commissioner` and `@fontsource/fira-mono` 5.3.0 (2026-07-19) are installed, pinned under the 14-day
+    rule.
+  - To check in pass 1: Fira Mono's package licence names Google Inc. as copyright holder; the font file's own record
+    decides what the committed licence says.
+- **Also in the plan:**
+  - information architecture, with an About the project page proposed;
+  - the landing page;
+  - a motion table (no animation library; the load sequence at most 1.5 s, once per session; the dive's intro
+    compressed from 4.8 s to 1.5 s);
+  - ASCII wireframes of four pages at 1440 and 390 px;
+  - a pass-2 review against generic-portfolio traits;
+  - six decisions for the author.
+- **The style page** `/style-9/` (development builds only) uses the new tokens alone, so the rest of the site is
+  untouched. Screenshots are in `docs/screens/phase-9-style/`.
+  - **Found while building it, and fixed:**
+    - the floating menu button covered the header's last link at 1440 px, so from 900 px it now appears only once the
+      header has scrolled away;
+    - a still 216 px marquee cut the title mid-word, so under reduced motion the line shows once, wrapped at display
+      size, its formulas unbroken, with no pause control;
+    - ❚ ▶ ↗ ↓ had no self-hosted glyph (caught by `tests/test_site_fonts.py`), so they are SVG icons now.
+  - **One isolation quirk:** Vite links the shared landing stylesheet after the page's own, so the style page's
+    headline rule needs a more specific selector. The landing stylesheet is rewritten in pass 3.
+
 

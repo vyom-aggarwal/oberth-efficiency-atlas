@@ -18,6 +18,13 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-9-style/` (Phase 9, step 2): the development-only style page `/style-9/` in the proposed dark system
+  (`docs/revamp_plan.md` §2.11), for the author's approval:
+  - **`style-9-<width>.png`:** the full page, with motion;
+  - **`-hero`:** a frame of the moving title, with its pause control;
+  - **`-reduced-hero`:** the same under reduced motion, the line still and wrapped;
+  - **`-menu`:** the drawer open;
+  - **`style-9-1440-row-hover.png`:** a findings row on hover.
 - `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
   in both themes:
   - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build

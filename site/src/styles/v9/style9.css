@@ -1,0 +1,43 @@
+/* The /style-9/ page's own layout (development only). */
+.hero9 { background: var(--panel); padding-bottom: var(--s5); --surface: var(--panel); }
+.hero9-top { display: grid; gap: var(--s5); padding-top: var(--s4); }
+/* The shared landing stylesheet is linked after this page's (Vite emits it as its own chunk), so these selectors are
+   more specific than its .slot-headline rules. */
+.hero9 .hero9-headline .slot-headline p { margin: 0; max-width: 24ch; font-size: var(--t-statement); line-height: 1.2;
+                                          letter-spacing: -0.015em; color: var(--ink); background: none; -webkit-background-clip: border-box;
+                                          background-clip: border-box; }
+.hero9-foot { display: flex; justify-content: flex-end; }
+.block9 { padding-top: var(--s9); padding-bottom: var(--s5); display: grid; gap: var(--s6); }
+.display9 { font-size: var(--t-display); display: flex; align-items: baseline; gap: var(--s5); }
+.display9 .n9 { font-family: var(--mono); font-size: var(--t-label); color: var(--quiet); letter-spacing: 0; }
+.swatches9 { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--s6) var(--s5); }
+.swatch9 { display: grid; gap: var(--s1); }
+.chip9 { height: 72px; border-radius: var(--r-control); box-shadow: inset 0 0 0 1px var(--rule); margin-bottom: var(--s2); }
+.name9 { font-size: var(--t-h3); }
+.mono9 { font-family: var(--mono); }
+.datastrip9 { display: grid; gap: var(--s3); max-width: 760px; }
+.strip9 { display: grid; grid-template-columns: 9ch 1fr; align-items: center; gap: var(--s4); }
+.steps9 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.steps9 span { height: 36px; border-radius: 2px; }
+.tex9 { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.tex9 span { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--s4); border-radius: 2px; font-size: var(--t-label);
+             color: var(--ink); background-color: var(--panel); box-shadow: inset 0 0 0 1px var(--rule); }
+.hatch-neg { background-image: repeating-linear-gradient(45deg, var(--critical) 0 1px, transparent 1px 6px); }
+.hatch-imp { background-image: repeating-linear-gradient(135deg, var(--ink-2) 0 1px, transparent 1px 6px); }
+.dots-unr { background-image: radial-gradient(var(--muted) 1px, transparent 1.4px); background-size: 6px 6px; }
+.tex9 span { text-shadow: 0 0 3px var(--panel), 0 0 3px var(--panel); }
+.specimens9 { display: grid; gap: var(--s6); }
+.spec9 { display: grid; gap: var(--s2); border-top: 1px solid var(--rule); padding-top: var(--s4); min-width: 0; }
+.spec-marquee { font-size: var(--t-marquee); line-height: 1; letter-spacing: var(--track-display); white-space: nowrap; overflow: hidden; }
+.spec-display { font-size: var(--t-display); line-height: 1.05; letter-spacing: var(--track-display); }
+.spec-figure { font-family: var(--mono); font-size: var(--t-figure); line-height: 1; letter-spacing: -0.02em; }
+.spec-statement { font-size: var(--t-statement); line-height: 1.2; letter-spacing: -0.015em; max-width: 28ch; }
+.spec-h3 { font-size: var(--t-h3); font-weight: 600; }
+.spec-prose { font-size: var(--t-prose); line-height: 1.6; max-width: var(--measure); }
+.spec-ui { font-size: var(--t-ui); }
+.spec-small { font-size: var(--t-label); color: var(--quiet); }
+.spec-tick { font-family: var(--mono); font-size: var(--t-tick); color: var(--quiet); }
+.fig9 { display: grid; gap: var(--s3); margin: 0; }
+.controls9 { display: grid; gap: var(--s6); }
+.row9 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
+.slider9 { max-width: 760px; }

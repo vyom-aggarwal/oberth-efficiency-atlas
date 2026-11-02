@@ -1,0 +1,118 @@
+/* Phase 9 components (docs/revamp_plan.md §2.4–2.6), for the style page until passes 2–6 apply them to the site.
+   One easing curve; motion is CSS or a few lines of requestAnimationFrame; nothing moves under reduced motion. */
+
+.wrap9 { padding: 0 var(--pad); }
+.eyebrow9 { font-size: var(--t-label); color: var(--quiet); letter-spacing: 0.02em; }
+.panel9 { background: var(--panel); border-radius: var(--r-panel); padding: var(--s4); --surface: var(--panel); --raised: var(--void); }
+
+/* Header: not sticky; inline links from 900 px. */
+.head9 { display: flex; align-items: center; justify-content: space-between; gap: var(--s5); padding: var(--s5) var(--pad); }
+.head9 .wordmark9 { color: var(--ink); text-decoration: none; font-size: var(--t-ui); }
+.head9 nav { display: none; gap: var(--s6); }
+.head9 nav a { color: var(--ink); text-decoration: none; font-size: var(--t-ui); position: relative; }
+.head9 nav a::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 5px; height: 5px; border-radius: 50%;
+                       background: var(--ink); transform: translateX(-50%) scale(0); transition: transform 300ms var(--ease); }
+.head9 nav a:hover::after, .head9 nav a:focus-visible::after, .head9 nav a[aria-current="page"]::after { transform: translateX(-50%) scale(1); }
+@media (min-width: 900px) { .head9 nav { display: flex; } }
+
+/* The floating round menu button (fixed, top right) and the drawer. */
+.menu-fab { position: fixed; top: var(--s4); right: var(--pad); z-index: 50; width: 56px; height: 56px; border-radius: 50%;
+            border: 0; background: var(--ink); color: var(--void); cursor: pointer; display: grid; place-items: center;
+            transition: background-color 250ms var(--ease), transform 300ms var(--ease); }
+.menu-fab .bars, .menu-fab .bars::before { display: block; width: 18px; height: 1.5px; background: currentColor; position: relative;
+                                           transition: transform 300ms var(--ease); }
+.menu-fab .bars::before { content: ""; position: absolute; top: 6px; }
+.menu-fab .bars { transform: translateY(-3px); }
+.menu-fab[data-away] { transform: scale(0); visibility: hidden; transition: transform 300ms var(--ease), visibility 0s 300ms; }
+.menu-fab[aria-expanded="true"] { background: var(--signal); }
+.menu-fab[aria-expanded="true"] .bars { transform: rotate(45deg); }
+.menu-fab[aria-expanded="true"] .bars::before { transform: translateY(-6px) rotate(-90deg); }
+.veil9 { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.55); opacity: 0; pointer-events: none;
+         transition: opacity 300ms var(--ease); }
+.veil9.open { opacity: 1; pointer-events: auto; }
+.drawer9 { position: fixed; top: 0; right: 0; bottom: 0; z-index: 45; width: min(480px, 100vw); background: var(--panel);
+           padding: 120px var(--s7) var(--s7); transform: translateX(100%); transition: transform 450ms var(--ease);
+           display: flex; flex-direction: column; gap: var(--s6); visibility: hidden; }
+.drawer9.open { transform: none; visibility: visible; }
+.drawer9 .eyebrow9 { border-bottom: 1px solid var(--rule); padding-bottom: var(--s5); }
+.drawer9 ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s1); }
+.drawer9 li a { color: var(--ink); text-decoration: none; font-size: clamp(40px, 4.2vw, 56px); letter-spacing: var(--track-display);
+                line-height: 1.15; display: inline-block; transform: translateX(40px); opacity: 0;
+                transition: transform 450ms var(--ease), opacity 450ms var(--ease); }
+.drawer9.open li a { transform: none; opacity: 1; }
+.drawer9.open li:nth-child(2) a { transition-delay: 30ms; } .drawer9.open li:nth-child(3) a { transition-delay: 60ms; }
+.drawer9.open li:nth-child(4) a { transition-delay: 90ms; } .drawer9.open li:nth-child(5) a { transition-delay: 120ms; }
+.drawer9 li a[aria-current="page"]::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+                                            background: var(--ink); margin: 0 var(--s4) 0 calc(-1 * (8px + var(--s4))); vertical-align: middle; }
+.drawer9 .secondary { display: flex; gap: var(--s5); border-top: 1px solid var(--rule); padding-top: var(--s5); }
+.drawer9 .secondary a { color: var(--ink); font-size: var(--t-label); text-decoration: none; }
+
+/* The marquee: the title line, twice, drifting; a pause control (WCAG 2.2.2); static under reduced motion. */
+.marquee9 { position: relative; overflow: hidden; white-space: nowrap; padding: var(--s2) 0; }
+.marquee9 .track { display: inline-flex; animation: drift9 60s linear infinite; will-change: transform; }
+.marquee9 .line { font-size: var(--t-marquee); line-height: 1; letter-spacing: var(--track-display); padding-right: 0.25em; color: var(--ink); }
+.marquee9 .line sub { font-size: 0.42em; letter-spacing: 0; vertical-align: baseline; position: relative; top: 0.18em; }
+.marquee9.paused .track { animation-play-state: paused; }
+@keyframes drift9 { to { transform: translateX(-50%); } }
+.marquee9 .pause9 { position: absolute; right: var(--pad); bottom: var(--s3); }
+/* Reduced motion: nothing moves, so the line shows once, wrapped at display size (a static 216 px line would cut the
+   title mid-word), and the pause control goes. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee9 { white-space: normal; }
+  .marquee9 .track { animation: none; display: block; }
+  .marquee9 .line + .line { display: none; }
+  .marquee9 .line { display: block; font-size: var(--t-display); line-height: 1.05; padding: 0 var(--pad); }
+  .round9.pause9 { display: none; }     /* more specific than .round9's display, which comes later in this file */
+}
+
+/* Buttons: round (the two primary actions; magnetic for fine pointers) and pills (everything else). */
+.round9 { --size: 148px; width: var(--size); height: var(--size); border-radius: 50%; border: 0; display: inline-grid; place-items: center;
+          background: var(--signal); color: var(--void); font: inherit; font-size: var(--t-ui); text-decoration: none; cursor: pointer;
+          position: relative; overflow: hidden; isolation: isolate; transition: transform 350ms var(--ease); }
+.round9::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--ink);
+                  transform: translateY(101%); transition: transform 350ms var(--ease); }
+.round9:hover::before, .round9:focus-visible::before { transform: none; }
+.round9.outline { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--quiet); --size: 56px; }
+.round9.outline::before { background: var(--panel); }
+.pill9 { display: inline-flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s5); border-radius: var(--r-pill);
+         border: 1px solid var(--quiet); color: var(--ink); background: transparent; font: inherit; font-size: var(--t-ui);
+         text-decoration: none; cursor: pointer; transition: background-color 300ms var(--ease), color 300ms var(--ease); }
+.pill9:hover, .pill9:focus-visible { background: var(--ink); color: var(--void); }
+.pill9 sup { font-size: 0.65em; margin-left: -0.15em; }
+.pill9.small { min-height: 32px; padding: 0 var(--s4); font-size: var(--t-label); }
+
+/* The switch (radio pills), select and slider, restyled from the shared controls. */
+.segmented { display: inline-flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; }
+.segmented legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.segmented label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: var(--r-pill);
+                   border: 1px solid var(--quiet); color: var(--quiet); font-size: var(--t-label); cursor: pointer; }
+.segmented label:has(input:checked) { border-color: var(--ink); color: var(--ink); }
+.segmented input { accent-color: var(--signal); margin: 0; }
+.segmented label:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 3px; }
+.select9 { font: inherit; font-size: var(--t-ui); color: var(--ink); background: var(--void); border: 1px solid var(--quiet);
+           border-radius: var(--r-pill); min-height: 44px; padding: 0 40px 0 var(--s5); appearance: none;
+           background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+           background-position: calc(100% - 22px) 52%, calc(100% - 17px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
+.axis-slider { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s3); align-items: center; }
+.axis-slider input[type="range"], .scrub input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0; background: transparent; cursor: pointer; }
+.axis-slider input[type="range"]::-webkit-slider-runnable-track, .scrub input[type="range"]::-webkit-slider-runnable-track { height: 1px; background: var(--quiet); }
+.axis-slider input[type="range"]::-webkit-slider-thumb, .scrub input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -7.5px; border-radius: 50%; background: var(--ink); }
+.axis-slider input[type="range"]:focus-visible, .scrub input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; }
+.axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
+.axis-slider svg text { fill: var(--quiet); font-family: var(--mono); font-size: var(--t-tick); }
+.axis-slider svg text.mark-label { fill: var(--ink); font-family: var(--sans); font-size: var(--t-annot); font-weight: 600; }
+.axis-slider svg text.mark-label.hollow { fill: var(--quiet); font-weight: 400; }
+.axis-slider .number { width: 9ch; font-family: var(--mono); font-size: var(--t-label); color: var(--ink); background: var(--void);
+                       border: 1px solid var(--quiet); border-radius: var(--r-pill); min-height: 36px; padding: 0 var(--s3); text-align: right; }
+
+/* Findings rows: number, title, category; the title shifts and dims on hover or focus, an arrow appears. */
+.rows9 { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.rows9 li { border-bottom: 1px solid var(--rule); }
+.rows9 a { display: grid; grid-template-columns: 4ch 1fr auto 2ch; align-items: baseline; gap: var(--s5); padding: var(--s7) 0;
+           color: var(--ink); text-decoration: none; }
+.rows9 .n { font-family: var(--mono); font-size: var(--t-label); color: var(--quiet); }
+.rows9 .t { font-size: var(--t-statement); letter-spacing: -0.02em; transition: transform 300ms var(--ease), color 300ms var(--ease); }
+.rows9 .c { font-size: var(--t-label); color: var(--quiet); }
+.rows9 .arrow { opacity: 0; transform: translate(-6px, 6px); transition: opacity 300ms var(--ease), transform 300ms var(--ease); }
+.rows9 a:hover .t, .rows9 a:focus-visible .t { transform: translateX(12px); color: var(--quiet); }
+.rows9 a:hover .arrow, .rows9 a:focus-visible .arrow { opacity: 1; transform: none; }
