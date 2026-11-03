@@ -25,7 +25,7 @@ export default defineConfig<SiteOptions>({
   use: { baseURL: DIST ? "http://site.test/" : `http://localhost:${PORT}/`, channel: "chrome", browserName: "chromium" },
   projects: [
     { name: "site", testIgnore: /(prod|fold|headline-budget)\.spec\.ts$/ },
-    ...(PROD ? [{ name: "production", testMatch: /(prod|fold)\.spec\.ts$/,
+    ...(PROD ? [{ name: "production", testMatch: /(prod|fold|preloader)\.spec\.ts$/,
                   use: { siteDist: PROD, siteBase: PROD_BASE, baseURL: `http://site.test${PROD_BASE}` } }] : []),
     ...(PH ? [{ name: "placeholders", testMatch: /(fold|headline-budget)\.spec\.ts$/, use: { siteDist: PH, baseURL: "http://site.test/" } }] : []),
   ],

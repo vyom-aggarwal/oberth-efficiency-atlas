@@ -798,3 +798,20 @@ footer.
 - **Closing section** on every page, with the escape leg.
 - **Sticky elements:** extended the measurements and their tests to the menu pill; added tests of the drawer's
   keyboard handling and of the closing section.
+
+**Assistant, pass 3 (the landing page):**
+- **Landing page:** rebuilt it from the approved style page, with the preloader, the hero band, the title moved by
+  the clock, the docked dive with rows that steer it and open in place, the intro with the scope facts, and four key
+  results from the site data with source links.
+- **Preloader tests:** wrote the spec the author asked for. It checks that the stage marks lie on the drawn path and
+  switch on in physical order, the once-a-session rules, and the 2.0 s cap on the production build (enforced
+  locally, report-only in CI). A fixture option keeps every other spec clear of the preloader.
+- **Fold and budget:** re-specified the fold check and the headline budget for a hero without the entry-link row,
+  following the brief, and re-measured both.
+- **Tests and tools:** rewrote the landing spec for the rows, docking and steering, and wrote
+  `tools/landing-shots.mjs` for the review screenshots.
+
+**Assistant found inside pass 3:**
+- **Clipped label:** in the dive's window at 1440 px the view is 266 px wide and the SEP label's star was clipped
+  (the approved style page had the same fault, unnoticed). A narrow view now keeps 28 px on the right.
+- **Title position:** a later rule overrode the title line's position, so it sat at the top of the hero; fixed.

@@ -18,6 +18,18 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-9-pass-3/` (Phase 9, pass 3, 2026-11-03: the landing page, for the author's review). The author's list, at 1440
+  and 390 px, from the test build. Made by `site/tools/landing-shots.mjs` (in `site/`, after the test build), which also
+  prints the preloader's measured times:
+  - **`landing-<width>-preloader-flight.png`:** the preloader mid-flight, 0.75 s from navigation start;
+  - **`-hero`:** the hero, its intro already seen (the final frame);
+  - **`-hover-01`, `-hover-02`, `-hover-03` (1440 only):** the dive docked beside the rows, each row hovered in turn.
+    Row 01 lights every burn with the clock at the end; row 02 leaves the dive as it is; row 03 lights the solid stack,
+    just after its burn. Below 1100 px there is no dock.
+  - **`-row-open`:** row 01 opened in place, its live figure and caption slot;
+  - **`-reduced`, `-reduced-full`:** reduced motion (no preloader, no intro, the title still and wrapped), the hero and
+    the full page;
+  - **`landing-<width>.png`:** the full page.
 - `phase-9-style/` (Phase 9, step 2, revised again 2026-11-02: every page in scope, the reference's signature
   interactions replaced): the development-only style page `/style-9/` (`docs/revamp_plan.md` §2.11), for the author's
   approval. Made by `site/tools/style9-shots.mjs` (in `site/`, with `npm run dev` running), at 1440 and 390 px unless

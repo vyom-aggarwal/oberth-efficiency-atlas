@@ -1,8 +1,9 @@
-// The landing page (Phase 7; docs/landing_plan.md as approved 2026-10-21), against the test build: no console errors
-// and no sideways scrolling at four widths; the hero's sequence (once per browser session, skipped under reduced
-// motion), scrubbing, and the SEP caveat; the entry links; the three findings; the reproducibility facts and the
-// footer's citation. The production build's checks (the Research link, links under the base path, above the fold)
-// are in prod.spec.ts.
+// The landing page (Phase 7; Phase 9 pass 3, docs/revamp_plan.md §2.5), against the test build: no console errors and
+// no sideways scrolling at four widths; the hero's sequence (once per browser session, skipped under reduced motion),
+// scrubbing, and the SEP caveat; the findings rows (a disclosure list: each opens in place to its live figure); the
+// docked dive and the rows that steer it (from 1100 × 700; row 02 has no state); the scope facts, the key results and
+// the footer's citation. The production build's checks (the Research link, links under the base path, above the fold)
+// are in prod.spec.ts and fold.spec.ts; the preloader's in preloader.spec.ts.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "./fixtures";
 
@@ -22,11 +23,10 @@ async function open(page: Page, width: number, reducedMotion = true): Promise<st
 for (const width of [360, 390, 768, 1440]) {
   test(`landing at ${width}px: no console errors, no sideways scrolling, every part drawn, the SEP caveat visible`, async ({ page }) => {
     const errors = await open(page, width);
-    await page.evaluate(async () => {                                 // reach the lazily loaded parts
-      for (let y = 0; y < document.documentElement.scrollHeight; y += 400) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); }
-    });
+    for (const head of await page.locator(".row-head").all()) await head.click();     // each row's figure mounts when it opens
     await expect(page.locator(".finding svg[role=img]")).toHaveCount(3);
-    await expect(page.locator(".landing-repro dl.facts dt")).toHaveCount(7);
+    await expect(page.locator(".scope-facts dt")).toHaveCount(7);
+    await expect(page.locator(".key-results li")).toHaveCount(4);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow, "no sideways scrolling").toBeLessThanOrEqual(0);
     await expect(page.locator(".lh-note")).toHaveText("* hypothetical at 3.2 R☉");
@@ -90,27 +90,35 @@ test("scrubbing moves the clock, the paths and the strip's cursor", async ({ pag
   await expect(page.locator("#hero-t")).toHaveAttribute("aria-valuetext", /from perihelion/);
 });
 
-test("every entry link resolves", async ({ page }) => {
+test("the ways on resolve: Read the research (the intro) and Open the explorer (the closing section)", async ({ page }) => {
   await open(page, 1440);
-  const links = page.locator(".entry-links a");
-  await expect(links).toHaveText(["Read the research", "Open the explorer", "View the source on GitHub"]);   // the test build shows the article
-  for (const href of await links.evaluateAll((els) => els.map((e) => (e as HTMLAnchorElement).href))) {
-    if (new URL(href).host !== "site.test") { expect(href).toMatch(/^https:\/\/github\.com\//); continue; }
+  await expect(page.locator(".intro-cta a")).toHaveText("Read the research");          // the test build shows the article
+  await expect(page.locator(".closing-cta")).toHaveText("Open the explorer");
+  for (const href of await page.locator(".intro-cta a, .closing-cta").evaluateAll((els) => els.map((e) => (e as HTMLAnchorElement).href)))
     expect((await page.goto(href))!.status(), href).toBe(200);
-  }
 });
 
-test("the findings: titles, live figures with readouts, and one link each", async ({ page }) => {
+test("the findings rows: a disclosure list, one open at a time, each with its live figure and one link", async ({ page }) => {
   await open(page, 1440);
-  const findings = page.locator("figure.finding");
-  await expect(findings).toHaveCount(3);
-  await findings.first().scrollIntoViewIfNeeded();
-  for (const id of ["loss", "missions", "hibberd"]) {
+  const heads = page.locator(".row-head");
+  await expect(heads).toHaveText([/Loss against Π/, /Where real missions sit/, /The Hibberd et al\. check/]);
+  await expect(page.locator(".row-h")).toHaveCount(3);                                  // each button inside a heading
+  for (const [i, id] of ["loss", "missions", "hibberd"].entries()) {
+    const head = heads.nth(i), body = page.locator(`#row-${id}`);
+    await expect(head).toHaveAttribute("aria-controls", `row-${id}`);
+    await expect(body).toBeHidden();
+    await head.focus();
+    await page.keyboard.press("Enter");                                                 // the keyboard opens it
+    await expect(head).toHaveAttribute("aria-expanded", "true");
+    await expect(body).toBeVisible();
+    await expect(page.locator('.row-head[aria-expanded="true"]')).toHaveCount(1);       // the others closed
     const f = page.locator(`#finding-${id}`);
-    await f.scrollIntoViewIfNeeded();
     await expect(f.locator(".finding-plot svg")).toBeVisible();
     await expect(f.locator("a.finding-link")).toHaveCount(1);
   }
+  await heads.nth(2).click();                                                           // and closes again
+  await expect(page.locator("#row-hibberd")).toBeHidden();
+  await heads.nth(0).click();
   // The loss finding marks the three engines of the hero, with the 1 % Π from curve.json.
   const loss = page.locator("#finding-loss");
   await expect(loss.locator(".finding-plot .hit[tabindex]")).toHaveCount(4);                // three engines and the 1 % point
@@ -119,6 +127,47 @@ test("the findings: titles, live figures with readouts, and one link each", asyn
   const missions = page.locator("#finding-missions .finding-plot");
   await expect(missions).toHaveAttribute("data-mission-points", String(data("missions.json").Pi.length));
   await expect(page.locator("#finding-hibberd .finding-legend")).toContainText("Reference stack of Hibberd et al.");
+});
+
+test("from 1100 × 700 the dive docks beside the rows, which steer it; row 02 has no state", async ({ page }) => {
+  await open(page, 1440, false);
+  const hero = page.locator("#landing-hero"), steer = () => hero.getAttribute("data-steer");
+  await expect(page.locator("#dive-dock #landing-hero")).toHaveCount(1);
+  await page.locator("#findings-title").scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, 200));
+  await expect(page.locator("html")).toHaveClass(/dive-docked/);
+  const heads = page.locator(".row-head");
+  await heads.nth(0).hover();
+  await expect.poll(steer).toBe("012b");                                                // every burn, the clock at the end
+  await expect(page.locator("#rows li").nth(0)).toHaveClass(/is-active/);
+  await heads.nth(1).hover();
+  await expect.poll(steer).toBeNull();                                                  // row 02: as if pointing at nothing
+  await heads.nth(2).hover();
+  await expect.poll(steer).toBe("0");                                                   // the solid stack alone
+  await expect(page.locator(".lh-key li").nth(1)).toHaveClass(/dim/);
+  await page.mouse.move(5, 5);
+  await expect.poll(steer).toBeNull();                                                  // the reader's own clock again
+  await heads.nth(2).click();                                                           // an open row holds its state
+  await page.mouse.move(5, 5);
+  await expect.poll(steer).toBe("0");
+  await heads.nth(1).hover();                                                           // row 02 leaves it as it is
+  await expect.poll(steer).toBe("0");
+  // Focus steers as pointing does, and the row says what the dive shows (the pointer moved off the rows first: pointing
+  // takes priority over focus).
+  await heads.nth(2).click();
+  await page.mouse.move(5, 5);
+  await heads.nth(0).focus();
+  await expect.poll(steer).toBe("012b");
+  await expect(heads.nth(0)).toHaveAttribute("aria-describedby", "row-loss-steer");
+  await expect(heads.nth(1)).not.toHaveAttribute("aria-describedby", /.+/);
+});
+
+test("below 1100 px there is no dock: the dive stays in the band and the rows do not steer it", async ({ page }) => {
+  await open(page, 768);
+  await expect(page.locator("#dive-home #landing-hero")).toHaveCount(1);
+  await page.locator(".row-head").nth(0).hover();
+  expect(await page.locator("#landing-hero").getAttribute("data-steer")).toBeNull();
+  await expect(page.locator(".row-head").nth(0)).not.toHaveAttribute("aria-describedby", /.+/);
 });
 
 // Every finding's explorer fallback (the link while its article section is unpublished) opens on a valid case: the
@@ -148,11 +197,25 @@ test("the check catches a bad fallback: earth.hall starts its burn outside Earth
 test("reproducibility and scope: labelled pairs from methods.json", async ({ page }) => {
   await open(page, 1440);
   const m = data("methods.json");
-  const repro = page.locator(".landing-repro");
-  await repro.scrollIntoViewIfNeeded();
-  await expect(repro.locator("dl.facts")).toContainText(`${m.audit.identical.value} of ${m.audit.outputs.value} outputs reproduced identically`);
-  await expect(repro.locator("dl.facts")).toContainText(`${m.tests_collected} in the suite`);
-  await expect(repro.locator("dl.facts")).toContainText(m.scope.engines.map((e: { value: string }) => e.value).join(", "));
+  const facts = page.locator(".scope-facts");
+  await facts.scrollIntoViewIfNeeded();
+  await expect(facts).toContainText(`${m.audit.identical.value} of ${m.audit.outputs.value} outputs reproduced identically`);
+  await expect(facts).toContainText(`${m.tests_collected} in the suite`);
+  await expect(facts).toContainText(m.scope.engines.map((e: { value: string }) => e.value).join(", "));
+});
+
+test("key results: four numbers from the site data, each with a link to its source file", async ({ page }) => {
+  await open(page, 1440);
+  const m = data("methods.json"), curve = data("curve.json");
+  const one = curve.thresholds.find((t: { level: string }) => t.level === "1%").Pi;
+  const items = page.locator(".key-results li");
+  await items.first().scrollIntoViewIfNeeded();
+  await expect(items.locator(".num")).toHaveText([
+    Number(m.scope.sweep_rows.value).toLocaleString("en-GB"), `${m.audit.identical.value} / ${m.audit.outputs.value}`,
+    `Π = ${one.value.toPrecision(3)}`, m.rule_max_ratio_Pi_le_1.value.toPrecision(4)]);
+  const srcs = [m.scope.sweep_rows.src, m.audit.identical.src, one.src, m.rule_max_ratio_Pi_le_1.src].map((s: string) => s.split("#")[0]);
+  for (const [i, src] of srcs.entries())
+    await expect(items.nth(i).locator(".src a")).toHaveAttribute("href", new RegExp(`/blob/[^/]+/${src.replace(/[.]/g, "\\.")}$`));
 });
 
 // The Copy button needs the clipboard API, which browsers give only to secure contexts: localhost is one (author,

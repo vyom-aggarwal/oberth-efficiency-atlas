@@ -27,6 +27,8 @@ as its licence requires. Package dependencies not listed here keep their own lic
   adapted:
   - `site/src/styles/shell.css` (the site's header, drawer, buttons, closing section and footer layouts; Phase 9 pass 2)
   - `site/src/pages/shell.ts` (the site's drawer: open, close and focus handling; Phase 9 pass 2)
+  - `site/src/styles/landing.css` (the landing page's hero composition and the findings rows' layout; Phase 9 pass 3)
+  - `site/index.html` (the landing page's preloader gate, inline before the first paint; Phase 9 pass 3)
   - `site/src/styles/v9/components.css` (the development style page: header, drawer, rows, buttons, closing section and
     footer layouts)
   - `site/src/styles/v9/style9.css` (the hero's composition)

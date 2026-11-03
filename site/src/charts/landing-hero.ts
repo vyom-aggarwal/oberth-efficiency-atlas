@@ -182,8 +182,10 @@ export function landingHero(root: HTMLElement, body: HTMLElement, d: EnginesData
   function drawView(k: number): void {
     const narrow = W < 560;
     const lane = narrow ? 4 : 5;                              // px between lanes
-    // Room around the paths: the lanes and their labels (the solid stack's label on the left, the SEP label above).
-    const pad = { left: narrow ? 58 : 70, right: 8, top: narrow ? 26 : 34, bottom: narrow ? 12 : 18 };
+    // Room around the paths: the lanes and their labels (the solid stack's label on the left, the SEP label above). A
+    // narrow view filled edge to edge (Phase 9: the dive's window at 1440 px gives it 266 px) keeps room on the right
+    // for the SEP label, which hangs up and to the right of its lane.
+    const pad = { left: narrow ? 58 : 70, right: narrow ? 28 : 8, top: narrow ? 26 : 34, bottom: narrow ? 12 : 18 };
     // The hero's height cap (above the fold: author, 2026-10-21); data-height-cap overrides it for tools/og-image.mjs.
     const cap = Number(root.dataset.heightCap) || (narrow ? 196 : 360);
     const sc = Math.min((W - pad.left - pad.right) / (xMax - xMin), (cap - pad.top - pad.bottom) / (yMax - yMin));

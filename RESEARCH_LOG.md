@@ -4025,4 +4025,81 @@ the drawer's focus handling), each with a header comment.
 - screenshots of the header, the open drawer, the closing section and the article's bar with the pill, at 1440 and
   390 px, looked right.
 
+## 2026-11-03: Phase 9 pass 3: the landing page
+
+The approved style-page design becomes the landing page (`site/index.html`, `src/pages/landing.ts`, a rewritten
+`src/styles/landing.css`), in this order:
+- **the flyby preloader**, using `lib/flyby.ts`, with its inline once-a-session gate;
+- **the hero band**, with the header on it: the dive in its Void window, the case pill, the published headline under its
+  rule, and the title line moved by the dive's clock;
+- **the findings rows**, beside the docked dive from 1100 × 700: rows 01 and 03 steer it, row 02 has no state, and every
+  row opens in place;
+- **the intro**: the author's summary slot, the seven scope facts from `methods.json`, and "Read the research";
+- **four key results**, each from the site data with a link to its source file:
+  - 135,720 simulated flybys (`phase2_numbers.json`);
+  - 69 / 69 outputs reproduced (the audit summary);
+  - Π = 0.976 where the loss reaches 1 % of Δv (`phase4_numbers.json`, via `curve.json`);
+  - 1.010, the largest ratio of loss/Δv to its bound Π²/96 for Π ≤ 1 (`rule_numbers.json`; the label avoids "≲",
+    which no self-hosted face has: the font test caught it).
+- **the shell's closing section and footer.**
+
+Every interaction is the style page's, already approved.
+
+**Deviations and decisions, recorded now:**
+- **The fold contract, re-specified for a hero without the entry-link row** (plan §2.5). Phase 7's rule kept the
+  title, the headline and the entry links above the fold. The Phase 9 brief keeps "the published headline", and the
+  approved hero has no entry links. So `e2e/fold.spec.ts` now checks:
+  - the headline and the way into the site: the header's links, the title line and the Findings cue at 1440 × 900;
+    the menu pill at 390 × 844;
+  - that at 1440 the headline is clear of the dive and the title line.
+
+  Measured on the production and placeholder builds: the lowest part ends at 878 px of 900, and at 233 px of 844.
+- **The headline budget,** re-measured on the same terms (`e2e/headline-budget.spec.ts`): the longest headline that
+  fits is 209 characters at 1440 × 900 (now the binding size) and 699 at 390 × 844 (the headline comes first there).
+  `HEADLINE_BUDGET` stays 100. The build's warning message names the new reason.
+- **The h1** is the visually hidden "Oberth Efficiency Atlas"; the title line is decoration, as on the style page. The
+  dive's accessible title stays "One solar dive, three engines", now visually hidden.
+- **A clipped label, found by the existing layout test.** In the dive's window at 1440 the view is 266 px wide, which
+  is narrow mode, filled edge to edge. The SEP label's star was clipped: `data-labels-clipped = 1`, also on the approved
+  style page, unnoticed. A narrow view now keeps 28 px on the right (`landing-hero.ts`); clipped = 0 at 360, 390, 768
+  and 1440 px.
+- **The scrub,** as on the style page: a hairline track and an Ink thumb (the accent stays out of the figure). The
+  touch thumb stays 26 px.
+
+**The preloader's checks** (the author, 2026-11-02; `e2e/preloader.spec.ts`):
+- **Test build:**
+  - every stage mark is in the drawn path's stroke;
+  - the marks switch on in the order Approach, Ignition, Periapsis, Cutoff, Escape, each no earlier than the one
+    before;
+  - a key ends it;
+  - it does not play on a second load in the session, with a `#fragment`, or under reduced motion.
+- **A tolerance change, measured:** the first version required strictly later times. Under the full suite Ignition
+  and Periapsis switched on in the same frame (both at 762.7 ms), so the e2e check is now "no earlier".
+  `flyby.test.ts` keeps the strict order of their times.
+- **Production build:** gone by 2.0 s from navigation start, enforced locally, report-only in CI (`PRELOADER_CAP=report`
+  in `.github/workflows/site.yml`, the times in the job summary). Measured: 1671 and 1657 ms (1440, 390) in the full
+  suite, and 1818 and 1638 ms on a rerun.
+- **The fixture option `preloader`** (default off) starts every other spec in a session that has seen it.
+
+**Tests rewritten** (`e2e/landing.spec.ts`, 23 tests pass):
+- the rows as a disclosure list (keyboard, one open at a time, each figure and link);
+- the dock and the steering (rows 01 and 03, row 02 as nothing, an open row holding its state, focus with its
+  description);
+- no dock below 1100 px;
+- the ways on;
+- the scope facts and the key results with their source files.
+
+**The full Playwright suite on the three builds:** 174 passed, 5 failed, 3 skipped (project-specific skips).
+- **Fixed:** the preloader's strict-order test (above).
+- **Not fixed, left for the passes that rebuild their pages:** three failures are knock-ons from pass 1's type (DM Sans
+  and the Phase 9 scale):
+  - the article hero's slider label "1000" crosses the figure's edge at 1440 (`hero.spec.ts`; pass 4);
+  - the explorer's "Trajectory" title reaches past its panel's padding at 360 and 390 px (`panel-text.spec.ts`;
+    pass 5);
+  - the universal curve's tooltip closes during the full-page capture in `screens-states.spec.ts` (pass 4; cause not
+    yet found).
+
+**Review screenshots** (`docs/screens/phase-9-pass-3/`, by `site/tools/landing-shots.mjs`): the author's list at 1440
+and 390 px. The docked hover shots are at 1440 only, since there is no dock below 1100 px.
+
 

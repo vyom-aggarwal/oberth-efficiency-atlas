@@ -80,7 +80,8 @@ export function loadSections(base = "/"): Section[] {
 const LANDING = dir("../content/landing/");
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 // The headline is about 80 characters and the summary two sentences (author, 2026-10-21): the fold test on the
-// placeholder build (e2e/fold.spec.ts) checks that a headline of that length keeps the entry links above the fold.
+// placeholder build (e2e/fold.spec.ts) checks that a headline of that length stays above the fold (and, at 1440 px,
+// clear of the dive and the title line; Phase 9).
 export const PLACEHOLDERS: Record<string, string> = {
   headline: "[Placeholder headline] Lorem ipsum dolor sit amet, consectetur adipiscing elit sed.",
   summary: `[Placeholder summary, two sentences] ${LOREM} Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.`,
@@ -91,12 +92,15 @@ export const PLACEHOLDERS: Record<string, string> = {
 };
 
 /**
- * The headline's length budget, in characters of plain text (author, 2026-10-21). A longer headline can push the entry
- * links below the fold on a phone. e2e/fold.spec.ts measures the longest headline that keeps them above the fold at
- * 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build reports a written headline over it.
+ * The headline's length budget, in characters of plain text (author, 2026-10-21). e2e/headline-budget.spec.ts measures
+ * the longest headline that still fits at 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build
+ * reports a written headline over it.
  * Measured 2026-10-21: 114 characters at 390 × 844 (three lines; the binding size) and 365 at 1440 × 900; after the
  * Phase 8 restyle (2026-10-24, Barlow 24 px): 124 and 444, so the budget is unchanged. The budget
  * keeps about one long word in hand, since where a headline wraps depends on its words.
+ * Phase 9 (pass 3, 2026-11-03): the hero has no entry-link row, and the headline comes first at 390 px. It fits while it
+ * stays above the fold and, at 1440 px, where it sits beside the dive, clear of the dive and the title line. Measured:
+ * 699 characters at 390 × 844 and 209 at 1440 × 900 (now the binding size), so the budget of 100 is unchanged.
  */
 export const HEADLINE_BUDGET = 100;
 
@@ -105,7 +109,7 @@ export function headlineReport(markdown: string, budget = HEADLINE_BUDGET): stri
   if (TODO.test(markdown)) return null;
   const text = md.render(frontMatter(markdown).body).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
   return text.length > budget
-    ? `[content] the landing headline is ${text.length} characters, over its budget of ${budget}: on a 390 × 844 screen it can push the entry links below the fold (e2e/fold.spec.ts)`
+    ? `[content] the landing headline is ${text.length} characters, over its budget of ${budget}: it may not fit beside the dive at 1440 × 900 (e2e/headline-budget.spec.ts)`
     : null;
 }
 

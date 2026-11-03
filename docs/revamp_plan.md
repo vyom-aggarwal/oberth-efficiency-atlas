@@ -363,6 +363,11 @@ texture. All checks pass on both surfaces:
 
    Its first frame is drawn beneath the preloader; its intro starts as the preloader clears (`landingHero`'s `start`
    option).
+
+   **The fold** (re-measured in pass 3; the brief: "the published headline must stay above the fold"). The entry-link
+   row of Phase 7 is gone, so `e2e/fold.spec.ts` checks the headline and the way into the site: the header's links,
+   the title line and the "Findings" cue at 1440 × 900, the menu pill at 390 × 844. At 1440 the headline must also
+   stay clear of the dive and the title line. `HEADLINE_BUDGET` (100) stays within the measured fit (§2.13).
 2. **Findings, beside the docked dive** (the author's preferred direction; my design):
 
    | number | title | category | the dive shows | why (from the data) |
