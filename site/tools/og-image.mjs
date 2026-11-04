@@ -1,7 +1,7 @@
 // The social preview image, public/og-image.png (1200 × 630): the landing page's hero (Phase 7, author 2026-10-21),
 // Hibberd et al.'s dive flown by all three engines with each burn in its lane on the a·v ramp, as the site draws it
-// (light theme, the final frame), taken from a build with Playwright's own Chrome. No server: requests to
-// http://site.test/ are answered from the build directory, as in e2e/fixtures.ts.
+// (Phase 9, pass 7: dark only, on the Void of the dive's window; the final frame), taken from a build with Playwright's
+// own Chrome. No server: requests to http://site.test/ are answered from the build directory, as in e2e/fixtures.ts.
 // Run (in site/), after a test build:
 //   SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
 //   node tools/og-image.mjs [dist-test]
@@ -17,7 +17,9 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", "
   ".bin": "application/octet-stream" };
 
 const browser = await chromium.launch({ channel: "chrome" });
-const page = await browser.newPage({ viewport: { width: 1200, height: 900 }, deviceScaleFactor: 1, colorScheme: "light", reducedMotion: "reduce" });
+// 650 px tall: below the 700 px the dock needs, so the dive stays in the hero band (Phase 9).
+const page = await browser.newPage({ viewport: { width: 1200, height: 650 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
+await page.addInitScript(() => sessionStorage.setItem("oberth-preloaded", "1"));
 await page.route("http://site.test/**", async (route) => {
   let file = join(DIST, decodeURIComponent(new URL(route.request().url()).pathname));
   if (file.endsWith("/") || file.endsWith("\\") || (existsSync(file) && statSync(file).isDirectory())) file = join(file, "index.html");
@@ -27,13 +29,16 @@ await page.route("http://site.test/**", async (route) => {
 await page.goto("http://site.test/");
 await page.locator(".lh-dive").waitFor();
 await page.evaluate(() => document.fonts.ready);
-// Only the dive (paths, Sun, rings, the lanes and their labels), as large as the card allows, on the panel colour it is
-// drawn on (Phase 8: the card is one surface, as the panel; the canvas paints --surface); the card's text
-// comes from og:title and og:description.
+// Only the dive (paths, Sun, rings, the lanes and their labels), as large as the card allows, on the colour it is drawn
+// on (the card is one surface; the canvas paints --surface, the Void of the dive's window since Phase 9); the card's
+// text comes from og:title and og:description. The window is widened to the card for the capture.
 await page.evaluate(() => { document.getElementById("landing-hero").dataset.heightCap = "590"; });
 await page.addStyleTag({ content: ".landing-hero-body { grid-template-columns: minmax(0, 1fr) !important; } .lh-side { display: none !important; }" +
+  " .landing-band { display: block !important; height: auto !important; padding: 0 !important; }" +
+  " .band-home { position: relative !important; left: 0 !important; top: 0 !important; translate: none !important; width: 1200px !important;" +
+  " margin: 0 !important; } figure.landing-hero { padding: 0 !important; box-shadow: none !important; }" +
   " body * { visibility: hidden !important; } .lh-dive { visibility: visible !important; }" +
-  " html, body { background: var(--panel) !important; }" });
+  " html, body { background: var(--void) !important; }" });
 await page.waitForTimeout(400);                                   // the hero redraws on resize
 const box = await page.locator(".lh-dive").evaluate((e) => {
   const r = e.getBoundingClientRect();

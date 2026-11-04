@@ -4177,4 +4177,17 @@ no chart stylesheet (`chart.css`) may read `--signal` or `--accent`. None does. 
 - The two failures are the explorer's "Trajectory" title at 360 and 390 px, assigned to pass 5.
 - The preloader was gone at 1625 and 1636 ms on the production build.
 
+## 2026-11-04: Phase 9 pass 7, the Open Graph image, done before passes 5 and 6
+
+**The order changed.** The author approved pass 4 and moved pass 7 ahead of passes 5 and 6, to stay within the weekly
+budget. Passes 5 and 6, the final checks and the pull request follow after the weekly reset.
+
+**`site/public/og-image.png`** (1200 × 630) is regenerated from the finished landing hero by `site/tools/og-image.mjs`:
+- **Content:** the dive alone (paths, the Sun, rings, the burn lanes and their labels), as large as the card allows,
+  on Void, the surface it is drawn on in the hero's window. Phase 8 used the light theme's panel.
+- **Capture:** at a 1200 × 650 viewport, below the 700 px the dock needs, so the dive stays in the hero band. The window
+  is widened to the card for the capture, with the height cap at 590.
+- **Result:** the dive is 1200 × 590, and every label is inside the frame.
+- **Tests:** `e2e/social.spec.ts` checks the tags and that the image is served.
+
 

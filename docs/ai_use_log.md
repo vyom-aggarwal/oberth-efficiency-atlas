@@ -830,3 +830,9 @@ results in plain language, Hibberd et al.'s thrust margin in place of the Π²/9
     was rounded up; it is now rounded down;
   - a full-page capture resizes the viewport, the figure redraws, and its tooltip is briefly closed; under load the
     capture caught that gap. That screenshot now crops inside the viewport.
+
+**Author decided** (2026-11-04): pass 4 approved; pass 7 next if the budget allows; passes 5 and 6 after the weekly
+reset.
+
+**Assistant, pass 7:** regenerated the Open Graph image from the finished hero: the dive on Void, captured where the
+dive stays in the hero band.
