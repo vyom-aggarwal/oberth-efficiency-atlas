@@ -12,7 +12,10 @@
 import { expect, test } from "./fixtures";
 import { loadLanding } from "./landing-load";
 
-for (const [width, height] of [[1440, 900], [390, 844]] as const) {
+// Laptop viewports after browser chrome (author, 2026-11-04): 1366 × 650 and 1280 × 720 must keep the headline and the
+// header's links fully above the fold; the Findings cue and the title line may fall below there.
+const LAPTOP = new Set(["1366×650", "1280×720"]);
+for (const [width, height] of [[1440, 900], [1366, 650], [1280, 720], [390, 844]] as const) {
   test(`above the fold at ${width}×${height}: the headline and the way into the site`, async ({ page }, info) => {
     await loadLanding(page, width, height);
     const filled = info.project.name === "placeholders";
@@ -29,8 +32,9 @@ for (const [width, height] of [[1440, 900], [390, 844]] as const) {
       await expect(page.locator("[data-slot].slot-placeholder, [data-slot][data-todo]")).toHaveCount(0);
     }
     const shown = (await headline.count()) > 0;
-    const wide = width >= 900;
-    const parts = [...(shown ? [".slot-headline"] : []), ...(wide ? [".site-nav a", ".band-title", ".band-cue"] : [".menu-pill"])];
+    const wide = width >= 900, laptop = LAPTOP.has(`${width}×${height}`);
+    const parts = [...(shown ? [".slot-headline"] : []),
+      ...(laptop ? [".site-nav a"] : wide ? [".site-nav a", ".band-title", ".band-cue"] : [".menu-pill"])];
     let lowest = 0;
     for (const sel of parts) {
       const boxes = await page.locator(sel).evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
@@ -47,6 +51,8 @@ for (const [width, height] of [[1440, 900], [390, 844]] as const) {
       expect(apart(h, dive), "the headline clear of the dive").toBe(true);
       expect(apart(h, title), "the headline clear of the title line").toBe(true);
     }
-    console.log(`above the fold at ${width}×${height} (${info.project.name}${shown ? ", headline shown" : ""}): the lowest part ends at ${Math.round(lowest)} px`);
+    const lowHead = shown ? (await headline.boundingBox())!.y + (await headline.boundingBox())!.height : 0;
+    console.log(`above the fold at ${width}×${height} (${info.project.name}${shown ? ", headline shown" : ""}): the lowest checked part ends at ` +
+      `${Math.round(lowest)} px (margin ${Math.round(height - lowest)} px); the headline at ${Math.round(lowHead)} px (margin ${Math.round(height - lowHead)} px)`);
   });
 }

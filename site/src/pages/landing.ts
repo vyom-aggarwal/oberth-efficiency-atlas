@@ -213,7 +213,7 @@ placeDive();
 
 // ---------------------------------------------------------------- the intro's scope facts and the key results
 async function facts(site: SiteData): Promise<void> {
-  const [m, curve] = await Promise.all([loadData<any>("methods.json"), loadData<any>("curve.json")]);
+  const [m, kase] = await Promise.all([loadData<any>("methods.json"), loadData<any>("case.json")]);
   const row = (k: string, v: Node | string) => h("div", {}, h("dt", {}, k), h("dd", {}, v));
   const a = m.audit;
   $("scope-facts").append(
@@ -224,15 +224,23 @@ async function facts(site: SiteData): Promise<void> {
     row("Engines", m.scope.engines.map((e: { value: string }) => e.value).join(", ")),
     row("Bodies", Object.keys(m.scope.bodies.value).map((b) => BODY_NAMES[b] ?? b).join(", ")),
     row("Rebuild and audit", h("a", { href: `${site.repo.url}/blob/main/${m.repro_doc}`, rel: "noopener" }, m.repro_doc)));
-  // Each key result: a number from the site data, what it is, and its source file.
-  const one = curve.thresholds.find((t: { level: string }) => t.level === "1%").Pi;
-  const result = (num: string, what: Node | string, src: string) =>
+  // Each key result: a number from the site data, a plain-language label for a reader who has not met Π yet (author,
+  // 2026-11-04; every number in a label comes from the data too), and its source file. The 1 % threshold is the case
+  // study's (Hibberd et al.'s dive, a burn centred on perihelion): its Π and how far the stack's thrust could fall.
+  const one = kase.thresholds.find((t: { level: string }) => t.level === "1%"), pct = one.level.replace("%", " %");
+  const result = (num: string, what: string, src: string) =>
     h("li", {}, h("span", { class: "num" }, num), h("span", { class: "what" }, what), h("span", { class: "src" }, "Source: ", sourceLink(site, src.split("#")[0])));
   $("key-results").append(
-    result(Number(m.scope.sweep_rows.value).toLocaleString("en-GB"), "simulated flybys in the sweep", m.scope.sweep_rows.src),
-    result(`${a.identical.value} / ${a.outputs.value}`, "outputs reproduced identically from a fresh clone", a.identical.src),
-    result(`Π = ${sig(one.value, 3)}`, "where the loss reaches 1 % of Δv (a burn centred on perihelion)", one.src),
-    result(sig(m.rule_max_ratio_Pi_le_1.value, 4), "the largest ratio of loss/Δv to its bound Π²/96, for Π ≤ 1", m.rule_max_ratio_Pi_le_1.src));
+    result(Number(m.scope.sweep_rows.value).toLocaleString("en-GB"),
+      `flybys simulated, with ${m.scope.engines.length} engine types at ${Object.keys(m.scope.bodies.value).length} bodies`, m.scope.sweep_rows.src),
+    result(`${a.identical.value} / ${a.outputs.value}`,
+      "outputs rebuilt from scratch in a fresh copy of the repository match the committed ones", a.identical.src),
+    result(sig(one.Pi.value, 3),
+      `periapsis timescales: a burn centred on periapsis and shorter than this loses under ${pct} of its Δv. One timescale is ` +
+      "the periapsis distance divided by the speed there.", one.Pi.src),
+    result(`${sig(one.thrust_scale_divisor.value, 3)}×`,
+      `less thrust, and Hibberd et al.'s solid stack would still lose no more than ${pct} of its Δv on its dive past the Sun`,
+      one.thrust_scale_divisor.src));
 }
 
 // ---------------------------------------------------------------- data: the dive (drawn beneath the preloader; its intro

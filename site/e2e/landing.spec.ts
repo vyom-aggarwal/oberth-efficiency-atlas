@@ -204,16 +204,20 @@ test("reproducibility and scope: labelled pairs from methods.json", async ({ pag
   await expect(facts).toContainText(m.scope.engines.map((e: { value: string }) => e.value).join(", "));
 });
 
-test("key results: four numbers from the site data, each with a link to its source file", async ({ page }) => {
+test("key results: four numbers from the site data, plain-language labels, each with a link to its source file", async ({ page }) => {
   await open(page, 1440);
-  const m = data("methods.json"), curve = data("curve.json");
-  const one = curve.thresholds.find((t: { level: string }) => t.level === "1%").Pi;
+  const m = data("methods.json"), one = data("case.json").thresholds.find((t: { level: string }) => t.level === "1%");
   const items = page.locator(".key-results li");
   await items.first().scrollIntoViewIfNeeded();
   await expect(items.locator(".num")).toHaveText([
     Number(m.scope.sweep_rows.value).toLocaleString("en-GB"), `${m.audit.identical.value} / ${m.audit.outputs.value}`,
-    `Π = ${one.value.toPrecision(3)}`, m.rule_max_ratio_Pi_le_1.value.toPrecision(4)]);
-  const srcs = [m.scope.sweep_rows.src, m.audit.identical.src, one.src, m.rule_max_ratio_Pi_le_1.src].map((s: string) => s.split("#")[0]);
+    one.Pi.value.toPrecision(3), `${one.thrust_scale_divisor.value.toPrecision(3)}×`]);
+  // The labels' own numbers come from the data too, and none uses Π (author, 2026-11-04).
+  await expect(items.nth(0).locator(".what")).toContainText(`${m.scope.engines.length} engine types at ${Object.keys(m.scope.bodies.value).length} bodies`);
+  await expect(items.nth(2).locator(".what")).toContainText("under 1 % of its Δv");
+  await expect(items.nth(3).locator(".what")).toContainText("Hibberd et al.'s solid stack would still lose no more than 1 % of its Δv");
+  for (const t of await items.locator(".what").allTextContents()) expect(t).not.toMatch(/Π/);
+  const srcs = [m.scope.sweep_rows.src, m.audit.identical.src, one.Pi.src, one.thrust_scale_divisor.src].map((s: string) => s.split("#")[0]);
   for (const [i, src] of srcs.entries())
     await expect(items.nth(i).locator(".src a")).toHaveAttribute("href", new RegExp(`/blob/[^/]+/${src.replace(/[.]/g, "\\.")}$`));
 });

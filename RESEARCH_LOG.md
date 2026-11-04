@@ -4039,7 +4039,7 @@ The approved style-page design becomes the landing page (`site/index.html`, `src
   - 135,720 simulated flybys (`phase2_numbers.json`);
   - 69 / 69 outputs reproduced (the audit summary);
   - Π = 0.976 where the loss reaches 1 % of Δv (`phase4_numbers.json`, via `curve.json`);
-  - 1.010, the largest ratio of loss/Δv to its bound Π²/96 for Π ≤ 1 (`rule_numbers.json`; the label avoids "≲",
+  - 1.010, the largest ratio of loss/Δv to its bound Π²/96 for Π ≤ 1 (replaced on 2026-11-04, below; the label avoided "≲",
     which no self-hosted face has: the font test caught it).
 - **the shell's closing section and footer.**
 
@@ -4101,5 +4101,46 @@ Every interaction is the style page's, already approved.
 
 **Review screenshots** (`docs/screens/phase-9-pass-3/`, by `site/tools/landing-shots.mjs`): the author's list at 1440
 and 390 px. The docked hover shots are at 1440 only, since there is no dock below 1100 px.
+
+## 2026-11-04: Phase 9 pass 3 review: laptop folds and plain-language key results
+
+The author approved pass 3 with two fixes.
+
+**1. The fold at laptop viewports.** `e2e/fold.spec.ts` adds 1366 × 650 and 1280 × 720, typical laptop viewports after
+browser chrome. There the published headline and the header's links must be fully above the fold; the Findings cue and
+the title line may fall below. `e2e/headline-budget.spec.ts` measures the same two sizes. Margins, on the production
+and placeholder builds alike (the headline is the author's published one in both):
+
+| viewport | headline ends at | margin | lowest required part ends at | margin |
+|---|---|---|---|---|
+| 1440 × 900 | 504 px | 396 px | 878 px (the Findings cue) | 22 px |
+| 1366 × 650 | 471 px | 179 px | 471 px (the headline) | 179 px |
+| 1280 × 720 | 454 px | 266 px | 454 px (the headline) | 266 px |
+| 390 × 844 | 233 px | 611 px | 233 px (the headline) | 611 px |
+
+The longest headline that fits is 192 characters at both laptop sizes (209 at 1440, 699 at 390). `HEADLINE_BUDGET`
+(100) holds, so the hero needed no change.
+
+**2. Key results a visitor who has not met Π can read** (`landing.ts`). Each number keeps its source link and gains a
+plain-language label. Every number inside a label comes from the data as well: the engine and body counts from
+`methods.json`, the "1 %" from the threshold's own level.
+- **135,720:** "flybys simulated, with 5 engine types at 6 bodies" (`phase2_numbers.json`).
+- **69 / 69:** "outputs rebuilt from scratch in a fresh copy of the repository match the committed ones" (the audit summary).
+- **0.976:** "periapsis timescales: a burn centred on periapsis and shorter than this loses under 1 % of its Δv. One
+  timescale is the periapsis distance divided by the speed there." This is the 1 % threshold of the case study's
+  centred burn (`phase4_numbers.json`, `thresholds/time_centred/1%/Pi`).
+- **29.9×, replacing "1.010 against Π²/96"** (the author's suggestion): "less thrust, and Hibberd et al.'s solid stack
+  would still lose no more than 1 % of its Δv on its dive past the Sun". This is Hibberd et al.'s thrust margin, the
+  divisor at which the loss reaches 1 % (`phase4_numbers.json`, `thresholds/time_centred/1%/thrust_scale_divisor`
+  = 29.887, via `case.json`).
+
+**Checks:**
+- **No new glyphs.** No label uses Π, and none needs a glyph outside the self-hosted fonts: the font test passes, and
+  "×" is in DM Sans's Latin set.
+- **check_numbers on the rendered key results** (from the test build, `--strict`): with the default files it matched
+  every number but "69", whose source, `docs/audit/2026-10-19_f185234/summary.json`, is not among them. Run with
+  `--json figures/*numbers*.json docs/audit/2026-10-19_f185234/summary.json`, all 9 numbers match. The loose matching
+  of small integers (5, 6) is backed by `e2e/landing.spec.ts`, which checks each number and count against its exact
+  source.
 
 

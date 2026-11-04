@@ -1,8 +1,8 @@
 // The landing headline's length budget (author, 2026-10-21; re-measured for the Phase 9 hero), on the placeholder build
 // (Playwright project "placeholders"), where the headline slot exists: lengthen the headline a word at a time and record
-// the longest that still fits, at 1440 × 900 and 390 × 844. It fits while it stays above the fold, and at 1440 (where it
-// sits beside the dive) while it also stays clear of the dive and of the title line below it (fold.spec.ts checks the
-// same at load). The build's HEADLINE_BUDGET (plugins/content-plugin.ts; the build reports a written headline over it)
+// the longest that still fits, at 1440 × 900, the laptop sizes 1366 × 650 and 1280 × 720 (author, 2026-11-04), and
+// 390 × 844. It fits while it stays above the fold, and from 900 px wide (where it sits beside the dive) while it also
+// stays clear of the dive and of the title line below it (fold.spec.ts checks the same at load). The build's HEADLINE_BUDGET (plugins/content-plugin.ts; the build reports a written headline over it)
 // must not exceed that.
 import { HEADLINE_BUDGET, PLACEHOLDERS } from "../plugins/content-plugin";
 import { expect, test } from "./fixtures";
@@ -12,7 +12,7 @@ const LOREM = "Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiu
   "Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat";
 const WORDS = `${LOREM} ${LOREM} ${LOREM} ${LOREM}`.split(" ");
 
-for (const [width, height] of [[1440, 900], [390, 844]] as const) {
+for (const [width, height] of [[1440, 900], [1366, 650], [1280, 720], [390, 844]] as const) {
   test(`the headline budget at ${width}×${height} is within the longest headline that fits the hero`, async ({ page }) => {
     await loadLanding(page, width, height);
     const longest = await page.evaluate(({ words, wide }) => {
