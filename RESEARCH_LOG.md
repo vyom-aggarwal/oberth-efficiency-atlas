@@ -4143,4 +4143,38 @@ plain-language label. Every number inside a label comes from the data as well: t
   of small integers (5, 6) is backed by `e2e/landing.spec.ts`, which checks each number and count against its exact
   source.
 
+## 2026-11-04: Phase 9 pass 4: the article and its figures
+
+The approved article sample is applied to `/research/`:
+- **`src/styles/article.css`** (new; this project's own design, no reference code), moved from the style page's
+  `v9/pages.css`, which keeps only its sample's own rules: the numbered section rail from 1180 px and the sticky section
+  bar below it, display-size section titles with their numbers, prose at 18 px and 66 ch, and figures in Panels with
+  their titles, legends, captions and tooltips.
+- **`src/styles/controls.css`** restyled in place to the approved pills: Quiet outlines turning Ink when chosen,
+  hairline slider tracks with Ink thumbs, Signal focus rings and native checks. The landing's scrub now uses it, and
+  its own copy is gone.
+- **Import order:** `research.ts` imports `article.css` after the shell's stylesheets. Imported first, `layout.css`'s
+  rules of equal specificity would override it.
+- **The rail's current item** keeps its number. Phase 8's more specific marker rule is overridden.
+
+**The accent rule as a test** (`src/styles/accent.test.ts`, vitest; plan §2.1): no chart module (`src/charts/*.ts`) and
+no chart stylesheet (`chart.css`) may read `--signal` or `--accent`. None does. The explorer's modules join it in pass
+5, where its case dot becomes Ink.
+
+**The two failures assigned to pass 4, with their causes:**
+- **The slider label "1000" crossed its track at 1440 px** (`hero.spec.ts`). The cause was not the fonts. Phase 9's
+  page padding (3 vw = 43.2 px) gives the track a fractional width, 1027.62 px, which `axis-slider.ts` rounded up to
+  1028, so the right-aligned end label ended 0.8 px past the track (the test allows 0.5). The width is now rounded down
+  (`Math.floor`). Fixed in the control, not the test.
+- **The universal curve's tooltip closed during a full-page capture** (`screens-states.spec.ts`).
+  - A probe showed the sequence: the capture resizes the viewport, the figure redraws and briefly drops focus, then
+    `redraw()` gives focus back to the new target and the tooltip reopens.
+  - The test passed alone three times out of three, so the failure was a race under the full suite's load.
+  - The test now crops this transient state inside the viewport (no resize, no redraw), below the menu pill. The
+    other crops keep the full-page capture.
+
+**Full Playwright suite on the three builds:** 183 passed, 2 failed, 3 skipped (project-specific skips).
+- The two failures are the explorer's "Trajectory" title at 360 and 390 px, assigned to pass 5.
+- The preloader was gone at 1625 and 1636 ms on the production build.
+
 

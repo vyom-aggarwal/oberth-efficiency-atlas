@@ -55,7 +55,9 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
   let width = 0;
   // Redraw in the next frame: drawing changes the scale's height, which must not happen inside the observer.
   new ResizeObserver(([e]) => {
-    const w = Math.round(e.contentRect.width);
+    // Rounded down: a fractional track (Phase 9's 3 vw page padding gives 1027.62 px at 1440) must not put the end
+    // label past its edge.
+    const w = Math.floor(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(drawScale); }
   }).observe(track);
   onFontsLoaded(() => width && requestAnimationFrame(drawScale));   // label widths change with the web font

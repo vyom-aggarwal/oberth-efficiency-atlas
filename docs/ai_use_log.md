@@ -815,3 +815,18 @@ footer.
 - **Clipped label:** in the dive's window at 1440 px the view is 266 px wide and the SEP label's star was clipped
   (the approved style page had the same fault, unnoticed). A narrow view now keeps 28 px on the right.
 - **Title position:** a later rule overrode the title line's position, so it sat at the top of the hero; fixed.
+
+**Author decided** (2026-11-04): pass 3 approved, with two fixes: fold checks at 1366 × 650 and 1280 × 720, and key
+results in plain language, Hibberd et al.'s thrust margin in place of the Π²/96 ratio.
+
+**Assistant, the fixes and pass 4 (the article and its figures):**
+- **Fixes:** added the laptop fold and budget checks (the hero fits as it is) and rewrote the key results' labels from
+  the data. `check_numbers` matches every rendered number once the audit summary is given via `--json`.
+- **Article:** applied the approved article sample to `/research/`, in a new `article.css`. Restyled the shared
+  controls to the approved pills and Ink thumbs.
+- **Accent rule:** wrote the test that no chart module or chart stylesheet reads the accent.
+- **Found the causes of the two failures assigned to pass 4:**
+  - the slider's end label crossed its track by 0.8 px because a fractional track width (from Phase 9's 3 vw padding)
+    was rounded up; it is now rounded down;
+  - a full-page capture resizes the viewport, the figure redraws, and its tooltip is briefly closed; under load the
+    capture caught that gap. That screenshot now crops inside the viewport.

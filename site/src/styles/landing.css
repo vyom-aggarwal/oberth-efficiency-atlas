@@ -177,18 +177,7 @@ figure.landing-hero { position: relative; margin: 0; padding: var(--s3); backgro
 .lh-side { display: flex; flex-direction: column; gap: var(--s2); }
 .lh-controls { flex-wrap: wrap; row-gap: 2px; margin: 0; gap: var(--s3); }
 .lh-controls .scrub { flex: 1 1 auto; min-width: 120px; }
-.lh-controls .clock { flex: 1 0 100%; min-width: 0; }
-/* The scrub as on the style page: a hairline track and an Ink thumb (the article's sliders follow in pass 4). */
-.lh-controls .scrub input[type="range"] { accent-color: var(--ink); }
-.lh-controls .scrub input[type="range"]::-webkit-slider-runnable-track { height: 1px; background: var(--quiet); }
-.lh-controls .scrub input[type="range"]::-moz-range-track { height: 1px; background: var(--quiet); }
-.lh-controls .scrub input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -7.5px;
-                                                                border-radius: 50%; background: var(--ink); border: 0; box-shadow: none; }
-.lh-controls .scrub input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--ink); border: 0; box-shadow: none; }
-.lh-controls .scrub input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; }
-@media (pointer: coarse) {                         /* the touch target stays large (controls.css) */
-  .lh-controls .scrub input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12.5px; }
-}
+.lh-controls .clock { flex: 1 0 100%; min-width: 0; }      /* the scrub: controls.css */
 .lh-strip-title { margin: 0; font-size: var(--t-label); color: var(--text-2); }
 .lh-side .strip-plot { margin-top: 0; }
 .lh-key, .lh-legend { margin: 0; font-size: var(--t-label); }

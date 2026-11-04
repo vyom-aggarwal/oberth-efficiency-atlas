@@ -14,6 +14,18 @@ async function crop(page: Page, id: string, file: string) {
   });
   await page.screenshot({ path: `../runs/screens/${file}`, fullPage: true, clip: box });
 }
+/** A crop inside the viewport, for a figure in a transient state (an open tooltip). A full-page capture resizes the
+ *  viewport, the figure redraws, and its tooltip closes until focus returns to the new target (common.ts redraw()); under
+ *  the full suite's load the capture once caught that gap (Phase 9 pass 4, 2026-11-04). Scrolled to sit below the fixed
+ *  menu pill. */
+async function cropInView(page: Page, id: string, file: string) {
+  const box = await page.locator(`#${id}`).evaluate((e) => {
+    window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 80);
+    const r = e.getBoundingClientRect();
+    return { x: r.left, y: r.top, width: r.width, height: Math.min(r.height, window.innerHeight - r.top) };
+  });
+  await page.screenshot({ path: `../runs/screens/${file}`, clip: box });
+}
 
 for (const width of [1440, 390]) {
   test(`atlas legend, inertial, Venus, mission samples, at ${width}px`, async ({ page }) => {
@@ -58,7 +70,7 @@ for (const theme of ["dark"] as const) {             // dark only since Phase 9 
     await page.evaluate(() => document.fonts.ready);
     await fig.locator(".plot svg .hit[tabindex]").first().focus();
     await expect(fig.locator(".tooltip")).toBeVisible();
-    await crop(page, "fig-universal-curve", `curve-tooltip-1440-${theme}.png`);
+    await cropInView(page, "fig-universal-curve", `curve-tooltip-1440-${theme}.png`);
     await expect(fig.locator(".tooltip")).toBeVisible();                      // still open in the capture
   });
 }
