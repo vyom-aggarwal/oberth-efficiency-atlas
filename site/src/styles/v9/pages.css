@@ -11,27 +11,6 @@
 .article9 .home-content { counter-reset: sec 1; }               /* the sample shows the second section */
 .article9 .section-nav-mobile { position: sticky; top: 0; z-index: 20; }
 
-/* ------------------------------------------------------------- the explorer: four Panel regions with eyebrow titles;
-   η at figure size; the reader's case an Ink dot on the curve (the accent never sits in a plot, §2.1). */
-.explorer9 .explorer-layout { gap: var(--s4); }
-.explorer-controls, .explorer-readouts, .explorer-placement { background: var(--panel); --surface: var(--panel); --raised: var(--void);
-                                                              border-radius: var(--r-panel); padding: var(--s5); min-width: 0; }
-.explorer-view { padding: var(--s4); }
-.region-title { font-family: var(--sans); font-size: var(--t-label); font-weight: 400; letter-spacing: 0.01em; text-transform: none; color: var(--quiet); }
-.explorer-note, .explorer-fallback, .explorer-place-fig figcaption { color: var(--quiet); }
-.explorer-readouts-list > div { border-top: 1px solid var(--rule); padding: var(--s3) 0 var(--s2); }
-.explorer-readouts-list > div:first-child { border-top: 2px solid var(--ink); }
-.explorer-readouts-list dt { color: var(--quiet); }
-.explorer-readouts-list > div:first-child dd { font-size: clamp(30px, 2.5vw, 38px); font-weight: 400; letter-spacing: -0.03em; line-height: 1.1;
-                                               overflow-wrap: normal; }
-.explorer-controls .axis-slider .number { width: 10ch; padding: 0 10px; }
-.explorer-place-fig { padding: 0; background: none; }
-.case-dot .case-mark { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
-.warning { border-radius: var(--r-control); }
-@media (min-width: 1100px) {
-  .explorer9 .explorer-layout { grid-template-columns: 300px minmax(0, 1fr) 260px; }
-}
-
 /* ------------------------------------------------------------- references: rows between hairlines, the number in IBM
    Plex Mono at the left (above the entry on phones); a cited entry reached by its link is ringed in Signal. */
 .references { list-style: none; counter-reset: none; padding: 0; margin: 0; max-width: 1080px; font-size: var(--t-ui); }

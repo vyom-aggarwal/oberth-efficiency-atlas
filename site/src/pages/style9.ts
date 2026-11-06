@@ -20,6 +20,7 @@ import "../styles/layout.css";
 import "../styles/landing.css";
 import "../styles/v9/components.css";
 import "../styles/article.css";
+import "../styles/explorer.css";
 import "../styles/v9/pages.css";
 import "../styles/v9/style9.css";
 import Lenis from "lenis";

@@ -836,3 +836,8 @@ reset.
 
 **Assistant, pass 7:** regenerated the Open Graph image from the finished hero: the dive on Void, captured where the
 dive stays in the hero band.
+
+**Assistant, pass 5 (the explorer):** applied the approved explorer sample in a new `explorer.css`; made the reader's
+case an Ink dot (the case marks moved to `chart.css`, and the accent test now covers the explorer); found the cause of
+the two "Trajectory" failures (the heading line height on a 13 px title) and of a slider-label collision in the case
+column, and fixed both.

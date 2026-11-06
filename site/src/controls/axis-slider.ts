@@ -69,8 +69,10 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       svg.append(s("line", { x1: x(z.from), x2: x(z.to), y1: 3, y2: 3, stroke: "var(--ink-2)", "stroke-width": 3 }),
         s("text", { class: "annot-2", x: x(z.from) + 2, y: 32 }, z.label));
     }
-    // A tick at every decade; on a narrow scale, a label at every second one (the ends always labelled).
-    const every = (width - THUMB) / (lmax - lmin) < 48 ? 2 : 1;
+    // A tick at every decade; on a narrow scale, a label every n decades so that labels stay at least 48 px apart: every
+    // second one from 24 px a decade, as before, and sparser below that (Phase 9: the explorer's case column leaves the Π
+    // track about 15 px a decade, where every second label still collided).
+    const every = Math.max(1, Math.ceil(48 / ((width - THUMB) / (lmax - lmin))));
     for (let e = Math.ceil(lmin); e <= Math.floor(lmax); e++) {
       const t = 10 ** e;
       svg.append(s("line", { x1: x(t), x2: x(t), y1: 0, y2: 6, stroke: "var(--ink-2)" }));

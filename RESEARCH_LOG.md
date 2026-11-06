@@ -4190,4 +4190,34 @@ budget. Passes 5 and 6, the final checks and the pull request follow after the w
 - **Result:** the dive is 1200 × 590, and every label is inside the frame.
 - **Tests:** `e2e/social.spec.ts` checks the tags and that the image is served.
 
+## 2026-11-06: Phase 9 pass 5: the explorer
+
+The approved explorer sample is applied to `/explorer/` in a new `src/styles/explorer.css` (moved from the style page's
+`v9/pages.css`; this project's own design). It has:
+- four Panel regions with quiet titles;
+- η at figure size under an Ink rule (the accent rule on the η tile is gone);
+- the page title at display size;
+- the 300 / 1fr / 260 px grid from 1100 px.
+
+Behaviour, URL state and the simulator are unchanged. `explorer.ts` imports the stylesheet after the shell's.
+
+**The reader's case is an Ink dot.** The case marks (`.case-dot`, `.case-circle`) move from `layout.css` to `chart.css`,
+where the plot styles live, and the dot on the curve turns from the accent to Ink. `src/styles/accent.test.ts` now also
+scans `src/explorer/*.ts` and checks that the dot is Ink. No explorer module reads the accent.
+
+**The two "Trajectory" failures** (`panel-text.spec.ts`, 360 and 390 px).
+- **Cause:** Phase 9's heading line height (1.05). On the 13 px region title it makes the glyph box rise above its line
+  box. The title is the first thing in the panel, so its text crossed the panel's top padding; the report's "(0, 216 px)"
+  meant that left and right were fine.
+- **Fix:** region titles get a line height of 1.4. Both cases pass.
+
+**A collision found on the way:** in the 300 px case column the Π slider gets about 15 px a decade, and "every second
+label" still let "0.001" and "0.1" overlap.
+- `axis-slider.ts` now labels every n decades, with n chosen so labels stay at least 48 px apart.
+- That is the old rule wherever a decade has 24 px or more, so the article's sliders are unchanged. In the explorer's
+  case column the labels are 0.001, 1, 1000.
+
+**Checked:** the type check, vitest (43 tests), and `explorer`, `panel-text`, `hero`, `screens-explorer` and `case`
+specs on the test build (29 pass).
+
 
