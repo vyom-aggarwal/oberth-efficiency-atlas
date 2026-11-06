@@ -4328,4 +4328,15 @@ The author's answer 3 at the final review: skip pass 8 for now. Not part of this
   360 px; Lighthouse accessibility at 90 or above), else native scrolling. View Transitions only as a progressive
   enhancement, skipped under reduced motion.
 
+## 2026-11-06: /about/ joins the Lighthouse gate
+
+The author's answer 4 at the final review: `site/tools/lighthouse.mjs` now audits `/about/` with the other pages
+(landing, research, explorer, references), mobile and desktop. The same gate applies: accessibility, best practices and
+SEO each at least 0.90, or the run exits 1; performance is reported, not enforced. The CI job runs this script, so no
+workflow change is needed.
+
+**Local run: not possible on this machine.** Chrome stopped at an interstitial for the preview server on
+`localhost:4174` before the first page (the landing page). It is the same loopback problem the dev server has had here
+since 2026-11-02, not a page fault. CI is the gate's record (2026-10-19), so the PR's Lighthouse job measures `/about/`.
+
 
