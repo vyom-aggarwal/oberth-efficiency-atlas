@@ -4316,4 +4316,16 @@ Both pass on the test build.
 **Confirmed:** a search of the site's code, specs, tools, scripts, tests and CI finds no remaining reference to `/style/`
 or `style.ts`, and the test build no longer contains it. `docs/site.md` now lists `/about/` and `/style-9/`.
 
+## 2026-11-06: Phase 9 pass 8 (Lenis, View Transitions) deferred
+
+The author's answer 3 at the final review: skip pass 8 for now. Not part of this pull request (plan §2.13).
+- **Lenis** and its four condition tests (§2.6) are not built.
+- **The site scrolls natively,** and the production site does not bundle Lenis. Only the development style page
+  `/style-9/` uses it (`THIRD_PARTY_NOTICES.md` §2 says so).
+- **Cross-document View Transitions** are not added; pages change without a transition.
+- **If taken up later,** the plan's conditions stand: Lenis only if all four hold (never under reduced motion; keyboard,
+  section-nav, citation and focus scrolling land targets fully visible, tested with Lenis active; no sideways scroll at
+  360 px; Lighthouse accessibility at 90 or above), else native scrolling. View Transitions only as a progressive
+  enhancement, skipped under reduced motion.
+
 

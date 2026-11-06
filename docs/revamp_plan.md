@@ -774,7 +774,8 @@ of every page and the motion states, and the pull request.
 8. **Optional, after the author's final review and only if the budget allows** (the author, 2026-11-02, to protect the
    weekly usage): Lenis with its four condition tests (§2.6), and the cross-document View Transitions. Until then the
    site uses native scrolling and no page transitions, and the production site does not bundle Lenis (only the
-   development style page uses it).
+   development style page uses it). **Deferred** at the final review (the author, 2026-11-06: "skip for now"); not part
+   of this pull request.
 
 ## 3. Copying and attribution
 
