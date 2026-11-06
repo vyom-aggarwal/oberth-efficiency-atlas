@@ -4286,4 +4286,34 @@ build), with the landing page's motion states in `docs/screens/phase-9-pass-3/`.
 - the optional pass 8 (Lenis and View Transitions);
 - whether to retire the development style pages (`/style/`, `/style-9/`).
 
+## 2026-11-06: the Phase 6 style page retired; its interaction test moved to the article
+
+The author approved the final review, pending CI, with answers on the open points. Answer 2: remove `/style/` (Phase 6),
+first moving any test coverage that depends on it onto the real pages; keep `/style-9/` as the development-only design
+reference.
+
+**Coverage moved.** `e2e/interact-style.spec.ts` was the only test of `/style/`. It checked behaviour no real-page spec
+covered, so `e2e/interact-figures.spec.ts` now checks the same on the research page:
+- **On the universal curve** (`#fig-universal-curve`, the same module and data as the style page's figure):
+  - the tooltip by pointer, with the citation and the `phase4_numbers.json` link at the tag;
+  - keyboard focus on the nuclear-thermal mark;
+  - the SEP-class caveat in the tooltip and the data table;
+  - the band's measured spread in the legend;
+  - a case toggle removing its mark.
+- **On the article hero:** the Π slider (`#hero-pi`) moved from the keyboard, its number field following. This replaces
+  the style page's own slider specimen.
+
+Both pass on the test build.
+
+**Removed:**
+- `site/style/index.html` and `src/pages/style.ts`;
+- the page's build entry in `vite.config.ts`;
+- `"style"` from `initShell`'s page names;
+- `/style/` from the screenshot spec's pages;
+- its specimen rules in `layout.css` (`.dev-banner`, `.swatches`, the HTML `.swatch`, `.ramp`, `.checks`, `.specimen`,
+  `.ctl-row`, `.readout`). No other page used them; the atlas legend's SVG `.swatch` rule in `chart.css` stays.
+
+**Confirmed:** a search of the site's code, specs, tools, scripts, tests and CI finds no remaining reference to `/style/`
+or `style.ts`, and the test build no longer contains it. `docs/site.md` now lists `/about/` and `/style-9/`.
+
 

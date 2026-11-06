@@ -6,7 +6,7 @@ import type { SiteOptions } from "./e2e/fixtures";
 // Two modes:
 // - default: the Vite dev server on SITE_PORT (5173), started here;
 // - SITE_DIST=<built dir>: no server; e2e/fixtures.ts answers http://site.test/ from the build. Build first with
-//   `SITE_SHOW_TODO=1 npx vite build --mode development` to include the unfinished sections and /style/.
+//   `SITE_SHOW_TODO=1 npx vite build --mode development` to include the unfinished sections.
 const PORT = Number(process.env.SITE_PORT ?? 5173);
 const DIST = process.env.SITE_DIST;
 // The production build (Phase 7): SITE_DIST_PROD=<dir>, built with BASE_PATH=SITE_BASE (default the project path, as

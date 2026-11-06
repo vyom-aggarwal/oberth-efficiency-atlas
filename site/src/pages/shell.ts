@@ -16,7 +16,7 @@ import "../styles/layout.css";
 import "../styles/shell.css";
 import { s } from "../lib/dom";
 
-export function initShell(page: "landing" | "research" | "references" | "explorer" | "about" | "notfound" | "style"): void {
+export function initShell(page: "landing" | "research" | "references" | "explorer" | "about" | "notfound"): void {
   for (const a of document.querySelectorAll(`.site-nav a[data-page="${page}"], .menu-pages a[data-page="${page}"]`))
     a.setAttribute("aria-current", "page");
 

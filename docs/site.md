@@ -58,7 +58,10 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
   universal curve and the theory atlas, and keeps its state in the URL.
 - **`/explorer/classic/`** is the single-file offline explorer, copied unchanged.
 - **`/404.html`** is the not-found page.
-- **`/style/`** is the design reference. It is built only in development mode.
+- **`/about/`** is the About page: the citation, the licences with the design credit and the portfolio's MIT notice, the
+  audit and the author's slots (Phase 9).
+- **`/style-9/`** is the design reference (Phase 9). It is built only in development mode. The Phase 6 `/style/` page was
+  retired on 2026-11-06; its interaction test moved to `e2e/interact-figures.spec.ts`, on the article's figures.
 
 ## Stack
 - **Build:** Vite 8.3.1 (multi-page) and TypeScript 7.0.2, with no UI framework. Charts use D3
