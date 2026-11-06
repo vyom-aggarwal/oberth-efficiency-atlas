@@ -4,7 +4,7 @@ import { expect, test } from "./fixtures";
 
 // Pages to capture ("" is the landing page). /style/ exists only in development builds, /research/ only when it has
 // a published section or unfinished content is shown.
-const PAGES = (process.env.SCREEN_PAGES ?? ",research/,explorer/,references/,404.html,style/").split(",");
+const PAGES = (process.env.SCREEN_PAGES ?? ",research/,explorer/,references/,about/,404.html,style/").split(",");
 const WIDTHS = [1440, 390];
 const THEMES = ["dark"] as const;                 // dark only since Phase 9 (pass 1)
 const OUT = "../runs/screens";

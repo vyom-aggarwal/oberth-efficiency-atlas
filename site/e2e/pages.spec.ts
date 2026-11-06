@@ -8,7 +8,7 @@ const CLASSIC = new URL("../../explorer/oberth_explorer.html", import.meta.url);
 
 test("dark only: every page is dark under a light system setting, with no theme switch (Phase 9)", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
-  for (const path of ["", "research/", "explorer/", "references/", "404.html"]) {
+  for (const path of ["", "research/", "explorer/", "references/", "about/", "404.html"]) {
     await page.goto(path);
     const { scheme, bg, theme } = await page.evaluate(() => ({
       scheme: getComputedStyle(document.documentElement).colorScheme, bg: getComputedStyle(document.body).backgroundColor,
@@ -62,11 +62,11 @@ test("from 900 px the header's links are inline and the pill waits until the hea
   await expect(page.locator(".menu-pill")).toBeVisible();
 });
 
-test("site navigation: Research, Explorer, References; the current page is marked", async ({ page }) => {
+test("site navigation: Research, Explorer, References, About; the current page is marked", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  for (const [path, current] of [["research/", "Research"], ["explorer/", "Explorer"], ["references/", "References"]]) {
+  for (const [path, current] of [["research/", "Research"], ["explorer/", "Explorer"], ["references/", "References"], ["about/", "About"]]) {
     await page.goto(path);
-    await expect(page.locator(".site-nav a")).toHaveText(["Research", "Explorer", "References"]);
+    await expect(page.locator(".site-nav a")).toHaveText(["Research", "Explorer", "References", "About"]);
     await expect(page.locator('.site-nav a[aria-current="page"]')).toHaveText(current);
     await expect(page.locator('.menu-pages a[aria-current="page"]')).toHaveText(current);
   }

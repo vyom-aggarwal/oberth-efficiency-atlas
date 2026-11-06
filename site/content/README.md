@@ -19,12 +19,15 @@ One Markdown file per section of the research article (`/research/`); the order 
 
 | file | where it appears |
 |---|---|
-| `headline.md` | under the title: one sentence, at most 100 characters (the build warns above that: a longer headline can push the entry links below the fold on a phone) |
-| `summary.md` | under the entry links: two or three sentences |
+| `headline.md` | beside the dive in the hero (first on a phone): one sentence, at most 100 characters (the build warns above that: a longer headline may not fit beside the dive on a desktop screen) |
+| `summary.md` | the landing page's intro, beside the scope facts: two or three sentences |
 | `finding-loss.md` | caption of "Loss against Π, with the 1 % line" |
 | `finding-missions.md` | caption of "Where real missions sit" |
 | `finding-hibberd.md` | caption of "The Hibberd et al. check" |
 | `closing.md` | the closing line at the foot of every page, above "Open the explorer" (Phase 9; on every page since pass 2, through `partials/footer.html`; hidden in production until written) |
+| `about-intro.md` | the About page's introduction, beside the citation card (Phase 9) |
+| `about-ai.md` | the About page's AI-use disclosure, above the link to the AI-use log (Phase 9) |
+| `about-author.md` | the About page's author section (Phase 9) |
 
 - Plain Markdown: no front matter, KaTeX math and `<sup>n</sup>` citations as above.
 - A file that still contains `TODO` is left out of the production build; the page closes up without

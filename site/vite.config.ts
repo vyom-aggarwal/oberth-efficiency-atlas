@@ -14,6 +14,7 @@ export default defineConfig(({ command, mode }) => {
     main: resolve(__dirname, "index.html"),
     references: resolve(__dirname, "references/index.html"),
     explorer: resolve(__dirname, "explorer/index.html"),
+    about: resolve(__dirname, "about/index.html"),
     notfound: resolve(__dirname, "404.html"),
   };
   if (researchIncluded(command)) pages.research = resolve(__dirname, "research/index.html");

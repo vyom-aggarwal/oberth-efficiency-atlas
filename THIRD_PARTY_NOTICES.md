@@ -29,6 +29,10 @@ as its licence requires. Package dependencies not listed here keep their own lic
   - `site/src/pages/shell.ts` (the site's drawer: open, close and focus handling; Phase 9 pass 2)
   - `site/src/styles/landing.css` (the landing page's hero composition and the findings rows' layout; Phase 9 pass 3)
   - `site/index.html` (the landing page's preloader gate, inline before the first paint; Phase 9 pass 3)
+  - `site/src/styles/pages.css` (the About page's layout: the title, the divider with a round button, sticky section
+    headings in a 28 % column; Phase 9 pass 6)
+- **The built site** carries this notice in full on its About page (`/about/`), quoted at build time from the block
+  below, with the credit "Design adapted from Suhas Beemineni's portfolio (MIT licence)" linking to the portfolio.
   - `site/src/styles/v9/components.css` (the development style page: header, drawer, rows, buttons, closing section and
     footer layouts)
   - `site/src/styles/v9/style9.css` (the hero's composition)
@@ -64,7 +68,8 @@ SOFTWARE.
 ## 2. Lenis (smooth scrolling, bundled into the website)
 
 - **Source:** the npm package `lenis` 1.3.27, https://github.com/darkroomengineering/lenis.
-- **Use:** used unmodified, with its stylesheet.
+- **Use:** used unmodified, with its stylesheet, by the development-only style page `/style-9/`. The production site does
+  not bundle it until the optional Phase 9 pass 8 (the author deferred it on 2026-11-02).
 
 The licence, verbatim:
 

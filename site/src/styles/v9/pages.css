@@ -11,20 +11,6 @@
 .article9 .home-content { counter-reset: sec 1; }               /* the sample shows the second section */
 .article9 .section-nav-mobile { position: sticky; top: 0; z-index: 20; }
 
-/* ------------------------------------------------------------- references: rows between hairlines, the number in IBM
-   Plex Mono at the left (above the entry on phones); a cited entry reached by its link is ringed in Signal. */
-.references { list-style: none; counter-reset: none; padding: 0; margin: 0; max-width: 1080px; font-size: var(--t-ui); }
-.references li { position: relative; padding: var(--s5) 0 var(--s5) 5.5em; margin: 0; border-top: 1px solid var(--rule); line-height: 1.55; }
-.references li:last-child { border-bottom: 1px solid var(--rule); }
-.references li::before { content: attr(value); position: absolute; left: 0; top: calc(var(--s5) + 3px); font-family: var(--mono);
-                         font-size: var(--t-label); color: var(--quiet); }
-.references li:target { outline: 2px solid var(--signal); outline-offset: 4px; border-radius: 2px; }
-.references a, .references code { overflow-wrap: anywhere; }
-@media (max-width: 599px) {
-  .references li { padding-left: 0; }
-  .references li::before { position: static; display: block; margin-bottom: var(--s1); }
-}
-
 /* ------------------------------------------------------------- facts (methods, About, 404 links) */
 .facts dt { color: var(--quiet); }
 .link-list { list-style: none; padding: 0; display: grid; gap: var(--s2); font-size: var(--t-ui); }

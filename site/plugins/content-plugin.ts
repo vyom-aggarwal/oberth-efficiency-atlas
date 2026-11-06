@@ -21,6 +21,7 @@ import { renderTex } from "./tex-plugin";
 const dir = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 const CONTENT = dir("../content/");
 const PARTIALS = dir("../partials/");
+const NOTICES = dir("../../THIRD_PARTY_NOTICES.md");
 const DATA = dir("../public/data/");
 const CLASSIC = dir("../../explorer/oberth_explorer.html");
 const TODO = /\bTODO\b/;
@@ -89,6 +90,9 @@ export const PLACEHOLDERS: Record<string, string> = {
   "finding-missions": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-hibberd": `[Placeholder caption, one or two sentences] ${LOREM}`,
   closing: "[Placeholder closing line] Lorem ipsum dolor.",
+  "about-intro": `[Placeholder About introduction] ${LOREM} ${LOREM}`,
+  "about-ai": `[Placeholder AI-use disclosure] ${LOREM}`,
+  "about-author": `[Placeholder author] ${LOREM}`,
 };
 
 /**
@@ -197,6 +201,32 @@ export function citationText(c: { title: string; authors: { given: string; famil
   return `${names}${year}. ${c.title}${c.version ? ` (${c.version})` : ""} [Software]. ${c.repository}`;
 }
 
+/** The same record as BibTeX, for the About page (Phase 9 pass 6): a @software entry keyed by the first author's family
+ * name, the year and the title's first word. */
+export function citationBibtex(c: { title: string; authors: { given: string; family: string }[]; version?: string | null;
+                                    date_released?: string | null; repository: string } | undefined): string {
+  if (!c) return "";
+  const year = c.date_released?.slice(0, 4) ?? "";
+  const key = `${c.authors[0].family}${year}${c.title.split(/\s+/)[0]}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const fields: [string, string][] = [["author", c.authors.map((a) => `${a.family}, ${a.given}`).join(" and ")], ["title", c.title],
+    ...(c.version ? [["version", c.version] as [string, string]] : []), ...(year ? [["year", year] as [string, string]] : []),
+    ["url", c.repository]];
+  return `@software{${key},\n${fields.map(([k, v]) => `  ${k.padEnd(7)} = {${v}}`).join(",\n")}\n}`;
+}
+
+/** A licence text quoted verbatim from THIRD_PARTY_NOTICES.md: the first fenced block under the "## <n>." heading
+ * (Phase 9 pass 6: the reference's MIT notice on the About page, from the one copy kept in the repository). */
+export function noticeText(md: string, section: number): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const start = lines.findIndex((l) => l.startsWith(`## ${section}.`));
+  if (start < 0) throw new Error(`THIRD_PARTY_NOTICES.md: no section ${section}`);
+  const open = lines.findIndex((l, i) => i > start && l.startsWith("```"));
+  const close = lines.findIndex((l, i) => i > open && l.startsWith("```"));
+  const next = lines.findIndex((l, i) => i > start && l.startsWith("## "));
+  if (open < 0 || close < 0 || (next >= 0 && open > next)) throw new Error(`THIRD_PARTY_NOTICES.md: no licence block in section ${section}`);
+  return lines.slice(open + 1, close).join("\n");
+}
+
 function partial(name: string, base: string): string {
   const site = readData("site.json");
   const methods = readData("methods.json");
@@ -282,6 +312,14 @@ export function contentPlugin(): Plugin {
         if (out.includes("<!--#references-->")) {
           const site = readData("site.json");
           out = out.replace("<!--#references-->", referenceListHTML(site?.references ?? []));
+        }
+        // The About page (Phase 9 pass 6): a licence quoted from THIRD_PARTY_NOTICES.md, and the citation in two forms.
+        if (/<!--#(notice:|citation-)/.test(out)) {
+          const site = readData("site.json");
+          out = out.replace(/<!--#notice:(\d+)-->/g, (_m, n: string) =>
+            `<pre class="licence-text">${esc(noticeText(readFileSync(NOTICES, "utf8"), Number(n)))}</pre>`)
+            .replace("<!--#citation-text-->", esc(citationText(site?.citation)))
+            .replace("<!--#citation-bibtex-->", esc(citationBibtex(site?.citation)));
         }
         if (!/<!--#(sections|section:|section-nav)/.test(out)) return out;
         return articleHTML(out, keptSections(loadSections(base), dev), dev);

@@ -4220,4 +4220,49 @@ label" still let "0.001" and "0.1" overlap.
 **Checked:** the type check, vitest (43 tests), and `explorer`, `panel-text`, `hero`, `screens-explorer` and `case`
 specs on the test build (29 pass).
 
+## 2026-11-06: Phase 9 pass 6: references, the About page, 404
+
+**`src/styles/pages.css`** (site), imported after the shell's stylesheets, styles three pages:
+- **References:** rows between hairlines, the number in IBM Plex Mono, a cited entry ringed in Signal. Moved from the
+  style page's sample.
+- **404:** the display title, the statement line, and the links as outline pills.
+- **About** (new, `/about/`, plan §2.4): the layout is modelled on the reference's About page and listed in
+  `THIRD_PARTY_NOTICES.md` as adapted design. It has:
+  - the display title, then a hairline divider with a round "Cite" button straddling it, which copies the citation;
+  - the author's intro slot beside a citation card: the reference line, BibTeX and "Copy BibTeX";
+  - five sections, whose headings stick in a 28 % column from 900 px: Citation (with `CITATION.cff`); Licences;
+    Reproducibility (the audit facts from `methods.json`); AI use (the author's slot and the log); Author (the author's
+    slot);
+  - under Licences: code MIT, content CC BY 4.0, fonts OFL 1.1, the design credit in the author's words ("Design
+    adapted from Suhas Beemineni's portfolio (MIT licence)", linking to https://suhaslord.github.io/portfolio/), and the
+    portfolio's MIT notice verbatim.
+  - A section whose slot is unwritten (production) is hidden.
+
+**Build-time texts, from single sources** (content plugin, with vitest tests):
+- `<!--#notice:1-->` quotes section 1's licence block from `THIRD_PARTY_NOTICES.md`, so the notice is never retyped.
+- `<!--#citation-text-->` and `<!--#citation-bibtex-->` build the citation from `site.json`'s copy of `CITATION.cff`.
+  `citationBibtex` is new; its key is `aggarwal2026oberth`.
+
+**Other changes:**
+- **New author slots** (TODO notes, hidden in production): `about-intro.md`, `about-ai.md` and `about-author.md`, with
+  placeholders for the placeholder build.
+- **Navigation:** About joins the header's links and the drawer (deferred from pass 2 until the page existed).
+- **The shell's Copy buttons** now restore their own label after "Copied" ("Cite", "Copy BibTeX").
+- **Lenis:** `THIRD_PARTY_NOTICES.md` now says it is bundled only into the development style page until the optional
+  pass 8.
+
+**Tests:**
+- `e2e/about.spec.ts`:
+  - the credit's text and link;
+  - the notice equal to the repository's block;
+  - the citation equal to the footer's;
+  - the BibTeX equal to `citationBibtex(site.json)`;
+  - the audit facts;
+  - the headings sticky at 1440 and static at 390, below the menu pill's band and left of it;
+  - no sideways scroll;
+  - the 404 pills.
+- About is added to the navigation, closing, dark-only, notation, social, screenshot and production no-console-error
+  lists.
+- On the test build, `about`, `pages`, `notation` and `social` pass (32 tests), as do vitest (45) and the type check.
+
 

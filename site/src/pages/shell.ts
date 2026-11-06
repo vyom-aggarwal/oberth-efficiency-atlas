@@ -16,7 +16,7 @@ import "../styles/layout.css";
 import "../styles/shell.css";
 import { s } from "../lib/dom";
 
-export function initShell(page: "landing" | "research" | "references" | "explorer" | "notfound" | "style"): void {
+export function initShell(page: "landing" | "research" | "references" | "explorer" | "about" | "notfound" | "style"): void {
   for (const a of document.querySelectorAll(`.site-nav a[data-page="${page}"], .menu-pages a[data-page="${page}"]`))
     a.setAttribute("aria-current", "page");
 
@@ -29,6 +29,7 @@ export function initShell(page: "landing" | "research" | "references" | "explore
     status.setAttribute("aria-live", "polite");
     b.after(status);
     b.hidden = false;
+    const label = b.textContent;                    // "Copy", "Copy BibTeX", "Cite": restored after the confirmation
     b.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText(from.textContent?.trim() ?? "");
@@ -37,7 +38,7 @@ export function initShell(page: "landing" | "research" | "references" | "explore
       } catch {
         status.textContent = "Copying failed";
       }
-      setTimeout(() => { b.textContent = "Copy"; status.textContent = ""; }, 2000);
+      setTimeout(() => { b.textContent = label; status.textContent = ""; }, 2000);
     });
   }
 

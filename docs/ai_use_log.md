@@ -841,3 +841,12 @@ dive stays in the hero band.
 case an Ink dot (the case marks moved to `chart.css`, and the accent test now covers the explorer); found the cause of
 the two "Trajectory" failures (the heading line height on a 13 px title) and of a slider-label collision in the case
 column, and fixed both.
+
+**Assistant, pass 6 (references, About, 404):**
+- **References and 404:** restyled both.
+- **About page:** built it to the approved plan: the design credit in the author's words, the portfolio's MIT notice
+  quoted at build time from `THIRD_PARTY_NOTICES.md`, the citation as a reference line and BibTeX, the audit facts, and
+  three author slots left as TODO notes.
+- **Navigation:** added About to the header and the drawer.
+- **Tests:** wrote the About and 404 tests.
+

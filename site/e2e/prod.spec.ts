@@ -44,7 +44,7 @@ test("the classic explorer is served at explorer/classic/, byte for byte", async
 
 // Above the fold: e2e/fold.spec.ts, which runs on this build (slots empty) and on the placeholder build.
 
-for (const path of ["", "references/", "explorer/", "404.html"]) {
+for (const path of ["", "references/", "explorer/", "about/", "404.html"]) {
   test(`no console errors: ${path || "landing"}`, async ({ page }) => {
     const errors: string[] = [];
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));

@@ -6,7 +6,7 @@
 // MathML copy of its TeX source is not displayed.
 import { expect, test, type Page } from "./fixtures";
 
-const PAGES = ["", "research/", "explorer/", "references/", "404.html"];
+const PAGES = ["", "research/", "explorer/", "references/", "about/", "404.html"];
 
 async function underscores(page: Page): Promise<string[]> {
   return page.evaluate(() => {
