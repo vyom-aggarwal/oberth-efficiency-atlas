@@ -4265,4 +4265,25 @@ specs on the test build (29 pass).
   lists.
 - On the test build, `about`, `pages`, `notation` and `social` pass (32 tests), as do vitest (45) and the type check.
 
+## 2026-11-06: Phase 9 build complete: final checks, screenshots, pull request
+
+**`scripts/check_all.py` (the full gate):**
+- the type check, vitest (45), and `check_numbers` on every content file all pass;
+- the full Python suite: 623 passed.
+
+**Playwright, all three builds** (test, production under the base path, placeholders): 195 passed, 0 failed, 3 skipped.
+The skips are project-specific: the preloader tests run only on their own build.
+- **Folds:** the headline ends at 504, 471, 454 and 233 px at 1440 × 900, 1366 × 650, 1280 × 720 and 390 × 844. At
+  1440 the Findings cue ends at 878 px of 900.
+- **Preloader:** gone at 1649 and 1639 ms from navigation start on the production build (cap 2000).
+- **Hero frame time** (the article's hero while dragging): p50 4.9 ms, p95 6.7 ms (target 16), max 27.2 ms.
+
+**Screenshots of every page,** dark, at 1440 and 390 px: `docs/screens/phase-9/` (from `e2e/screens.spec.ts` on the test
+build), with the landing page's motion states in `docs/screens/phase-9-pass-3/`.
+
+**Left for the author:**
+- the prose slots: the closing line, the About page's three, and the landing summary and captions;
+- the optional pass 8 (Lenis and View Transitions);
+- whether to retire the development style pages (`/style/`, `/style-9/`).
+
 

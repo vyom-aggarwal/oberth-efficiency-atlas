@@ -637,7 +637,7 @@ added to the numbers file as values.
   the same face, so the heavier look is light-on-dark appearance.
 - **An over-claim:** the part B report said `docs/site.md` also held interpretations to confirm; it held none.
 
-## Phase 9: dark, portfolio-style revamp (from 2026-11-01; plan approved 2026-11-02, build in progress)
+## Phase 9: dark, portfolio-style revamp (2026-11-01 to 2026-11-06; build complete, pull request for the author's review)
 
 **Author decided:**
 - **The brief:** a dark interpretation of https://suhaslord.github.io/portfolio/, dark only.

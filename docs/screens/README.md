@@ -18,6 +18,11 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-9/` (Phase 9, the end of the build, 2026-11-06, for the author's final review): every page as full-length
+  captures, dark only, at 1440 and 390 px: `landing`, `research`, `explorer`, `references`, `about` and `404`. They are
+  made by `e2e/screens.spec.ts` in the full Playwright run on the test build (`runs/screens/`), so the article and the
+  author's TODO notes show. The landing page's motion states (the preloader mid-flight, the docked dive with each row
+  hovered, a row open in place, reduced motion) are in `phase-9-pass-3/`.
 - `phase-9-pass-3/` (Phase 9, pass 3, 2026-11-03: the landing page, for the author's review). The author's list, at 1440
   and 390 px, from the test build. Made by `site/tools/landing-shots.mjs` (in `site/`, after the test build), which also
   prints the preloader's measured times:
