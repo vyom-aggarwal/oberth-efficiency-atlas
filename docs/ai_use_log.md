@@ -850,3 +850,21 @@ column, and fixed both.
 - **Navigation:** added About to the header and the drawer.
 - **Tests:** wrote the About and 404 tests.
 
+**Author decided** (2026-11-06, final review): approved pending CI. No auto-fix: a CI failure is reported with its log
+and a proposed fix, and waits for the author's OK. Retire `/style/` once its test coverage is on the real pages, and
+keep `/style-9/`. Defer pass 8. Add `/about/` to the Lighthouse gate.
+
+**Assistant, the final-review items:** moved the style page's interaction test onto the article's figures and removed
+`/style/`; recorded pass 8 as deferred; added `/about/` to the Lighthouse script.
+
+**Assistant slip, found by CI:** both CI runs on the pull request failed the 14-day package rule. On 2026-11-01 I
+added Lenis and DM Sans to the lockfile, but left its recorded dates (`config.npmLockedOn`, `config.npmBefore` in
+`site/package.json`) at the scaffold's 2026-10-14 and 2026-09-30. Lenis itself met the rule, but not those stale dates.
+The pre-commit hook did not run the age check, so the slip reached CI, and it stopped that job before Playwright ran.
+
+**Author decided** (2026-11-06): correct the dates (locked on 2026-11-01, cutoff 2026-10-18) and keep Lenis; make the
+pre-commit hook run the age check whenever either package file is staged, with a test.
+
+**Assistant, the fix:** added the `package-age` check to `check_all.py` and its selection, with tests; confirmed it
+fails on the stale dates as CI did and passes on the corrected ones; documented it in `CLAUDE.md` and `docs/site.md`.
+

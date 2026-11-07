@@ -4368,4 +4368,15 @@ Production build and Lighthouse passed in both runs. The Playwright step comes a
   `package-age` fails with the same lenis violation as CI. So the hook would have blocked the 2026-11-01 commit.
 - Documented in `CLAUDE.md` (pre-commit hook) and `docs/site.md` (packages).
 
+**The date fix** (author's OK, 2026-11-06; Lenis kept). `site/package.json` now records `npmLockedOn` 2026-11-01 and
+`npmBefore` 2026-10-18, exactly 14 days apart.
+- **2026-11-01 is the day the lockfile was last written with additions** (`7329f6b`, `4c8a67f`). Its only later
+  change, `f0045ce` on 2026-11-02, removed the two Barlow packages and added none, so every entry now in the lockfile
+  was locked by 2026-11-01.
+- **The rule is unchanged and no looser:** every locked package must still be at least 14 days old on its lock day.
+  Lenis (2026-10-15) passes. Every other package was published before the old cutoff, 2026-09-30, since Lenis was
+  the only violation.
+- **Measured** (`node tools/check-package-age.mjs`, 2026-11-06): "131 locked packages; newest lenis@1.3.27
+  (2026-10-15); cutoff 2026-10-18, locked on 2026-11-01 (14 days apart)", then "14-day rule: ok", exit 0.
+
 

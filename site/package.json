@@ -8,8 +8,8 @@
     "node": "24.18.1"
   },
   "config": {
-    "npmBefore": "2026-09-30",
-    "npmLockedOn": "2026-10-14"
+    "npmBefore": "2026-10-18",
+    "npmLockedOn": "2026-11-01"
   },
   "scripts": {
     "dev": "vite",
