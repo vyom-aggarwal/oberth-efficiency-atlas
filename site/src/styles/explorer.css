@@ -1,0 +1,29 @@
+/* The explorer in the Phase 9 system (pass 5, docs/revamp_plan.md §2.7, §2.12), as approved on the style page's explorer
+   sample: four Panel regions with quiet titles, η at figure size under an Ink rule, controls as pills (controls.css),
+   warnings in Critical with icon and text, and the reader's case an Ink dot on the curve (chart.css: the accent never
+   sits in a plot, §2.1). Behaviour, URL state and the simulator are unchanged. This project's own design; no code from
+   the reference. */
+
+.page-explorer .page { padding: var(--s6) var(--pad) 0; }
+.page-explorer .wrap { max-width: 1320px; margin: 0; }
+.page-explorer .page-title { font-size: var(--t-display); line-height: 1.05; letter-spacing: var(--track-display); margin: 0 0 var(--s6); }
+
+.explorer-layout { gap: var(--s4); }
+@media (min-width: 1100px) { .explorer-layout { grid-template-columns: 300px minmax(0, 1fr) 260px; } }
+.explorer-controls, .explorer-readouts, .explorer-placement { background: var(--panel); --surface: var(--panel); --raised: var(--void);
+                                                              border-radius: var(--r-panel); padding: var(--s5); min-width: 0; }
+.explorer-view { padding: var(--s4); }
+/* Region titles: quiet labels. Their line height clears the glyphs, which at Phase 9's heading line height (1.05) rose
+   above the panel's padding when the title came first (e2e/panel-text.spec.ts, 360 and 390 px). */
+.region-title { font-family: var(--sans); font-size: var(--t-label); font-weight: 400; line-height: 1.4; letter-spacing: 0.01em;
+                text-transform: none; color: var(--quiet); }
+.explorer-note, .explorer-fallback, .explorer-place-fig figcaption { color: var(--quiet); }
+.explorer-readouts-list > div { border-top: 1px solid var(--rule); padding: var(--s3) 0 var(--s2); }
+.explorer-readouts-list > div:first-child { border-top: 2px solid var(--ink); }
+.explorer-readouts-list dt { color: var(--quiet); }
+.explorer-readouts-list > div:first-child dd { font-size: clamp(30px, 2.5vw, 38px); font-weight: 400; letter-spacing: -0.03em; line-height: 1.1;
+                                               overflow-wrap: normal; }
+.explorer-controls .axis-slider .number { width: 10ch; padding: 0 10px; }
+.explorer-place-fig { padding: 0; background: none; }
+.warning { border-radius: var(--r-control); }
+.explorer-fallback { margin-top: var(--s6); }

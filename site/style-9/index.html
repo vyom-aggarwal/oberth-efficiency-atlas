@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="robots" content="noindex" />
+    <title>Phase 9 style</title>
+    <!-- The preloader's gate, before the first paint (adapted from suhaslord/portfolio index.html; MIT,
+         THIRD_PARTY_NOTICES.md): the first load of a session only, never with a #fragment or under reduced motion,
+         with a failsafe if the page script never runs. The page content stays in the DOM beneath it. -->
+    <script>
+      try {
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches && !location.hash && !sessionStorage.getItem("oberth-preloaded")) {
+          sessionStorage.setItem("oberth-preloaded", "1");
+          document.documentElement.classList.add("preloading");
+          setTimeout(function () { document.documentElement.classList.remove("preloading"); }, 2000);
+        }
+      } catch (e) { /* no storage: no preloader */ }
+    </script>
+    <script type="module" src="/src/pages/style9.ts"></script>
+  </head>
+  <body>
+    <div class="preload9" id="preload9" aria-hidden="true"><svg class="flyby9"></svg></div>
+    <a class="skip9" href="#main">Skip to content</a>
+    <header class="head9">
+      <a class="brand9" href="#">Oberth Efficiency Atlas</a>
+      <nav aria-label="Site"><a href="#">Research</a><a href="#">Explorer</a><a href="#">References</a><a href="#">About</a></nav>
+    </header>
+    <button class="menu9-pill" type="button" aria-expanded="false" aria-controls="menu9">Menu</button>
+    <div class="menu9-scrim" id="scrim9"></div>
+    <aside class="menu9-panel" id="menu9" aria-label="Menu" aria-hidden="true" inert data-lenis-prevent>
+      <p class="label">Navigation</p>
+      <nav aria-label="Pages">
+        <a href="#" aria-current="page">Home</a>
+        <a href="#">Research</a>
+        <a href="#">Explorer</a>
+        <a href="#">References</a>
+        <a href="#">About</a>
+      </nav>
+      <div class="bottom" id="menu9-bottom"><a href="#">Classic explorer</a><a href="#">Cite</a></div>
+    </aside>
+
+    <main id="main">
+      <!-- The hero and the findings share one grid: from 1100 px wide (and 700 px tall) the dive docks beside the rows. -->
+      <div class="stage9" id="stage9">
+        <section class="hero9" aria-labelledby="hero9-title">
+          <h1 id="hero9-title" class="visually-hidden">Oberth Efficiency Atlas</h1>
+          <div class="hero9-home" id="dive-home"><figure class="hero9-dive" id="landing-hero" data-intro=""><div class="landing-hero-body"></div></figure></div>
+          <p class="hero9-pill" id="pill9"></p>
+          <div class="hero9-role" id="role9"><div class="hero9-headline"><!--#slot:headline--></div></div>
+          <div class="marquee9" id="marquee9" aria-hidden="true"><div class="track" id="marquee9-track"></div></div>
+          <div class="hero9-foot" id="foot9"></div>
+        </section>
+        <div class="dock9" id="dock9"></div>
+        <section class="block9 findings9" id="findings9" aria-labelledby="findings9-title">
+          <p class="eyebrow9 note9">Development page (not deployed): the Phase 9 system for the author's approval, revised for the
+            decisions of 2026-11-02 (docs/revamp_plan.md §2.11).</p>
+          <h2 class="display9" id="findings9-title"><span class="n9">01</span>Findings</h2>
+          <p class="eyebrow9 note9" id="findings9-how">Point at row 01 or 03 or focus it and the dive moves to that finding's state (row 02 leaves the dive as it is); open a row
+            for its live figure, caption and link.</p>
+          <ol class="rows9" id="rows9">
+            <li data-row="loss">
+              <h3 class="row9-h"><button class="row9-head" type="button" aria-expanded="false" aria-controls="row9-loss">
+                <span class="n">01</span><span class="t" id="row9-loss-t">Loss against Π</span>
+                <span class="c"><span class="g"></span><span>universal curve</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <p class="visually-hidden" id="row9-loss-steer">The dive beside shows all three burns, the clock at the end.</p>
+              <div class="row9-body" id="row9-loss" hidden>
+                <figure class="finding" id="pv9-1" aria-labelledby="row9-loss-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-loss--><!--#finding-link:universal-curve|preset=hibberd--></figcaption></figure>
+              </div>
+            </li>
+            <li data-row="missions">
+              <h3 class="row9-h"><button class="row9-head" type="button" aria-expanded="false" aria-controls="row9-missions">
+                <span class="n">02</span><span class="t" id="row9-missions-t">Where real missions sit</span>
+                <span class="c"><span class="g"></span><span>atlas</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <div class="row9-body" id="row9-missions" hidden>
+                <figure class="finding" id="pv9-2" aria-labelledby="row9-missions-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-missions--><!--#finding-link:atlas|preset=jupiter.hall--></figcaption></figure>
+              </div>
+            </li>
+            <li data-row="hibberd">
+              <h3 class="row9-h"><button class="row9-head" type="button" aria-expanded="false" aria-controls="row9-hibberd">
+                <span class="n">03</span><span class="t" id="row9-hibberd-t">The Hibberd et al. check</span>
+                <span class="c"><span class="g"></span><span>case study</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <p class="visually-hidden" id="row9-hibberd-steer">The dive beside shows the solid stack alone, just after its burn.</p>
+              <div class="row9-body" id="row9-hibberd" hidden>
+                <figure class="finding" id="pv9-3" aria-labelledby="row9-hibberd-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-hibberd--><!--#finding-link:case-study|preset=hibberd--></figcaption></figure>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <section class="wrap9 block9" aria-labelledby="colour9">
+        <h2 class="display9" id="colour9"><span class="n9">02</span>Colour</h2>
+        <div class="swatches9" id="swatches9"></div>
+        <p class="eyebrow9">Data colours, unchanged: the η ramp, the a·v ramp, and the three special-cell textures. The accent
+          never appears inside a plot area, legend or colour scale.</p>
+        <div class="datastrip9" id="datastrip9"></div>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="type9">
+        <h2 class="display9" id="type9"><span class="n9">03</span>Type</h2>
+        <div class="specimens9" id="specimens9"></div>
+      </section>
+
+      <section class="wrap9 block9" aria-labelledby="controls9">
+        <h2 class="display9" id="controls9"><span class="n9">04</span>Controls</h2>
+        <div class="controls9" id="controls9-body"></div>
+      </section>
+
+      <!-- Samples of the other pages in the new system (author, 2026-11-02: the styling covers every page). -->
+      <section class="block9 sample9" aria-labelledby="article9">
+        <div class="wrap9 sample9-head">
+          <h2 class="display9" id="article9"><span class="n9">05</span>Article</h2>
+          <p class="eyebrow9 note9">The research article's frame with one section: the section navigation (a rail from 1180 px, a bar
+            below), the section's TODO notes (the author's, as in development builds) and Figure 2 live, with its legend,
+            controls, tooltips, data table and caption.</p>
+        </div>
+        <div class="home-grid article9">
+          <nav class="section-nav" aria-label="Sections (sample)"><ul><!--#section-nav--></ul></nav>
+          <details class="section-nav-mobile">
+            <summary><span class="label">Section</span> <span data-current-section>The universal curve</span></summary>
+            <nav aria-label="Sections (sample)"><ul><!--#section-nav--></ul></nav>
+          </details>
+          <div class="home-content"><!--#section:universal-curve--></div>
+        </div>
+      </section>
+
+      <section class="block9 sample9" aria-labelledby="explorer9">
+        <div class="wrap9 sample9-head">
+          <h2 class="display9" id="explorer9"><span class="n9">06</span>Explorer</h2>
+          <p class="eyebrow9 note9">The explorer's whole interface, live: the case, the trajectory, the results and where the case sits.
+            The reader's case on the universal curve is an Ink dot (it was the accent).</p>
+        </div>
+        <div class="wrap9 explorer9">
+          <h3 class="page-title9">Explorer</h3>
+          <div class="explorer-layout" data-explorer>
+            <section class="explorer-controls" aria-label="Case"></section>
+            <section class="explorer-view" aria-label="Trajectory" data-lenis-prevent></section>
+            <section class="explorer-readouts" aria-label="Results"></section>
+            <section class="explorer-placement" aria-label="Placement on the universal curve and the atlas"></section>
+          </div>
+          <p class="explorer-fallback">The <a href="#">single-file explorer</a> works offline and without this page.</p>
+        </div>
+      </section>
+
+      <section class="block9 sample9" aria-labelledby="refs9">
+        <div class="wrap9 sample9-head">
+          <h2 class="display9" id="refs9"><span class="n9">07</span>References</h2>
+          <p class="eyebrow9 note9">The reference list as rows, from site.json.</p>
+        </div>
+        <div class="wrap9 refs9">
+          <h3 class="page-title9">References</h3>
+          <!--#references-->
+        </div>
+      </section>
+    </main>
+
+    <div class="close9">
+      <svg class="escape9" id="escape9" aria-hidden="true"></svg>
+      <section class="close9-content wrap9" aria-label="Closing">
+        <div class="close9-title"><!--#slot:closing--></div>
+        <div class="close9-line">
+          <div class="close9-cta" id="cta9"></div>
+          <div class="close9-links" id="links9"></div>
+        </div>
+      </section>
+      <footer class="foot9">
+        <div class="meta">
+          <div><span class="key">Analysis</span><span id="tag9"></span></div>
+          <div><span class="key">Site data</span><span id="data9"></span></div>
+        </div>
+        <nav aria-label="Footer"><span class="key">Links</span><div id="flinks9"></div></nav>
+      </footer>
+    </div>
+  </body>
+</html>

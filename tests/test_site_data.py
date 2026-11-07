@@ -279,3 +279,16 @@ def test_reference_numbers_follow_the_paper_outline():
     for case in curve["cases"]:
         if case["ref"] is not None:
             assert case["label"].split()[0] in numbers[case["ref"]]
+
+
+# The classic offline explorer, served unchanged at /explorer/classic/ (Phase 9 brief: byte-identical, the fallback).
+# The sha256 of explorer/oberth_explorer.html as the repository stores it (LF line endings; a Windows checkout has CRLF),
+# pinned when Phase 9 began (main at 2026-11-02, last rebuilt in 6b08037). Rebuilding the classic on purpose means
+# updating this hash with a RESEARCH_LOG entry. e2e/pages.spec.ts and e2e/prod.spec.ts check that the built site
+# serves the file byte for byte.
+CLASSIC_SHA256 = "61675394f6a81de6e7d45210e43eee4b04d58d7dece98dd2cf2e52cf0f0d645c"
+
+
+def test_classic_explorer_is_unchanged():
+    data = (ROOT / "explorer" / "oberth_explorer.html").read_bytes().replace(b"\r\n", b"\n")
+    assert hashlib.sha256(data).hexdigest() == CLASSIC_SHA256

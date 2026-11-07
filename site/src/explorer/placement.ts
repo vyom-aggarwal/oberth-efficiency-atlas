@@ -1,8 +1,8 @@
 // Placement of the reader's case on the universal curve (curve.json: the near-parabolic band, the Π²/96 bound, the
-// 0.1 % and 1 % thresholds) and on the Δv → 0 theory atlas (presets.json: linear-response η, prograde). The markers are
-// the classic explorer's: on the curve, which has no blue, an accent dot on a ring of the panel colour; on the blue
-// atlas, where the accent would vanish, an Ink ring on a halo. A case beyond a plot's range sits on its edge, dashed and
-// in Critical, and the summary says so.
+// 0.1 % and 1 % thresholds) and on the Δv → 0 theory atlas (presets.json: linear-response η, prograde). The markers
+// (chart.css): on the curve, an Ink dot on a ring of the panel colour (an accent dot until Phase 9: the accent never sits
+// in a plot); on the blue atlas, an Ink ring on a halo. A case beyond a plot's range sits on its edge, dashed and in
+// Critical, and the summary says so.
 import { scaleLinear, scaleLog } from "d3-scale";
 import { area, line } from "d3-shape";
 import tex from "virtual:tex";

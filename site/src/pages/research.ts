@@ -2,6 +2,7 @@
 // figures, each loaded when it nears the viewport (data for figures below the fold is lazy-loaded with its code).
 // The reference list has its own page, /references/.
 import { initShell } from "./shell";
+import "../styles/article.css";                  // after the shell's sheets (layout.css), which it restyles
 import { loadBinary, loadData, type SiteData } from "../lib/data";
 import { h } from "../lib/dom";
 import { sourceLink } from "../lib/cite";

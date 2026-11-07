@@ -1,0 +1,214 @@
+/* Phase 9 components (docs/revamp_plan.md §2.4–2.6), for the style page until passes 2–6 apply them to the site.
+
+   Design adapted from Suhas Beemineni's portfolio, https://github.com/suhaslord/portfolio, css/site.css at commit
+   c98c5cc (MIT licence, "Copyright (c) 2026 SuahsTheLord"; THIRD_PARTY_NOTICES.md): the header's layout, the menu
+   drawer's layout, the findings rows' layout (index, large title, category, hairlines), the round and outline buttons'
+   shapes and sizes, and the closing section's and footer's layout. Their proportions are the reference's; the colours
+   are this project's dark tokens. The interactions here are this project's own (§1.3): the flyby preloader, the menu
+   pill, the rows that steer the dive and open in place, plain button states, and the escape leg over the closing
+   section. Nothing moves under reduced motion. */
+
+.wrap9 { padding: 0 var(--pad); }
+.eyebrow9 { font-size: var(--t-label); color: var(--quiet); letter-spacing: 0.01em; }
+.icon9 { display: block; flex: none; }
+.skip9 { position: absolute; left: var(--s2); top: var(--s2); z-index: 120; padding: var(--s2) var(--s3); background: var(--void);
+         color: var(--ink); transform: translateY(-200%); }
+.skip9:focus { transform: none; }
+
+/* ------------------------------------------------------------- preloader: a flyby, drawn (style9.ts preloader())
+   Shown only on the first load of a session, without a #fragment, without reduced motion: an inline script in <head>
+   sets html.preloading before the first paint (with a 2 s failsafe), and the page content is in the DOM beneath it. */
+.preload9 { position: fixed; inset: 0; z-index: 100; display: none; background: var(--void); }
+html.preloading .preload9 { display: block; }
+html.preloading { overflow: hidden; }
+.flyby9 { display: block; width: 100%; height: 100%; }
+.flyby9 .full { fill: none; stroke: var(--rule); stroke-width: 1; }
+.flyby9 .flown { fill: none; stroke: var(--quiet); stroke-width: 1.2; }
+.flyby9 .burn { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.flyby9 .sun { fill: var(--sun); }
+.flyby9 .dot { fill: var(--ink); }
+.flyby9 .stage { opacity: 0; transition: opacity 180ms ease-out; }
+.flyby9 .stage.on { opacity: 1; }
+.flyby9 .stage circle { fill: var(--ink); }
+.flyby9 .stage text { fill: var(--ink); font-family: var(--sans); font-size: 20px; letter-spacing: -0.01em; }
+@media (max-width: 599px) { .flyby9 .stage text { font-size: 15px; } }
+@media (prefers-reduced-motion: reduce) { .preload9 { display: none !important; } html.preloading { overflow: auto; } }
+
+/* ------------------------------------------------------------- header: inline links from 900 px, underlined on hover */
+.head9 { position: absolute; inset: 0 0 auto; z-index: 3; height: 90px; display: flex; align-items: center;
+         justify-content: space-between; padding: 0 var(--pad); }
+.head9 .brand9 { color: var(--ink); text-decoration: none; font-size: var(--t-ui); letter-spacing: -0.025em; }
+.head9 nav { display: none; gap: var(--s6); }
+.head9 nav a { padding: 8px 0; color: var(--ink); text-decoration: underline; text-decoration-color: transparent;
+               text-underline-offset: 6px; font-size: var(--t-ui); transition: text-decoration-color 150ms; }
+.head9 nav a:hover, .head9 nav a:focus-visible, .head9 nav a[aria-current="page"] { text-decoration-color: currentColor; }
+@media (min-width: 900px) { .head9 nav { display: flex; } }
+
+/* ------------------------------------------------------------- menu: a text pill, the scrim and the drawer
+   The pill reads "Menu" or "Close" (no icon to morph). From 900 px it waits until the header has scrolled away, and
+   while hidden it is out of the tab order (visibility). The drawer has a straight edge and its links arrive with it. */
+.menu9-pill { position: fixed; z-index: 60; right: var(--pad); top: 24px; min-height: 40px; padding: 0 18px; border-radius: var(--r-pill);
+              border: 1px solid var(--quiet); background: var(--void); color: var(--ink); font: inherit; font-size: var(--t-ui);
+              cursor: pointer; transition: opacity 200ms, background-color 150ms, color 150ms, border-color 150ms, visibility 0s; }
+.menu9-pill:hover, .menu9-pill:focus-visible { background: var(--ink); color: var(--void); border-color: var(--ink); }
+.menu-open .menu9-pill { background: var(--panel); border-color: var(--ink); }
+.menu-open .menu9-pill:hover, .menu-open .menu9-pill:focus-visible { background: var(--ink); color: var(--void); }
+@media (max-width: 899px) { .menu9-pill { top: 25px; } }
+@media (min-width: 900px) {
+  html:not(.has-scrolled):not(.menu-open) .menu9-pill { opacity: 0; pointer-events: none; visibility: hidden;
+                                                       transition: opacity 200ms, visibility 0s 200ms; }
+}
+.menu9-scrim { position: fixed; inset: 0; z-index: 40; background: rgb(0 0 0 / 0.6); opacity: 0; visibility: hidden;
+               transition: opacity 250ms, visibility 0s 250ms; }
+.menu-open .menu9-scrim { opacity: 1; visibility: visible; transition: opacity 250ms; }
+.menu9-panel { position: fixed; inset: 0 0 0 auto; z-index: 50; width: 100%; background: var(--panel); color: var(--ink);
+               border-left: 1px solid var(--rule); padding: 15svh 12vw 35px; display: flex; flex-direction: column;
+               overflow-y: auto; overscroll-behavior: contain; transform: translateX(100%); visibility: hidden;
+               transition: transform 300ms cubic-bezier(.4, 0, 1, 1), visibility 0s 300ms; }
+.menu-open .menu9-panel { transform: none; visibility: visible; transition: transform 380ms var(--ease); }
+.menu9-panel .label { font-size: 12px; color: var(--quiet); margin: 0 0 20px; }
+.menu9-panel nav { display: grid; padding: 22px 0; margin-bottom: 22px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.menu9-panel nav a { position: relative; justify-self: start; color: var(--ink); text-decoration: none; font-size: 12vw; line-height: 1.2;
+                     letter-spacing: -0.02em; }
+.menu9-panel nav a:hover, .menu9-panel nav a:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.12em; }
+/* The current page carries the section rail's marker: a short bar before it. */
+.menu9-panel nav a[aria-current="page"]::before { content: ""; position: absolute; left: -32px; top: 50%; width: 18px; height: 2px;
+                                                  background: currentColor; }
+.menu9-panel .bottom { display: flex; flex-wrap: wrap; gap: 22px; font-size: 14px; }
+.menu9-panel .bottom a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.menu9-panel .bottom a:hover, .menu9-panel .bottom a:focus-visible { text-decoration: underline; text-underline-offset: 5px; }
+.menu-open { overflow: hidden; }
+@media (min-width: 900px) {
+  .menu9-panel { width: 37.5vw; min-width: 460px; max-width: 700px; padding: 15svh 7.5vw 40px; }
+  .menu9-panel nav a { font-size: clamp(48px, 5vw, 80px); }
+}
+/* Opened or closed from the keyboard: no motion. */
+.menu-instant .menu9-panel, .menu-instant .menu9-scrim { transition: none !important; }
+
+/* ------------------------------------------------------------- the title: one line at 15 vw, moved by the dive's clock
+   (style9.ts onFrame); still and wrapped at display size under reduced motion. */
+.marquee9 { position: relative; overflow: hidden; }
+.marquee9 .track { display: flex; width: max-content; will-change: transform; }
+.marquee9 .line { font-size: var(--t-marquee); line-height: 1.08; letter-spacing: var(--track-marquee); white-space: nowrap;
+                  padding: 0 0.12em 0.08em 0; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) {
+  .marquee9 .track { width: auto; display: block; transform: none !important; }
+  .marquee9 .line + .line { display: none; }
+  .marquee9 .line { display: block; white-space: normal; font-size: var(--t-display); line-height: 1.05; padding: 0 var(--pad); }
+}
+
+/* ------------------------------------------------------------- buttons: round and outline, with plain states
+   (the reference's shapes; no magnetic pull and no rising fill: a colour change on hover or focus, 150 ms). */
+.round9, .pill9 { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); text-decoration: none;
+                  cursor: pointer; font: inherit; transition: background-color 150ms, color 150ms, border-color 150ms, box-shadow 150ms; }
+.round9 { width: 12vw; height: 12vw; min-width: 135px; min-height: 135px; max-width: 180px; max-height: 180px; border-radius: 50%;
+          border: 0; background: var(--ink); color: var(--void); font-size: clamp(14px, 1.2vw, 18px); }
+.round9:hover, .round9:focus-visible { background: var(--void); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.round9.accent { background: var(--signal); color: var(--ink); }
+.round9.accent:hover, .round9.accent:focus-visible { background: color-mix(in oklab, var(--signal) 78%, black); box-shadow: none; }
+.round9.small { width: 46px; height: 46px; min-width: 46px; min-height: 46px; background: transparent; color: var(--ink);
+                box-shadow: inset 0 0 0 1px var(--quiet); }
+a:hover > .round9.small, a:focus-visible > .round9.small { background: var(--ink); color: var(--void); box-shadow: none; }
+.pill9 { min-height: 48px; padding: 0 var(--s6); border-radius: var(--r-pill); border: 1px solid var(--quiet); color: var(--ink);
+         background: transparent; font-size: var(--t-ui); }
+.pill9:hover, .pill9:focus-visible { background: var(--ink); color: var(--void); border-color: var(--ink); }
+.pill9 sup { font-size: 0.65em; margin-left: -0.15em; line-height: 0; }
+
+/* The switch (radio pills), select and slider, restyled from the shared controls. */
+.segmented { display: inline-flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; }
+.segmented legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.segmented label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: var(--r-pill);
+                   border: 1px solid var(--quiet); color: var(--quiet); font-size: var(--t-label); cursor: pointer; }
+.segmented label:has(input:checked) { border-color: var(--ink); color: var(--ink); }
+.segmented input { accent-color: var(--signal); margin: 0; }
+.segmented label:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 3px; }
+.select9 { font: inherit; font-size: var(--t-ui); color: var(--ink); background: var(--void); border: 1px solid var(--quiet);
+           border-radius: var(--r-pill); min-height: 44px; padding: 0 40px 0 var(--s5); appearance: none;
+           background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+           background-position: calc(100% - 22px) 52%, calc(100% - 17px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
+.axis-slider { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s3); align-items: center; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-runnable-track { height: 1px; background: var(--quiet); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-track { height: 1px; background: var(--quiet); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px;
+  margin-top: -7.5px; border-radius: 50%; background: var(--ink); border: 0; box-shadow: none; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%;
+  background: var(--ink); border: 0; box-shadow: none; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; }
+.axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
+.axis-slider svg text { fill: var(--quiet); font-family: var(--mono); font-size: var(--t-tick); }
+.axis-slider svg text.mark-label { fill: var(--ink); font-family: var(--sans); font-size: var(--t-annot); font-weight: 600; }
+.axis-slider svg text.mark-label.hollow { fill: var(--quiet); font-weight: 400; }
+.axis-slider .number { width: 9ch; font-family: var(--mono); font-size: var(--t-label); color: var(--ink); background: var(--void);
+                       border: 1px solid var(--quiet); border-radius: var(--r-pill); min-height: 36px; padding: 0 var(--s3); text-align: right; }
+
+/* ------------------------------------------------------------- findings rows (the reference's row layout: index, large
+   title, category, hairlines). Each row is a disclosure (a heading's button): it opens in place to its live figure.
+   Where the dive is docked beside them, the row pointed at or focused stays Ink and the others go Quiet, and its
+   category column shows the line styles of the engines it lights on the dive. */
+.rows9 { list-style: none; margin: 0; padding: 0; }
+.rows9 li { border-top: 1px solid var(--rule); }
+.rows9 li:last-child { border-bottom: 1px solid var(--rule); }
+.row9-h { margin: 0; font: inherit; letter-spacing: normal; }
+.row9-head { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 25% 24px; align-items: center; gap: 40px; width: 100%;
+             padding: 4.1vw 4vw 4.8vw 8vw; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer;
+             transition: color 200ms; }
+.row9-head .n { position: absolute; left: 3vw; top: 50%; translate: 0 -50%; font-family: var(--mono); font-size: 12px; color: var(--quiet); }
+.row9-head .t { font-size: clamp(30px, 5.25vw, 76px); line-height: 1.2; letter-spacing: -0.035em; }
+.row9-head .c { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--s3); font-size: clamp(13px, 1.2vw, 17px); color: var(--quiet); }
+.row9-head .g { display: inline-flex; gap: 4px; }
+.row9-head .chev { width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--quiet); position: relative; }
+.row9-head .chev::before, .row9-head .chev::after { content: ""; position: absolute; left: 7px; right: 7px; top: 11.5px; height: 1px; background: currentColor; }
+.row9-head .chev::after { transform: rotate(90deg); transition: transform 200ms var(--ease); }
+.row9-head[aria-expanded="true"] .chev::after { transform: rotate(0deg); }
+.row9-head:focus-visible { outline-offset: -2px; }
+.rows9.has-active li:not(.is-active) .row9-head { color: var(--quiet); }
+.rows9 li.is-active .row9-head .t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.14em; }
+.row9-body { padding: 0 4vw var(--s6) 8vw; animation: open9 280ms var(--ease); }
+.row9-body .finding { margin: 0; max-width: 760px; background: var(--panel); --surface: var(--panel); --raised: var(--void);
+                      border-radius: var(--r-panel); padding: var(--s4); }
+@keyframes open9 { from { opacity: 0; transform: translateY(-8px); } }
+@media (max-width: 767px) {
+  .row9-head { grid-template-columns: minmax(0, 1fr) 24px; gap: 6px var(--s3); padding: 28px var(--pad) 32px calc(var(--pad) + 32px); }
+  .row9-head .n { left: var(--pad); top: 34px; translate: none; }
+  .row9-head .c { grid-row: 2; grid-column: 1; }
+  .row9-head .chev { grid-row: 1; grid-column: 2; }
+  .row9-body { padding: 0 var(--pad) var(--s5); }
+}
+@media (prefers-reduced-motion: reduce) { .row9-body { animation: none; } }
+
+/* ------------------------------------------------------------- closing section and footer (the reference's layout: a
+   large line, a round call to action on a rule, outline links, fine print). Its top edge is straight; over it, the
+   escape leg (style9.ts drawEscape) draws itself as the band scrolls in, where scroll-driven animation is supported. */
+.close9 { position: relative; background: var(--panel); --surface: var(--panel); overflow: hidden; isolation: isolate;
+          border-top: 1px solid var(--rule); view-timeline: --close9; }
+.escape9 { display: block; width: 100%; height: clamp(84px, 10vw, 150px); overflow: visible; }
+.escape9 .leg { fill: none; stroke: var(--quiet); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.escape9 .dot { fill: var(--ink); }
+.close9-content { position: relative; padding-top: var(--s5); }
+.close9-title { font-size: clamp(48px, 6.125vw, 88px); line-height: 1.065; letter-spacing: -0.035em; max-width: 14ch; }
+.close9-title .slot p { margin: 0; }
+.close9-title .slot-todo { font-size: var(--t-ui); letter-spacing: normal; line-height: 1.5; max-width: var(--measure); color: var(--quiet); }
+.close9-line { position: relative; margin-top: max(80px, 7.2vw); padding-top: max(80px, 6.8vw); border-top: 1px solid rgb(255 255 255 / 0.2); }
+.close9-cta { position: absolute; right: 8.5%; top: min(-60px, -6vw); }
+.close9-links { display: flex; flex-wrap: wrap; gap: 10px; padding-bottom: 1vw; }
+.foot9 { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 40px; padding: max(70px, 11.1vw) var(--pad) 26px;
+         font-size: 13px; line-height: 1.6; }
+.foot9 .meta { display: flex; flex-wrap: wrap; gap: max(24px, 3vw); }
+.foot9 .meta > div, .foot9 nav { display: grid; gap: 4px; }
+.foot9 .key { font-size: 12px; color: var(--quiet); }
+.foot9 nav div { display: flex; flex-wrap: wrap; gap: 0 30px; }
+.foot9 a { color: var(--ink); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; transition: text-decoration-color 150ms; }
+.foot9 a:hover, .foot9 a:focus-visible { text-decoration-color: currentColor; }
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .escape9 .leg { animation: draw9 linear both; animation-timeline: --close9; animation-range: entry 10% entry 90%; }
+    .escape9 .dot { animation: arrive9 linear both; animation-timeline: --close9; animation-range: entry 80% entry 95%; }
+  }
+}
+@keyframes draw9 { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes arrive9 { from { opacity: 0; } to { opacity: 1; } }
+
+/* ------------------------------------------------------------- the dive while steered (charts/landing-hero.ts steer()) */
+.lh-key li, .lh-key-compact li { transition: opacity 200ms; }
+.lh-key li.dim, .lh-key-compact li.dim { opacity: 0.35; }
+.energy-strip .strip-line.dim { opacity: 0.25; }

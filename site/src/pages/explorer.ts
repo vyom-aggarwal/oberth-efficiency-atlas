@@ -1,6 +1,7 @@
 // The explorer page: the shell, then the explorer once its data has loaded (presets, the hero's case for the
 // Hibberd preset, and the universal curve for placement).
 import { initShell } from "./shell";
+import "../styles/explorer.css";                 // after the shell's sheets (layout.css), which it restyles
 import { explorer, type ExplorerData } from "../explorer/explorer";
 import { loadData } from "../lib/data";
 import { h } from "../lib/dom";

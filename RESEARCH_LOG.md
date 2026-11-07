@@ -3582,4 +3582,801 @@ very first check (360 px, Π = 0.001), with the η annotation and every slider l
 - It now waits until the hero has drawn: the canvas records its a·v steps, and the slider has its labels. 15 of 15 in
   three repeats.
 
+## 2026-11-01: Phase 9 begins: a dark, portfolio-style revamp (steps 1 and 2)
+
+**Brief** (author, 2026-11-01): revamp the site's look as a dark interpretation of https://suhaslord.github.io/portfolio/,
+with this project's content and data.
+- **Dark only:** the light theme and the theme toggle go, and `color-scheme: dark` is set.
+- **Inspiration, not copying.** Site-only; the analysis freeze holds. Every contract that isn't visual stays.
+- **Work on the branch `phase-9-revamp`;** main changes only through a pull request with green CI.
+- **The sticky-header fix** was already on main (`ba0dae9`), so it stands. The new navigation keeps equivalent tests.
+
+**Step 1, the reference** (`docs/revamp_plan.md` §1):
+- **Captured** with Playwright at 1440 and 390 px into `runs/reference/`, not committed: load frames, hero, sections,
+  footer, the menu, row hovers, and computed measurements.
+- **Licence:** MIT ("Copyright (c) 2026 SuahsTheLord"). Nothing is copied.
+- **Typefaces,** all OFL 1.1 (none commercial): DM Sans (the home page's only face, at weight 400), Space Grotesk, Lora,
+  IBM Plex Mono.
+- **Libraries:** GSAP with ScrollTrigger, Lenis and Barba.
+- **Measured traits:**
+  - one family at one weight, from 12 to 216 px, with tight tracking on large sizes;
+  - one easing curve, `cubic-bezier(.22, 1, .36, 1)`, with transitions of 0.2–0.8 s;
+  - a greeting preloader from 0.6 to 2.6 s;
+  - the marquee at 216 px, drifting about 18 px/s;
+  - an 80 px floating menu button.
+- **Inventory** in my own words, and an adopt, adapt or drop decision for each element, with reasons (§1.2).
+
+**Step 2, the design plan** (§2), for the author's approval:
+- **Interface palette, six named colours** (all checks pass, `site/tools/phase9-palette.mjs`): Void `#111214`, Panel
+  `#1b1c1f`, Ink `#ecebe7`, Quiet `#a3a4a8`, Rule `#2f3135`, Signal `#c27bff`.
+  - **A deviation inside the step:** the first accent, a violet-shifted indigo `#7c6cff`, was ΔE 11.6 from an a·v step
+    and took a white label at only 3.86:1. It moved to electric violet `#c27bff` (ΔE 15.9 from every data blue,
+    6.76:1 with a Void label).
+  - The reference's own indigo would sit ΔE 8.3 from the η ramp.
+- **Data colours** are unchanged: the classic's dark steps. Re-checked on the new surfaces, all pass:
+  - the faintest a·v stroke 2.43:1 on Void and 2.21:1 on Panel;
+  - the hatching, the dots and the Sun at 4.85–9.64:1;
+  - ramps monotone (steps 0.082 and 0.071);
+  - critical against the η ramp, worst colour-vision ΔE 17.6.
+  - **Rendered, on the style page's live dive:** step 1 at full strength (279 px at 1440, 141 at 390) on the sampled
+    panel colour, 2.21:1.
+- **Typography:** Commissioner (OFL) for display, interface and prose, and Fira Mono (OFL) for data.
+  - Both have native Greek. Commissioner's proportions are the closest to DM Sans among the families with Greek
+    (0.026; fontTools).
+  - DM Sans would be allowed (OFL) but has no Greek.
+  - `@fontsource/commissioner` and `@fontsource/fira-mono` 5.3.0 (2026-07-19) are installed, pinned under the 14-day
+    rule.
+  - To check in pass 1: Fira Mono's package licence names Google Inc. as copyright holder; the font file's own record
+    decides what the committed licence says.
+- **Also in the plan:**
+  - information architecture, with an About the project page proposed;
+  - the landing page;
+  - a motion table (no animation library; the load sequence at most 1.5 s, once per session; the dive's intro
+    compressed from 4.8 s to 1.5 s);
+  - ASCII wireframes of four pages at 1440 and 390 px;
+  - a pass-2 review against generic-portfolio traits;
+  - six decisions for the author.
+- **The style page** `/style-9/` (development builds only) uses the new tokens alone, so the rest of the site is
+  untouched. Screenshots are in `docs/screens/phase-9-style/`.
+  - **Found while building it, and fixed:**
+    - the floating menu button covered the header's last link at 1440 px, so from 900 px it now appears only once the
+      header has scrolled away;
+    - a still 216 px marquee cut the title mid-word, so under reduced motion the line shows once, wrapped at display
+      size, its formulas unbroken, with no pause control;
+    - ❚ ▶ ↗ ↓ had no self-hosted glyph (caught by `tests/test_site_fonts.py`), so they are SVG icons now.
+  - **One isolation quirk:** Vite links the shared landing stylesheet after the page's own, so the style page's
+    headline rule needs a more specific selector. The landing stylesheet is rewritten in pass 3.
+
+## 2026-11-01: Phase 9 steps 1–2 revised after the author's review: copying allowed, decisions applied
+
+**The author's changes to the brief** (review of steps 1–2):
+- **Copying:** allowed. The reference's repository is MIT, and the result should be close to it.
+  - Its code, CSS, animation logic and component structure may be reused.
+  - Its MIT notice must be kept verbatim in `THIRD_PARTY_NOTICES.md`, with every file containing copied or adapted
+    code marked and listed.
+  - None of its personal content may be used.
+  - The result must stay distinguishable.
+  - The About page must carry the credit "Design adapted from Suhas Beemineni's portfolio (MIT licence)".
+- **Libraries:**
+  - GSAP is allowed (licence and 14-day rule to be reported);
+  - Lenis is allowed only under four conditions;
+  - Barba is not; cross-document View Transitions are allowed instead.
+- **Decisions:**
+  1. the reference's indigo, never in a plot area, legend or colour scale (or the nearest passing variant);
+  2. the existing dark data steps;
+  3. DM Sans and IBM Plex Mono, with Commissioner's and Fira Mono's Greek as fallbacks through `fonts.py`;
+  4. an About page modelled on the reference's;
+  5. the title alone in the marquee;
+  6. a preloader of about 2 s at most, and the dive intro at most 3 s. The 1.5 s cap now applies only to sequences that
+     block content.
+
+**Reference code read** (`runs/reference-src/`, not committed, from `suhaslord/portfolio` at `c98c5cc`):
+- `js/site.js`, `js/motion.js`, `css/site.css` and the pages' markup.
+- **Adapted, each file with a header naming the source,** and listed in `THIRD_PARTY_NOTICES.md`:
+  - the preloader's timeline and curve;
+  - the menu, with its keyboard instant path and focus cycle;
+  - the marquee's ticker;
+  - `spring()` and the magnetic controls;
+  - the work-row preview;
+  - the liquid buttons;
+  - the closing curve and footer;
+  - the hero's composition.
+
+  GSAP timelines are rewritten as CSS transitions and the Web Animations API, with the same durations and the
+  equivalent Bézier curves.
+- **Corrections to my step-1 inventory,** from the code:
+  - The marquee runs at 0.055 px/ms, which is 55 px/s at normal frame rates. The 18 px/s I measured in step 1 came from
+    headless captures with slow frames, where the ticker clamps each step to 50 ms.
+  - The work rows are about 220 px tall at 1440 px, not 110.
+
+**Libraries:**
+- **GSAP 3.15.0:**
+  - Published 2026-04-13, so it qualifies under the 14-day rule.
+  - Licence: the GSAP Standard "no charge" License (Webflow, effective 2025-04-30). Free, commercial use included,
+    not open source. It forbids use in no-code animation tools that compete with Webflow, and removing GSAP's notices.
+  - **Not used** (my recommendation, decision 7 in the plan): CSS and the Web Animations API cover every timeline here,
+    and the springs are the reference's own code.
+- **Lenis 1.3.27:**
+  - MIT, published 2026-10-15, so it qualifies; 5.4 kB gzipped.
+  - On the style page for fine pointers at 768 px and wider, never under reduced motion.
+  - The author's four conditions get tests in pass 2. If any fails, Lenis comes out.
+
+**Accent (decision 1):**
+- The reference's `#455ce9` takes an Ink label at only 4.44:1.
+- The nearest variant passing every accent job is `#445be8`, ΔE 0.31, found by a grid search in OKLCH
+  (`phase9-palette.mjs`). It gives an Ink label at 4.51:1 and focus rings at 3.49:1 on Void and 3.17:1 on Panel.
+- It is never text (links are Ink, underlined).
+- The old "accent vs every data blue" check is replaced by the author's rule. The distance, ΔE 8.3 from η step 3, is now
+  reported only. Consequences:
+  - the preview's "View" badge is Ink, because it rides over live plots;
+  - the explorer's accent case dot becomes Ink in pass 5;
+  - a test from pass 4 will fail on any chart code that reads the accent.
+
+**Fonts (decision 3):**
+- `@fontsource/dm-sans` 5.3.0 is added. `@fontsource/commissioner` and `@fontsource/fira-mono` are removed.
+- `fonts.py` gains a Phase 9 set, written beside the Phase 8 set until pass 1:
+  - **files:** `site/src/styles/v9/fonts.css`, `v9-*` subsets, `manifest-v9.json`;
+  - **Greek:** Commissioner 400 and 600 behind DM Sans, Fira Mono 400 and 500 behind IBM Plex Mono;
+  - **signs:** → from Noto Sans Math, ⁻ ⁿ ₚ from Arimo.
+- **Sources:** pinned Google Fonts files by sha256. OFL texts are pinned to google/fonts `e7db6ca`; neither declares a
+  Reserved Font Name.
+- **The Fira Mono question from the step-2 entry,** settled: the committed `LICENSE-fira-mono.txt` opens with the font
+  file's own record, "Digitized data copyright © 2012-2015, The Mozilla Foundation and Telefonica S.A.".
+- **Metrics:** x-height ratios 1.016 and 0.979 against the primaries, and the same 0.6 em mono advance, so no
+  `size-adjust` is needed.
+- **Output:** the Phase 8 set regenerates byte-identical. `tests/test_site_fonts.py` now checks both sets.
+
+**Preloader (decision 6):**
+- The words are the stages of a powered flyby: Approach, Periapsis, Ignition, Burn, Cutoff, Escape (proposed).
+- **Timing,** from the page's start: the lift starts at 0.8 s and lasts 950 ms, so it is done at 1.75 s by design.
+  `site/tools/style9-shots.mjs` measured 1.83 s at both widths.
+- **The 2 s cap holds even if the script is late:** it joins at the word that is due and shortens the lift, and an
+  inline failsafe removes the curtain at 2 s.
+- It shows once a session, never with a `#fragment` or under reduced motion. Any key, click, tap or wheel ends it.
+- **Two deviations inside the step:**
+  - The first timing, a lift at 1.0 s, measured 2.17 s with screenshots and 1.97 s without. The second, at 0.9 s,
+    measured 1.999 s from the page's start.
+  - So the words were tightened to 110 ms apart and the lift starts at 0.8 s.
+
+**Dive intro:**
+- My step-2 plan said it took 4.8 s and proposed compressing it to 1.5 s. That was wrong: it has been 2.8 s since
+  Phase 7 (`DONE_MS = 2800`; measured 2.84 s), within the author's 3 s.
+- `landingHero` gains an optional `start` promise. With it, the dive draws its first frame beneath the preloader and
+  starts the intro as the curtain clears. Without it, behaviour is unchanged.
+
+**Departures from the reference, found while building the style page:**
+- **The monogram is dropped:** behind a 590 px figure it showed only as a stray bar.
+- **The preview is portrait (5:4)** instead of square, so the Hibberd figure's key stays in view.
+- **The closing section's content slide is dropped:** it hides the title under the curve until scrolled.
+- **The marquee keeps a pause control,** for WCAG 2.2.2.
+
+**Screenshots** (`docs/screens/phase-9-style/`, by `site/tools/style9-shots.mjs`): at 1440 and 390 px, the preloader
+(a word, then the lift), the hero, the menu open, reduced motion and the full page; at 1440 px, the hover and
+keyboard-focus previews.
+
+## 2026-11-02: Phase 9 step 2, second revision: every page in scope, the signature interactions replaced
+
+**The author's second review** (decisions in `docs/revamp_plan.md` §2.10):
+- **Scope widened to every page.** The article and every figure, the explorer's whole interface, the references, the
+  About and 404 pages. Only `/explorer/classic/` stays byte-identical.
+- **Less copying.** The reference's styling stays; its signature interactions go, each replaced by one of this project's
+  own. Test: someone who knows both sites should not recognise the trick.
+- **Decided:** no GSAP; preloader words Approach, Ignition, Periapsis, Cutoff, Escape (physical order: a centred burn
+  ignites before periapsis); the four departures approved; the closing line in a content slot.
+
+**Deviations from the approved step-2 design, recorded before the screenshots that depend on them:**
+- **The audit** (plan §1.3) classifies each adapted element as styling (kept) or signature interaction (replaced).
+- **Replaced:**
+  - the pointer-following preview;
+  - the curved-curtain preloader;
+  - the curved section edges;
+  - the magnetic and liquid buttons;
+  - the round menu button morphing to ×, with the drawer's rotated link stagger;
+  - the marquee's ticker;
+  - the links' hover dot.
+
+  `spring()` goes with the preview and the magnetic controls.
+- **Findings** (the author's preferred direction, my design, plan §2.5):
+  - **Dock.** From 1100 × 700 the hero's dive is sticky in a column spanning the hero and the findings. It slides from
+    the centre into that column as the headline scrolls away.
+  - **Steering.** Pointing at a row or focusing it steers the dive. The states come from the data:
+    - 01: every burn, the clock at the end;
+    - 02: the clock at perihelion, the impulsive reference emphasised;
+    - 03: the solid stack alone, just after its burn (`afterBurn(0)`, from the burn's samples).
+  - **Open in place.** The rows also open in place at every width, so the findings' figures and the author's captions
+    never depend on hover.
+  - **Plumbing.** `landingHero` gains `steer()` and `onFrame`. Neither changes anything unless a page calls it, and the
+    vitest suite and type check pass.
+- **Preloader:**
+  - **Path.** A hyperbola (e = 1.5) in the dive's radial mapping, the Sun at the focus.
+  - **Timing.** The dot's timing is half Kepler's (the hyperbolic mean anomaly) and half uniform in true anomaly. With
+    Kepler's alone the burn arc (±35°) takes about 2 % of the flight, about two frames.
+  - **Stage names.** They stay up once shown.
+  - **Schedule.** 120–1120 ms flight, 150 ms hold, 350 ms fade.
+- **Title.** Its offset is the angle the solid stack has swept around the Sun at the dive's clock, as a fraction of the
+  whole sweep, times one line's width.
+  - It moves only during the 2.8 s intro and while the reader scrubs or the rows steer.
+  - So nothing moves on its own for more than 5 s, and the pause control, approved as a departure, is no longer needed
+    under WCAG 2.2.2. It is removed.
+- **Closing section.** A straight edge, with the outgoing leg of a hyperbola (e = 3, perihelion to 80°) drawn over it by
+  a scroll-driven animation (drawn whole where unsupported or under reduced motion).
+  - The closing line moves to the slot `site/content/landing/closing.md`: a TODO note with "Fly one yourself." as a
+    candidate.
+- **Samples.** Article (Figure 2 with its section, via the new content-plugin directive `<!--#section:id-->`), explorer
+  and references, styled by a new `site/src/styles/v9/pages.css` with no reference code. The explorer's case dot is
+  Ink there.
+
+**Surprises, fixed before the final screenshots:**
+- **The new preloader first measured 2.10–2.17 s, over the 2 s cap.** Two causes:
+  - The explorer and Figure 2 were set up on the main thread during the fade.
+  - A Web Animations delay counts from the animation's first frame, which the module's synchronous set-up pushed back.
+
+  The fixes:
+  - Both now mount lazily, after the preloader.
+  - The fade's `startTime` is set in page time.
+  - A late script keeps 200 ms in hand.
+
+  Six dev-server runs, plus the screenshot run's two: the script took over at 210–389 ms; faded by 1.71–1.80 s; removed
+  by 1.72–1.95 s. Removal waits for the main thread; the opacity fade runs on the compositor.
+- **Stage names drawn on the path.** Far out the path runs almost radially, so radial offsets landed on it; they now
+  go along the path's normal, on its convex side.
+- **Styling bugs exposed by the shared controls and layout stylesheets the samples need:**
+  - the dive's clock overflowed its panel (that row became a non-wrapping flex row);
+  - reference entries' italic journal names became separate grid cells;
+  - η wrapped in the explorer's results column.
+
+  All three are fixed in the v9 sheets.
+- **The classic explorer's protection is weaker than the plan assumed.** `e2e/pages.spec.ts` only checks that
+  `/explorer/classic/` is served; a byte comparison is added to pass 1 (plan §2.12).
+
+**Measured:** dive intro 2.81–2.83 s.
+
+**Screenshots** (`docs/screens/phase-9-style/`): listed in `docs/screens/README.md`.
+
+## 2026-11-02: Phase 9 plan approved; row 02 leaves the dive; the build's passes and review point
+
+**The author approved the plan and the style page**, with these decisions (plan §2.10, 11–13):
+- **Findings:** both steering and opening in place.
+- **Row 02** (where real missions sit) does not steer the dive. The perihelion state is removed.
+- **The other replacements** are approved: the preloader, the title moved by the clock, the menu pill, plain buttons,
+  the closing leg.
+- **Preloader check:** the stage labels must sit at physically correct points on the drawn path, Ignition before
+  Periapsis on a centred burn, with an assertion.
+- **Preloader cap test:** against the production build, gone by 2.0 s from navigation start. Enforced locally,
+  report-only in CI, like the hero frame time.
+- **Review point:** stop after pass 3, the landing page, with screenshots at 1440 and 390 px (the docked dive with each
+  row hovered, a row open in place, the preloader mid-flight, reduced motion).
+
+**How "row 02 leaves the dive in its current state" is implemented** (my reading, recorded before the build depends on
+it):
+- Row 02 has no state. Pointing at it or focusing it counts as pointing at nothing.
+- The dive therefore keeps what the other sources give it: a focused or open row, else the reader's own clock.
+  - With row 03 open, pointing at row 02 keeps row 03's state.
+  - Moving the pointer from row 01 to row 02 returns the dive to the reader's clock, as leaving the rows does.
+- Row 02 shows no line styles in its category column, and has no hidden state description.
+- `landingHero`'s `imp` option (the emphasised impulsive reference), used only by row 02, is removed with it.
+- Checked in a headless run of the style page:
+  - row 01 pointed at gives `data-steer="012b"`;
+  - row 02 pointed at after it gives none;
+  - row 03 open, then row 02 pointed at, gives `"0"`.
+
+**The preloader's geometry moved to `site/src/lib/flyby.ts`, with seven unit tests** (`flyby.test.ts`):
+- the stages in the flight's order;
+- a centred burn: Ignition and Cutoff are the burn arc's ends, with equal Kepler times either side of periapsis;
+- Periapsis is the path's closest point to the Sun, at r = r_p;
+- each mark is a vertex of the drawn path and lies on the conic (checked against an independent formula);
+- the incoming leg is above the apse line and the outgoing below;
+- `nuAt` inverts the timing;
+- the names sit on the convex side.
+
+The drawn path now includes every stage's true anomaly among its samples, so each mark is exactly on it. A headless run
+confirmed that every mark is in the path's stroke (`isPointInStroke`) and that the marks switch on in physical order.
+
+**Correction to the plan's pass numbers.** The author's brief orders the passes:
+1. tokens, fonts and base layout;
+2. navigation, shell and footer;
+3. the landing page;
+4. the article and its figures;
+5. the explorer;
+6. references and new pages;
+7. the Open Graph image.
+
+My §2.12 table had the article as pass 3 and the landing as pass 4. It now follows the brief, which the author's review
+point (after pass 3, the landing page) confirms.
+
+**Tooling note.** The dev server started by the desktop app's preview stopped accepting connections. The headless checks
+used a dev server I started myself on port 5180 (`STYLE9_URL` points `tools/style9-shots.mjs` at it). Only
+`style-9-1440-steer-focus.png` was retaken: row 01 is now reached by keyboard from row 02.
+
+## 2026-11-02: Phase 9 pass 1: tokens, fonts and base layout; dark only; the classic explorer pinned
+
+**Palette.** `site/tools/palette.mjs` now does what `phase9-palette.mjs` did in step 2, and that file is gone.
+- It defines the six interface colours and finds Signal by the same search: `#445be8`, ΔE 0.31 from the reference.
+- It reads the data colours from the classic explorer's dark block in `explorer/app.css`.
+- It writes a dark-only `palette.css`. Every value equals the approved step-2 tokens.
+- **Checks:** all pass, including every step-2 check plus critical as warning text (5.84 on Void, 5.31 on Panel).
+- **Tests:** `palette.test.ts` now checks the dark-only output and that Signal is the nearest passing variant.
+- **One new token, `--band`:** the classic's dark axis grey `#4b4a45`, read from `app.css`. The loss band's fill was a
+  literal in the step-2 `tokens.css`; it is now `color-mix(var(--band) 60%)` in `base.css`.
+
+**Fonts.** `site/tools/fonts.py` writes one set, Phase 9's, to `src/styles/fonts.css`.
+- The subsets lose their `v9-` prefix and are byte-identical to the approved ones.
+- The CSS differs from the step-2 `v9/fonts.css` only in its relative paths.
+- **Removed:** the Phase 8 subsets and licences (Roboto Condensed, Noto Sans Mono, Arimo's Greek), and the
+  `@fontsource/barlow` and `@fontsource/barlow-semi-condensed` packages (`npm uninstall`; no package added).
+- `fonts.py` now deletes any file in `src/fonts/fallback/` that is not in the set. A new font test checks that the
+  directory holds exactly the set.
+
+**Base layout.** `base.css` takes the Phase 9 type scale, spacing, shapes and element defaults from the step-2
+`tokens.css` (deleted), and maps the colours onto the role names the charts read.
+- `--sans-cond` now names DM Sans: one sans family.
+- `--t-h2` is the statement size.
+- `--measure` is 66 ch.
+- `--gutter` is the 3 vw page padding.
+
+**Deviations from the plan, recorded now:**
+- **Phase 8's drifting background is removed.** It was a body glow of accent and Sun tints, animated for 48 s, without
+  end. Phase 9's page is a flat Void, and nothing may move on its own for more than 5 s (§2.6).
+- **The theme switch goes in pass 1, not pass 2.** With no light palette it would do nothing. Removed with it:
+  - the switch, from the header partial and `shell.ts`;
+  - `themePref`;
+  - the inline script that applied a stored theme, from six pages.
+
+  `themeShown` stays as a constant, so the chart modules that subscribe to it are unchanged. The e2e specs that looped
+  over both themes now run dark only. The switch test is replaced by one that loads every page under a light system
+  setting and expects `color-scheme: dark`, a Void background and no switch.
+- **The development page `/style/` (Phase 6) stays** for now, with its colour list updated: `e2e/interact-style.spec.ts`
+  tests the curve and controls through it. It is reviewed at the end of the build.
+- **Until passes 4 and 5, the accent appears where the plan forbids it.** `--accent` is now the indigo Signal, and the
+  pages keep their Phase 8 markup until their own pass. It shows in:
+  - the explorer's case dot on the universal curve (Ink in pass 5);
+  - checked controls;
+  - the landing's section marks.
+
+  The test that no chart module or chart stylesheet reads the accent comes in pass 4, as planned.
+
+**The classic explorer, pinned** (plan §2.12):
+- `tests/test_site_data.py` pins the sha256 of `explorer/oberth_explorer.html` as the repository stores it:
+  `61675394…`, equal to `main`'s blob.
+  - The file has LF line endings in the repository and CRLF in a Windows checkout (`core.autocrlf`), so the test hashes
+    it with LF line endings.
+  - Rebuilding the classic on purpose means a new hash and a log entry.
+- `e2e/pages.spec.ts` (test build) and `e2e/prod.spec.ts` (production build) check that `/explorer/classic/` serves
+  that file byte for byte.
+
+**Checked** on the dev server:
+- every page (landing, article, explorer, references, 404, both style pages) under a light system setting at 1440 and
+  390 px;
+- each is dark, with a Void background, DM Sans, no console errors and no sideways scroll;
+- the classic explorer is unchanged: light, and still loading Barlow from Google Fonts itself.
+
+**E2E run on the test and production builds:**
+- `pages.spec.ts` (with the new dark-only and byte-for-byte tests), `interact-style.spec.ts` and `av-stroke.spec.ts`
+  pass (10 tests). `av-stroke` measured every canvas at 2:1 or more on the new panels.
+- The production project passes 8 of 9: the classic explorer byte for byte, the links, no console errors.
+- **One known interim failure:** `fold.spec.ts` at 390 × 844. The old landing page now gets the Phase 9 display size
+  (44 px at that width, 34 px before), so its entry links fall below the fold. Pass 3 replaces that page and
+  re-measures the fold and the headline budget. Until then the full Playwright suite is not expected to pass. It is
+  not part of the fast checks run after each pass.
+
+## 2026-11-02: Phase 9 reordered: Lenis and View Transitions deferred to an optional pass 8
+
+The author approved pass 1 and confirmed the row-02 reading: pointing at row 02 counts as pointing at nothing, so the dive
+returns to the reader's clock. To protect the weekly usage, the author changed the order (plan §2.13), recorded here
+before pass 2 begins:
+- **Pass 2** covers only the header, the menu drawer and the footer (with the closing section) on every page.
+- **Lenis, with its four condition tests, and the View Transitions** move to a new optional pass 8, after pass 7 and the
+  author's final review, only if the budget allows.
+- **Until then:** native scrolling, no page transitions, and no Lenis in the production bundle. The development style
+  page `/style-9/` keeps its Lenis, so its notice entry stays.
+- **Review point:** unchanged, after pass 3, with the named screenshots.
+
+## 2026-11-02: Phase 9 pass 2: the header, the menu drawer and the footer on every page
+
+The approved style-page design, moved into the shared partials. Styles are in a new `site/src/styles/shell.css`; the
+old header, menu and footer rules are removed from `layout.css`.
+
+**The header** (`partials/header.html`):
+- **Layout.** The wordmark on the left. From 900 px, the inline links Research (when built), Explorer and References.
+- **Not sticky.** It scrolls away; Phase 7's sticky header from 900 px is gone.
+- **Source** leaves the inline links for the drawer, the closing section and the footer.
+
+**The menu pill and drawer:**
+- **The pill** reads "Menu" or "Close". It is fixed at the top right. From 900 px it appears once the header has
+  scrolled away, and is out of the tab order while hidden. Below 900 px it is always there.
+- **The drawer** lists the pages in display type (the current one marked by a short bar), then Source on GitHub, the
+  classic explorer and Cite. Cite jumps to the footer's citation, now `#cite`.
+- **Behaviour,** adapted from the reference as on the style page:
+  - the rest of the page is inert while it is open;
+  - Tab cycles between the pill and the drawer's links;
+  - Escape closes it and focus returns;
+  - from the keyboard it opens and closes without motion.
+- **New:** a link in the drawer closes it before navigating, so an in-page target is no longer inert.
+- **Without JavaScript** the inline links stay at every width and the pill stays hidden.
+
+**The closing section and footer** (`partials/footer.html`, on every page):
+- the escape leg over a straight edge (drawn by `shell.ts`; scroll-driven in CSS);
+- the author's closing-line slot (`content/landing/closing.md`, hidden in production until written);
+- "Open the explorer" (a round accent button), hidden on the explorer page itself;
+- outline links: Research (when built), Source on GitHub, Classic explorer;
+- the footer's facts, every one kept: author, citation with Copy, licences, source, analysis, site data, AI-use log,
+  offline explorer.
+
+**Sticky and fixed elements:**
+- **Measurements.** `shell.ts` sets `--header-h` to 0 and `--sticky-top` to the lowest bottom of the stuck section bar
+  and the pill. The pill counts wherever it is shown, because a jump always scrolls past the header.
+- **On the article below 1180 px** the section bar keeps 104 px free at its right end. The pill rides up with the
+  header until it sits centred in the bar (`--pill-top`), so two fixed elements never stack.
+- **Tests.** `e2e/sticky.spec.ts` now checks that the header does not stick and that the pill never covers the bar's
+  title or the rail. Its "fully visible" band includes the pill.
+
+**Deviations, recorded now:**
+- **About is not in the header yet.** The page arrives in pass 6, and a link to a missing page would fail the link
+  tests. The link comes with the page.
+- **The CTA on the explorer page.** The closing section's "Open the explorer" is hidden there rather than replaced.
+
+**Notices:** `shell.css` and `shell.ts` are added to `THIRD_PARTY_NOTICES.md` as files with adapted code (layouts;
+the drawer's focus handling), each with a header comment.
+
+**Checked** on the test build:
+- `pages.spec.ts` (with the new menu, inline-links, navigation and closing tests) and `sticky.spec.ts` at 390, 768,
+  1024 and 1440 px: 30 tests pass;
+- the landing spec's Copy and footer tests pass;
+- screenshots of the header, the open drawer, the closing section and the article's bar with the pill, at 1440 and
+  390 px, looked right.
+
+## 2026-11-03: Phase 9 pass 3: the landing page
+
+The approved style-page design becomes the landing page (`site/index.html`, `src/pages/landing.ts`, a rewritten
+`src/styles/landing.css`), in this order:
+- **the flyby preloader**, using `lib/flyby.ts`, with its inline once-a-session gate;
+- **the hero band**, with the header on it: the dive in its Void window, the case pill, the published headline under its
+  rule, and the title line moved by the dive's clock;
+- **the findings rows**, beside the docked dive from 1100 × 700: rows 01 and 03 steer it, row 02 has no state, and every
+  row opens in place;
+- **the intro**: the author's summary slot, the seven scope facts from `methods.json`, and "Read the research";
+- **four key results**, each from the site data with a link to its source file:
+  - 135,720 simulated flybys (`phase2_numbers.json`);
+  - 69 / 69 outputs reproduced (the audit summary);
+  - Π = 0.976 where the loss reaches 1 % of Δv (`phase4_numbers.json`, via `curve.json`);
+  - 1.010, the largest ratio of loss/Δv to its bound Π²/96 for Π ≤ 1 (replaced on 2026-11-04, below; the label avoided "≲",
+    which no self-hosted face has: the font test caught it).
+- **the shell's closing section and footer.**
+
+Every interaction is the style page's, already approved.
+
+**Deviations and decisions, recorded now:**
+- **The fold contract, re-specified for a hero without the entry-link row** (plan §2.5). Phase 7's rule kept the
+  title, the headline and the entry links above the fold. The Phase 9 brief keeps "the published headline", and the
+  approved hero has no entry links. So `e2e/fold.spec.ts` now checks:
+  - the headline and the way into the site: the header's links, the title line and the Findings cue at 1440 × 900;
+    the menu pill at 390 × 844;
+  - that at 1440 the headline is clear of the dive and the title line.
+
+  Measured on the production and placeholder builds: the lowest part ends at 878 px of 900, and at 233 px of 844.
+- **The headline budget,** re-measured on the same terms (`e2e/headline-budget.spec.ts`): the longest headline that
+  fits is 209 characters at 1440 × 900 (now the binding size) and 699 at 390 × 844 (the headline comes first there).
+  `HEADLINE_BUDGET` stays 100. The build's warning message names the new reason.
+- **The h1** is the visually hidden "Oberth Efficiency Atlas"; the title line is decoration, as on the style page. The
+  dive's accessible title stays "One solar dive, three engines", now visually hidden.
+- **A clipped label, found by the existing layout test.** In the dive's window at 1440 the view is 266 px wide, which
+  is narrow mode, filled edge to edge. The SEP label's star was clipped: `data-labels-clipped = 1`, also on the approved
+  style page, unnoticed. A narrow view now keeps 28 px on the right (`landing-hero.ts`); clipped = 0 at 360, 390, 768
+  and 1440 px.
+- **The scrub,** as on the style page: a hairline track and an Ink thumb (the accent stays out of the figure). The
+  touch thumb stays 26 px.
+
+**The preloader's checks** (the author, 2026-11-02; `e2e/preloader.spec.ts`):
+- **Test build:**
+  - every stage mark is in the drawn path's stroke;
+  - the marks switch on in the order Approach, Ignition, Periapsis, Cutoff, Escape, each no earlier than the one
+    before;
+  - a key ends it;
+  - it does not play on a second load in the session, with a `#fragment`, or under reduced motion.
+- **A tolerance change, measured:** the first version required strictly later times. Under the full suite Ignition
+  and Periapsis switched on in the same frame (both at 762.7 ms), so the e2e check is now "no earlier".
+  `flyby.test.ts` keeps the strict order of their times.
+- **Production build:** gone by 2.0 s from navigation start, enforced locally, report-only in CI (`PRELOADER_CAP=report`
+  in `.github/workflows/site.yml`, the times in the job summary). Measured: 1671 and 1657 ms (1440, 390) in the full
+  suite, and 1818 and 1638 ms on a rerun.
+- **The fixture option `preloader`** (default off) starts every other spec in a session that has seen it.
+
+**Tests rewritten** (`e2e/landing.spec.ts`, 23 tests pass):
+- the rows as a disclosure list (keyboard, one open at a time, each figure and link);
+- the dock and the steering (rows 01 and 03, row 02 as nothing, an open row holding its state, focus with its
+  description);
+- no dock below 1100 px;
+- the ways on;
+- the scope facts and the key results with their source files.
+
+**The full Playwright suite on the three builds:** 174 passed, 5 failed, 3 skipped (project-specific skips).
+- **Fixed:** the preloader's strict-order test (above).
+- **Not fixed, left for the passes that rebuild their pages:** three failures are knock-ons from pass 1's type (DM Sans
+  and the Phase 9 scale):
+  - the article hero's slider label "1000" crosses the figure's edge at 1440 (`hero.spec.ts`; pass 4);
+  - the explorer's "Trajectory" title reaches past its panel's padding at 360 and 390 px (`panel-text.spec.ts`;
+    pass 5);
+  - the universal curve's tooltip closes during the full-page capture in `screens-states.spec.ts` (pass 4; cause not
+    yet found).
+
+**Review screenshots** (`docs/screens/phase-9-pass-3/`, by `site/tools/landing-shots.mjs`): the author's list at 1440
+and 390 px. The docked hover shots are at 1440 only, since there is no dock below 1100 px.
+
+## 2026-11-04: Phase 9 pass 3 review: laptop folds and plain-language key results
+
+The author approved pass 3 with two fixes.
+
+**1. The fold at laptop viewports.** `e2e/fold.spec.ts` adds 1366 × 650 and 1280 × 720, typical laptop viewports after
+browser chrome. There the published headline and the header's links must be fully above the fold; the Findings cue and
+the title line may fall below. `e2e/headline-budget.spec.ts` measures the same two sizes. Margins, on the production
+and placeholder builds alike (the headline is the author's published one in both):
+
+| viewport | headline ends at | margin | lowest required part ends at | margin |
+|---|---|---|---|---|
+| 1440 × 900 | 504 px | 396 px | 878 px (the Findings cue) | 22 px |
+| 1366 × 650 | 471 px | 179 px | 471 px (the headline) | 179 px |
+| 1280 × 720 | 454 px | 266 px | 454 px (the headline) | 266 px |
+| 390 × 844 | 233 px | 611 px | 233 px (the headline) | 611 px |
+
+The longest headline that fits is 192 characters at both laptop sizes (209 at 1440, 699 at 390). `HEADLINE_BUDGET`
+(100) holds, so the hero needed no change.
+
+**2. Key results a visitor who has not met Π can read** (`landing.ts`). Each number keeps its source link and gains a
+plain-language label. Every number inside a label comes from the data as well: the engine and body counts from
+`methods.json`, the "1 %" from the threshold's own level.
+- **135,720:** "flybys simulated, with 5 engine types at 6 bodies" (`phase2_numbers.json`).
+- **69 / 69:** "outputs rebuilt from scratch in a fresh copy of the repository match the committed ones" (the audit summary).
+- **0.976:** "periapsis timescales: a burn centred on periapsis and shorter than this loses under 1 % of its Δv. One
+  timescale is the periapsis distance divided by the speed there." This is the 1 % threshold of the case study's
+  centred burn (`phase4_numbers.json`, `thresholds/time_centred/1%/Pi`).
+- **29.9×, replacing "1.010 against Π²/96"** (the author's suggestion): "less thrust, and Hibberd et al.'s solid stack
+  would still lose no more than 1 % of its Δv on its dive past the Sun". This is Hibberd et al.'s thrust margin, the
+  divisor at which the loss reaches 1 % (`phase4_numbers.json`, `thresholds/time_centred/1%/thrust_scale_divisor`
+  = 29.887, via `case.json`).
+
+**Checks:**
+- **No new glyphs.** No label uses Π, and none needs a glyph outside the self-hosted fonts: the font test passes, and
+  "×" is in DM Sans's Latin set.
+- **check_numbers on the rendered key results** (from the test build, `--strict`): with the default files it matched
+  every number but "69", whose source, `docs/audit/2026-10-19_f185234/summary.json`, is not among them. Run with
+  `--json figures/*numbers*.json docs/audit/2026-10-19_f185234/summary.json`, all 9 numbers match. The loose matching
+  of small integers (5, 6) is backed by `e2e/landing.spec.ts`, which checks each number and count against its exact
+  source.
+
+## 2026-11-04: Phase 9 pass 4: the article and its figures
+
+The approved article sample is applied to `/research/`:
+- **`src/styles/article.css`** (new; this project's own design, no reference code), moved from the style page's
+  `v9/pages.css`, which keeps only its sample's own rules: the numbered section rail from 1180 px and the sticky section
+  bar below it, display-size section titles with their numbers, prose at 18 px and 66 ch, and figures in Panels with
+  their titles, legends, captions and tooltips.
+- **`src/styles/controls.css`** restyled in place to the approved pills: Quiet outlines turning Ink when chosen,
+  hairline slider tracks with Ink thumbs, Signal focus rings and native checks. The landing's scrub now uses it, and
+  its own copy is gone.
+- **Import order:** `research.ts` imports `article.css` after the shell's stylesheets. Imported first, `layout.css`'s
+  rules of equal specificity would override it.
+- **The rail's current item** keeps its number. Phase 8's more specific marker rule is overridden.
+
+**The accent rule as a test** (`src/styles/accent.test.ts`, vitest; plan §2.1): no chart module (`src/charts/*.ts`) and
+no chart stylesheet (`chart.css`) may read `--signal` or `--accent`. None does. The explorer's modules join it in pass
+5, where its case dot becomes Ink.
+
+**The two failures assigned to pass 4, with their causes:**
+- **The slider label "1000" crossed its track at 1440 px** (`hero.spec.ts`). The cause was not the fonts. Phase 9's
+  page padding (3 vw = 43.2 px) gives the track a fractional width, 1027.62 px, which `axis-slider.ts` rounded up to
+  1028, so the right-aligned end label ended 0.8 px past the track (the test allows 0.5). The width is now rounded down
+  (`Math.floor`). Fixed in the control, not the test.
+- **The universal curve's tooltip closed during a full-page capture** (`screens-states.spec.ts`).
+  - A probe showed the sequence: the capture resizes the viewport, the figure redraws and briefly drops focus, then
+    `redraw()` gives focus back to the new target and the tooltip reopens.
+  - The test passed alone three times out of three, so the failure was a race under the full suite's load.
+  - The test now crops this transient state inside the viewport (no resize, no redraw), below the menu pill. The
+    other crops keep the full-page capture.
+
+**Full Playwright suite on the three builds:** 183 passed, 2 failed, 3 skipped (project-specific skips).
+- The two failures are the explorer's "Trajectory" title at 360 and 390 px, assigned to pass 5.
+- The preloader was gone at 1625 and 1636 ms on the production build.
+
+## 2026-11-04: Phase 9 pass 7, the Open Graph image, done before passes 5 and 6
+
+**The order changed.** The author approved pass 4 and moved pass 7 ahead of passes 5 and 6, to stay within the weekly
+budget. Passes 5 and 6, the final checks and the pull request follow after the weekly reset.
+
+**`site/public/og-image.png`** (1200 × 630) is regenerated from the finished landing hero by `site/tools/og-image.mjs`:
+- **Content:** the dive alone (paths, the Sun, rings, the burn lanes and their labels), as large as the card allows,
+  on Void, the surface it is drawn on in the hero's window. Phase 8 used the light theme's panel.
+- **Capture:** at a 1200 × 650 viewport, below the 700 px the dock needs, so the dive stays in the hero band. The window
+  is widened to the card for the capture, with the height cap at 590.
+- **Result:** the dive is 1200 × 590, and every label is inside the frame.
+- **Tests:** `e2e/social.spec.ts` checks the tags and that the image is served.
+
+## 2026-11-06: Phase 9 pass 5: the explorer
+
+The approved explorer sample is applied to `/explorer/` in a new `src/styles/explorer.css` (moved from the style page's
+`v9/pages.css`; this project's own design). It has:
+- four Panel regions with quiet titles;
+- η at figure size under an Ink rule (the accent rule on the η tile is gone);
+- the page title at display size;
+- the 300 / 1fr / 260 px grid from 1100 px.
+
+Behaviour, URL state and the simulator are unchanged. `explorer.ts` imports the stylesheet after the shell's.
+
+**The reader's case is an Ink dot.** The case marks (`.case-dot`, `.case-circle`) move from `layout.css` to `chart.css`,
+where the plot styles live, and the dot on the curve turns from the accent to Ink. `src/styles/accent.test.ts` now also
+scans `src/explorer/*.ts` and checks that the dot is Ink. No explorer module reads the accent.
+
+**The two "Trajectory" failures** (`panel-text.spec.ts`, 360 and 390 px).
+- **Cause:** Phase 9's heading line height (1.05). On the 13 px region title it makes the glyph box rise above its line
+  box. The title is the first thing in the panel, so its text crossed the panel's top padding; the report's "(0, 216 px)"
+  meant that left and right were fine.
+- **Fix:** region titles get a line height of 1.4. Both cases pass.
+
+**A collision found on the way:** in the 300 px case column the Π slider gets about 15 px a decade, and "every second
+label" still let "0.001" and "0.1" overlap.
+- `axis-slider.ts` now labels every n decades, with n chosen so labels stay at least 48 px apart.
+- That is the old rule wherever a decade has 24 px or more, so the article's sliders are unchanged. In the explorer's
+  case column the labels are 0.001, 1, 1000.
+
+**Checked:** the type check, vitest (43 tests), and `explorer`, `panel-text`, `hero`, `screens-explorer` and `case`
+specs on the test build (29 pass).
+
+## 2026-11-06: Phase 9 pass 6: references, the About page, 404
+
+**`src/styles/pages.css`** (site), imported after the shell's stylesheets, styles three pages:
+- **References:** rows between hairlines, the number in IBM Plex Mono, a cited entry ringed in Signal. Moved from the
+  style page's sample.
+- **404:** the display title, the statement line, and the links as outline pills.
+- **About** (new, `/about/`, plan §2.4): the layout is modelled on the reference's About page and listed in
+  `THIRD_PARTY_NOTICES.md` as adapted design. It has:
+  - the display title, then a hairline divider with a round "Cite" button straddling it, which copies the citation;
+  - the author's intro slot beside a citation card: the reference line, BibTeX and "Copy BibTeX";
+  - five sections, whose headings stick in a 28 % column from 900 px: Citation (with `CITATION.cff`); Licences;
+    Reproducibility (the audit facts from `methods.json`); AI use (the author's slot and the log); Author (the author's
+    slot);
+  - under Licences: code MIT, content CC BY 4.0, fonts OFL 1.1, the design credit in the author's words ("Design
+    adapted from Suhas Beemineni's portfolio (MIT licence)", linking to https://suhaslord.github.io/portfolio/), and the
+    portfolio's MIT notice verbatim.
+  - A section whose slot is unwritten (production) is hidden.
+
+**Build-time texts, from single sources** (content plugin, with vitest tests):
+- `<!--#notice:1-->` quotes section 1's licence block from `THIRD_PARTY_NOTICES.md`, so the notice is never retyped.
+- `<!--#citation-text-->` and `<!--#citation-bibtex-->` build the citation from `site.json`'s copy of `CITATION.cff`.
+  `citationBibtex` is new; its key is `aggarwal2026oberth`.
+
+**Other changes:**
+- **New author slots** (TODO notes, hidden in production): `about-intro.md`, `about-ai.md` and `about-author.md`, with
+  placeholders for the placeholder build.
+- **Navigation:** About joins the header's links and the drawer (deferred from pass 2 until the page existed).
+- **The shell's Copy buttons** now restore their own label after "Copied" ("Cite", "Copy BibTeX").
+- **Lenis:** `THIRD_PARTY_NOTICES.md` now says it is bundled only into the development style page until the optional
+  pass 8.
+
+**Tests:**
+- `e2e/about.spec.ts`:
+  - the credit's text and link;
+  - the notice equal to the repository's block;
+  - the citation equal to the footer's;
+  - the BibTeX equal to `citationBibtex(site.json)`;
+  - the audit facts;
+  - the headings sticky at 1440 and static at 390, below the menu pill's band and left of it;
+  - no sideways scroll;
+  - the 404 pills.
+- About is added to the navigation, closing, dark-only, notation, social, screenshot and production no-console-error
+  lists.
+- On the test build, `about`, `pages`, `notation` and `social` pass (32 tests), as do vitest (45) and the type check.
+
+## 2026-11-06: Phase 9 build complete: final checks, screenshots, pull request
+
+**`scripts/check_all.py` (the full gate):**
+- the type check, vitest (45), and `check_numbers` on every content file all pass;
+- the full Python suite: 623 passed.
+
+**Playwright, all three builds** (test, production under the base path, placeholders): 195 passed, 0 failed, 3 skipped.
+The skips are project-specific: the preloader tests run only on their own build.
+- **Folds:** the headline ends at 504, 471, 454 and 233 px at 1440 × 900, 1366 × 650, 1280 × 720 and 390 × 844. At
+  1440 the Findings cue ends at 878 px of 900.
+- **Preloader:** gone at 1649 and 1639 ms from navigation start on the production build (cap 2000).
+- **Hero frame time** (the article's hero while dragging): p50 4.9 ms, p95 6.7 ms (target 16), max 27.2 ms.
+
+**Screenshots of every page,** dark, at 1440 and 390 px: `docs/screens/phase-9/` (from `e2e/screens.spec.ts` on the test
+build), with the landing page's motion states in `docs/screens/phase-9-pass-3/`.
+
+**Left for the author:**
+- the prose slots: the closing line, the About page's three, and the landing summary and captions;
+- the optional pass 8 (Lenis and View Transitions);
+- whether to retire the development style pages (`/style/`, `/style-9/`).
+
+## 2026-11-06: the Phase 6 style page retired; its interaction test moved to the article
+
+The author approved the final review, pending CI, with answers on the open points. Answer 2: remove `/style/` (Phase 6),
+first moving any test coverage that depends on it onto the real pages; keep `/style-9/` as the development-only design
+reference.
+
+**Coverage moved.** `e2e/interact-style.spec.ts` was the only test of `/style/`. It checked behaviour no real-page spec
+covered, so `e2e/interact-figures.spec.ts` now checks the same on the research page:
+- **On the universal curve** (`#fig-universal-curve`, the same module and data as the style page's figure):
+  - the tooltip by pointer, with the citation and the `phase4_numbers.json` link at the tag;
+  - keyboard focus on the nuclear-thermal mark;
+  - the SEP-class caveat in the tooltip and the data table;
+  - the band's measured spread in the legend;
+  - a case toggle removing its mark.
+- **On the article hero:** the Π slider (`#hero-pi`) moved from the keyboard, its number field following. This replaces
+  the style page's own slider specimen.
+
+Both pass on the test build.
+
+**Removed:**
+- `site/style/index.html` and `src/pages/style.ts`;
+- the page's build entry in `vite.config.ts`;
+- `"style"` from `initShell`'s page names;
+- `/style/` from the screenshot spec's pages;
+- its specimen rules in `layout.css` (`.dev-banner`, `.swatches`, the HTML `.swatch`, `.ramp`, `.checks`, `.specimen`,
+  `.ctl-row`, `.readout`). No other page used them; the atlas legend's SVG `.swatch` rule in `chart.css` stays.
+
+**Confirmed:** a search of the site's code, specs, tools, scripts, tests and CI finds no remaining reference to `/style/`
+or `style.ts`, and the test build no longer contains it. `docs/site.md` now lists `/about/` and `/style-9/`.
+
+## 2026-11-06: Phase 9 pass 8 (Lenis, View Transitions) deferred
+
+The author's answer 3 at the final review: skip pass 8 for now. Not part of this pull request (plan §2.13).
+- **Lenis** and its four condition tests (§2.6) are not built.
+- **The site scrolls natively,** and the production site does not bundle Lenis. Only the development style page
+  `/style-9/` uses it (`THIRD_PARTY_NOTICES.md` §2 says so).
+- **Cross-document View Transitions** are not added; pages change without a transition.
+- **If taken up later,** the plan's conditions stand: Lenis only if all four hold (never under reduced motion; keyboard,
+  section-nav, citation and focus scrolling land targets fully visible, tested with Lenis active; no sideways scroll at
+  360 px; Lighthouse accessibility at 90 or above), else native scrolling. View Transitions only as a progressive
+  enhancement, skipped under reduced motion.
+
+## 2026-11-06: /about/ joins the Lighthouse gate
+
+The author's answer 4 at the final review: `site/tools/lighthouse.mjs` now audits `/about/` with the other pages
+(landing, research, explorer, references), mobile and desktop. The same gate applies: accessibility, best practices and
+SEO each at least 0.90, or the run exits 1; performance is reported, not enforced. The CI job runs this script, so no
+workflow change is needed.
+
+**Local run: not possible on this machine.** Chrome stopped at an interstitial for the preview server on
+`localhost:4174` before the first page (the landing page). It is the same loopback problem the dev server has had here
+since 2026-11-02, not a page fault. CI is the gate's record (2026-10-19), so the PR's Lighthouse job measures `/about/`.
+
+## 2026-11-06: CI caught stale lockfile dates; the pre-commit hook now runs the 14-day rule
+
+**The failure.** Both CI runs on the Phase 9 pull request (42268887313 for `174348f`, 42271116485 for `5d136c7`)
+failed in "Checks and Playwright" at "Package age (14-day rule)":
+```
+131 locked packages; newest lenis@1.3.27 (2026-10-15); cutoff 2026-09-30, locked on 2026-10-14 (14 days apart)
+14-day rule violations:
+  lenis@1.3.27 published 2026-10-15T15:44:06.231Z
+```
+Production build and Lighthouse passed in both runs. The Playwright step comes after the failing step, so it never ran.
+
+**The cause** (my slip, Phase 9 step 2): `site/package.json` records the day the lockfile was written
+(`config.npmLockedOn`) and the cutoff 14 days earlier (`config.npmBefore`). Both were still the scaffold's
+(2026-10-14 and 2026-09-30) when I added Lenis 1.3.27 and DM Sans on 2026-11-01 (`7329f6b`, `4c8a67f`).
+- Lenis was 17 days old that day, so it meets the rule itself; the recorded dates were stale.
+- The pre-commit hook ran only the type check and vitest for a lockfile change, so nothing checked the dates before
+  CI.
+
+**The guard** (author, 2026-11-06). `check_all.select_checks` now adds a `package-age` check whenever
+`site/package.json` or `site/package-lock.json` changes.
+- It runs `node tools/check-package-age.mjs` in `site/`, which queries the npm registry.
+- A missing `node` fails the check.
+- It is not part of the default full run: CI runs the checker as its own step on every push.
+- Tests in `tests/test_check_all.py`: the selection for both files and none for other site files; the command, its
+  failure status and a missing `node`; and the hook's command end to end (a dry run, so offline).
+- **Run on the stale dates** (`check_all.py --paths site/package-lock.json`): typecheck and vitest pass, and
+  `package-age` fails with the same lenis violation as CI. So the hook would have blocked the 2026-11-01 commit.
+- Documented in `CLAUDE.md` (pre-commit hook) and `docs/site.md` (packages).
+
+**The date fix** (author's OK, 2026-11-06; Lenis kept). `site/package.json` now records `npmLockedOn` 2026-11-01 and
+`npmBefore` 2026-10-18, exactly 14 days apart.
+- **2026-11-01 is the day the lockfile was last written with additions** (`7329f6b`, `4c8a67f`). Its only later
+  change, `f0045ce` on 2026-11-02, removed the two Barlow packages and added none, so every entry now in the lockfile
+  was locked by 2026-11-01.
+- **The rule is unchanged and no looser:** every locked package must still be at least 14 days old on its lock day.
+  Lenis (2026-10-15) passes. Every other package was published before the old cutoff, 2026-09-30, since Lenis was
+  the only violation.
+- **Measured** (`node tools/check-package-age.mjs`, 2026-11-06): "131 locked packages; newest lenis@1.3.27
+  (2026-10-15); cutoff 2026-10-18, locked on 2026-11-01 (14 days apart)", then "14-day rule: ok", exit 0.
+
 

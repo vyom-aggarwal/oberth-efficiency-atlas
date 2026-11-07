@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, test } from "vitest";
-import { loadSections, pagePath, renderMarkdown, researchIncluded, showTodo } from "./content-plugin";
+import { articleHTML, citationBibtex, citationText, loadSections, noticeText, pagePath, renderMarkdown, researchIncluded, showTodo,
+         type Section } from "./content-plugin";
 import { referenceHref, referenceListHTML } from "../src/lib/references";
 
 const SHOW = process.env.SITE_SHOW_TODO;
@@ -28,10 +30,43 @@ describe("Phase 7 routes and citations", () => {
     expect(researchIncluded("build")).toBe(true);
   });
 
+  test("one section can be placed on its own, with the section navigation (Phase 9 style page)", () => {
+    const sec = (id: string, figure?: string, figN?: number): Section =>
+      ({ id, title: `T ${id}`, todo: false, figure, figN, before: "<p>prose</p>", after: "", caption: "<p>cap</p>", notes: "" });
+    const kept = [sec("hero", "hero", 1), sec("curve", "universal-curve", 2), sec("question")];
+    const out = articleHTML("<!--#section:curve-->|<!--#section:missing-->|<ul><!--#section-nav--></ul>", kept, false);
+    expect(out).toContain('<section class="section" id="curve" aria-labelledby="h-curve" data-section><h2 id="h-curve">T curve</h2>');
+    expect(out).toContain('<figure class="figure" id="fig-universal-curve" data-figure="universal-curve" data-fig-n="2">');
+    expect(out).toContain('|<ul><li><a href="#curve" data-nav="curve">T curve</a></li><li><a href="#question" data-nav="question">T question</a></li></ul>');
+    expect(out.split("|")[1]).toBe("");          // a section not kept in this build renders as nothing
+  });
+
   test("a page's path comes from its file under the site root", () => {
     expect(pagePath("/x/site/index.html", "/x/site")).toBe("");
     expect(pagePath("/x/site/research/index.html", "/x/site")).toBe("research/");
     expect(pagePath("/x/site/references/index.html", "/x/site")).toBe("references/");
     expect(pagePath("/x/site/404.html", "/x/site")).toBe("404.html");
+  });
+});
+
+// The About page (Phase 9 pass 6): the reference's MIT notice quoted from THIRD_PARTY_NOTICES.md, and the citation as BibTeX.
+describe("the About page's quoted texts", () => {
+  const notices = readFileSync(new URL("../../THIRD_PARTY_NOTICES.md", import.meta.url), "utf8");
+  test("the reference's MIT notice is section 1's block, verbatim, and Lenis's is section 2's", () => {
+    const mit = noticeText(notices, 1);
+    expect(mit.split("\n")[0]).toBe("MIT License");
+    expect(mit).toContain("Copyright (c) 2026 SuahsTheLord");
+    expect(mit.trimEnd().endsWith("SOFTWARE.")).toBe(true);
+    expect(notices.replace(/\r\n/g, "\n")).toContain("```\n" + mit + "\n```");
+    expect(noticeText(notices, 2)).toContain("darkroom.engineering");
+    expect(() => noticeText(notices, 9)).toThrow(/no section 9/);
+  });
+  test("the citation as BibTeX carries the same record as the reference line", () => {
+    const c = { title: "Oberth Efficiency Atlas", authors: [{ given: "Vyom", family: "Aggarwal" }], version: "v1.0-analysis",
+                date_released: "2026-10-06", repository: "https://github.com/vyom-aggarwal/oberth-efficiency-atlas" };
+    expect(citationBibtex(c)).toBe("@software{aggarwal2026oberth,\n  author  = {Aggarwal, Vyom},\n  title   = {Oberth Efficiency Atlas},\n" +
+      "  version = {v1.0-analysis},\n  year    = {2026},\n  url     = {https://github.com/vyom-aggarwal/oberth-efficiency-atlas}\n}");
+    expect(citationText(c)).toBe("Aggarwal, V. (2026). Oberth Efficiency Atlas (v1.0-analysis) [Software]. https://github.com/vyom-aggarwal/oberth-efficiency-atlas");
+    expect(citationBibtex(undefined)).toBe("");
   });
 });
