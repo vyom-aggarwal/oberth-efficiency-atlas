@@ -4339,4 +4339,33 @@ workflow change is needed.
 `localhost:4174` before the first page (the landing page). It is the same loopback problem the dev server has had here
 since 2026-11-02, not a page fault. CI is the gate's record (2026-10-19), so the PR's Lighthouse job measures `/about/`.
 
+## 2026-11-06: CI caught stale lockfile dates; the pre-commit hook now runs the 14-day rule
+
+**The failure.** Both CI runs on the Phase 9 pull request (42268887313 for `174348f`, 42271116485 for `5d136c7`)
+failed in "Checks and Playwright" at "Package age (14-day rule)":
+```
+131 locked packages; newest lenis@1.3.27 (2026-10-15); cutoff 2026-09-30, locked on 2026-10-14 (14 days apart)
+14-day rule violations:
+  lenis@1.3.27 published 2026-10-15T15:44:06.231Z
+```
+Production build and Lighthouse passed in both runs. The Playwright step comes after the failing step, so it never ran.
+
+**The cause** (my slip, Phase 9 step 2): `site/package.json` records the day the lockfile was written
+(`config.npmLockedOn`) and the cutoff 14 days earlier (`config.npmBefore`). Both were still the scaffold's
+(2026-10-14 and 2026-09-30) when I added Lenis 1.3.27 and DM Sans on 2026-11-01 (`7329f6b`, `4c8a67f`).
+- Lenis was 17 days old that day, so it meets the rule itself; the recorded dates were stale.
+- The pre-commit hook ran only the type check and vitest for a lockfile change, so nothing checked the dates before
+  CI.
+
+**The guard** (author, 2026-11-06). `check_all.select_checks` now adds a `package-age` check whenever
+`site/package.json` or `site/package-lock.json` changes.
+- It runs `node tools/check-package-age.mjs` in `site/`, which queries the npm registry.
+- A missing `node` fails the check.
+- It is not part of the default full run: CI runs the checker as its own step on every push.
+- Tests in `tests/test_check_all.py`: the selection for both files and none for other site files; the command, its
+  failure status and a missing `node`; and the hook's command end to end (a dry run, so offline).
+- **Run on the stale dates** (`check_all.py --paths site/package-lock.json`): typecheck and vitest pass, and
+  `package-age` fails with the same lenis violation as CI. So the hook would have blocked the 2026-11-01 commit.
+- Documented in `CLAUDE.md` (pre-commit hook) and `docs/site.md` (packages).
+
 

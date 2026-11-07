@@ -78,7 +78,9 @@ Phase 7 (`docs/landing_plan.md`) gave the site a landing page and a references p
     self-hosted glyph.
 - **Node:** 24.18.1 (`site/.nvmrc`).
 - **Packages:** pinned exactly, with the 14-day age rule (`npm install --before=…`;
-  `npm run check-age` verifies the lockfile).
+  `npm run check-age` verifies the lockfile against `config.npmBefore` and `config.npmLockedOn` in `package.json`).
+  Update both dates with every lockfile change. The pre-commit hook runs the check whenever `package.json` or
+  `package-lock.json` is staged, and CI runs it on every push.
 - **Palette** (Phase 9): `npm run palette` runs `tools/palette.mjs`, which defines the six interface colours,
   reads the data colours from the classic explorer's dark block in `explorer/app.css`, checks them all and writes
   `src/styles/palette.css`, dark only (vitest re-runs the checks).

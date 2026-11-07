@@ -53,6 +53,10 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
     (`check_all.select_checks`). It blocks the commit on any failure.
     - Content only: `check_numbers`.
     - Site code: the type check and vitest.
+    - `site/package.json` or `site/package-lock.json`: also the package-age check
+      (`site/tools/check-package-age.mjs`, the 14-day rule; it queries the npm registry). Update `config.npmLockedOn`
+      (the day the lockfile is written) and `config.npmBefore` (at least 14 days earlier) with every lockfile change
+      (author, 2026-11-06, after stale dates failed CI on the Phase 9 pull request).
     - The exporter, the site data, any of its provenance sources, or `tests/`: the site-data tests.
     - Hook scripts: the hook tests.
     - A changed `tests/test_*.py` runs itself, and a changed `scripts/<name>.py` runs

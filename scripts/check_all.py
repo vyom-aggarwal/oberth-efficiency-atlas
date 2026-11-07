@@ -16,6 +16,9 @@ Checks, in order:
 
   check-all   pytest tests/test_check_all.py (this script's own selection rules)   (--staged only)
   own-tests   pytest on the test files the changed files name (see own_tests)       (--staged only)
+  package-age node tools/check-package-age.mjs, the 14-day rule on the site's lockfile; it queries the npm registry
+              (in site/; --staged only, when site/package.json or site/package-lock.json changes; CI runs it as its
+              own step)
 
 --fast runs the full set without the full Python suite: the site-data and hook tests replace it.
 --staged is the pre-commit hook (.githooks/pre-commit, author rule 2026-10-19): only the checks that the staged
@@ -74,6 +77,16 @@ def numbers() -> int:
     return status
 
 
+def package_age() -> int:
+    """The 14-day rule (site/tools/check-package-age.mjs): every locked package published on or before
+    config.npmBefore, at least 14 days before config.npmLockedOn. Needs node and the network, not node_modules."""
+    exe = shutil.which("node")
+    if exe is None:
+        print("node not found: install Node (see site/package.json engines)", flush=True)
+        return 1
+    return run([exe, "tools/check-package-age.mjs"], SITE)
+
+
 def run_own_tests(files: list[str]) -> int:
     if not files:                                                 # never a silent pass
         print("own-tests: no test files given (they come from --staged or --paths)", flush=True)
@@ -84,6 +97,7 @@ def run_own_tests(files: list[str]) -> int:
 CHECKS = {
     "typecheck": lambda: npx("tsc", "--noEmit"),
     "vitest": lambda: npx("vitest", "run"),
+    "package-age": package_age,
     "numbers": numbers,
     "site-data": lambda: pytest("tests/test_site_data.py"),
     "hooks": lambda: pytest("tests/test_hooks.py"),
@@ -135,6 +149,8 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
     - site/content/*           → numbers (the author's prose and notes)
     - site/public/data/*       → site-data; other site/public files (images, fonts) → nothing
     - other site/ files        → typecheck and vitest (code, styles, pages, plugins, e2e specs, configs)
+    - site/package.json, site/package-lock.json → package-age too (the 14-day rule; author, 2026-11-06, after the
+      lockfile changed on 2026-11-01 with its recorded dates left at 2026-10-14 and only CI caught it)
     - the exporter, check_numbers.py, tests/ (methods.json records the test count), or any provenance source of
       the site data           → site-data
     - scripts/check_numbers.py → numbers too
@@ -155,6 +171,8 @@ def select_checks(paths: list[str], sources: set[str] | None = None) -> list[str
             pass
         elif p.startswith("site/"):
             want |= {"typecheck", "vitest"}
+        if p in ("site/package.json", "site/package-lock.json"):
+            want.add("package-age")
         if p in ("scripts/export_site_data.py", "scripts/check_numbers.py") or p.startswith("tests/") or p in sources:
             want.add("site-data")
         if p == "scripts/check_numbers.py":
