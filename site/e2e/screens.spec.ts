@@ -1,12 +1,12 @@
-// Review screenshots: every page at 1440 and 390 px wide, in both themes, with no console errors and no
+// Review screenshots: every page at 1440 and 390 px wide (dark only since Phase 9), with no console errors and no
 // sideways scrolling. Images are written to runs/screens/ for review (gitignored).
 import { expect, test } from "./fixtures";
 
-// Pages to capture ("" is the landing page). /style/ exists only in development builds, /research/ only when it has
+// Pages to capture ("" is the landing page). /research/ exists only when it has
 // a published section or unfinished content is shown.
-const PAGES = (process.env.SCREEN_PAGES ?? ",research/,explorer/,references/,404.html,style/").split(",");
+const PAGES = (process.env.SCREEN_PAGES ?? ",research/,explorer/,references/,about/,404.html").split(",");
 const WIDTHS = [1440, 390];
-const THEMES = ["light", "dark"] as const;
+const THEMES = ["dark"] as const;                 // dark only since Phase 9 (pass 1)
 const OUT = "../runs/screens";
 
 for (const path of PAGES) {

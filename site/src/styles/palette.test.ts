@@ -1,26 +1,30 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
-import { classic, css, OUT, runChecks, themes } from "../../tools/palette.mjs";
+import { classic, contrast, css, deltaE, nearestAccent, OUT, palette, REFERENCE_ACCENT, runChecks } from "../../tools/palette.mjs";
 
-// The site palette is the classic explorer's (Phase 8, docs/restyle_plan.md), checked by tools/palette.mjs.
+// The site palette (Phase 9, docs/revamp_plan.md §2.1–2.2): six interface colours and the classic explorer's dark data
+// steps, dark only, checked by tools/palette.mjs.
 describe("site palette", () => {
-  test("every check passes: contrast, ramps, the a·v faint end, colour-vision distinctness", () => {
+  test("every check passes: contrast, the accent's jobs, ramps, the a·v faint end, colour-vision distinctness", () => {
     expect(runChecks()).toEqual([]);
   });
-  test("palette.css is generated from the definitions (run `npm run palette` after a change)", () => {
-    expect(readFileSync(OUT, "utf8").replace(/\r\n/g, "\n")).toBe(css());
+  test("palette.css is generated from the definitions (run `npm run palette` after a change), dark only", () => {
+    const text = readFileSync(OUT, "utf8").replace(/\r\n/g, "\n");
+    expect(text).toBe(css());
+    expect(text).toContain("color-scheme: dark;");
+    expect(text).not.toMatch(/light|data-theme|prefers-color-scheme/);
   });
-  test("the tokens are the classic explorer's, read from explorer/app.css", () => {
-    const c = classic(), t = themes();
-    expect(t.light.bg).toBe("#fcfcfb");
-    expect(t.dark.panel).toBe("#1b1b19");
-    for (const mode of ["light", "dark"] as const) {
-      for (const [k, v] of Object.entries(c[mode])) expect(t[mode][k as keyof (typeof t)["light"]]).toBe(v);
-    }
+  test("the data colours are the classic explorer's dark steps, read from explorer/app.css", () => {
+    const c = classic(), p = palette();
+    for (const [k, v] of Object.entries(c)) expect(p[k]).toBe(v);
+    expect(p.ramp).toEqual([0, 1, 2, 3, 4, 5, 6].map((k) => c[`ramp-${k}`]));
+    expect(p.av[0]).toBe(c["ramp-2"]);
+    expect(p.av[6]).toBe(c["ramp-6"]);
   });
-  test("links: ramp-4 in light (the accent is short of 4.5:1 for text), the accent in dark", () => {
-    const t = themes();
-    expect(t.light.link).toBe(t.light["ramp-4"]);
-    expect(t.dark.link).toBe(t.dark.accent);
+  test("the accent: the reference's indigo fails an Ink label, so Signal is its nearest passing variant (author decision 1)", () => {
+    expect(contrast("#ecebe7", REFERENCE_ACCENT)).toBeLessThan(4.5);
+    expect(nearestAccent()).toBe("#445be8");
+    expect(palette().signal).toBe("#445be8");
+    expect(deltaE(palette().signal, REFERENCE_ACCENT)).toBeLessThan(0.5);
   });
 });

@@ -1,0 +1,67 @@
+/* The references, About and 404 pages (Phase 9 pass 6, docs/revamp_plan.md §2.4, §2.7, §2.12).
+
+   The About page's layout is adapted from Suhas Beemineni's portfolio, https://github.com/suhaslord/portfolio, its About
+   page in css/site.css at commit c98c5cc (MIT licence, "Copyright (c) 2026 SuahsTheLord"; THIRD_PARTY_NOTICES.md): a
+   display title, a hairline divider with a round button straddling it, and sections whose headings stick in a left
+   column (28 %) beside their rows. Its content is this project's: the citation, the licences with the design credit,
+   the audit and the author's slots. The references and 404 rules are this project's own design. */
+
+.page-references .page, .page-about .page, .page-notfound .page { padding: var(--s6) var(--pad) 0; }
+.page-references .wrap, .page-notfound .wrap { max-width: 1320px; margin: 0; }
+:is(.page-references, .page-about, .page-notfound) .page-title { font-size: var(--t-display); line-height: 1.05;
+  letter-spacing: var(--track-display); margin: 0 0 var(--s6); }
+
+/* ------------------------------------------------------------- references: rows between hairlines, the number in IBM
+   Plex Mono at the left (above the entry on phones); a cited entry reached by its link is ringed in Signal. */
+.references { list-style: none; counter-reset: none; padding: 0; margin: 0; max-width: 1080px; font-size: var(--t-ui); }
+.references li { position: relative; padding: var(--s5) 0 var(--s5) 5.5em; margin: 0; border-top: 1px solid var(--rule); line-height: 1.55; }
+.references li:last-child { border-bottom: 1px solid var(--rule); }
+.references li::before { content: attr(value); position: absolute; left: 0; top: calc(var(--s5) + 3px); font-family: var(--mono);
+                         font-size: var(--t-label); color: var(--quiet); }
+.references li:target { outline: 2px solid var(--signal); outline-offset: 4px; border-radius: 2px; }
+.references a, .references code { overflow-wrap: anywhere; }
+@media (max-width: 599px) {
+  .references li { padding-left: 0; }
+  .references li::before { position: static; display: block; margin-bottom: var(--s1); }
+}
+
+/* ------------------------------------------------------------- About */
+.about { max-width: 1320px; }
+.page-about .page-title { margin-bottom: var(--s5); }
+.about-divider { position: relative; height: 1px; background: var(--rule); margin: var(--s7) 0 var(--s9); }
+.about-divider .cite-button { position: absolute; right: 8%; top: 50%; translate: 0 -50%; }
+.about-intro { display: grid; gap: var(--s6); margin-bottom: var(--s9); align-items: start; }
+.about-intro .slot p { margin: 0 0 var(--s4); font-size: var(--t-statement); line-height: 1.25; letter-spacing: -0.02em; max-width: 30ch; }
+.about-intro .slot-todo p { font-size: var(--t-label); letter-spacing: normal; max-width: none; }
+.citation-card { background: var(--panel); border-radius: var(--r-panel); padding: var(--s5); display: grid; gap: var(--s3); min-width: 0; }
+.citation-line { margin: 0; font-size: var(--t-ui); overflow-wrap: anywhere; }
+.bibtex { margin: 0; font-family: var(--mono); font-size: var(--t-label); line-height: 1.5; color: var(--quiet); white-space: pre-wrap;
+          overflow-wrap: anywhere; }
+.citation-card .copy-button { justify-self: start; margin-left: 0; }
+@media (min-width: 900px) { .about-intro { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--s8); } }
+.about-row { display: grid; gap: var(--s4); border-top: 1px solid var(--rule); padding: var(--s6) 0 var(--s7); }
+.about-row:has(.about-body:empty) { display: none; }          /* an author's slot not yet written (production) */
+.about-h { margin: 0; font-size: var(--t-h3); letter-spacing: -0.01em; color: var(--quiet); }
+.about-body { min-width: 0; max-width: var(--measure); font-size: var(--t-ui); line-height: 1.6; }
+.about-body p { margin: 0 0 var(--s4); }
+.about-facts { margin: 0 0 var(--s5); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--s2) var(--s5); }
+.about-facts > div { display: contents; }
+.about-facts dt { color: var(--quiet); }
+.about-facts dd { margin: 0; }
+.notice-title { color: var(--quiet); font-size: var(--t-label); }
+.licence-text { margin: 0; padding: var(--s4); background: var(--panel); border-radius: var(--r-control); font-family: var(--mono);
+                font-size: var(--t-tick); line-height: 1.6; color: var(--quiet); white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (min-width: 900px) {
+  .about-row { grid-template-columns: 28% minmax(0, 1fr); column-gap: var(--s6); }
+  .about-h { position: sticky; top: calc(var(--sticky-top, 0px) + var(--s4)); align-self: start; }
+}
+@media (max-width: 600px) { .about-facts { grid-template-columns: minmax(0, 1fr); } .about-facts dd { margin-bottom: var(--s2); } }
+
+/* ------------------------------------------------------------- 404: a statement line and the links as outline pills */
+.page-notfound .lead-ui { font-size: var(--t-statement); line-height: 1.2; letter-spacing: -0.03em; max-width: 24ch; margin: 0 0 var(--s6); }
+.page-notfound .link-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.page-notfound .link-list li { margin: 0; }
+.page-notfound .link-list a { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--s6); border-radius: var(--r-pill);
+                              border: 1px solid var(--quiet); color: var(--ink); text-decoration: none; font-size: var(--t-ui);
+                              transition: background-color 150ms, color 150ms, border-color 150ms; }
+.page-notfound .link-list a:hover, .page-notfound .link-list a:focus-visible { background: var(--ink); color: var(--void); border-color: var(--ink); }

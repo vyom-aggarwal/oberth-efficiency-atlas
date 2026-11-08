@@ -1,37 +1,88 @@
-// The pages and what they share (Phase 7 routes): the theme switch and the narrow-screen menu, the article's section
+// The pages and what they share (Phase 7 routes): dark only (Phase 9) and the narrow-screen menu, the article's section
 // navigation at /research/, the references page and its anchors, citations that resolve to it, the legacy
 // /#ref-n redirect, and the classic explorer route. Runs against a build that keeps the unfinished sections.
+import { readFileSync } from "node:fs";
 import { expect, test } from "./fixtures";
 
-test("theme switch pins a theme and returns to the system setting", async ({ page }) => {
-  await page.goto("");
-  await page.locator(".theme-switch label", { hasText: "Dark" }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");     // remembered
-  await page.locator(".theme-switch label", { hasText: "System" }).click();
-  await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.+/);
-});
+const CLASSIC = new URL("../../explorer/oberth_explorer.html", import.meta.url);
 
-test("narrow screens fold the site links behind a menu button", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("");
-  const button = page.getByRole("button", { name: "Menu" });
-  await expect(button).toBeVisible();
-  await expect(page.locator(".site-nav")).toBeHidden();
-  await button.click();
-  await expect(page.locator(".site-nav")).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".site-nav")).toBeHidden();
-});
-
-test("site navigation: Research, Explorer, References, Source; the current page is marked", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  for (const [path, current] of [["research/", "Research"], ["explorer/", "Explorer"], ["references/", "References"]]) {
+test("dark only: every page is dark under a light system setting, with no theme switch (Phase 9)", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  for (const path of ["", "research/", "explorer/", "references/", "about/", "404.html"]) {
     await page.goto(path);
-    await expect(page.locator(".site-nav a")).toHaveText(["Research", "Explorer", "References", "Source"]);
-    await expect(page.locator('.site-nav a[aria-current="page"]')).toHaveText(current);
+    const { scheme, bg, theme } = await page.evaluate(() => ({
+      scheme: getComputedStyle(document.documentElement).colorScheme, bg: getComputedStyle(document.body).backgroundColor,
+      theme: document.documentElement.getAttribute("data-theme") }));
+    expect([path, scheme, bg, theme]).toEqual([path, "dark", "rgb(17, 18, 20)", null]);    // Void, #111214
+    await expect(page.locator(".theme-switch, [data-theme-switch]")).toHaveCount(0);
   }
+});
+
+test("the menu pill opens the drawer: focus moves in, Tab cycles, Escape closes and returns focus (Phase 9)", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("explorer/");
+  const pill = page.locator(".menu-pill"), drawer = page.locator("#site-drawer");
+  const inert = () => page.evaluate(() => document.querySelector("main")!.inert);
+  await expect(pill).toBeVisible();
+  await expect(pill).toHaveText("Menu");
+  await expect(page.locator(".site-nav")).toBeHidden();               // below 900 px the links are in the drawer
+  await expect(drawer).toBeHidden();
+  await pill.focus();
+  await page.keyboard.press("Enter");                                // from the keyboard: no motion
+  await expect(pill).toHaveAttribute("aria-expanded", "true");
+  await expect(pill).toHaveText("Close");
+  await expect(drawer).toBeVisible();
+  await expect(drawer.locator("nav a").first()).toBeFocused();
+  await expect(drawer.locator('a[aria-current="page"]')).toHaveText("Explorer");
+  expect(await inert()).toBe(true);
+  await page.keyboard.press("Shift+Tab");                            // the Tab cycle: first link → pill → last link → pill
+  await expect(pill).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(drawer.locator("a").last()).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(pill).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(pill).toHaveAttribute("aria-expanded", "false");
+  await expect(drawer).toBeHidden();
+  await expect(pill).toBeFocused();                                  // focus returns where it was
+  expect(await inert()).toBe(false);
+  // A pointer opens it too, and the scrim closes it.
+  await pill.click();
+  await expect(drawer).toBeVisible();
+  await page.locator("[data-menu-scrim]").click({ position: { x: 10, y: 400 } });
+  await expect(pill).toHaveAttribute("aria-expanded", "false");
+});
+
+test("from 900 px the header's links are inline and the pill waits until the header has scrolled away", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("references/");
+  await expect(page.locator(".site-nav")).toBeVisible();
+  await expect(page.locator(".menu-pill")).toBeHidden();
+  await page.evaluate(() => window.scrollTo(0, 400));
+  await expect(page.locator(".menu-pill")).toBeVisible();
+});
+
+test("site navigation: Research, Explorer, References, About; the current page is marked", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  for (const [path, current] of [["research/", "Research"], ["explorer/", "Explorer"], ["references/", "References"], ["about/", "About"]]) {
+    await page.goto(path);
+    await expect(page.locator(".site-nav a")).toHaveText(["Research", "Explorer", "References", "About"]);
+    await expect(page.locator('.site-nav a[aria-current="page"]')).toHaveText(current);
+    await expect(page.locator('.menu-pages a[aria-current="page"]')).toHaveText(current);
+  }
+});
+
+test("every page ends with the closing section and the footer: the explorer, the research, the source, the citation", async ({ page }) => {
+  for (const path of ["", "research/", "references/", "404.html"]) {
+    await page.goto(path);
+    const closing = page.locator(".site-closing");
+    await expect(closing.locator(".closing-cta"), path).toHaveText("Open the explorer");
+    await expect(closing.locator(".closing-links a")).toHaveText(["Research", "Source on GitHub", "Classic explorer"]);
+    await expect(closing.locator(".escape-leg path.leg")).toHaveCount(1);
+    await expect(closing.locator("#cite .citation-text")).not.toBeEmpty();
+  }
+  await page.goto("explorer/");
+  await expect(page.locator(".site-closing .closing-cta")).toBeHidden();   // the explorer does not send the reader to itself
 });
 
 test("the article: section navigation marks the section in view, and figures load when reached", async ({ page }) => {
@@ -82,8 +133,10 @@ test("an old link to the reference list on / goes to the references page", async
   await expect(page.locator("#ref-3")).toBeVisible();
 });
 
-test("the classic explorer is served at explorer/classic/", async ({ page }) => {
+test("the classic explorer is served at explorer/classic/, byte for byte", async ({ page }) => {
   const res = await page.goto("explorer/classic/");
   expect(res?.status()).toBe(200);
   await expect(page).toHaveTitle(/Oberth/);
+  // Phase 9: the offline fallback stays byte-identical (tests/test_site_data.py pins the file itself).
+  expect((await res!.body()).equals(readFileSync(CLASSIC))).toBe(true);
 });

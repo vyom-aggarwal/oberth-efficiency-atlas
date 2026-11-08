@@ -9,65 +9,90 @@
     <script>
       // Links to the reference list made before Phase 7 (/#ref-n) go to the references page (author, 2026-10-21).
       if (/^#ref-\d+$/.test(location.hash)) location.replace("{{base}}references/" + location.hash);
-      try { var t = localStorage.getItem("oberth-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+      // The preloader's gate, before the first paint (adapted from suhaslord/portfolio index.html; MIT,
+      // THIRD_PARTY_NOTICES.md): the first load of a session only, never with a #fragment or under reduced motion, with
+      // a failsafe at 2 s if the page script never runs. The page content stays in the DOM beneath it.
+      try {
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches && !location.hash && !sessionStorage.getItem("oberth-preloaded")) {
+          sessionStorage.setItem("oberth-preloaded", "1");
+          document.documentElement.classList.add("preloading");
+          setTimeout(function () { document.documentElement.classList.remove("preloading"); }, 2000);
+        }
+      } catch (e) { /* no storage: no preloader */ }
     </script>
     <script type="module" src="/src/pages/landing.ts"></script>
   </head>
   <body class="page-landing">
+    <div class="preloader" id="preloader" aria-hidden="true"><svg class="flyby"></svg></div>
     <!--#header-->
     <main id="main" class="landing">
-      <figure class="landing-hero" id="landing-hero" data-intro="pending">
-        <figcaption class="hero-figure-title" id="hero-figure-title">One solar dive, three engines</figcaption>
-        <div class="landing-hero-body"></div>
-      </figure>
+      <!-- The hero band and the findings share one grid: from 1100 px wide (and 700 px tall) the dive docks beside the rows. -->
+      <div class="landing-stage" id="landing-stage">
+        <section class="landing-band" aria-labelledby="landing-title">
+          <h1 id="landing-title" class="visually-hidden">Oberth Efficiency Atlas</h1>
+          <div class="band-home" id="dive-home">
+            <figure class="landing-hero" id="landing-hero" data-intro="pending">
+              <figcaption class="visually-hidden" id="hero-figure-title">One solar dive, three engines</figcaption>
+              <div class="landing-hero-body"></div>
+            </figure>
+          </div>
+          <p class="band-pill" id="band-pill"></p>
+          <div class="band-role" id="band-role"><span class="band-rule" aria-hidden="true"></span><!--#slot:headline--></div>
+          <div class="band-title" id="band-title" aria-hidden="true"><div class="track" id="title-track"></div></div>
+          <div class="band-foot">
+            <a class="band-cue" href="#findings">Findings <span class="ring" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 3v10M4 9l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          </div>
+        </section>
+        <div class="dive-dock" id="dive-dock"></div>
+        <section class="landing-section landing-findings" id="findings" aria-labelledby="findings-title">
+          <h2 class="section-title" id="findings-title"><span class="n">01</span>Findings</h2>
+          <ol class="rows" id="rows">
+            <li data-row="loss">
+              <h3 class="row-h"><button class="row-head" type="button" aria-expanded="false" aria-controls="row-loss">
+                <span class="n">01</span><span class="t" id="row-loss-t">Loss against Π</span>
+                <span class="c"><span class="g"></span><span>universal curve</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <p class="visually-hidden" id="row-loss-steer">The dive beside shows all three burns, the clock at the end.</p>
+              <div class="row-body" id="row-loss" hidden>
+                <figure class="finding" id="finding-loss" data-finding="loss" aria-labelledby="row-loss-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-loss--><!--#finding-link:universal-curve|preset=hibberd--></figcaption></figure>
+              </div>
+            </li>
+            <li data-row="missions">
+              <h3 class="row-h"><button class="row-head" type="button" aria-expanded="false" aria-controls="row-missions">
+                <span class="n">02</span><span class="t" id="row-missions-t">Where real missions sit</span>
+                <span class="c"><span class="g"></span><span>atlas</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <div class="row-body" id="row-missions" hidden>
+                <figure class="finding" id="finding-missions" data-finding="missions" aria-labelledby="row-missions-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-missions--><!--#finding-link:atlas|preset=jupiter.hall--></figcaption></figure>
+              </div>
+            </li>
+            <li data-row="hibberd">
+              <h3 class="row-h"><button class="row-head" type="button" aria-expanded="false" aria-controls="row-hibberd">
+                <span class="n">03</span><span class="t" id="row-hibberd-t">The Hibberd et al. check</span>
+                <span class="c"><span class="g"></span><span>case study</span></span><span class="chev" aria-hidden="true"></span>
+              </button></h3>
+              <p class="visually-hidden" id="row-hibberd-steer">The dive beside shows the solid stack alone, just after its burn.</p>
+              <div class="row-body" id="row-hibberd" hidden>
+                <figure class="finding" id="finding-hibberd" data-finding="hibberd" aria-labelledby="row-hibberd-t"><div class="finding-body"></div>
+                  <figcaption class="finding-caption"><!--#slot:finding-hibberd--><!--#finding-link:case-study|preset=hibberd--></figcaption></figure>
+              </div>
+            </li>
+          </ol>
+        </section>
+      </div>
 
-      <section class="landing-intro" aria-labelledby="landing-title">
-        <h1 id="landing-title" class="landing-title">Oberth Efficiency Atlas</h1>
-        <!--#slot:headline-->
-        <!-- The entry links come before the summary, so a written headline keeps them above the fold (author, 2026-10-21). -->
-        <nav class="entry-links" aria-label="Start here">
-          <ul>
-            <li><!--#research-link: data-entry="research"|Read the research--></li>
-            <li><a href="{{base}}explorer/" data-entry="explorer">Open the explorer</a></li>
-            <li><a href="{{repo}}" rel="noopener" data-entry="source">View the source on GitHub</a></li>
-          </ul>
-        </nav>
+      <section class="landing-intro" aria-labelledby="intro-title">
+        <h2 class="section-title" id="intro-title"><span class="n">02</span>Reproducibility and scope</h2>
         <!--#slot:summary-->
+        <dl class="scope-facts" id="scope-facts"></dl>
+        <div class="intro-cta"><!--#research-link: class="round"|Read the research--></div>
       </section>
 
-      <section class="landing-findings" aria-labelledby="findings-title">
-        <h2 id="findings-title">Findings</h2>
-        <div class="findings-grid">
-          <figure class="finding" id="finding-loss" data-finding="loss" aria-labelledby="finding-loss-title">
-            <h3 class="finding-title" id="finding-loss-title">Loss against Π, with the 1 % line</h3>
-            <div class="finding-body"></div>
-            <figcaption class="finding-caption">
-              <!--#slot:finding-loss-->
-              <!--#finding-link:universal-curve|preset=hibberd-->
-            </figcaption>
-          </figure>
-          <figure class="finding" id="finding-missions" data-finding="missions" aria-labelledby="finding-missions-title">
-            <h3 class="finding-title" id="finding-missions-title">Where real missions sit</h3>
-            <div class="finding-body"></div>
-            <figcaption class="finding-caption">
-              <!--#slot:finding-missions-->
-              <!--#finding-link:atlas|preset=jupiter.hall-->
-            </figcaption>
-          </figure>
-          <figure class="finding" id="finding-hibberd" data-finding="hibberd" aria-labelledby="finding-hibberd-title">
-            <h3 class="finding-title" id="finding-hibberd-title">The Hibberd et al. check</h3>
-            <div class="finding-body"></div>
-            <figcaption class="finding-caption">
-              <!--#slot:finding-hibberd-->
-              <!--#finding-link:case-study|preset=hibberd-->
-            </figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <section class="landing-repro" aria-labelledby="repro-title">
-        <h2 id="repro-title">Reproducibility and scope</h2>
-        <div class="repro-body"></div>
+      <section class="landing-section landing-results" aria-labelledby="results-title">
+        <h2 class="section-title" id="results-title"><span class="n">03</span>Key results</h2>
+        <ul class="key-results" id="key-results"></ul>
       </section>
     </main>
     <!--#footer-->

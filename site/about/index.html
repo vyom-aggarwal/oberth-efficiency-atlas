@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>About: Oberth Efficiency Atlas</title>
+    <meta name="description" content="About the Oberth Efficiency Atlas: how to cite it, its licences and design credit, how it was reproduced, and how AI was used." />
+    <script type="module" src="/src/pages/about.ts"></script>
+  </head>
+  <body class="page-about">
+    <!--#header-->
+    <main id="main" class="page about">
+      <h1 class="page-title">About</h1>
+      <div class="about-divider"><button class="round cite-button" type="button" data-copy="#about-citation" hidden>Cite</button></div>
+      <div class="about-intro">
+        <!--#slot:about-intro-->
+        <div class="citation-card" aria-label="Citation">
+          <p class="citation-line" id="about-citation"><!--#citation-text--></p>
+          <pre class="bibtex" id="about-bibtex"><!--#citation-bibtex--></pre>
+          <button class="copy-button" type="button" data-copy="#about-bibtex" hidden>Copy BibTeX</button>
+        </div>
+      </div>
+
+      <section class="about-row" aria-labelledby="about-cite-h">
+        <h2 class="about-h" id="about-cite-h">Citation</h2>
+        <div class="about-body">
+          <p>Cite the software with the reference line or the BibTeX above. The same record is in
+            <a href="{{repo}}/blob/main/CITATION.cff" rel="noopener"><code>CITATION.cff</code></a>, which GitHub offers as "Cite this repository".</p>
+        </div>
+      </section>
+
+      <section class="about-row" aria-labelledby="about-licences-h">
+        <h2 class="about-h" id="about-licences-h">Licences</h2>
+        <div class="about-body">
+          <dl class="about-facts">
+            <div><dt>Code</dt><dd>MIT (<a href="{{repo}}/blob/main/LICENSE" rel="noopener">LICENSE</a>)</dd></div>
+            <div><dt>Text, figures and data</dt><dd>CC BY 4.0 (<a href="{{repo}}/blob/main/LICENSE-content.md" rel="noopener">LICENSE-content.md</a>)</dd></div>
+            <div><dt>Fonts</dt><dd>DM Sans, IBM Plex Mono and the Greek and symbol subsets, under the SIL Open Font License 1.1</dd></div>
+            <div><dt>Design</dt><dd><a href="https://suhaslord.github.io/portfolio/" rel="noopener" id="design-credit">Design adapted from Suhas Beemineni's portfolio (MIT licence)</a></dd></div>
+            <div><dt>Third-party notices</dt><dd><a href="{{repo}}/blob/main/THIRD_PARTY_NOTICES.md" rel="noopener"><code>THIRD_PARTY_NOTICES.md</code></a> lists what is adapted and where</dd></div>
+          </dl>
+          <p class="notice-title">The portfolio's licence, verbatim:</p>
+          <!--#notice:1-->
+        </div>
+      </section>
+
+      <section class="about-row" aria-labelledby="about-repro-h">
+        <h2 class="about-h" id="about-repro-h">Reproducibility</h2>
+        <div class="about-body"><dl class="about-facts" id="about-repro"></dl></div>
+      </section>
+
+      <section class="about-row" aria-labelledby="about-ai-h">
+        <h2 class="about-h" id="about-ai-h">AI use</h2>
+        <div class="about-body">
+          <!--#slot:about-ai-->
+          <p>The full record, phase by phase: <a href="{{repo}}/blob/main/docs/ai_use_log.md" rel="noopener"><code>docs/ai_use_log.md</code></a>.</p>
+        </div>
+      </section>
+
+      <section class="about-row" aria-labelledby="about-author-h">
+        <h2 class="about-h" id="about-author-h">Author</h2>
+        <div class="about-body"><!--#slot:about-author--></div>
+      </section>
+    </main>
+    <!--#footer-->
+  </body>
+</html>

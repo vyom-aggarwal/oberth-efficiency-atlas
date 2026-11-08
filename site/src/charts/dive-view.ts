@@ -130,7 +130,7 @@ export function drawEnergyStrip(strip: SVGSVGElement, dv: Dive, k: number, W: nu
   }
   for (const f of [0, 0.5, 1]) ax.append(s("line", { x1: m.left - 4, x2: m.left, y1: y(f), y2: y(f) }),
     s("text", { x: m.left - 7, y: y(f) + 4, "text-anchor": "end" }, String(f)));
-  // The axis title in Barlow 12 px (not the ticks' mono), its subscripts typeset (dom.ts).
+  // The axis title in the sans face at 12 px (not the ticks' mono), its subscripts typeset (dom.ts).
   ax.append(s("text", { class: "axis-title", x: (m.left + W - m.right) / 2, y: H - 6, "text-anchor": "middle" },
     `time from perihelion (τ = r_p/v_p = ${duration(tau * timeS)})`));
   strip.append(ax);

@@ -52,6 +52,7 @@ jobs:
         working-directory: site
         env:
           HERO_FRAME_TIME: report   # p50/p95/max to the job summary; the 16 ms p95 target is enforced on the development laptop
+          PRELOADER_CAP: report     # the landing preloader's removal time to the job summary; the 2.0 s cap is enforced locally (Phase 9)
         run: |
           SITE_SHOW_TODO=1 npx vite build --mode development --outDir dist-test --emptyOutDir
           BASE_PATH=/oberth-efficiency-atlas/ npx vite build --outDir dist-prod --emptyOutDir

@@ -18,6 +18,39 @@ The author asked on 2026-10-18 for screenshots to be committed at each checkpoin
 - The full-page captures (1.5–2 MB each) stay in `runs/screens/`, which is not committed.
 
 **Checkpoints:**
+- `phase-9/` (Phase 9, the end of the build, 2026-11-06, for the author's final review): every page as full-length
+  captures, dark only, at 1440 and 390 px: `landing`, `research`, `explorer`, `references`, `about` and `404`. They are
+  made by `e2e/screens.spec.ts` in the full Playwright run on the test build (`runs/screens/`), so the article and the
+  author's TODO notes show. The landing page's motion states (the preloader mid-flight, the docked dive with each row
+  hovered, a row open in place, reduced motion) are in `phase-9-pass-3/`.
+- `phase-9-pass-3/` (Phase 9, pass 3, 2026-11-03: the landing page, for the author's review). The author's list, at 1440
+  and 390 px, from the test build. Made by `site/tools/landing-shots.mjs` (in `site/`, after the test build), which also
+  prints the preloader's measured times:
+  - **`landing-<width>-preloader-flight.png`:** the preloader mid-flight, 0.75 s from navigation start;
+  - **`-hero`:** the hero, its intro already seen (the final frame);
+  - **`-hover-01`, `-hover-02`, `-hover-03` (1440 only):** the dive docked beside the rows, each row hovered in turn.
+    Row 01 lights every burn with the clock at the end; row 02 leaves the dive as it is; row 03 lights the solid stack,
+    just after its burn. Below 1100 px there is no dock.
+  - **`-row-open`:** row 01 opened in place, its live figure and caption slot;
+  - **`-reduced`, `-reduced-full`:** reduced motion (no preloader, no intro, the title still and wrapped), the hero and
+    the full page;
+  - **`landing-<width>.png`:** the full page.
+- `phase-9-style/` (Phase 9, step 2, revised again 2026-11-02: every page in scope, the reference's signature
+  interactions replaced): the development-only style page `/style-9/` (`docs/revamp_plan.md` §2.11), for the author's
+  approval. Made by `site/tools/style9-shots.mjs` (in `site/`, with `npm run dev` running), at 1440 and 390 px unless
+  noted:
+  - **`style-9-<width>.png`:** the full page;
+  - **`-preloader-flight`, `-preloader-stages`:** the flyby preloader at 0.75 s (in flight) and 1.2 s (every stage up);
+  - **`-hero-intro`, `-hero`:** the hero 1.2 s into the dive's intro (the title moved by its clock), and its final frame;
+  - **`-menu`:** the menu pill and the drawer open;
+  - **`-row-open`:** a findings row open in place, its live figure and caption slot;
+  - **`-closing`:** the closing section, the escape leg drawn;
+  - **`-article`, `-explorer`, `-references`:** the samples of the other pages in the new system, each section whole;
+  - **`-reduced`:** reduced motion (at 390 px, the full page);
+  - **at 1440 px only:** `-dock-slide` (the dive sliding into its dock), `-steer-hover` (row 03 pointed at: the solid
+    stack alone), `-steer-focus` (row 01 focused from the keyboard: every burn, the clock at the end; retaken
+    2026-11-02 after the author decided that row 02 does not steer), and `-article-tooltip` (Figure 2 with a tooltip
+    open). Below 1100 px there is no dock.
 - `phase-8/` (Phase 8, step 2, the restyle to the classic explorer), for the author's review, at 1440 and 390 px
   in both themes:
   - **Every page, full length:** `research`, `explorer`, `references` and `404`, from the placeholder build

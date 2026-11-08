@@ -1,11 +1,12 @@
-"""The website's self-hosted fonts (site/tools/fonts.py, site/src/styles/fonts.css; Phase 8).
+"""The website's self-hosted fonts (site/tools/fonts.py; Phase 9, the only set since pass 1, 2026-11-02).
 
+site/src/styles/fonts.css, with base.css's stacks:
 - The Greek-and-symbol fallback subsets hold exactly the characters their manifest lists, cut from the pinned sources,
-  and each face's unicode-range in fonts.css equals its file's characters.
-- The primaries' faces in fonts.css are the pinned @fontsource packages' Latin and Latin-ext faces, unchanged.
-- Each font stack in base.css puts its primary first, then the fallbacks.
-- Every character the site can display outside KaTeX has a self-hosted glyph in every stack (sans, condensed, mono),
-  so no text falls through to the platform's fonts, whose metrics differ between machines and CI.
+  and each face's unicode-range equals its file's characters. The fallback directory holds nothing else.
+- The primaries' faces are the pinned @fontsource packages' Latin and Latin-ext faces, unchanged.
+- Each font stack puts its primary first, then the fallbacks.
+- Every character the site can display outside KaTeX has a self-hosted glyph in every stack, so no text falls through
+  to the platform's fonts, whose metrics differ between machines and CI.
 """
 
 import importlib.util
@@ -19,9 +20,6 @@ from fontTools.ttLib import TTFont
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 FALLBACK = SITE / "src" / "fonts" / "fallback"
-CSS = (SITE / "src" / "styles" / "fonts.css").read_text(encoding="utf-8")
-BASE = (SITE / "src" / "styles" / "base.css").read_text(encoding="utf-8")
-MANIFEST = json.loads((FALLBACK / "manifest.json").read_text(encoding="utf-8"))
 FONTSOURCE = SITE / "node_modules" / "@fontsource"
 
 spec = importlib.util.spec_from_file_location("site_fonts", SITE / "tools" / "fonts.py")
@@ -29,6 +27,13 @@ F = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(F)
 
 needs_packages = pytest.mark.skipif(not FONTSOURCE.is_dir(), reason="site/node_modules not installed (npm ci)")
+# The stacks: primary first, then its fallbacks. One sans family (--sans-cond names it too).
+STACKS = {"sans": ["DM Sans", "Oberth Greek Sans", "Oberth Symbols"],
+          "mono": ["IBM Plex Mono", "Oberth Greek Mono", "Oberth Symbols"]}
+
+
+def manifest() -> list[dict]:
+    return json.loads((FALLBACK / F.MANIFEST).read_text(encoding="utf-8"))
 
 
 def expand(urange: str) -> set[int]:
@@ -42,11 +47,11 @@ def expand(urange: str) -> set[int]:
 def faces() -> list[dict]:
     """The @font-face rules in fonts.css: family, weight, style, the file (repository path) and its unicode-range."""
     out = []
-    for body in re.findall(r"@font-face \{(.*?)\}", CSS, re.S):
+    for body in re.findall(r"@font-face \{(.*?)\}", F.CSS.read_text(encoding="utf-8"), re.S):
         get = lambda k: re.search(rf"{k}:\s*([^;]+);", body).group(1).strip()          # noqa: E731
         url = re.search(r'url\("([^"]+)"\)', body).group(1)
         out.append({"family": get("font-family").strip('"'), "weight": int(get("font-weight")), "style": get("font-style"),
-                    "file": (SITE / "src" / "styles" / url).resolve(), "range": expand(get("unicode-range"))})
+                    "file": (F.CSS.parent / url).resolve(), "range": expand(get("unicode-range"))})
     return out
 
 
@@ -58,21 +63,29 @@ def cmap(path: Path) -> set[int]:
     return set(TTFont(path).getBestCmap())
 
 
-def stack(name: str) -> list[str]:
-    value = re.search(rf"--{name}:\s*([^;]+);", BASE).group(1)
+def stack(which: str) -> list[str]:
+    value = re.search(rf"--{which}:\s*([^;]+);", F.STACKS.read_text(encoding="utf-8")).group(1)
     return [f.strip().strip('"') for f in value.split(",")]
 
 
 # ---------------------------------------------------------------- the fallback subsets
 def test_fallback_files_hold_exactly_the_manifest_characters():
-    assert [e["file"] for e in MANIFEST] == [f"{slug}.woff" for slug, *_ in F.FALLBACKS]
-    for e in MANIFEST:
+    m = manifest()
+    assert [e["file"] for e in m] == [f"{slug}.woff" for slug, *_ in F.FALLBACKS]
+    for e in m:
         assert cmap(FALLBACK / e["file"]) == set(e["codepoints"]), e["file"]
         assert e["license"] == "OFL-1.1"
 
 
+def test_the_fallback_directory_holds_only_this_set():
+    """Pass 1 made the Phase 9 set the only one: no Phase 8 or v9-* files are left behind."""
+    m = manifest()
+    want = {F.MANIFEST} | {e["file"] for e in m} | {e["license_file"] for e in m}
+    assert {p.name for p in FALLBACK.iterdir()} == want
+
+
 def test_fallbacks_come_from_the_pinned_sources():
-    for e, (slug, family, weight, source_family, url, sha, wanted) in zip(MANIFEST, F.FALLBACKS):
+    for e, (slug, family, weight, source_family, url, sha, wanted) in zip(manifest(), F.FALLBACKS):
         assert (e["family"], e["weight"], e["source_family"], e["source"], e["sha256"]) == (family, weight, source_family, url, sha)
         assert set(e["codepoints"]) | set(e["missing"]) == set(wanted)
 
@@ -80,7 +93,7 @@ def test_fallbacks_come_from_the_pinned_sources():
 def test_fallback_licences_are_shipped_with_each_subset():
     """Each subset's licence: its own copyright notice (name record 0, kept by the subsetter), then the OFL 1.1 text
     (author, 2026-10-24). No Reserved Font Name is declared, so the subsets may keep their internal names."""
-    for e in MANIFEST:
+    for e in manifest():
         slug, url, _ = F.LICENSES[e["source_family"]]
         assert (e["license_file"], e["license_text"]) == (f"LICENSE-{slug}.txt", url)
         text = (FALLBACK / e["license_file"]).read_text(encoding="utf-8")
@@ -92,19 +105,32 @@ def test_fallback_licences_are_shipped_with_each_subset():
 
 
 def test_fallback_unicode_ranges_equal_the_files():
+    m = manifest()
     by_file = {f["file"].name: f for f in faces() if f["file"].parent == FALLBACK.resolve()}
-    assert sorted(by_file) == sorted(e["file"] for e in MANIFEST)
-    for e in MANIFEST:
+    assert sorted(by_file) == sorted(e["file"] for e in m)
+    for e in m:
         f = by_file[e["file"]]
         assert (f["family"], f["weight"], f["style"]) == (e["family"], e["weight"], "normal")
         assert f["range"] == set(e["codepoints"]), e["file"]
 
 
+def test_greek_comes_from_commissioner_and_fira_mono():
+    """Author decision 3 (2026-11-01): Commissioner's Greek behind DM Sans, Fira Mono's behind IBM Plex Mono, so Greek
+    renders identically everywhere; every letter of the basic Greek alphabet is in both."""
+    m = {(e["family"], e["weight"]): e for e in manifest()}
+    for (family, weight), source in {("Oberth Greek Sans", 400): "Commissioner", ("Oberth Greek Sans", 600): "Commissioner",
+                                     ("Oberth Greek Mono", 400): "Fira Mono", ("Oberth Greek Mono", 500): "Fira Mono"}.items():
+        e = m[(family, weight)]
+        assert e["source_family"] == source
+        assert set(F.GREEK) <= set(e["codepoints"]), (family, weight)
+
+
 # ---------------------------------------------------------------- the primaries
 @needs_packages
 def test_primary_faces_are_the_packages():
+    css = F.CSS.read_text(encoding="utf-8")
     for rule in F.primary_faces():
-        assert rule in CSS
+        assert rule in css
     primaries = [f for f in faces() if "node_modules" in f["file"].parts]
     assert {(f["family"], f["weight"], f["style"]) for f in primaries} == {
         (family, w, s) for _, family, fs in F.PRIMARIES for w, s in fs}
@@ -113,13 +139,14 @@ def test_primary_faces_are_the_packages():
 
 
 def test_stacks_put_the_primary_first_then_the_fallbacks():
-    assert stack("sans")[:3] == ["Barlow", "Oberth Greek Sans", "Oberth Symbols"]
-    assert stack("sans-cond")[:4] == ["Barlow Semi Condensed", "Oberth Greek Condensed", "Oberth Greek Sans", "Oberth Symbols"]
-    assert stack("mono")[:3] == ["IBM Plex Mono", "Oberth Greek Mono", "Oberth Symbols"]
+    for which, want in STACKS.items():
+        assert stack(which)[:len(want)] == want, which
+    assert re.search(r"--sans-cond:\s*var\(--sans\);", F.STACKS.read_text(encoding="utf-8"))
 
 
 # ---------------------------------------------------------------- every displayed character
-SKIP_DIRS = {"node_modules", "e2e", "tools", "public"} | {p.name for p in SITE.glob("dist*")}
+# Playwright's output folders (not committed) hold its failure reports, which quote page text: not the site's text.
+SKIP_DIRS = {"node_modules", "e2e", "tools", "public", "test-results", "playwright-report"} | {p.name for p in SITE.glob("dist*")}
 
 
 def displayed_text() -> dict[str, str]:
@@ -153,15 +180,15 @@ def displayed_text() -> dict[str, str]:
 @needs_packages
 def test_every_displayed_character_has_a_self_hosted_glyph_in_every_stack():
     chars: dict[int, str] = {}
-    for name, text in displayed_text().items():
+    for where, text in displayed_text().items():
         for ch in text:
-            if ord(ch) > 0x7E and ch not in " ​﻿":
-                chars.setdefault(ord(ch), name)
+            if ord(ch) > 0x7E and ch not in " ​﻿":
+                chars.setdefault(ord(ch), where)
     assert ord("η") in chars and ord("Π") in chars                       # the scan sees the site's text
     covered: dict[str, set[int]] = {}
     for f in faces():
         covered.setdefault(f["family"], set()).update(f["range"] & cmap(f["file"]))
-    for name in ("sans", "sans-cond", "mono"):
-        have = set().union(*(covered.get(family, set()) for family in stack(name)))
+    for which in STACKS:
+        have = set().union(*(covered.get(family, set()) for family in stack(which)))
         missing = {f"U+{c:04X} {chr(c)} (e.g. {where})" for c, where in chars.items() if c not in have}
-        assert not missing, f"--{name}: no self-hosted glyph for {sorted(missing)}"
+        assert not missing, f"--{which}: no self-hosted glyph for {sorted(missing)}"

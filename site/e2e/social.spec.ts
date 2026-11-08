@@ -2,7 +2,7 @@
 // URL, a 1200 × 630 preview image that is served, and a large-image card; the 404 page none.
 import { expect, test } from "./fixtures";
 
-for (const [name, path] of [["landing", ""], ["research", "research/"], ["explorer", "explorer/"], ["references", "references/"]]) {
+for (const [name, path] of [["landing", ""], ["research", "research/"], ["explorer", "explorer/"], ["references", "references/"], ["about", "about/"]]) {
   test(`${name}: Open Graph tags from the page's own title and description, and the image is served`, async ({ page }) => {
     await page.goto(path);
     const meta = (k: string) => page.locator(`meta[property="${k}"], meta[name="${k}"]`).getAttribute("content");

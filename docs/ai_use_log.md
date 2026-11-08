@@ -636,3 +636,235 @@ added to the numbers file as values.
   labels, then did not report it. The author asked. The measurement found 400 Regular in both themes, rendered with
   the same face, so the heavier look is light-on-dark appearance.
 - **An over-claim:** the part B report said `docs/site.md` also held interpretations to confirm; it held none.
+
+## Phase 9: dark, portfolio-style revamp (2026-11-01 to 2026-11-06; build complete, pull request for the author's review)
+
+**Author decided:**
+- **The brief:** a dark interpretation of https://suhaslord.github.io/portfolio/, dark only.
+  - Inspiration, not copying; licence and typefaces to be reported.
+  - Site-only, under the analysis freeze, every non-visual contract kept.
+  - Work on `phase-9-revamp` through a pull request with green CI.
+  - A plan with a style page first, then a build in seven passes.
+
+**Assistant, steps 1 and 2:**
+- **Studied the reference.** Playwright captures (not committed) and computed measurements. Reported: the MIT licence,
+  four OFL typefaces (none commercial), and the libraries used.
+- **Wrote the plan** (`docs/revamp_plan.md`):
+  - an inventory in its own words, and an adopt, adapt or drop decision for each element;
+  - a six-colour dark palette with every check, the data colours re-checked on it, and the faintest a·v stroke
+    measured from rendered pixels;
+  - typography chosen with fontTools for native Greek: Commissioner and Fira Mono, both OFL;
+  - the information architecture, the landing page, a motion table, ASCII wireframes and a pass-2 review.
+- **Built the development-only style page** `/style-9/` in isolation, with screenshots.
+
+**Assistant found and changed inside step 2:**
+- **The first accent sat too close to the data blues:** ΔE 11.6, and it failed a white label. It moved to electric
+  violet `#c27bff`.
+- **The style page's floating button covered a header link at 1440 px.** From 900 px it now waits until the header has
+  scrolled away.
+- **A still marquee cut the title mid-word under reduced motion.** It now wraps at display size.
+- **Glyph icons had no self-hosted glyph.** The font test caught it; they are SVG now.
+
+**Assistant interpretations, for the author to confirm** (plan §2.10):
+- the accent's move off indigo;
+- "the paper-matched blue ramp" on a dark-only site meaning the dark steps already in use;
+- Commissioner and Fira Mono over the reference's DM Sans and IBM Plex Mono;
+- an About the project page;
+- the marquee line;
+- the dive's intro compressed to 1.5 s.
+
+**Author decided** (review of steps 1–2, 2026-11-01):
+- **Copying:** allowed, with the reference's MIT notice kept and every file marked. No personal content. The result must
+  stay distinguishable, and the About page carries the design credit.
+- **Libraries:** GSAP allowed; Lenis only under four conditions; no Barba, but View Transitions allowed.
+- **Decisions:**
+  - the reference's indigo, never in a plot;
+  - the existing dark data steps confirmed;
+  - DM Sans and IBM Plex Mono with Commissioner's and Fira Mono's Greek;
+  - an About page modelled on the reference's;
+  - the title alone in the marquee;
+  - a preloader of about 2 s at most, and the dive intro at most 3 s.
+
+**Assistant, the step-2 revision:**
+- **Copying:** read the reference's code and adapted its components (`THIRD_PARTY_NOTICES.md`, with headers in the four
+  files). Reported GSAP's licence and dates; recommended not using it.
+- **Accent:** computed the nearest passing variant, `#445be8` (ΔE 0.31).
+- **Fonts:** extended `fonts.py` with the Phase 9 set, and the font tests to cover both sets.
+- **Style page:** rebuilt it with the preloader, the reference's menu, marquee, magnetic and liquid buttons, live
+  previews, the closing section, and Lenis.
+- **`landingHero`:** gave it an optional `start` promise.
+- **Screenshots:** wrote `site/tools/style9-shots.mjs` to capture them and measure the load sequences.
+
+**Assistant found and changed inside the revision:**
+- **The preloader's first timings ran over 2 s** as measured (1.999–2.17 s). It is now tied to the page's start, with
+  a hard cap and a failsafe, and measured at 1.83 s.
+- **The previews were empty:** the mini figures need a `figure` ancestor with an id.
+- **Badge:** the accent "View" badge sat over live plots, so it is Ink.
+- **The monogram** showed only as a bar, so it is dropped.
+- **The square preview cut a figure's key,** so it is portrait.
+- **The closing section's content slide hid the title,** so it is dropped.
+- **At 390 px the dive pushed the headline below the fold,** so the headline comes first.
+
+**Corrections to my own earlier claims:**
+- the dive intro was 2.8 s, not 4.8 s;
+- the reference's marquee runs at 55 px/s, not 18 (my step-1 measurement came from throttled headless frames);
+- its rows are about 220 px tall, not 110.
+
+**Assistant proposals, for the author to confirm** (plan §2.10):
+- not using GSAP;
+- the preloader words;
+- the departures from the reference: no monogram, portrait previews with an Ink badge, no content slide, a pause
+  control;
+- "Fly one yourself." as the closing line.
+
+**Author decided** (second review of steps 1–2, 2026-11-02):
+- **Scope:** the new styling covers every page, the article's figures and the explorer included; only the classic
+  explorer stays byte-identical. The style page gains article, explorer and references samples.
+- **Less copying:** the reference's styling may be borrowed, its signature interactions may not. Every adapted element
+  to be classified, each signature interaction replaced by one grounded in this project; for the findings, the
+  preferred direction is rows that drive the hero dive. The notices and headers to list only what is still adapted.
+- **Decisions:** no GSAP; the preloader words Approach, Ignition, Periapsis, Cutoff, Escape, in physical order; the four
+  departures approved; the closing line as the author's text in a content slot.
+
+**Assistant, the second revision:**
+- **Audit** (plan §1.3): classified every adapted element as styling (kept) or signature interaction (replaced), with
+  a reason for each.
+- **Designed and built the replacements** on the style page:
+  - the findings rows steer the dive, which docks beside them from 1100 × 700; each finding's state is grounded in the
+    exported data, and the rows also open in place to their live figures;
+  - a flyby preloader: a hyperbola drawn past the Sun, the stages named at their points;
+  - the title moved by the dive's clock, through the angle swept around the Sun, in place of the ticker;
+  - a text menu pill, plain button states, and the escape leg over a straight-edged closing section.
+- **`landingHero`:** gave it `steer()` and an `onFrame` callback, both inert unless a page calls them.
+- **Content plugin:** a `<!--#section:id-->` directive with a test, for the article sample; a `closing` slot.
+- **New stylesheet** `site/src/styles/v9/pages.css` (no reference code) for the article, figures, explorer and
+  references in the new system.
+- Updated `THIRD_PARTY_NOTICES.md`, the file headers, the plan and the screenshots.
+
+**Assistant found and changed inside the second revision:**
+- **The preloader ran over 2 s** (2.10–2.17 s). Two causes: the explorer and Figure 2 set themselves up during the
+  fade, and an animation's delay counts from its first frame, which the module's own set-up held back. Now those two
+  mount lazily after the preloader, the fade's start is set in page time, and late runs keep 200 ms in hand. Measured:
+  faded by 1.71–1.80 s, removed by 1.72–1.95 s.
+- **The stage names sat on the path** far out, where it runs almost radially; they now sit off it along its normal.
+- **The dive's clock overflowed its panel** once the shared controls stylesheet made that row a non-wrapping flex
+  row; it now wraps under the scrub.
+- **Reference entries split apart:** each italic journal name became its own grid cell. The rows are no longer grids.
+- **η wrapped onto two lines** in the explorer's results column; its size is capped.
+
+**Assistant proposals, for the author to confirm** (plan §2.10, items 11–13):
+- the findings design: docked steering plus rows that open in place;
+- row 02's state (the weakest link), or leaving the dive as it is for that row;
+- the other replacements.
+
+**Author decided** (approval of the plan, 2026-11-02):
+- **Findings:** both steering and opening in place.
+- **Row 02:** does not steer the dive; its perihelion state is removed.
+- **The other replacements:** approved.
+- **Preloader:** an assertion that its stage labels sit at physically correct points, Ignition before Periapsis.
+- **Preloader cap:** a test against the production build, enforced locally and report-only in CI.
+- **Review point:** after pass 3, the landing page, with named screenshots.
+- **Proceed** with pass 1.
+
+**Assistant, applying the approval:**
+- **Row 02:** implemented "leaves the dive in its current state" as pointing at nothing. The dive keeps a focused or
+  open row's state, else the reader's clock. Removed `landingHero`'s `imp` option, which only row 02 used.
+- **Preloader:** moved its geometry and timing to `site/src/lib/flyby.ts`, with seven unit tests of the physical
+  placement of the stages. The drawn path now passes exactly through every stage.
+- **Plan:** corrected my pass numbering to the author's brief: the landing page is pass 3, the article pass 4.
+
+**Assistant, pass 1 (tokens, fonts and base layout):**
+- **Palette:** folded the Phase 9 palette and its checks into `tools/palette.mjs`, which now writes a dark-only
+  `palette.css`.
+- **Fonts:** made the Phase 9 set the only one in `fonts.py` and its tests, and removed the Barlow packages.
+- **Base layout:** moved the Phase 9 scale and roles into `base.css`.
+- **Theme:** removed the light theme, the theme switch and its scripts. The e2e specs run dark only, with a new
+  dark-only test.
+- **Classic explorer:** pinned its hash in the site-data tests, and added byte-for-byte e2e checks of the served file
+  on the test and production builds.
+
+**Assistant found inside pass 1:**
+- **Line endings:** the classic explorer is CRLF in a Windows checkout, so the pinned hash is taken over its LF text.
+- **Background motion:** Phase 8's background glow drifted for 48 s without end, which the Phase 9 motion rule
+  forbids. It is removed.
+
+**Author decided** (2026-11-02, after pass 1): pass 1 approved; the row-02 reading confirmed; Lenis and the View
+Transitions deferred to an optional pass 8, to protect the weekly usage; pass 2 limited to the header, drawer and
+footer.
+
+**Assistant, pass 2 (header, menu drawer and footer):**
+- **Shell:** moved the approved design into the shared header and footer partials, with a new `shell.css`.
+- **Drawer:** the reference's focus handling, plus closing it before a link navigates.
+- **Closing section** on every page, with the escape leg.
+- **Sticky elements:** extended the measurements and their tests to the menu pill; added tests of the drawer's
+  keyboard handling and of the closing section.
+
+**Assistant, pass 3 (the landing page):**
+- **Landing page:** rebuilt it from the approved style page, with the preloader, the hero band, the title moved by
+  the clock, the docked dive with rows that steer it and open in place, the intro with the scope facts, and four key
+  results from the site data with source links.
+- **Preloader tests:** wrote the spec the author asked for. It checks that the stage marks lie on the drawn path and
+  switch on in physical order, the once-a-session rules, and the 2.0 s cap on the production build (enforced
+  locally, report-only in CI). A fixture option keeps every other spec clear of the preloader.
+- **Fold and budget:** re-specified the fold check and the headline budget for a hero without the entry-link row,
+  following the brief, and re-measured both.
+- **Tests and tools:** rewrote the landing spec for the rows, docking and steering, and wrote
+  `tools/landing-shots.mjs` for the review screenshots.
+
+**Assistant found inside pass 3:**
+- **Clipped label:** in the dive's window at 1440 px the view is 266 px wide and the SEP label's star was clipped
+  (the approved style page had the same fault, unnoticed). A narrow view now keeps 28 px on the right.
+- **Title position:** a later rule overrode the title line's position, so it sat at the top of the hero; fixed.
+
+**Author decided** (2026-11-04): pass 3 approved, with two fixes: fold checks at 1366 × 650 and 1280 × 720, and key
+results in plain language, Hibberd et al.'s thrust margin in place of the Π²/96 ratio.
+
+**Assistant, the fixes and pass 4 (the article and its figures):**
+- **Fixes:** added the laptop fold and budget checks (the hero fits as it is) and rewrote the key results' labels from
+  the data. `check_numbers` matches every rendered number once the audit summary is given via `--json`.
+- **Article:** applied the approved article sample to `/research/`, in a new `article.css`. Restyled the shared
+  controls to the approved pills and Ink thumbs.
+- **Accent rule:** wrote the test that no chart module or chart stylesheet reads the accent.
+- **Found the causes of the two failures assigned to pass 4:**
+  - the slider's end label crossed its track by 0.8 px because a fractional track width (from Phase 9's 3 vw padding)
+    was rounded up; it is now rounded down;
+  - a full-page capture resizes the viewport, the figure redraws, and its tooltip is briefly closed; under load the
+    capture caught that gap. That screenshot now crops inside the viewport.
+
+**Author decided** (2026-11-04): pass 4 approved; pass 7 next if the budget allows; passes 5 and 6 after the weekly
+reset.
+
+**Assistant, pass 7:** regenerated the Open Graph image from the finished hero: the dive on Void, captured where the
+dive stays in the hero band.
+
+**Assistant, pass 5 (the explorer):** applied the approved explorer sample in a new `explorer.css`; made the reader's
+case an Ink dot (the case marks moved to `chart.css`, and the accent test now covers the explorer); found the cause of
+the two "Trajectory" failures (the heading line height on a 13 px title) and of a slider-label collision in the case
+column, and fixed both.
+
+**Assistant, pass 6 (references, About, 404):**
+- **References and 404:** restyled both.
+- **About page:** built it to the approved plan: the design credit in the author's words, the portfolio's MIT notice
+  quoted at build time from `THIRD_PARTY_NOTICES.md`, the citation as a reference line and BibTeX, the audit facts, and
+  three author slots left as TODO notes.
+- **Navigation:** added About to the header and the drawer.
+- **Tests:** wrote the About and 404 tests.
+
+**Author decided** (2026-11-06, final review): approved pending CI. No auto-fix: a CI failure is reported with its log
+and a proposed fix, and waits for the author's OK. Retire `/style/` once its test coverage is on the real pages, and
+keep `/style-9/`. Defer pass 8. Add `/about/` to the Lighthouse gate.
+
+**Assistant, the final-review items:** moved the style page's interaction test onto the article's figures and removed
+`/style/`; recorded pass 8 as deferred; added `/about/` to the Lighthouse script.
+
+**Assistant slip, found by CI:** both CI runs on the pull request failed the 14-day package rule. On 2026-11-01 I
+added Lenis and DM Sans to the lockfile, but left its recorded dates (`config.npmLockedOn`, `config.npmBefore` in
+`site/package.json`) at the scaffold's 2026-10-14 and 2026-09-30. Lenis itself met the rule, but not those stale dates.
+The pre-commit hook did not run the age check, so the slip reached CI, and it stopped that job before Playwright ran.
+
+**Author decided** (2026-11-06): correct the dates (locked on 2026-11-01, cutoff 2026-10-18) and keep Lenis; make the
+pre-commit hook run the age check whenever either package file is staged, with a test.
+
+**Assistant, the fix:** added the `package-age` check to `check_all.py` and its selection, with tests; confirmed it
+fails on the stale dates as CI did and passes on the corrected ones; documented it in `CLAUDE.md` and `docs/site.md`.
+

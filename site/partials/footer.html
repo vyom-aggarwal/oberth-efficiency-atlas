@@ -1,12 +1,26 @@
-<footer class="site-footer">
-  <dl class="footer-facts">
-    <div><dt>Author</dt><dd>{{author}}</dd></div>
-    <div><dt>Cite this project</dt><dd><span class="citation-text" id="citation-text">{{citation}}</span> <button class="button copy-button" type="button" data-copy="#citation-text" hidden>Copy</button></dd></div>
-    <div><dt>Licence</dt><dd>MIT for the code (<a href="{{licence_code}}" rel="noopener">LICENSE</a>); CC BY 4.0 for the text, figures and data (<a href="{{licence_content}}" rel="noopener">LICENSE-content.md</a>), which also lists the third-party material that keeps its own terms</dd></div>
-    <div><dt>Source code</dt><dd><a href="{{repo}}" rel="noopener">GitHub repository</a></dd></div>
-    <div><dt>Analysis</dt><dd><a href="{{tag_url}}" rel="noopener">{{tag}}</a> (commit {{tag_commit}})</dd></div>
-    <div><dt>Site data</dt><dd>exported by <code>scripts/export_site_data.py</code> at commit {{data_git}}</dd></div>
-    <div><dt>AI-use disclosure</dt><dd><a href="{{ai_log}}" rel="noopener"><code>docs/ai_use_log.md</code></a></dd></div>
-    <div><dt>Offline explorer</dt><dd><a href="{{base}}explorer/classic/">single-file version</a></dd></div>
-  </dl>
-</footer>
+<div class="site-closing">
+  <svg class="escape-leg" aria-hidden="true"></svg>
+  <section class="closing" aria-label="Closing">
+    <div class="closing-title"><!--#slot:closing--></div>
+    <div class="closing-line">
+      <a class="round accent closing-cta" href="{{base}}explorer/">Open the explorer</a>
+      <div class="closing-links">
+        <!--#research-link: class="pill"-->
+        <a class="pill" href="{{repo}}" rel="noopener">Source on GitHub</a>
+        <a class="pill" href="{{base}}explorer/classic/">Classic explorer</a>
+      </div>
+    </div>
+  </section>
+  <footer class="site-footer">
+    <dl class="footer-facts">
+      <div><dt>Author</dt><dd>{{author}}</dd></div>
+      <div id="cite"><dt>Cite this project</dt><dd><span class="citation-text" id="citation-text">{{citation}}</span> <button class="copy-button" type="button" data-copy="#citation-text" hidden>Copy</button></dd></div>
+      <div><dt>Licence</dt><dd>MIT for the code (<a href="{{licence_code}}" rel="noopener">LICENSE</a>); CC BY 4.0 for the text, figures and data (<a href="{{licence_content}}" rel="noopener">LICENSE-content.md</a>), which also lists the third-party material that keeps its own terms</dd></div>
+      <div><dt>Source code</dt><dd><a href="{{repo}}" rel="noopener">GitHub repository</a></dd></div>
+      <div><dt>Analysis</dt><dd><a href="{{tag_url}}" rel="noopener">{{tag}}</a> (commit {{tag_commit}})</dd></div>
+      <div><dt>Site data</dt><dd>exported by <code>scripts/export_site_data.py</code> at commit {{data_git}}</dd></div>
+      <div><dt>AI-use disclosure</dt><dd><a href="{{ai_log}}" rel="noopener"><code>docs/ai_use_log.md</code></a></dd></div>
+      <div><dt>Offline explorer</dt><dd><a href="{{base}}explorer/classic/">single-file version</a></dd></div>
+    </dl>
+  </footer>
+</div>

@@ -53,6 +53,10 @@ the impulsive Oberth bonus a real engine keeps (η), and whether Π = t_b/τ col
     (`check_all.select_checks`). It blocks the commit on any failure.
     - Content only: `check_numbers`.
     - Site code: the type check and vitest.
+    - `site/package.json` or `site/package-lock.json`: also the package-age check
+      (`site/tools/check-package-age.mjs`, the 14-day rule; it queries the npm registry). Update `config.npmLockedOn`
+      (the day the lockfile is written) and `config.npmBefore` (at least 14 days earlier) with every lockfile change
+      (author, 2026-11-06, after stale dates failed CI on the Phase 9 pull request).
     - The exporter, the site data, any of its provenance sources, or `tests/`: the site-data tests.
     - Hook scripts: the hook tests.
     - A changed `tests/test_*.py` runs itself, and a changed `scripts/<name>.py` runs
@@ -208,12 +212,16 @@ SITE_DIST=dist-test npx playwright test               # e2e against that build (
       `e2e/headline-budget.spec.ts`).
 
     Run all three: `SITE_DIST=dist-test SITE_DIST_PROD=dist-prod SITE_DIST_PH=dist-ph npx playwright test`.
-  - **Landing fold** (author, 2026-10-21): the title, headline and entry links stay above the fold
-    at 1440 × 900 and 390 × 844. The headline budget is `HEADLINE_BUDGET` (100 characters,
-    measured), and the build warns when a headline exceeds it.
-- **Phase 8 look** (`docs/restyle_plan.md`): the classic explorer's, which is the paper palette.
-  - `npm run palette`: `tools/palette.mjs` reads the tokens from `explorer/app.css` (never edit
-    `palette.css` by hand).
+  - **Landing fold** (author, 2026-10-21; Phase 9 brief): the headline and the way into the site
+    (the header's links at 1440, the menu pill at 390; at 1440 also the title line and the
+    Findings cue) stay above the fold at 1440 × 900 and 390 × 844. The headline budget is
+    `HEADLINE_BUDGET` (100 characters, measured), and the build warns when a headline exceeds it.
+  - **Landing preloader** (Phase 9): gone by 2.0 s from navigation start on the production build
+    (`e2e/preloader.spec.ts`); enforced locally, report-only in CI (`PRELOADER_CAP=report`).
+    Every other spec starts in a session that has seen it (the `preloader` fixture option).
+- **Phase 9 look** (`docs/revamp_plan.md`; Phase 8's is in `docs/restyle_plan.md`): dark only.
+  - `npm run palette`: `tools/palette.mjs` defines the six interface colours and reads the data
+    colours from the classic's dark block in `explorer/app.css` (never edit `palette.css` by hand).
   - `.venv/Scripts/python site/tools/fonts.py` regenerates `fonts.css`, the Greek-and-symbol
     subsets and their licences, from pinned sources.
   - Strings appended by `h()`/`s()` are typeset by `src/lib/notation.ts`: write "v_esc" and it

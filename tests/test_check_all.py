@@ -21,6 +21,35 @@ def test_site_code_runs_the_type_check_and_vitest():
     assert C.select_checks(["site/e2e/hero.spec.ts", "site/vite.config.ts"], SOURCES) == ["typecheck", "vitest"]
 
 
+def test_site_package_files_run_the_package_age_check():
+    # Author, 2026-11-06: the lockfile changed on 2026-11-01 with config.npmLockedOn and npmBefore left at the
+    # scaffold's dates, and only CI's package-age step caught it, on the pull request. Now the hook runs it first.
+    for p in ("site/package-lock.json", "site/package.json"):
+        assert C.select_checks([p], SOURCES) == ["typecheck", "vitest", "package-age"], p
+    for p in ("site/src/charts/atlas.ts", "site/tools/palette.mjs", "site/public/og-image.png", "site/content/hero.md"):
+        assert "package-age" not in C.select_checks([p], SOURCES), p
+
+
+def test_the_package_age_check_runs_the_checker_in_site_and_fails_without_node(monkeypatch):
+    assert (C.SITE / "tools" / "check-package-age.mjs").is_file()
+    calls = []
+    monkeypatch.setattr(C.shutil, "which", lambda name: "node-exe" if name == "node" else None)
+    monkeypatch.setattr(C, "run", lambda cmd, cwd: calls.append((cmd, cwd)) or 0)
+    assert C.CHECKS["package-age"]() == 0
+    assert calls == [(["node-exe", "tools/check-package-age.mjs"], C.SITE)]
+    monkeypatch.setattr(C, "run", lambda cmd, cwd: 1)
+    assert C.CHECKS["package-age"]() == 1                                    # the checker's failure is the check's
+    monkeypatch.setattr(C.shutil, "which", lambda name: None)
+    assert C.CHECKS["package-age"]() == 1                                    # a missing tool fails, never passes
+
+
+def test_a_lockfile_commit_runs_the_package_age_check_end_to_end():
+    """The command the hook runs, given a lockfile change (dry run: the check itself needs the npm registry)."""
+    out = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_all.py"), "--paths", "site/package-lock.json",
+                          "--dry-run"], capture_output=True, text=True, cwd=ROOT, check=True).stdout
+    assert "checks: typecheck, vitest, package-age" in out
+
+
 def test_exporter_data_tests_and_provenance_sources_run_the_site_data_tests():
     for p in ("scripts/export_site_data.py", "site/public/data/atlas.json", "tests/conftest.py",
               "configs/phase4/hibberd_som.yaml", "docs/paper_outline.md", "src/oberth_atlas/theory.py"):

@@ -21,6 +21,7 @@ import { renderTex } from "./tex-plugin";
 const dir = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 const CONTENT = dir("../content/");
 const PARTIALS = dir("../partials/");
+const NOTICES = dir("../../THIRD_PARTY_NOTICES.md");
 const DATA = dir("../public/data/");
 const CLASSIC = dir("../../explorer/oberth_explorer.html");
 const TODO = /\bTODO\b/;
@@ -80,22 +81,30 @@ export function loadSections(base = "/"): Section[] {
 const LANDING = dir("../content/landing/");
 const LOREM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 // The headline is about 80 characters and the summary two sentences (author, 2026-10-21): the fold test on the
-// placeholder build (e2e/fold.spec.ts) checks that a headline of that length keeps the entry links above the fold.
+// placeholder build (e2e/fold.spec.ts) checks that a headline of that length stays above the fold (and, at 1440 px,
+// clear of the dive and the title line; Phase 9).
 export const PLACEHOLDERS: Record<string, string> = {
   headline: "[Placeholder headline] Lorem ipsum dolor sit amet, consectetur adipiscing elit sed.",
   summary: `[Placeholder summary, two sentences] ${LOREM} Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.`,
   "finding-loss": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-missions": `[Placeholder caption, one or two sentences] ${LOREM}`,
   "finding-hibberd": `[Placeholder caption, one or two sentences] ${LOREM}`,
+  closing: "[Placeholder closing line] Lorem ipsum dolor.",
+  "about-intro": `[Placeholder About introduction] ${LOREM} ${LOREM}`,
+  "about-ai": `[Placeholder AI-use disclosure] ${LOREM}`,
+  "about-author": `[Placeholder author] ${LOREM}`,
 };
 
 /**
- * The headline's length budget, in characters of plain text (author, 2026-10-21). A longer headline can push the entry
- * links below the fold on a phone. e2e/fold.spec.ts measures the longest headline that keeps them above the fold at
- * 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build reports a written headline over it.
+ * The headline's length budget, in characters of plain text (author, 2026-10-21). e2e/headline-budget.spec.ts measures
+ * the longest headline that still fits at 390 × 844 and 1440 × 900 and fails if this budget exceeds it; the build
+ * reports a written headline over it.
  * Measured 2026-10-21: 114 characters at 390 × 844 (three lines; the binding size) and 365 at 1440 × 900; after the
  * Phase 8 restyle (2026-10-24, Barlow 24 px): 124 and 444, so the budget is unchanged. The budget
  * keeps about one long word in hand, since where a headline wraps depends on its words.
+ * Phase 9 (pass 3, 2026-11-03): the hero has no entry-link row, and the headline comes first at 390 px. It fits while it
+ * stays above the fold and, at 1440 px, where it sits beside the dive, clear of the dive and the title line. Measured:
+ * 699 characters at 390 × 844 and 209 at 1440 × 900 (now the binding size), so the budget of 100 is unchanged.
  */
 export const HEADLINE_BUDGET = 100;
 
@@ -104,7 +113,7 @@ export function headlineReport(markdown: string, budget = HEADLINE_BUDGET): stri
   if (TODO.test(markdown)) return null;
   const text = md.render(frontMatter(markdown).body).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
   return text.length > budget
-    ? `[content] the landing headline is ${text.length} characters, over its budget of ${budget}: on a 390 × 844 screen it can push the entry links below the fold (e2e/fold.spec.ts)`
+    ? `[content] the landing headline is ${text.length} characters, over its budget of ${budget}: it may not fit beside the dive at 1440 × 900 (e2e/headline-budget.spec.ts)`
     : null;
 }
 
@@ -161,6 +170,22 @@ function sectionHTML(s: Section, dev: boolean): string {
     `<h2 id="h-${s.id}">${esc(s.title)}</h2>${banner}${before}${fig}${after}</section>`;
 }
 
+/**
+ * The article's directives in a page: <!--#hero-->, <!--#sections--> and <!--#section-nav--> (/research/), and
+ * <!--#section:id--> for one kept section on its own (the Phase 9 style page shows one in the new system). A section
+ * not kept in this build renders as nothing.
+ */
+export function articleHTML(html: string, kept: Section[], dev: boolean): string {
+  const hero = kept.find((s) => s.id === "hero");
+  const rest = kept.filter((s) => s.id !== "hero");
+  const nav = rest.map((s) => `<li><a href="#${s.id}" data-nav="${s.id}">${esc(s.title)}</a></li>`).join("");
+  return html
+    .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Research</h1>`)
+    .replace("<!--#sections-->", rest.map((s) => sectionHTML(s, dev)).join("\n"))
+    .replace(/<!--#section:([\w-]+)-->/g, (_m, id: string) => { const s = kept.find((k) => k.id === id); return s ? sectionHTML(s, dev) : ""; })
+    .replace(/<!--#section-nav-->/g, nav);
+}
+
 function readData(name: string): any {
   const p = DATA + name;
   return existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null;
@@ -174,6 +199,32 @@ export function citationText(c: { title: string; authors: { given: string; famil
   const names = c.authors.map((a) => `${a.family}, ${a.given.split(/\s+/).map((g) => `${g[0]}.`).join(" ")}`).join(", ");
   const year = c.date_released ? ` (${c.date_released.slice(0, 4)})` : "";
   return `${names}${year}. ${c.title}${c.version ? ` (${c.version})` : ""} [Software]. ${c.repository}`;
+}
+
+/** The same record as BibTeX, for the About page (Phase 9 pass 6): a @software entry keyed by the first author's family
+ * name, the year and the title's first word. */
+export function citationBibtex(c: { title: string; authors: { given: string; family: string }[]; version?: string | null;
+                                    date_released?: string | null; repository: string } | undefined): string {
+  if (!c) return "";
+  const year = c.date_released?.slice(0, 4) ?? "";
+  const key = `${c.authors[0].family}${year}${c.title.split(/\s+/)[0]}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const fields: [string, string][] = [["author", c.authors.map((a) => `${a.family}, ${a.given}`).join(" and ")], ["title", c.title],
+    ...(c.version ? [["version", c.version] as [string, string]] : []), ...(year ? [["year", year] as [string, string]] : []),
+    ["url", c.repository]];
+  return `@software{${key},\n${fields.map(([k, v]) => `  ${k.padEnd(7)} = {${v}}`).join(",\n")}\n}`;
+}
+
+/** A licence text quoted verbatim from THIRD_PARTY_NOTICES.md: the first fenced block under the "## <n>." heading
+ * (Phase 9 pass 6: the reference's MIT notice on the About page, from the one copy kept in the repository). */
+export function noticeText(md: string, section: number): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const start = lines.findIndex((l) => l.startsWith(`## ${section}.`));
+  if (start < 0) throw new Error(`THIRD_PARTY_NOTICES.md: no section ${section}`);
+  const open = lines.findIndex((l, i) => i > start && l.startsWith("```"));
+  const close = lines.findIndex((l, i) => i > open && l.startsWith("```"));
+  const next = lines.findIndex((l, i) => i > start && l.startsWith("## "));
+  if (open < 0 || close < 0 || (next >= 0 && open > next)) throw new Error(`THIRD_PARTY_NOTICES.md: no licence block in section ${section}`);
+  return lines.slice(open + 1, close).join("\n");
 }
 
 function partial(name: string, base: string): string {
@@ -262,15 +313,16 @@ export function contentPlugin(): Plugin {
           const site = readData("site.json");
           out = out.replace("<!--#references-->", referenceListHTML(site?.references ?? []));
         }
-        if (!out.includes("<!--#sections-->")) return out;
-        const kept = keptSections(loadSections(base), dev);
-        const hero = kept.find((s) => s.id === "hero");
-        const rest = kept.filter((s) => s.id !== "hero");
-        const nav = rest.map((s) => `<li><a href="#${s.id}" data-nav="${s.id}">${esc(s.title)}</a></li>`).join("");
-        return out
-          .replace("<!--#hero-->", hero ? sectionHTML(hero, dev) : `<h1 class="visually-hidden">Research</h1>`)
-          .replace("<!--#sections-->", rest.map((s) => sectionHTML(s, dev)).join("\n"))
-          .replace(/<!--#section-nav-->/g, nav);
+        // The About page (Phase 9 pass 6): a licence quoted from THIRD_PARTY_NOTICES.md, and the citation in two forms.
+        if (/<!--#(notice:|citation-)/.test(out)) {
+          const site = readData("site.json");
+          out = out.replace(/<!--#notice:(\d+)-->/g, (_m, n: string) =>
+            `<pre class="licence-text">${esc(noticeText(readFileSync(NOTICES, "utf8"), Number(n)))}</pre>`)
+            .replace("<!--#citation-text-->", esc(citationText(site?.citation)))
+            .replace("<!--#citation-bibtex-->", esc(citationBibtex(site?.citation)));
+        }
+        if (!/<!--#(sections|section:|section-nav)/.test(out)) return out;
+        return articleHTML(out, keptSections(loadSections(base), dev), dev);
       },
     },
     configureServer(server) {

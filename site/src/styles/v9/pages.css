@@ -1,0 +1,17 @@
+/* Phase 9: the other pages in the new system (docs/revamp_plan.md §2.7, §2.12): the article's frame, its figures and
+   their parts, the explorer, the references, and the About and 404 pages' shared pieces. This project's own design on
+   the Phase 9 tokens; no code from the reference. The chart modules are unchanged: they read the token names, and
+   these rules restyle the HTML around them. Applied to the site in passes 3–6; shown on /style-9/ until then. */
+
+/* ------------------------------------------------------------- page titles and prose */
+.page-title9 { font-size: var(--t-display); line-height: 1.05; letter-spacing: var(--track-display); font-weight: 400; margin: 0 0 var(--s6); }
+/* The article sample (the frame, figures and controls are the site's since pass 4: article.css, controls.css). */
+.article9 { max-width: 1320px; margin: 0; padding: 0 var(--pad) var(--s8); }
+@media (min-width: 1180px) { .article9 { grid-template-columns: 220px minmax(0, 1fr); gap: var(--s8); } }
+.article9 .home-content { counter-reset: sec 1; }               /* the sample shows the second section */
+.article9 .section-nav-mobile { position: sticky; top: 0; z-index: 20; }
+
+/* ------------------------------------------------------------- facts (methods, About, 404 links) */
+.facts dt { color: var(--quiet); }
+.link-list { list-style: none; padding: 0; display: grid; gap: var(--s2); font-size: var(--t-ui); }
+.lead-ui { font-size: var(--t-statement); line-height: 1.2; letter-spacing: -0.03em; max-width: 24ch; }

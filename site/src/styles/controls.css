@@ -1,73 +1,73 @@
-/* Controls, as the classic explorer's (Phase 8, docs/restyle_plan.md): pill-shaped choices with a visible radio or
-   check in the accent colour, 6 px selects and buttons, 1 px Muted outlines (>= 3:1, WCAG 1.4.11), 2 px accent focus
-   rings, no shadows, no gradients. A control takes the surface opposite the one it sits on (--raised: the panel on
-   the page, the page colour inside a panel). All are native elements (range, number, select, checkbox, radio,
-   button, details), so keyboard operation and screen-reader semantics come from the platform. */
+/* Controls (Phase 9 pass 4, as approved on the style page; Phase 8's were the classic explorer's): pills with a Quiet
+   outline (>= 3:1, WCAG 1.4.11) that turns Ink when chosen, sliders with a hairline track and an Ink thumb, and 2 px
+   Signal focus rings. The accent marks only focus and the native radio or check; it never fills a plot. A control takes
+   the surface opposite the one it sits on (--raised: the panel on the page, the page colour inside a panel). All are
+   native elements (range, number, select, checkbox, radio, button, details), so keyboard operation and screen-reader
+   semantics come from the platform. */
 
 .controls { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s5); align-items: center; margin: 0 0 var(--s3); }
-.control-label { font-size: var(--t-label); color: var(--text-2); margin-right: var(--s2); }
+.control-label { font-size: var(--t-label); color: var(--quiet); margin-right: var(--s2); }
 
-/* Checkbox chips: pills, as the classic's segmented choices. */
+/* Checkbox chips: pills. */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; }
-.chips legend { float: left; font-size: var(--t-label); color: var(--text-2); margin: 0 var(--s2) 0 0; padding: 6px 0 0; }
-.chip { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 2px 10px;
-        border: 1px solid var(--control-edge); border-radius: var(--r-pill); font-size: var(--t-label); color: var(--text-2);
+.chips legend { float: left; font-size: var(--t-label); color: var(--quiet); margin: 0 var(--s2) 0 0; padding: 6px 0 0; }
+.chip { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 2px 12px;
+        border: 1px solid var(--control-edge); border-radius: var(--r-pill); font-size: var(--t-label); color: var(--quiet);
         cursor: pointer; user-select: none; }
-.chip:has(input:checked) { border-color: var(--accent); color: var(--text); }
-.chip input { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; cursor: pointer; }
-.chip:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip:has(input:checked) { border-color: var(--ink); color: var(--ink); }
+.chip input { accent-color: var(--signal); width: 14px; height: 14px; margin: 0; cursor: pointer; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 2px; }
 .chip input:focus-visible { outline: none; }
 .chip .glyph { display: inline-block; width: 14px; height: 14px; }
 
-/* Segmented control: a radio group of pills; the checked pill has an accent edge and the radio shows its dot. */
+/* Segmented control: a radio group of pills; the chosen pill has an Ink edge and the radio shows its dot. */
 .segmented { display: inline-flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; }
 .segmented legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.segmented label { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px;
+.segmented label { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px;
                    border: 1px solid var(--control-edge); border-radius: var(--r-pill); cursor: pointer; font-size: var(--t-label);
-                   color: var(--text-2); }
-.segmented input { accent-color: var(--accent); width: 13px; height: 13px; margin: 0; cursor: pointer; }
-.segmented label:has(input:checked) { border-color: var(--accent); color: var(--text); }
-.segmented label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 1; }
+                   color: var(--quiet); }
+.segmented input { accent-color: var(--signal); width: 13px; height: 13px; margin: 0; cursor: pointer; }
+.segmented label:has(input:checked) { border-color: var(--ink); color: var(--ink); }
+.segmented label:has(input:focus-visible) { outline: 2px solid var(--signal); outline-offset: 3px; z-index: 1; }
 .segmented input:focus-visible { outline: none; }
 
-/* Select, number field, button */
+/* Select, number field, button: pills. */
 .select, .number, .button {
-  font: inherit; font-size: var(--t-ui); color: var(--text); background: var(--raised);
-  border: 1px solid var(--control-edge); border-radius: var(--r-control); min-height: 32px;
+  font: inherit; font-size: var(--t-ui); color: var(--ink); background: var(--raised);
+  border: 1px solid var(--control-edge); border-radius: var(--r-pill); min-height: 36px;
 }
-.select { appearance: none; padding: 0 28px 0 var(--s2);
+.select { appearance: none; padding: 0 32px 0 var(--s3);
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: calc(100% - 14px) 55%, calc(100% - 9px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
-.number { width: 9ch; padding: 0 var(--s2); font-family: var(--mono); font-size: var(--t-label); font-variant-numeric: tabular-nums;
+  background-position: calc(100% - 17px) 55%, calc(100% - 12px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.number { width: 9ch; padding: 0 var(--s3); font-family: var(--mono); font-size: var(--t-label); font-variant-numeric: tabular-nums;
           text-align: right; }
-.button { padding: 0 var(--s3); cursor: pointer; }
-.button:hover { border-color: var(--accent); }
-.button:active { background: var(--grid); }
-:is(.select, .number, .button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.button { padding: 0 var(--s4); cursor: pointer; transition: background-color 150ms, color 150ms, border-color 150ms; }
+.button:hover { border-color: var(--ink); background: var(--ink); color: var(--void); }
+:is(.select, .number, .button):focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 
-/* Range slider drawn as a Π axis: the native input is the control; the SVG scale beneath it is decoration
-   aligned to the same track. Track in Muted, thumb in the accent on a ring of the surface colour. */
+/* Range slider drawn as a Π axis: the native input is the control; the SVG scale beneath it is decoration aligned to
+   the same track. A hairline track in Quiet, an Ink thumb. */
 .axis-slider { display: grid; grid-template-columns: auto 1fr auto; gap: var(--s2) var(--s3); align-items: center; }
 .axis-slider .slider-label { font-size: var(--t-ui); }
 .axis-slider .track { position: relative; }
 :is(.axis-slider, .snap-slider, .scrub) input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 32px; margin: 0;
-  background: transparent; cursor: pointer; }
-:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--muted); }
-:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-track { height: 2px; background: var(--muted); }
-:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -8px;
-  border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
-:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--accent);
-  border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
-:is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  background: transparent; cursor: pointer; accent-color: var(--ink); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-runnable-track { height: 1px; background: var(--quiet); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-track { height: 1px; background: var(--quiet); }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px;
+  margin-top: -7.5px; border-radius: 50%; background: var(--ink); border: 0; box-shadow: none; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--ink);
+  border: 0; box-shadow: none; }
+:is(.axis-slider, .snap-slider, .scrub) input[type="range"]:focus-visible { outline: 2px solid var(--signal); outline-offset: 4px; }
 .axis-slider svg { display: block; width: 100%; height: 40px; overflow: visible; }
 .axis-slider svg.marks-above { height: 0; }          /* set when drawn: engine marks on a narrow track */
-.axis-slider .axis-note { grid-column: 1 / -1; margin: 0; font-size: var(--t-label); color: var(--text-2); }
-.axis-slider svg text { fill: var(--text-2); font-family: var(--mono); font-size: var(--t-tick); font-variant-numeric: tabular-nums lining-nums; }
-.axis-slider svg text.mark-label { fill: var(--text); font-family: var(--sans-cond); font-size: var(--t-annot); font-weight: 600; }   /* engine names */
-.axis-slider svg text.mark-label.hollow { fill: var(--text-2); font-weight: 400; }   /* not .threshold: that class is the dotted line style */
+.axis-slider .axis-note { grid-column: 1 / -1; margin: 0; font-size: var(--t-label); color: var(--quiet); }
+.axis-slider svg text { fill: var(--quiet); font-family: var(--mono); font-size: var(--t-tick); font-variant-numeric: tabular-nums lining-nums; }
+.axis-slider svg text.mark-label { fill: var(--ink); font-family: var(--sans); font-size: var(--t-annot); font-weight: 600; }   /* engine names */
+.axis-slider svg text.mark-label.hollow { fill: var(--quiet); font-weight: 400; }   /* not .threshold: that class is the dotted line style */
 @media (pointer: coarse) {
   :is(.axis-slider, .snap-slider, .scrub) input[type="range"] { height: 44px; }
-  :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12px; }
+  :is(.axis-slider, .snap-slider, .scrub) input[type="range"]::-webkit-slider-thumb { width: 26px; height: 26px; margin-top: -12.5px; }
 }
 
 /* Slider over a fixed list of values: label, track, the current value. */
@@ -77,19 +77,19 @@
 .snap-value { font-family: var(--mono); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; min-width: 9ch;
               text-align: right; }
 
-/* Disclosure ("Show data") */
+/* Disclosure ("Show data"): a quiet disclosure; the table in hairlines, numbers in IBM Plex Mono. */
 details.data { margin-top: var(--s3); }
-details.data summary { cursor: pointer; font-size: var(--t-ui); width: max-content; }
-details.data summary::marker { color: var(--text-2); }
-details.data summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+details.data summary { cursor: pointer; font-size: var(--t-label); color: var(--ink); width: max-content; }
+details.data summary::marker { color: var(--quiet); }
+details.data summary:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 .data-table { border-collapse: collapse; margin-top: var(--s3); font-size: var(--t-label); font-variant-numeric: tabular-nums lining-nums; }
-.data-table caption { text-align: left; color: var(--text-2); padding-bottom: var(--s2); }
-.data-table th, .data-table td { text-align: left; padding: 4px var(--s3) 4px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
-.data-table th { font-weight: 500; }
+.data-table caption { text-align: left; color: var(--quiet); padding-bottom: var(--s2); }
+.data-table th, .data-table td { text-align: left; padding: 6px var(--s4) 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.data-table th { font-weight: 600; color: var(--quiet); }
 .data-table td.num { text-align: right; font-family: var(--mono); font-size: 0.75rem; }
 .table-scroll { overflow-x: auto; max-width: 100%; }
 
-/* Warnings: icon + text + outline in Critical (the classic's "bad" chip); never colour alone. */
+/* Warnings: icon + text + outline in Critical; never colour alone. */
 .note-warn { display: flex; gap: var(--s2); align-items: flex-start; border: 1px solid currentColor; border-radius: var(--r-control);
              padding: var(--s2) var(--s3); font-size: var(--t-ui); max-width: var(--measure); color: var(--critical); }
 .note-warn svg { flex: none; margin-top: 3px; }

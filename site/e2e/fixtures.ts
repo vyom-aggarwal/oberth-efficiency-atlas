@@ -16,13 +16,18 @@ const TYPES: Record<string, string> = {
 
 // siteOrigin is where the build is served: http://site.test by default; a test that needs a secure context (the
 // clipboard API) serves it at http://localhost instead, still answered by the route handler, with no server.
-export interface SiteOptions { siteDist: string | undefined; siteBase: string; siteOrigin: string }
+// preloader (Phase 9): the landing page's flyby preloader plays on a session's first load. Every spec starts in a
+// session that has seen it (sessionStorage "oberth-preloaded"), so it never covers what a test looks at; the preloader's
+// own spec (e2e/preloader.spec.ts) turns it back on with test.use({ preloader: true }).
+export interface SiteOptions { siteDist: string | undefined; siteBase: string; siteOrigin: string; preloader: boolean }
 
 export const test = base.extend<SiteOptions>({
   siteDist: [process.env.SITE_DIST, { option: true }],
   siteBase: ["/", { option: true }],
   siteOrigin: ["http://site.test", { option: true }],
-  page: async ({ page, siteDist, siteBase, siteOrigin }, use) => {
+  preloader: [false, { option: true }],
+  page: async ({ page, siteDist, siteBase, siteOrigin, preloader }, use) => {
+    if (!preloader) await page.addInitScript(() => { try { sessionStorage.setItem("oberth-preloaded", "1"); } catch { /* no storage */ } });
     if (siteDist) {
       const dist = resolve(siteDist);
       const notFound = () => ({ status: 404, contentType: TYPES[".html"], body: readFileSync(join(dist, "404.html")) });

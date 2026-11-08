@@ -14,11 +14,13 @@ export default defineConfig(({ command, mode }) => {
     main: resolve(__dirname, "index.html"),
     references: resolve(__dirname, "references/index.html"),
     explorer: resolve(__dirname, "explorer/index.html"),
+    about: resolve(__dirname, "about/index.html"),
     notfound: resolve(__dirname, "404.html"),
   };
   if (researchIncluded(command)) pages.research = resolve(__dirname, "research/index.html");
-  // /style/ is a design reference for development only: served by the dev server, never built for production.
-  if (command === "serve" || mode === "development") pages.style = resolve(__dirname, "style/index.html");
+  // /style-9/: the Phase 9 design reference (docs/revamp_plan.md §2.11), development only. (The Phase 6 /style/ page was
+  // retired on 2026-11-06; its interaction test moved to e2e/interact-figures.spec.ts.)
+  if (command === "serve" || mode === "development") pages.style9 = resolve(__dirname, "style-9/index.html");
   return {
     base,
     plugins: [texPlugin(), contentPlugin()],

@@ -55,7 +55,9 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
   let width = 0;
   // Redraw in the next frame: drawing changes the scale's height, which must not happen inside the observer.
   new ResizeObserver(([e]) => {
-    const w = Math.round(e.contentRect.width);
+    // Rounded down: a fractional track (Phase 9's 3 vw page padding gives 1027.62 px at 1440) must not put the end
+    // label past its edge.
+    const w = Math.floor(e.contentRect.width);
     if (w !== width) { width = w; requestAnimationFrame(drawScale); }
   }).observe(track);
   onFontsLoaded(() => width && requestAnimationFrame(drawScale));   // label widths change with the web font
@@ -67,8 +69,10 @@ export function axisSlider(o: AxisSliderOptions): { el: HTMLElement; value: Sign
       svg.append(s("line", { x1: x(z.from), x2: x(z.to), y1: 3, y2: 3, stroke: "var(--ink-2)", "stroke-width": 3 }),
         s("text", { class: "annot-2", x: x(z.from) + 2, y: 32 }, z.label));
     }
-    // A tick at every decade; on a narrow scale, a label at every second one (the ends always labelled).
-    const every = (width - THUMB) / (lmax - lmin) < 48 ? 2 : 1;
+    // A tick at every decade; on a narrow scale, a label every n decades so that labels stay at least 48 px apart: every
+    // second one from 24 px a decade, as before, and sparser below that (Phase 9: the explorer's case column leaves the Π
+    // track about 15 px a decade, where every second label still collided).
+    const every = Math.max(1, Math.ceil(48 / ((width - THUMB) / (lmax - lmin))));
     for (let e = Math.ceil(lmin); e <= Math.floor(lmax); e++) {
       const t = 10 ** e;
       svg.append(s("line", { x1: x(t), x2: x(t), y1: 0, y2: 6, stroke: "var(--ink-2)" }));
